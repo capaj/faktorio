@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Font
 } from '@react-pdf/renderer'
+import { reactMain } from './main'
 
 Font.register({
   family: 'Inter',
@@ -74,41 +75,93 @@ const styles = StyleSheet.create({
   }
 })
 
-export const InvoicePDF = ({ invoiceData }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.flex}>
-        <View style={styles.section}>
-          <Text>Dodavatel: {invoiceData.supplier.name}</Text>
-          <Text>Adresa: {invoiceData.supplier.address}</Text>
-          {/* Other supplier details */}
+export const InvoicePDF = ({ invoiceData }) => {
+  console.log('aaaa')
+  return (
+    <Document key={new Date().toISOString()}>
+      <Page size="A4" style={styles.page}>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}
+        >
+          <View
+            style={{
+              minHeight: 300,
+              width: 500,
+              display: 'flex',
+              alignContent: 'flex-end'
+            }}
+          >
+            <View
+              style={{
+                marginTop: 50,
+                fontSize: 24,
+                textAlign: 'right'
+              }}
+            >
+              <Text>Faktura</Text>
+              <Text>
+                <Text>{invoiceData.invoiceNumber}</Text>
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14
+                }}
+              >
+                Daňový doklad
+              </Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.section}>
-          <Text>Faktura číslo: {invoiceData.invoiceNumber}</Text>
-          <Text>Datum vystavení: {invoiceData.issueDate}</Text>
-          <Text>Datum splatnosti: {invoiceData.dueDate}</Text>
-          {/* Other invoice details */}
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            marginLeft: 20
+          }}
+        >
+          <View style={styles.section}>
+            <Text>Dodavatel: {invoiceData.supplier.name}</Text>
+            <Text>Adresa: {invoiceData.supplier.address}</Text>
+            {/* Other supplier details */}
+          </View>
+          <View style={styles.section}>
+            <Text>Faktura číslo: {invoiceData.invoiceNumber}</Text>
+            <Text>Datum vystavení: {invoiceData.issueDate}</Text>
+            <Text>Datum splatnosti: {invoiceData.dueDate}</Text>
+            {/* Other invoice details */}
+          </View>
+          <View style={styles.section}>
+            <Text>Odběratel: {invoiceData.customer.name}</Text>
+            <Text>Adresa: {invoiceData.customer.address}</Text>
+            {/* Other customer details */}
+          </View>
         </View>
-        <View style={styles.section}>
-          <Text>Odběratel: {invoiceData.customer.name}</Text>
-          <Text>Adresa: {invoiceData.customer.address}</Text>
-          {/* Other customer details */}
+        <View style={styles.flex}>
+          <View style={styles.section}>
+            <Text>Popis služby: {invoiceData.serviceDescription}</Text>
+            <Text>Cena za MJ: {invoiceData.pricePerUnit}</Text>
+            <Text>Celkem bez DPH: {invoiceData.totalExclTax}</Text>
+            {/* Other service details */}
+          </View>
+          <View style={styles.section}>
+            {/* Payment details */}
+            <Text>Bankovní účet: {invoiceData.paymentDetails.account}</Text>
+            <Text>IBAN: {invoiceData.paymentDetails.IBAN}</Text>
+            {/* Other payment details */}
+          </View>
         </View>
-      </View>
-      <View style={styles.flex}>
-        <View style={styles.section}>
-          <Text>Popis služby: {invoiceData.serviceDescription}</Text>
-          <Text>Cena za MJ: {invoiceData.pricePerUnit}</Text>
-          <Text>Celkem bez DPH: {invoiceData.totalExclTax}</Text>
-          {/* Other service details */}
-        </View>
-        <View style={styles.section}>
-          {/* Payment details */}
-          <Text>Bankovní účet: {invoiceData.paymentDetails.account}</Text>
-          <Text>IBAN: {invoiceData.paymentDetails.IBAN}</Text>
-          {/* Other payment details */}
-        </View>
-      </View>
-    </Page>
-  </Document>
-)
+      </Page>
+    </Document>
+  )
+}
+
+if (import.meta.hot) {
+  import.meta.hot.accept(() => {
+    console.log('hot reload2', new Date())
+    reactMain()
+  })
+}
