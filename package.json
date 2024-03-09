@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
+    "@clerk/clerk-react": "^4.30.7",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
     "@radix-ui/react-slot": "^1.0.2",

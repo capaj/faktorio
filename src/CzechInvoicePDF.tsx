@@ -7,7 +7,7 @@ import ReactPDF, {
   StyleSheet,
   Font,
 } from '@react-pdf/renderer'
-import { reactMain } from './main'
+import { reactMainRender } from './main'
 import { InvoiceData } from './invoiceSchema'
 import { formatMoneyCzech } from './lib/formatMoney'
 
@@ -541,7 +541,6 @@ export const CzechInvoicePDF = ({
 
 if (import.meta.hot) {
   import.meta.hot.accept(() => {
-    console.log('hot reload2', new Date())
-    reactMain()
+    reactMainRender() // clerk breaks on this, we  need to put the invoice in a separate index.html file
   })
 }
