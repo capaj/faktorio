@@ -7,9 +7,9 @@ import ReactPDF, {
   StyleSheet,
   Font,
 } from '@react-pdf/renderer'
-import { reactMainRender } from './main'
-import { InvoiceData } from './invoiceSchema'
-import { formatMoneyCzech } from './lib/formatMoney'
+import { reactMainRender } from '../../main'
+import { InvoiceData } from '../../invoiceSchema'
+import { formatMoneyCzech } from '../../lib/formatMoney'
 
 Font.register({
   family: 'Inter',
