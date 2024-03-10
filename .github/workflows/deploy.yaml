@@ -1,36 +1,41 @@
-on: [push]
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy-api:
     runs-on: ubuntu-latest
     name: Deploy API
     steps:
-			- name: Checkout code
-				uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-			- name: Setup pnpm
-				uses: pnpm/action-setup@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
 
-			- name: Setup Node
-				uses: actions/setup-node@v4
-				with:
-					node-version: 20
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-			- name: Get pnpm store directory
-				id: pnpm-cache
-				run: |
-					echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-			- name: Setup pnpm cache
-				uses: actions/cache@v4
-				with:
-					path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-					key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-					restore-keys: |
-						${{ runner.os }}-pnpm-store-
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
-			- name: Install deps (with cache)
-				run: pnpm install
+      - name: Install deps (with cache)
+        run: pnpm install
 
       - name: Deploy API
         uses: cloudflare/wrangler-action@v3
@@ -45,36 +50,36 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Frontend
     steps:
-			- name: Checkout code
-				uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-			- name: Setup pnpm
-				uses: pnpm/action-setup@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
 
-			- name: Setup Node
-				uses: actions/setup-node@v4
-				with:
-					node-version: 20
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-			- name: Get pnpm store directory
-				id: pnpm-cache
-				run: |
-					echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-			- name: Setup pnpm cache
-				uses: actions/cache@v4
-				with:
-					path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-					key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-					restore-keys: |
-						${{ runner.os }}-pnpm-store-
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
-			- name: Install deps (with cache)
-				run: pnpm install
+      - name: Install deps (with cache)
+        run: pnpm install
 
-			- name: Build
-				run: pnpm build
-				
+      - name: Build
+        run: pnpm build
+
       - name: Deploy Frontend
         uses: cloudflare/wrangler-action@v3
         with:
