@@ -3,6 +3,7 @@ import { userInvoicingDetailsInsertSchema } from '../../../faktorio-api/src/zodD
 import { fieldConfigForContactForm } from './ContactList'
 import { Button } from '@/components/ui/button'
 import { trpcClient } from '@/lib/trpcClient'
+import { FkButton } from '@/components/FkButton'
 
 export const upsertInvoicingDetailsSchema =
 	userInvoicingDetailsInsertSchema.omit({
@@ -36,13 +37,19 @@ export const MyDetails = () => {
 							label: 'Číslo bankovního účtu'
 						}
 					}}
-					values={q.data}
+					values={q.data ?? undefined}
 					onSubmit={async (values) => {
 						await upsert.mutateAsync(values)
 					}}
 				>
 					<div className="flex justify-end">
-						<Button type="submit">Uložit</Button>
+						<FkButton
+							// disabled={true} // TODO
+							isLoading={upsert.isLoading}
+							type="submit"
+						>
+							Uložit
+						</FkButton>
 					</div>
 				</AutoForm>
 			</div>
