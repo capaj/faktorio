@@ -10,39 +10,43 @@ NJCZbjlROUAYbfrqqhLGexChVclm8oQG6Zh9c25dY/pIhH4NMb9T347Ovu/IBHkN
 
 function uint8ArrayFromBase64Url(base64Url) {
   // Base64-URL to Base64
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
   // Pad with "=" to make the base64 string length a multiple of 4
-  const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+  const padded = base64.padEnd(
+    base64.length + ((4 - (base64.length % 4)) % 4),
+    '='
+  )
   // Base64 to binary string
-  const binaryStr = atob(padded);
+  const binaryStr = atob(padded)
   // Binary string to Uint8Array
-  const len = binaryStr.length;
-  const bytes = new Uint8Array(len);
+  const len = binaryStr.length
+  const bytes = new Uint8Array(len)
   for (let i = 0; i < len; i++) {
-    bytes[i] = binaryStr.charCodeAt(i);
+    bytes[i] = binaryStr.charCodeAt(i)
   }
-  return bytes;
+  return bytes
 }
 
 async function verifyToken(token) {
-  const [headerEncoded, payloadEncoded, signatureEncoded] = token.split('.');
+  const [headerEncoded, payloadEncoded, signatureEncoded] = token.split('.')
   // Convert the signature and fetch the public key
-  const signatureUint8Array = uint8ArrayFromBase64Url(signatureEncoded);
-
+  const signatureUint8Array = uint8ArrayFromBase64Url(signatureEncoded)
 
   // Prepare the data (header + payload) for verification
-  const data = new TextEncoder().encode([headerEncoded, payloadEncoded].join('.'));
+  const data = new TextEncoder().encode(
+    [headerEncoded, payloadEncoded].join('.')
+  )
 
   // Verify the signature
   const isValid = await crypto.subtle.verify(
     {
-      name: "RSASSA-PKCS1-v1_5",
-      hash: {name: "SHA-256"},
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: { name: 'SHA-256' }
     },
     publicKey, // from getPublicKey(), converted to CryptoKey
     signatureUint8Array,
     data
-  );
+  )
 
-  return isValid;
+  return isValid
 }

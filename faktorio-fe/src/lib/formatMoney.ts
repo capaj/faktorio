@@ -5,7 +5,7 @@ export function formatMoneyCzech(number: number, currency: string) {
 
   return number.toLocaleString('en-US', {
     style: 'currency',
-    currency: currency,
+    currency: currency
   })
 }
 

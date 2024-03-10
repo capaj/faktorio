@@ -1,11 +1,9 @@
-import React from "react"
-import { Spinner } from "./ui/spinner"
-
-
+import React from 'react'
+import { Spinner } from './ui/spinner'
 
 export function SpinnerContainer({
   loading,
-  children,
+  children
 }: {
   loading: boolean
   children?: React.ReactNode

@@ -1,16 +1,16 @@
-import { FormControl, FormItem, FormMessage } from "@/components/ui/form";
+import { FormControl, FormItem, FormMessage } from '@/components/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import * as z from "zod";
-import AutoFormLabel from "../common/label";
-import AutoFormTooltip from "../common/tooltip";
-import { AutoFormInputComponentProps } from "../types";
-import { getBaseSchema } from "../utils";
+  SelectValue
+} from '@/components/ui/select'
+import * as z from 'zod'
+import AutoFormLabel from '../common/label'
+import AutoFormTooltip from '../common/tooltip'
+import { AutoFormInputComponentProps } from '../types'
+import { getBaseSchema } from '../utils'
 
 export default function AutoFormEnum({
   label,
@@ -18,20 +18,20 @@ export default function AutoFormEnum({
   field,
   fieldConfigItem,
   zodItem,
-  fieldProps,
+  fieldProps
 }: AutoFormInputComponentProps) {
   const baseValues = (getBaseSchema(zodItem) as unknown as z.ZodEnum<any>)._def
-    .values;
+    .values
 
-  let values: [string, string][] = [];
+  let values: [string, string][] = []
   if (!Array.isArray(baseValues)) {
-    values = Object.entries(baseValues);
+    values = Object.entries(baseValues)
   } else {
-    values = baseValues.map((value) => [value, value]);
+    values = baseValues.map((value) => [value, value])
   }
 
   function findItem(value: any) {
-    return values.find((item) => item[0] === value);
+    return values.find((item) => item[0] === value)
   }
 
   return (
@@ -45,7 +45,7 @@ export default function AutoFormEnum({
         >
           <SelectTrigger className={fieldProps.className}>
             <SelectValue placeholder={fieldConfigItem.inputProps?.placeholder}>
-              {field.value ? findItem(field.value)?.[1] : "Select an option"}
+              {field.value ? findItem(field.value)?.[1] : 'Select an option'}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -60,5 +60,5 @@ export default function AutoFormEnum({
       <AutoFormTooltip fieldConfigItem={fieldConfigItem} />
       <FormMessage />
     </FormItem>
-  );
+  )
 }

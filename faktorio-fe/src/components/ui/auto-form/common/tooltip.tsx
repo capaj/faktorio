@@ -7,7 +7,7 @@ function AutoFormTooltip({ fieldConfigItem }: { fieldConfigItem: any }) {
         </p>
       )}
     </>
-  );
+  )
 }
 
-export default AutoFormTooltip;
+export default AutoFormTooltip

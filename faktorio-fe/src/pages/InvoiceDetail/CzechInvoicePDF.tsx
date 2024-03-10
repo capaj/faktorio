@@ -5,7 +5,7 @@ import ReactPDF, {
   Text,
   View,
   StyleSheet,
-  Font,
+  Font
 } from '@react-pdf/renderer'
 import { reactMainRender } from '../../main'
 import { InvoiceData } from '../../invoiceSchema'
@@ -16,41 +16,41 @@ Font.register({
   fonts: [
     {
       src: '//fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyeMZhrib2Bg-4.ttf',
-      fontWeight: 100,
+      fontWeight: 100
     },
     {
       src: '//fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuDyfMZhrib2Bg-4.ttf',
-      fontWeight: 200,
+      fontWeight: 200
     },
     {
       src: '//fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuOKfMZhrib2Bg-4.ttf',
-      fontWeight: 300,
+      fontWeight: 300
     },
     {
       src: '//fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf',
-      fontWeight: 400,
+      fontWeight: 400
     },
     {
       src: '//fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuI6fMZhrib2Bg-4.ttf',
-      fontWeight: 500,
+      fontWeight: 500
     },
     {
       src: '//fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYMZhrib2Bg-4.ttf',
-      fontWeight: 600,
+      fontWeight: 600
     },
     {
       src: '//fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYMZhrib2Bg-4.ttf',
-      fontWeight: 700,
+      fontWeight: 700
     },
     {
       src: '//fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuDyYMZhrib2Bg-4.ttf',
-      fontWeight: 800,
+      fontWeight: 800
     },
     {
       src: '//fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuBWYMZhrib2Bg-4.ttf',
-      fontWeight: 900,
-    },
-  ],
+      fontWeight: 900
+    }
+  ]
 })
 
 const styles = StyleSheet.create({
@@ -59,23 +59,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     // padding: 10,
     fontFamily: 'Inter',
-    color: '#000',
+    color: '#000'
   },
   section: {
     marginTop: 10,
 
     fontSize: 12,
-    fontFamily: 'Inter',
+    fontFamily: 'Inter'
   },
   flex: {
     display: 'flex',
-    flexDirection: 'row',
-  },
+    flexDirection: 'row'
+  }
 })
 
 const Flex = ({
   children,
-  style,
+  style
 }: {
   children?: React.ReactNode
   style?: ReactPDF.DocumentProps['style']
@@ -84,7 +84,7 @@ const Flex = ({
     <View
       style={{
         display: 'flex',
-        ...style,
+        ...style
       }}
     >
       {children}
@@ -97,7 +97,7 @@ const SectionHeading = ({ children }: { children: React.ReactNode }) => {
     <Text
       style={{
         fontSize: 12,
-        color: '#454545',
+        color: '#454545'
       }}
     >
       {children}
@@ -110,7 +110,7 @@ const TextLabel = ({ children }: { children: React.ReactNode }) => {
     <Text
       style={{
         fontSize: 10,
-        color: '#454545',
+        color: '#454545'
       }}
     >
       {children}
@@ -124,7 +124,7 @@ const FlexRow = ({ children }: { children: React.ReactNode }) => {
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
-        fontSize: 10,
+        fontSize: 10
       }}
     >
       {children}
@@ -137,7 +137,7 @@ const ThirdWidthColumnRight = ({ children }: { children: React.ReactNode }) => {
     <Flex
       style={{
         width: '33%',
-        textAlign: 'right',
+        textAlign: 'right'
       }}
     >
       <Text>{children}</Text>
@@ -146,7 +146,7 @@ const ThirdWidthColumnRight = ({ children }: { children: React.ReactNode }) => {
 }
 const ItemDescText = ({
   children,
-  style,
+  style
 }: {
   children: React.ReactNode
   style?: ReactPDF.DocumentProps['style']
@@ -155,7 +155,7 @@ const ItemDescText = ({
     <Text
       style={{
         marginRight: 10,
-        ...style,
+        ...style
       }}
     >
       {children}
@@ -164,7 +164,7 @@ const ItemDescText = ({
 }
 
 export const CzechInvoicePDF = ({
-  invoiceData,
+  invoiceData
 }: {
   invoiceData: InvoiceData
 }) => {
@@ -175,7 +175,7 @@ export const CzechInvoicePDF = ({
       return {
         ...acc,
         // @ts-expect-error
-        [item.vatRate]: ((acc[item.vatRate] ?? 0) as number) + tax,
+        [item.vatRate]: ((acc[item.vatRate] ?? 0) as number) + tax
       }
     },
     {}
@@ -198,31 +198,31 @@ export const CzechInvoicePDF = ({
           style={{
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            justifyContent: 'space-between'
           }}
         >
           <Flex
             style={{
               minHeight: 200,
-              width: '100%',
+              width: '100%'
             }}
           >
             <Flex
               style={{
                 flexDirection: 'row',
                 marginTop: 50,
-                fontSize: 22,
+                fontSize: 22
               }}
             >
               <View
                 style={{
-                  width: '50%',
+                  width: '50%'
                 }}
               ></View>
               <Flex
                 style={{
                   flexDirection: 'column',
-                  marginLeft: 20,
+                  marginLeft: 20
                 }}
               >
                 <Text>Faktura</Text>
@@ -232,7 +232,7 @@ export const CzechInvoicePDF = ({
                 <Text
                   style={{
                     marginTop: 10,
-                    fontSize: 11,
+                    fontSize: 11
                   }}
                 >
                   Daňový doklad
@@ -245,20 +245,20 @@ export const CzechInvoicePDF = ({
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
-            marginLeft: 2,
+            marginLeft: 2
           }}
         >
           <Flex
             style={{
               flexDirection: 'row',
-              marginLeft: 20,
+              marginLeft: 20
             }}
           >
             <Flex
               style={{
                 width: '57%',
                 flexDirection: 'column',
-                fontSize: 11,
+                fontSize: 11
               }}
             >
               <SectionHeading>Dodavatel</SectionHeading>
@@ -267,7 +267,7 @@ export const CzechInvoicePDF = ({
                 <Text
                   style={{
                     fontSize: 13,
-                    fontWeight: 500,
+                    fontWeight: 500
                   }}
                 >
                   {invoiceData.supplier.name}
@@ -282,7 +282,7 @@ export const CzechInvoicePDF = ({
               <Flex
                 style={{
                   marginTop: 10,
-                  paddingRight: 40,
+                  paddingRight: 40
                 }}
               >
                 <FlexRow>
@@ -297,7 +297,7 @@ export const CzechInvoicePDF = ({
               <View
                 style={{
                   ...styles.section,
-                  paddingRight: 40,
+                  paddingRight: 40
                 }}
               >
                 <FlexRow>
@@ -327,7 +327,7 @@ export const CzechInvoicePDF = ({
             <Flex
               style={{
                 marginRight: 22,
-                width: '43%',
+                width: '43%'
               }}
             >
               <SectionHeading>Odběratel</SectionHeading>
@@ -336,7 +336,7 @@ export const CzechInvoicePDF = ({
                 <Text
                   style={{
                     fontSize: 13,
-                    fontWeight: 500,
+                    fontWeight: 500
                   }}
                 >
                   {invoiceData.customer.name}
@@ -348,7 +348,7 @@ export const CzechInvoicePDF = ({
                 </Text>
                 <Flex
                   style={{
-                    marginTop: 10,
+                    marginTop: 10
                   }}
                 >
                   <FlexRow>
@@ -362,7 +362,7 @@ export const CzechInvoicePDF = ({
                 </Flex>
                 <Flex
                   style={{
-                    marginTop: 10,
+                    marginTop: 10
                   }}
                 >
                   <FlexRow>
@@ -388,14 +388,14 @@ export const CzechInvoicePDF = ({
             fontSize: 10,
             marginTop: 20,
             marginRight: 22,
-            justifyContent: 'flex-end',
+            justifyContent: 'flex-end'
           }}
         >
           <Flex
             style={{
               width: '49%',
               flexDirection: 'row',
-              justifyContent: 'space-between',
+              justifyContent: 'space-between'
             }}
           >
             <ThirdWidthColumnRight>DPH</ThirdWidthColumnRight>
@@ -412,7 +412,7 @@ export const CzechInvoicePDF = ({
             marginLeft: 20,
             fontSize: 10,
             borderBottom: '1px solid #444',
-            borderTop: '1px solid #444',
+            borderTop: '1px solid #444'
           }}
         >
           {invoiceData.items.map((item, index) => (
@@ -421,7 +421,7 @@ export const CzechInvoicePDF = ({
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                marginBottom: 7,
+                marginBottom: 7
               }}
             >
               <Flex
@@ -429,12 +429,12 @@ export const CzechInvoicePDF = ({
                   width: '50%',
                   flexDirection: 'row',
 
-                  justifyContent: 'flex-start',
+                  justifyContent: 'flex-start'
                 }}
               >
                 <ItemDescText
                   style={{
-                    width: '4%',
+                    width: '4%'
                   }}
                 >
                   {item.quantity}
@@ -442,7 +442,7 @@ export const CzechInvoicePDF = ({
                 <ItemDescText
                   style={{
                     width: '14%',
-                    fontSize: 9,
+                    fontSize: 9
                   }}
                 >
                   {item.unit}
@@ -452,7 +452,7 @@ export const CzechInvoicePDF = ({
               <Flex
                 style={{
                   width: '50%',
-                  flexDirection: 'row',
+                  flexDirection: 'row'
                 }}
               >
                 <ThirdWidthColumnRight>
@@ -475,23 +475,23 @@ export const CzechInvoicePDF = ({
           style={{
             marginTop: 30,
             marginRight: 22,
-            flexDirection: 'row',
+            flexDirection: 'row'
           }}
         >
           <Flex
             style={{
-              width: '60%',
+              width: '60%'
             }}
           ></Flex>
           <Flex
             style={{
               flexDirection: 'column',
-              width: '40%',
+              width: '40%'
             }}
           >
             <Flex
               style={{
-                borderBottom: '1px solid #444',
+                borderBottom: '1px solid #444'
               }}
             >
               <FlexRow>
@@ -515,7 +515,7 @@ export const CzechInvoicePDF = ({
                 fontSize: 24,
                 marginTop: 6,
                 textAlign: 'right',
-                fontWeight: 500,
+                fontWeight: 500
               }}
             >
               {formatMoneyCzech(invoiceTotal + taxTotal, invoiceData.currency)}
@@ -528,7 +528,7 @@ export const CzechInvoicePDF = ({
             position: 'absolute',
             bottom: 30,
             left: 20,
-            fontSize: 8,
+            fontSize: 8
           }}
         >
           <Text>Fyzická osoba zapsaná v živnostenském rejstříku.</Text>

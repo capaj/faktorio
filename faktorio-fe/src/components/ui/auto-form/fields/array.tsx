@@ -1,41 +1,41 @@
 import {
   AccordionContent,
   AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Plus, Trash } from "lucide-react";
-import { useFieldArray, useForm } from "react-hook-form";
-import * as z from "zod";
-import { beautifyObjectName } from "../utils";
-import AutoFormObject from "./object";
+  AccordionTrigger
+} from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Plus, Trash } from 'lucide-react'
+import { useFieldArray, useForm } from 'react-hook-form'
+import * as z from 'zod'
+import { beautifyObjectName } from '../utils'
+import AutoFormObject from './object'
 
 export default function AutoFormArray({
   name,
   item,
   form,
   path = [],
-  fieldConfig,
+  fieldConfig
 }: {
-  name: string;
-  item: z.ZodArray<any>;
-  form: ReturnType<typeof useForm>;
-  path?: string[];
-  fieldConfig?: any;
+  name: string
+  item: z.ZodArray<any>
+  form: ReturnType<typeof useForm>
+  path?: string[]
+  fieldConfig?: any
 }) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name,
-  });
-  const title = item._def.description ?? beautifyObjectName(name);
+    name
+  })
+  const title = item._def.description ?? beautifyObjectName(name)
 
   return (
     <AccordionItem value={name} className="border-none">
       <AccordionTrigger>{title}</AccordionTrigger>
       <AccordionContent>
         {fields.map((_field, index) => {
-          const key = _field.id;
+          const key = _field.id
           return (
             <div className="mt-4 flex flex-col" key={`${key}`}>
               <AutoFormObject
@@ -58,7 +58,7 @@ export default function AutoFormArray({
 
               <Separator />
             </div>
-          );
+          )
         })}
         <Button
           type="button"
@@ -71,5 +71,5 @@ export default function AutoFormArray({
         </Button>
       </AccordionContent>
     </AccordionItem>
-  );
+  )
 }

@@ -1,6 +1,6 @@
 import {
-	createTRPCReact,
-	inferReactQueryProcedureOptions,
+  createTRPCReact,
+  inferReactQueryProcedureOptions
 } from '@trpc/react-query'
 
 import { inferRouterInputs, inferRouterOutputs } from '@trpc/server'

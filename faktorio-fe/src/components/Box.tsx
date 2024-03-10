@@ -49,7 +49,7 @@ function generateClassNames(props: TailwindBoxProps): string {
     h: 'h',
     w: 'w',
     minW: 'min-w',
-    backgroundColor: 'bg', // Assumes a direct mapping; might need adjustment for custom palettes
+    backgroundColor: 'bg' // Assumes a direct mapping; might need adjustment for custom palettes
   }
 
   Object.entries(props).forEach(([key, value]) => {

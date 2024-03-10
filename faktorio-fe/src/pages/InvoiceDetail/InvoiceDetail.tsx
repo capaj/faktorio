@@ -23,7 +23,7 @@ export const InvoiceDetail = () => {
             showToolbar={false}
             style={{
               width: '70vw',
-              height: '1100px',
+              height: '1100px'
             }}
           >
             <CzechInvoicePDF invoiceData={invoiceData} />

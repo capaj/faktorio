@@ -1,14 +1,14 @@
-import { FormLabel } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
+import { FormLabel } from '@/components/ui/form'
+import { cn } from '@/lib/utils'
 
 function AutoFormLabel({
   label,
   isRequired,
-  className,
+  className
 }: {
-  label: string;
-  isRequired: boolean;
-  className?: string;
+  label: string
+  isRequired: boolean
+  className?: string
 }) {
   return (
     <>
@@ -17,7 +17,7 @@ function AutoFormLabel({
         {isRequired && <span className="text-destructive"> *</span>}
       </FormLabel>
     </>
-  );
+  )
 }
 
-export default AutoFormLabel;
+export default AutoFormLabel
