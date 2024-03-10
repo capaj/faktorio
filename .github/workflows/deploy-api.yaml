@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'faktorio-api/**'
+      - '.github/workflows/deploy-api.yml'
+
     branches:
       - main
 
