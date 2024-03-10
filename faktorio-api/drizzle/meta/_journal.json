@@ -1,0 +1,13 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1710016605302,
+      "tag": "0000_icy_christian_walker",
+      "breakpoints": true
+    }
+  ]
+}

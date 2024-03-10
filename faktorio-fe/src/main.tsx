@@ -6,28 +6,29 @@ import { ClerkProvider } from '@clerk/clerk-react'
 
 // Import your publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as
-  | string
-  | undefined
+	| string
+	| undefined
 
 if (!PUBLISHABLE_KEY) {
-  throw new Error('Missing Publishable Key')
+	throw new Error('Missing Publishable Key')
 }
 
 let reactRoot: ReactDOM.Root
 
 export const reactMainRender = () => {
-  const reactRootDiv = document.getElementById('root')!
+	// @ts-expect-error
+	const reactRootDiv = document.getElementById('root')!
 
-  if (reactRoot) {
-    reactRoot.unmount()
-  }
+	if (reactRoot) {
+		reactRoot.unmount()
+	}
 
-  reactRoot = ReactDOM.createRoot(reactRootDiv)
-  reactRoot.render(
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <App />
-    </ClerkProvider>
-  )
+	reactRoot = ReactDOM.createRoot(reactRootDiv)
+	reactRoot.render(
+		<ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+			<App />
+		</ClerkProvider>
+	)
 }
 
 reactMainRender()

@@ -541,6 +541,6 @@ export const CzechInvoicePDF = ({
 
 if (import.meta.hot) {
   import.meta.hot.accept(() => {
-    reactMainRender() // clerk breaks on this, we  need to put the invoice in a separate index.html file
+    // reactMainRender() // clerk breaks on this, we  need to put the invoice in a separate index.html file
   })
 }
