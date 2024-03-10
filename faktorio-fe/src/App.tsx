@@ -26,6 +26,7 @@ import { trpcClient } from './lib/trpcClient'
 import { httpBatchLink } from '@trpc/client'
 import { NewInvoice } from './pages/NewInvoice'
 import { ContactList } from './pages/ContactList'
+import { MyDetails } from './pages/MyDetails'
 
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
@@ -82,8 +83,8 @@ function App() {
 						<nav className="ml-auto flex gap-4 sm:gap-6">
 							{isSignedIn ? (
 								<>
-									<ButtonLink href="/contacts">Klienti</ButtonLink>
-									<ButtonLink href="/invoices">Všechny faktury</ButtonLink>
+									<ButtonLink href="/contacts">Kontakty</ButtonLink>
+									<ButtonLink href="/invoices">Faktury</ButtonLink>
 									<ButtonLink href="/new-invoice">Vystavit fakturu</ButtonLink>
 									<ButtonLink href="/my-details">Moje údaje</ButtonLink>
 									<UserButton />
@@ -105,13 +106,22 @@ function App() {
 							<Switch>
 								<Route path="/" component={LandingPage} />
 
-								<Route path="/invoices" component={InvoiceList}></Route>
-								<Route path="/contacts" component={ContactList}></Route>
-								<Route path="/new-invoice" component={NewInvoice}></Route>
-								<Route
-									path="/invoices/:invoiceId"
-									component={InvoiceDetail}
-								></Route>
+								{isSignedIn && (
+									<>
+										<Route path="/invoices" component={InvoiceList}></Route>
+										<Route path="/contacts" component={ContactList}></Route>
+										<Route
+											path="/contacts/:contactId"
+											component={ContactList}
+										></Route>
+										<Route path="/new-invoice" component={NewInvoice}></Route>
+										<Route path="/my-details" component={MyDetails}></Route>
+										<Route
+											path="/invoices/:invoiceId"
+											component={InvoiceDetail}
+										></Route>
+									</>
+								)}
 
 								{/* Default route in a switch */}
 								<Route>404: Bohužel neexistuje!</Route>

@@ -15,7 +15,7 @@ export const invoiceItemInsertSchema = createInsertSchema(
 	schemas.invoiceItemsTb
 )
 export const userInvoicingDetailsInsertSchema = createInsertSchema(
-	schemas.contactTb
+	schemas.userInvoicingDetailsTb
 )
 export const invoiceInsertSchema = createInsertSchema(schemas.invoicesTb)
 export const contactInsertSchema = createInsertSchema(schemas.contactTb)

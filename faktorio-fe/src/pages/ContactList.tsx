@@ -15,12 +15,38 @@ import { trpcClient } from '@/lib/trpcClient'
 import { Link } from 'wouter'
 import { contactCreateFormSchema } from '../../../faktorio-api/src/routers/contactCreateFormSchema'
 import { useState } from 'react'
+import { SpinnerContainer } from '@/components/SpinnerContainer'
+
+export const fieldConfigForContactForm = {
+	name: {
+		label: "Jméno"
+	},
+	street: {
+		label: 'Ulice'
+	},
+	street2: {
+		label: 'Ulice 2'
+	},
+	main_email: {
+		label: "Email"
+	},
+	registration_no: {
+		label: "IČO"
+	},
+	vat_no: {
+		label: "DIČ"
+	},
+	zip: {
+		label: "Poštovní směrovací číslo"
+	}
+}
 
 
 export const ContactList = () => {
 	const contactsQuery = trpcClient.contacts.all.useQuery()
 	const create = trpcClient.contacts.create.useMutation()
 	const [open, setOpen] = useState(false);
+
 	return (
 		<div>
 
@@ -31,38 +57,16 @@ export const ContactList = () => {
 						<DialogTitle>Nový kontakt</DialogTitle>
 						<DialogDescription>
 							<AutoForm formSchema={contactCreateFormSchema}
-								onSubmit={async (values) => { 
+								onSubmit={async (values) => {
 
 									await create.mutateAsync(values)
 									contactsQuery.refetch()
 									setOpen(false)
 								}}
-								fieldConfig={{
-									name: {
-										label: "Jméno"
-									},
-									street: {
-										label: 'Ulice'
-									},
-									street2: {
-										label: 'Ulice 2'
-									},
-									main_email: {
-										label: "email"
-									},
-									registration_no: {
-										label: "IČO"
-									},
-									vat_no: {
-										label: "DIČ"
-									},
-									zip: {
-										label: "Poštovní směrovací číslo"
-									}
-							}}
+								fieldConfig={fieldConfigForContactForm}
 							>
 
-									
+
 									<DialogFooter>
 									<Button type="submit">Přidat</Button>
         					</DialogFooter>
@@ -72,32 +76,37 @@ export const ContactList = () => {
 					</DialogHeader>
 				</DialogContent>
 			</Dialog>
-			<Table>
-				<TableCaption>Celkem {contactsQuery.data?.length}.</TableCaption>
-				<TableHeader>
-					<TableRow>
-						<TableHead className="w-[100px]"></TableHead>
-						<TableHead>Jméno</TableHead>
-						<TableHead>Adresa</TableHead>
-						<TableHead className="text-right">Email</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{contactsQuery.data?.map((contact) => (
-						<TableRow key={contact.id}>
-							<TableCell className="font-medium">
-								<Link href={`/contacts/${contact.id}`}>{contact.name}</Link>
-							</TableCell>
-
-							<TableCell>{contact.street}, {contact.city}</TableCell>
-							<TableCell>{contact.main_email}</TableCell>
-							<TableCell className="text-right">
-								{contact.created_at}
-							</TableCell>
+			<SpinnerContainer loading={contactsQuery.isLoading}>
+				<Table>
+					{(contactsQuery.data?.length ?? 0) > 1 && <TableCaption>Celkem {contactsQuery.data?.length} kontakty</TableCaption>}
+					<TableHeader>
+						<TableRow>
+							<TableHead>Jméno</TableHead>
+							<TableHead>Adresa</TableHead>
+							<TableHead >Email</TableHead>
+							<TableHead>IČO</TableHead>
+							<TableHead>DIČ</TableHead>
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+					</TableHeader>
+					<TableBody>
+						{contactsQuery.data?.map((contact) => (
+							<TableRow key={contact.id}>
+								<TableCell className="font-medium">
+									<Link href={`/contacts/${contact.id}`}>{contact.name}</Link>
+								</TableCell>
+								<TableCell>{contact.street}, {contact.city}</TableCell>
+								<TableCell>{contact.main_email}</TableCell>
+								<TableCell>
+									{contact.registration_no}
+								</TableCell>
+								<TableCell className="text-right">
+									{contact.vat_no}
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</SpinnerContainer>
 		</div>
 	)
 }

@@ -63,7 +63,7 @@ export function InvoiceList() {
 
 	return (
 		<Table>
-			<TableCaption>Víc jich není.</TableCaption>
+			{(q.data?.length ?? 0) > 1 && <TableCaption>Celkem {q.data?.length} faktury</TableCaption>}
 			<TableHeader>
 				<TableRow>
 					<TableHead className="w-[100px]"></TableHead>
