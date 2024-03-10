@@ -16,6 +16,7 @@ export const contactTb = sqliteTable(
 	{
 		id: text('id')
 			.$defaultFn(() => createId())
+			.primaryKey()
 			.notNull(),
 		user_id: text('user_id').notNull(), // a single user can have multiple of these
 		name: text('name'),
@@ -44,6 +45,7 @@ export const invoicesTb = sqliteTable(
 	{
 		id: text('id')
 			.$defaultFn(() => createId())
+			.primaryKey()
 			.notNull(),
 		userId: text('userId').notNull(),
 		proforma: integer('proforma', { mode: 'boolean' }),
@@ -135,10 +137,7 @@ export const invoicesTb = sqliteTable(
 export const userInvoicingDetailsTb = sqliteTable(
 	'user_invoicing_detail',
 	{
-		id: text('id')
-			.$defaultFn(() => createId())
-			.notNull(),
-		user_id: text('user_id').notNull().unique(), // single user has exactly one of this
+		user_id: text('user_id').notNull().unique().primaryKey(), // single user has exactly one of this
 		name: text('name'),
 		street: text('street'),
 		street2: text('street2'),
@@ -168,9 +167,7 @@ export const userInvoicingDetailsTb = sqliteTable(
 export const invoiceItemsTb = sqliteTable(
 	'invoice_item',
 	{
-		id: text('id')
-			.$defaultFn(() => createId())
-			.notNull(),
+		id: integer('id').primaryKey().notNull(),
 		order: integer('order'),
 		invoice_id: text('invoice_id')
 			.notNull()

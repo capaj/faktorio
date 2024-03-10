@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "69473050-a8f0-4afe-bc65-29fddd4ab179",
+  "id": "7d00d4a7-6d6a-43d5-9a21-fed40082f15f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "contact": {
@@ -10,7 +10,7 @@
         "id": {
           "name": "id",
           "type": "text",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
@@ -118,8 +118,8 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
-          "primaryKey": false,
+          "type": "integer",
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
@@ -229,7 +229,7 @@
         "id": {
           "name": "id",
           "type": "text",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
@@ -791,17 +791,10 @@
     "user_invoicing_detail": {
       "name": "user_invoicing_detail",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "user_id": {
           "name": "user_id",
           "type": "text",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },

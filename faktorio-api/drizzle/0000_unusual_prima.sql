@@ -1,5 +1,5 @@
 CREATE TABLE `contact` (
-	`id` text NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
 	`name` text,
 	`street` text,
@@ -15,7 +15,7 @@ CREATE TABLE `contact` (
 );
 --> statement-breakpoint
 CREATE TABLE `invoice_item` (
-	`id` text NOT NULL,
+	`id` integer PRIMARY KEY NOT NULL,
 	`order` integer,
 	`invoice_id` text NOT NULL,
 	`description` text,
@@ -29,7 +29,7 @@ CREATE TABLE `invoice_item` (
 );
 --> statement-breakpoint
 CREATE TABLE `invoice` (
-	`id` text NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`userId` text NOT NULL,
 	`proforma` integer,
 	`partial_proforma` integer,
@@ -109,8 +109,7 @@ CREATE TABLE `invoice` (
 );
 --> statement-breakpoint
 CREATE TABLE `user_invoicing_detail` (
-	`id` text NOT NULL,
-	`user_id` text NOT NULL,
+	`user_id` text PRIMARY KEY NOT NULL,
 	`name` text,
 	`street` text,
 	`street2` text,

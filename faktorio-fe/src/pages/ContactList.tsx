@@ -1,6 +1,14 @@
 import AutoForm from '@/components/ui/auto-form'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger
+} from '@/components/ui/dialog'
 import {
 	TableCaption,
 	TableHeader,
@@ -19,7 +27,7 @@ import { SpinnerContainer } from '@/components/SpinnerContainer'
 
 export const fieldConfigForContactForm = {
 	name: {
-		label: "Jméno"
+		label: 'Jméno'
 	},
 	street: {
 		label: 'Ulice'
@@ -28,49 +36,46 @@ export const fieldConfigForContactForm = {
 		label: 'Ulice 2'
 	},
 	main_email: {
-		label: "Email"
+		label: 'Email'
 	},
 	registration_no: {
-		label: "IČO"
+		label: 'IČO'
 	},
 	vat_no: {
-		label: "DIČ"
+		label: 'DIČ'
 	},
 	zip: {
-		label: "Poštovní směrovací číslo"
+		label: 'Poštovní směrovací číslo'
 	}
 }
-
 
 export const ContactList = () => {
 	const contactsQuery = trpcClient.contacts.all.useQuery()
 	const create = trpcClient.contacts.create.useMutation()
-	const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(false)
 
 	return (
 		<div>
-
 			<Dialog open={open} onOpenChange={setOpen}>
-				<DialogTrigger><Button variant={'default'}>Přidat klienta</Button></DialogTrigger>
+				<DialogTrigger>
+					<Button variant={'default'}>Přidat klienta</Button>
+				</DialogTrigger>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Nový kontakt</DialogTitle>
 						<DialogDescription>
-							<AutoForm formSchema={contactCreateFormSchema}
+							<AutoForm
+								formSchema={contactCreateFormSchema}
 								onSubmit={async (values) => {
-
 									await create.mutateAsync(values)
 									contactsQuery.refetch()
 									setOpen(false)
 								}}
 								fieldConfig={fieldConfigForContactForm}
 							>
-
-
-									<DialogFooter>
+								<DialogFooter>
 									<Button type="submit">Přidat</Button>
-        					</DialogFooter>
-
+								</DialogFooter>
 							</AutoForm>
 						</DialogDescription>
 					</DialogHeader>
@@ -78,12 +83,16 @@ export const ContactList = () => {
 			</Dialog>
 			<SpinnerContainer loading={contactsQuery.isLoading}>
 				<Table>
-					{(contactsQuery.data?.length ?? 0) > 1 && <TableCaption>Celkem {contactsQuery.data?.length} kontakty</TableCaption>}
+					{(contactsQuery.data?.length ?? 0) > 1 && (
+						<TableCaption>
+							Celkem {contactsQuery.data?.length} kontakty
+						</TableCaption>
+					)}
 					<TableHeader>
 						<TableRow>
 							<TableHead>Jméno</TableHead>
 							<TableHead>Adresa</TableHead>
-							<TableHead >Email</TableHead>
+							<TableHead>Email</TableHead>
 							<TableHead>IČO</TableHead>
 							<TableHead>DIČ</TableHead>
 						</TableRow>
@@ -94,14 +103,12 @@ export const ContactList = () => {
 								<TableCell className="font-medium">
 									<Link href={`/contacts/${contact.id}`}>{contact.name}</Link>
 								</TableCell>
-								<TableCell>{contact.street}, {contact.city}</TableCell>
-								<TableCell>{contact.main_email}</TableCell>
 								<TableCell>
-									{contact.registration_no}
+									{contact.street}, {contact.city}
 								</TableCell>
-								<TableCell className="text-right">
-									{contact.vat_no}
-								</TableCell>
+								<TableCell>{contact.main_email}</TableCell>
+								<TableCell>{contact.registration_no}</TableCell>
+								<TableCell className="text-right">{contact.vat_no}</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
