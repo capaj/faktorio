@@ -33,7 +33,7 @@ CREATE TABLE `invoice` (
 	`userId` text NOT NULL,
 	`proforma` integer,
 	`partial_proforma` integer,
-	`number` text,
+	`number` text NOT NULL,
 	`variable_symbol` text,
 	`your_name` text,
 	`your_street` text,
@@ -130,5 +130,6 @@ CREATE INDEX `contact_user_idx` ON `contact` (`user_id`);--> statement-breakpoin
 CREATE INDEX `invoice_idx` ON `invoice_item` (`invoice_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `invoice_item_invoice_id_order_unique` ON `invoice_item` (`invoice_id`,`order`);--> statement-breakpoint
 CREATE INDEX `invoices_user_idx` ON `invoice` (`userId`);--> statement-breakpoint
+CREATE UNIQUE INDEX `invoice_userId_number_unique` ON `invoice` (`userId`,`number`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_invoicing_detail_user_id_unique` ON `user_invoicing_detail` (`user_id`);--> statement-breakpoint
 CREATE INDEX `user_invoicing_details_user_idx` ON `user_invoicing_detail` (`user_id`);

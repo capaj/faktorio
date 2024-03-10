@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "7d00d4a7-6d6a-43d5-9a21-fed40082f15f",
+  "id": "e560164b-f27a-4bd3-bb9a-1d87c8857afc",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "contact": {
@@ -258,7 +258,7 @@
           "name": "number",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "variable_symbol": {
@@ -768,6 +768,14 @@
             "userId"
           ],
           "isUnique": false
+        },
+        "invoice_userId_number_unique": {
+          "name": "invoice_userId_number_unique",
+          "columns": [
+            "userId",
+            "number"
+          ],
+          "isUnique": true
         }
       },
       "foreignKeys": {

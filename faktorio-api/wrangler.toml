@@ -7,8 +7,11 @@ node_compat = true
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
-# [vars]
-# MY_VARIABLE = "production_value"
+[vars]
+TURSO_DATABASE_URL=libsql://faktorio-prod-capaj.turso.io
+TURSO_AUTH_TOKEN=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3MTAwMzUxMjIsImlkIjoiOTJiOTVlNzAtZWViOC00ZjI3LTk5MTYtNjVkMjFhNmZhNTQ5In0.VpBZp4meffg-FJtsaZO9fViZ5bmZFRgeomAnk2tyo8xq4WlXC2KGG2HwjLDOtaXI0hTyQUfCNQPxTJqgEgzbDQ
+CLERK_SECRET_KEY=sk_test_veUnsyGobYS0gcsRthbOt26uJmZmJMFHeyfvONrqld
+
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/runtime-apis/kv
