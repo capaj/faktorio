@@ -44,8 +44,16 @@ jobs:
 
       - name: Deploy API
         uses: cloudflare/wrangler-action@v3
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
         with:
           packageManager: pnpm
+          secrets: |
+            TURSO_DATABASE_URL
+            TURSO_AUTH_TOKEN
+            CLERK_SECRET_KEY
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: './faktorio-api'
