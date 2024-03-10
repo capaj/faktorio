@@ -244,6 +244,9 @@ importers:
       vite:
         specifier: ^5.1.5
         version: 5.1.5
+      wrangler:
+        specifier: ^3.32.0
+        version: 3.32.0(@cloudflare/workers-types@4.20240222.0)
 
 packages:
 
