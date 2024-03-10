@@ -1,53 +1,14 @@
-name: Deploy
+name: Deploy FE
 
 on:
   push:
+    paths:
+      - 'faktorio-fe/**'
     branches:
       - main
 
 jobs:
-  deploy-api:
-    runs-on: ubuntu-latest
-    name: Deploy API
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install deps (with cache)
-        run: pnpm install
-
-      - name: Deploy API
-        uses: cloudflare/wrangler-action@v3
-        with:
-          packageManager: pnpm
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: './faktorio-api'
-
   deploy-fe:
-    needs: deploy-api
     runs-on: ubuntu-latest
     name: Deploy Frontend
     steps:
