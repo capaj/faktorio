@@ -44,8 +44,8 @@ jobs:
       - name: Build
         working-directory: ./faktorio-fe
         env:
-          VITE_API_URL: ${{ vars.API_URL }}
-          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ vars.VITE_CLERK_PUBLISHABLE_KEY }}
         run: pnpm build
 
       - name: Deploy Frontend
