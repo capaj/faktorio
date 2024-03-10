@@ -71,7 +71,7 @@ export default function AutoFormObject<
         const fieldConfigForField = (fieldConfig?.[name] ?? {}) as FieldConfig<
         z.infer<typeof item>
       >;
-        const itemName = item._def.description ?? fieldConfigForField.label ??  beautifyObjectName(name);
+        const itemName = item._def.description ?? fieldConfigForField.label as string ??  beautifyObjectName(name);
         const key = [...path, name].join(".");
 
         const {

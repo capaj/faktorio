@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "dew": "bunx wrangler pages dev -- vite",
-    "build": "tsc && vite build",
+    "checkAndBuild": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "build": "vite build",
+    "deploy": "bunx wrangler pages deploy dist",
     "kill": "kill-port 5174"
   },
   "dependencies": {
