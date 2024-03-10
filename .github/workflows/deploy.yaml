@@ -82,13 +82,13 @@ jobs:
 
       - name: Build
         working-directory: ./faktorio-fe
+        env:
+          VITE_API_URL: ${{ vars.API_URL }}
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
         run: pnpm build
 
       - name: Deploy Frontend
         uses: cloudflare/wrangler-action@v3
-        env:
-          VITE_API_URL: ${{ vars.API_URL }}
-          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
         with:
           packageManager: pnpm
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
