@@ -146,9 +146,11 @@ export default {
 					colorize(
 						// @ts-expect-error types in colorize are wrong, it can accept anything same as console.log
 						{ input, ctxUser: ctx.user },
-						{ pretty: ecsMetadataUri ? false : true }
+						{ pretty: true }
 					)
 				)
+
+				return errCtx
 			},
 			req: request,
 			router: appRouter,
