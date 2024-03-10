@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'faktorio-fe/**'
-      - '.github/workflows/deploy-fe.yml'
+      - '.github/workflows/deploy-fe.yaml'
 
     branches:
       - main
