@@ -58,11 +58,7 @@ function App() {
     })
   )
   if (!isLoaded) {
-    return (
-      <div>
-        <Spinner />
-      </div>
-    )
+    return <SpinnerContainer loading={true} />
   }
 
   if (user && location === '/') {
