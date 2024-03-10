@@ -81,6 +81,7 @@ jobs:
         run: pnpm install
 
       - name: Build
+        working-directory: ./faktorio-fe
         run: pnpm build
 
       - name: Deploy Frontend
