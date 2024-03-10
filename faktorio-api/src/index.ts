@@ -23,6 +23,9 @@ import { LibSQLDatabase } from 'drizzle-orm/libsql'
 import { Client, createClient } from '@libsql/client'
 import jwt, { type JwtPayload } from '@tsndr/cloudflare-worker-jwt'
 import { jwtVerify, importSPKI } from 'jose'
+import * as schema from './schema'
+import colorize from '@pinojs/json-colorizer'
+import { TrpcContext } from './trpcContext'
 
 export interface Env {
 	TURSO_DATABASE_URL: string
@@ -30,10 +33,7 @@ export interface Env {
 	CLERK_SECRET_KEY: string
 }
 
-interface RequestWithDb extends Request {
-	dbClient: Client
-	db: LibSQLDatabase
-}
+
 
 // async function injectDB(request: RequestWithDb, env: Env) {
 //   const turso = createClient({
@@ -117,7 +117,7 @@ export default {
 
 			}
 			return {
-				db: drizzle(turso),
+				db: drizzle(turso, {schema}),
 				userId: jwtPayload?.payload.sub,
 				sessionId: jwtPayload?.payload.sid as string,
 			}
@@ -131,6 +131,24 @@ export default {
 						...corsHeaders,
 					},
 				}
+			},
+			onError: (errCtx: any) => {
+				const { path, input, ctx, type } = errCtx as {
+					error: any
+					type: string
+					path: string
+					input: any
+					ctx: TrpcContext
+					req: any
+				}
+				console.error(`${type} ${path} failed for:`)
+				console.error(
+					colorize(
+						// @ts-expect-error types in colorize are wrong, it can accept anything same as console.log
+						{ input, ctxUser: ctx.user },
+						{ pretty: ecsMetadataUri ? false : true }
+					)
+				)
 			},
 			req: request,
 			router: appRouter,

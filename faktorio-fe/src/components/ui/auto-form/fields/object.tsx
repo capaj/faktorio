@@ -68,7 +68,10 @@ export default function AutoFormObject<
         let item = shape[name] as z.ZodAny;
         item = handleIfZodNumber(item) as z.ZodAny;
         const zodBaseType = getBaseType(item);
-        const itemName = item._def.description ?? beautifyObjectName(name);
+        const fieldConfigForField = (fieldConfig?.[name] ?? {}) as FieldConfig<
+        z.infer<typeof item>
+      >;
+        const itemName = item._def.description ?? fieldConfigForField.label ??  beautifyObjectName(name);
         const key = [...path, name].join(".");
 
         const {
@@ -82,6 +85,7 @@ export default function AutoFormObject<
         }
 
         if (zodBaseType === "ZodObject") {
+    
           return (
             <AccordionItem value={name} key={key} className="border-none">
               <AccordionTrigger>{itemName}</AccordionTrigger>
@@ -90,9 +94,7 @@ export default function AutoFormObject<
                   schema={item as unknown as z.ZodObject<any, any>}
                   form={form}
                   fieldConfig={
-                    (fieldConfig?.[name] ?? {}) as FieldConfig<
-                      z.infer<typeof item>
-                    >
+                    fieldConfigForField
                   }
                   path={[...path, name]}
                 />

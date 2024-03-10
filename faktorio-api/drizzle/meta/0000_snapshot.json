@@ -1,11 +1,120 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "ed9c2abc-7889-4657-b6b1-ca56e525b58c",
+  "id": "69473050-a8f0-4afe-bc65-29fddd4ab179",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "invoice_items": {
-      "name": "invoice_items",
+    "contact": {
+      "name": "contact",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "street": {
+          "name": "street",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "street2": {
+          "name": "street2",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "city": {
+          "name": "city",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "zip": {
+          "name": "zip",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "country": {
+          "name": "country",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "registration_no": {
+          "name": "registration_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "main_email": {
+          "name": "main_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "vat_no": {
+          "name": "vat_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "contact_user_idx": {
+          "name": "contact_user_idx",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "invoice_item": {
+      "name": "invoice_item",
       "columns": {
         "id": {
           "name": "id",
@@ -87,8 +196,8 @@
           ],
           "isUnique": false
         },
-        "invoice_items_invoice_id_order_unique": {
-          "name": "invoice_items_invoice_id_order_unique",
+        "invoice_item_invoice_id_order_unique": {
+          "name": "invoice_item_invoice_id_order_unique",
           "columns": [
             "invoice_id",
             "order"
@@ -96,12 +205,26 @@
           "isUnique": true
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "invoice_item_invoice_id_invoice_id_fk": {
+          "name": "invoice_item_invoice_id_invoice_id_fk",
+          "tableFrom": "invoice_item",
+          "tableTo": "invoice",
+          "columnsFrom": [
+            "invoice_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "invoices": {
-      "name": "invoices",
+    "invoice": {
+      "name": "invoice",
       "columns": {
         "id": {
           "name": "id",
@@ -387,7 +510,7 @@
           "name": "currency",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "exchange_rate": {
@@ -429,14 +552,14 @@
           "name": "total",
           "type": "real",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "native_subtotal": {
           "name": "native_subtotal",
           "type": "real",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "native_total": {
@@ -464,8 +587,9 @@
           "name": "paid_amount",
           "type": "real",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "note": {
           "name": "note",
@@ -476,13 +600,6 @@
         },
         "footer_note": {
           "name": "footer_note",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "user_name": {
-          "name": "user_name",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -635,6 +752,13 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "client_contact_id": {
+          "name": "client_contact_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {
@@ -646,12 +770,26 @@
           "isUnique": false
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "invoice_client_contact_id_contact_id_fk": {
+          "name": "invoice_client_contact_id_contact_id_fk",
+          "tableFrom": "invoice",
+          "tableTo": "contact",
+          "columnsFrom": [
+            "client_contact_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "user_invoicing_details": {
-      "name": "user_invoicing_details",
+    "user_invoicing_detail": {
+      "name": "user_invoicing_detail",
       "columns": {
         "id": {
           "name": "id",
@@ -709,8 +847,29 @@
           "notNull": false,
           "autoincrement": false
         },
-        "registration_no": {
-          "name": "registration_no",
+        "main_email": {
+          "name": "main_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "bank_account": {
+          "name": "bank_account",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "iban": {
+          "name": "iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "swift_bic": {
+          "name": "swift_bic",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -718,6 +877,13 @@
         },
         "vat_no": {
           "name": "vat_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "registration_no": {
+          "name": "registration_no",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -740,8 +906,8 @@
         }
       },
       "indexes": {
-        "user_invoicing_details_user_id_unique": {
-          "name": "user_invoicing_details_user_id_unique",
+        "user_invoicing_detail_user_id_unique": {
+          "name": "user_invoicing_detail_user_id_unique",
           "columns": [
             "user_id"
           ],

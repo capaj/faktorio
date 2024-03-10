@@ -4,13 +4,43 @@ import {
 	text,
 	real,
 	index,
-	unique,
+	unique
 } from 'drizzle-orm/sqlite-core'
 import { createId } from '@paralleldrive/cuid2'
 import { sql } from 'drizzle-orm'
 
-export const invoices = sqliteTable(
-	'invoices',
+// always add postfix Tb to table names
+
+export const contactTb = sqliteTable(
+	'contact',
+	{
+		id: text('id')
+			.$defaultFn(() => createId())
+			.notNull(),
+		user_id: text('user_id').notNull(), // a single user can have multiple of these
+		name: text('name'),
+		street: text('street'),
+		street2: text('street2'),
+		city: text('city'),
+		zip: text('zip'),
+		country: text('country'),
+		registration_no: text('registration_no'),
+		main_email: text('main_email'),
+		vat_no: text('vat_no'),
+		created_at: text('created_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`),
+		updated_at: text('updated_at')
+	},
+	(userInvoicingDetails) => {
+		return {
+			userIndex: index('contact_user_idx').on(userInvoicingDetails.user_id)
+		}
+	}
+)
+
+export const invoicesTb = sqliteTable(
+	'invoice',
 	{
 		id: text('id')
 			.$defaultFn(() => createId())
@@ -54,23 +84,22 @@ export const invoices = sqliteTable(
 		iban: text('iban'),
 		swift_bic: text('swift_bic'),
 		payment_method: text('payment_method'),
-		currency: text('currency'),
+		currency: text('currency').notNull(),
 		exchange_rate: real('exchange_rate'),
 		language: text('language'),
 		transferred_tax_liability: integer('transferred_tax_liability', {
-			mode: 'boolean',
+			mode: 'boolean'
 		}),
 		supply_code: text('supply_code'),
 		subtotal: real('subtotal'),
-		total: real('total'),
-		native_subtotal: real('native_subtotal'),
+		total: real('total').notNull(),
+		native_subtotal: real('native_subtotal').notNull(),
 		native_total: real('native_total'),
 		remaining_amount: real('remaining_amount'),
 		remaining_native_amount: real('remaining_native_amount'),
-		paid_amount: real('paid_amount'),
+		paid_amount: real('paid_amount').notNull().default(0),
 		note: text('note'),
 		footer_note: text('footer_note'),
-		user_name: text('user_name'),
 		tags: text('tags', { mode: 'json' }).$type<string[]>(),
 		vat_base_21: real('vat_base_21'),
 		vat_21: real('vat_21'),
@@ -94,51 +123,58 @@ export const invoices = sqliteTable(
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
 		updated_at: text('updated_at'),
+		client_contact_id: text('client_contact_id').references(() => contactTb.id) // contact id used for this invoice
 	},
 	(invoices) => {
 		return {
-			userIndex: index('invoices_user_idx').on(invoices.userId),
+			userIndex: index('invoices_user_idx').on(invoices.userId)
 		}
 	}
 )
 
-export const userInvoicingDetails = sqliteTable(
-	'user_invoicing_details',
+export const userInvoicingDetailsTb = sqliteTable(
+	'user_invoicing_detail',
 	{
 		id: text('id')
 			.$defaultFn(() => createId())
 			.notNull(),
-		user_id: text('user_id').notNull().unique(),
+		user_id: text('user_id').notNull().unique(), // single user has exactly one of this
 		name: text('name'),
 		street: text('street'),
 		street2: text('street2'),
 		city: text('city'),
 		zip: text('zip'),
 		country: text('country'),
-		registration_no: text('registration_no'),
+		main_email: text('main_email'),
+		bank_account: text('bank_account'),
+		iban: text('iban'),
+		swift_bic: text('swift_bic'),
 		vat_no: text('vat_no'),
+		registration_no: text('registration_no'),
 		created_at: text('created_at')
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
-		updated_at: text('updated_at'),
+		updated_at: text('updated_at')
 	},
 	(userInvoicingDetails) => {
 		return {
 			userIndex: index('user_invoicing_details_user_idx').on(
 				userInvoicingDetails.user_id
-			),
+			)
 		}
 	}
 )
 
-export const invoiceItems = sqliteTable(
-	'invoice_items',
+export const invoiceItemsTb = sqliteTable(
+	'invoice_item',
 	{
 		id: text('id')
 			.$defaultFn(() => createId())
 			.notNull(),
 		order: integer('order'),
-		invoice_id: text('invoice_id').notNull(),
+		invoice_id: text('invoice_id')
+			.notNull()
+			.references(() => invoicesTb.id),
 		description: text('description'),
 		quantity: real('quantity'),
 		unit_price: real('unit_price'),
@@ -147,12 +183,12 @@ export const invoiceItems = sqliteTable(
 		created_at: text('created_at')
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
-		updated_at: text('updated_at'),
+		updated_at: text('updated_at')
 	},
 	(invoiceItems) => {
 		return {
 			uniqueIndex: unique().on(invoiceItems.invoice_id, invoiceItems.order),
-			invoiceIndex: index('invoice_idx').on(invoiceItems.invoice_id),
+			invoiceIndex: index('invoice_idx').on(invoiceItems.invoice_id)
 		}
 	}
 )

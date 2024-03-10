@@ -4,6 +4,7 @@ import { INPUT_COMPONENTS } from "./config";
 
 export type FieldConfigItem = {
   description?: React.ReactNode;
+  label?: string
   inputProps?: React.InputHTMLAttributes<HTMLInputElement> & {
     showLabel?: boolean;
   };

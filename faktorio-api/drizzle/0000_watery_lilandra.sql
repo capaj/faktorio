@@ -1,4 +1,20 @@
-CREATE TABLE `invoice_items` (
+CREATE TABLE `contact` (
+	`id` text NOT NULL,
+	`user_id` text NOT NULL,
+	`name` text,
+	`street` text,
+	`street2` text,
+	`city` text,
+	`zip` text,
+	`country` text,
+	`registration_no` text,
+	`main_email` text,
+	`vat_no` text,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`updated_at` text
+);
+--> statement-breakpoint
+CREATE TABLE `invoice_item` (
 	`id` text NOT NULL,
 	`order` integer,
 	`invoice_id` text NOT NULL,
@@ -8,10 +24,11 @@ CREATE TABLE `invoice_items` (
 	`unit` text,
 	`vat_rate` real,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` text
+	`updated_at` text,
+	FOREIGN KEY (`invoice_id`) REFERENCES `invoice`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `invoices` (
+CREATE TABLE `invoice` (
 	`id` text NOT NULL,
 	`userId` text NOT NULL,
 	`proforma` integer,
@@ -52,21 +69,20 @@ CREATE TABLE `invoices` (
 	`iban` text,
 	`swift_bic` text,
 	`payment_method` text,
-	`currency` text,
+	`currency` text NOT NULL,
 	`exchange_rate` real,
 	`language` text,
 	`transferred_tax_liability` integer,
 	`supply_code` text,
 	`subtotal` real,
-	`total` real,
-	`native_subtotal` real,
+	`total` real NOT NULL,
+	`native_subtotal` real NOT NULL,
 	`native_total` real,
 	`remaining_amount` real,
 	`remaining_native_amount` real,
-	`paid_amount` real,
+	`paid_amount` real DEFAULT 0 NOT NULL,
 	`note` text,
 	`footer_note` text,
-	`user_name` text,
 	`tags` text,
 	`vat_base_21` real,
 	`vat_21` real,
@@ -87,10 +103,12 @@ CREATE TABLE `invoices` (
 	`tax_document` integer,
 	`payment_method_human` text,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` text
+	`updated_at` text,
+	`client_contact_id` text,
+	FOREIGN KEY (`client_contact_id`) REFERENCES `contact`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `user_invoicing_details` (
+CREATE TABLE `user_invoicing_detail` (
 	`id` text NOT NULL,
 	`user_id` text NOT NULL,
 	`name` text,
@@ -99,14 +117,19 @@ CREATE TABLE `user_invoicing_details` (
 	`city` text,
 	`zip` text,
 	`country` text,
-	`registration_no` text,
+	`main_email` text,
+	`bank_account` text,
+	`iban` text,
+	`swift_bic` text,
 	`vat_no` text,
+	`registration_no` text,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
-CREATE INDEX `invoice_idx` ON `invoice_items` (`invoice_id`);--> statement-breakpoint
-CREATE UNIQUE INDEX `invoice_items_invoice_id_order_unique` ON `invoice_items` (`invoice_id`,`order`);--> statement-breakpoint
-CREATE INDEX `invoices_user_idx` ON `invoices` (`userId`);--> statement-breakpoint
-CREATE UNIQUE INDEX `user_invoicing_details_user_id_unique` ON `user_invoicing_details` (`user_id`);--> statement-breakpoint
-CREATE INDEX `user_invoicing_details_user_idx` ON `user_invoicing_details` (`user_id`);
+CREATE INDEX `contact_user_idx` ON `contact` (`user_id`);--> statement-breakpoint
+CREATE INDEX `invoice_idx` ON `invoice_item` (`invoice_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `invoice_item_invoice_id_order_unique` ON `invoice_item` (`invoice_id`,`order`);--> statement-breakpoint
+CREATE INDEX `invoices_user_idx` ON `invoice` (`userId`);--> statement-breakpoint
+CREATE UNIQUE INDEX `user_invoicing_detail_user_id_unique` ON `user_invoicing_detail` (`user_id`);--> statement-breakpoint
+CREATE INDEX `user_invoicing_details_user_idx` ON `user_invoicing_detail` (`user_id`);

@@ -1,18 +1,24 @@
 import { TRPCError, inferAsyncReturnType } from '@trpc/server'
 
 import { z } from 'zod'
-import { invoices } from './schema'
+import { contactTb, invoicesTb } from './schema'
 import { loggerMiddleware } from './loggerMiddleware'
 import { trpcContext } from './trpcContext'
+import { eq } from 'drizzle-orm'
+import { contactInsertSchema } from './zodDbSchemas'
 
 const isAuthorizedMiddleware = trpcContext.middleware(async ({ ctx, next }) => {
 	if (!ctx.userId) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
-			message: 'Not authorized',
+			message: 'Not authorized'
 		})
 	}
-	return next()
+	return next({
+		ctx: {
+			userId: ctx.userId as string
+		}
+	})
 })
 
 const protectedProc = trpcContext.procedure
@@ -20,34 +26,40 @@ const protectedProc = trpcContext.procedure
 	.use(isAuthorizedMiddleware)
 
 const invoiceRouter = trpcContext.router({
-	hello: protectedProc
+	create: protectedProc
 		.input(z.object({ title: z.string() }))
 		.mutation(({ input }) => {
 			return new Date()
 		}),
-	world: protectedProc.query(async ({ ctx }) => {
-		console.log('aaa')
-		console.log(await ctx.db.select().from(invoices))
+	all: protectedProc.query(async ({ ctx }) => {
+		const invoicesForUser = await ctx.db.query.invoicesTb.findMany({
+			where: eq(invoicesTb.userId, ctx.userId)
+		})
 
-		return [
-			{
-				title: 'hel22lo',
-				createdAt: new Date(),
-			},
-		]
-	}),
+		return invoicesForUser
+	})
+})
+
+const contactRouter = trpcContext.router({
+	all: protectedProc
+		.input(z.string().nullish())
+		.query(async ({ input, ctx }) => {
+			return await ctx.db.query.contactTb.findMany({
+				where: eq(contactTb.user_id, ctx.userId)
+			})
+		}),
+	create: protectedProc
+		.input(contactInsertSchema)
+		.mutation(async ({ input, ctx }) => {
+			const contact = await ctx.db.insert(contactTb).values(input).execute()
+
+			return contact
+		})
 })
 
 export const appRouter = trpcContext.router({
-	post: invoiceRouter,
-	hello: protectedProc
-		.input(z.string().nullish())
-		.query(async ({ input, ctx }) => {
-			const invoicesForUser = await ctx.db.select().from(invoices).execute()
-			console.log(invoicesForUser)
-			console.log(ctx)
-			return invoicesForUser
-		}),
+	invoices: invoiceRouter,
+	contacts: contactRouter
 })
 
 export type AppRouter = typeof appRouter
