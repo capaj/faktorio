@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev --port 8787",
+    "dev": "wrangler dev --port 9189",
     "start": "wrangler dev",
     "migrate": "tsx migrate.ts",
     "generate": "drizzle-kit generate:sqlite",
-    "kill": "kill -9 $(lsof -t -i:8787)"
+    "kill": "kill -9 $(lsof -t -i:9189)"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240222.0",

@@ -6,11 +6,12 @@
     "faktorio-fe"
   ],
   "devDependencies": {
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "tsx": "^4.7.1"
   },
   "scripts": {
     "dev": "cd faktorio-api && bun dev & cd faktorio-fe && bun dev",
-    "kill": "kill -9 $(lsof -t -i:8787)",
+    "kill": "kill -9 $(lsof -t -i:9189)",
     "db": "cd faktorio-api && pnpm generate && pnpm migrate"
   }
 }

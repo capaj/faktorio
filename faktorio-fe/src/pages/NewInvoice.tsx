@@ -27,7 +27,9 @@ export const NewInvoice = () => {
       payment_method: z
         .enum(['bank', 'cash', 'card', 'cod', 'crypto', 'other'])
         .default('bank'),
-      taxable_fulfillment_due: z.date()
+      taxable_fulfillment_due: z
+        .date()
+        .default(djs().subtract(1, 'month').endOf('month').toDate())
     })
   return (
     <div>

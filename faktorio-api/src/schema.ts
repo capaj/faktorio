@@ -28,6 +28,7 @@ export const contactTb = sqliteTable(
     registration_no: text('registration_no'),
     main_email: text('main_email'),
     vat_no: text('vat_no'),
+    phone_number: text('phone_number'),
     created_at: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -154,7 +155,9 @@ export const userInvoicingDetailsTb = sqliteTable(
     created_at: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updated_at: text('updated_at')
+    updated_at: text('updated_at'),
+    phone_number: text('phone_number'),
+    web_url: text('web_url'),
   },
   (userInvoicingDetails) => {
     return {
