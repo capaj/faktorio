@@ -1,9 +1,10 @@
 import AutoForm from '@/components/ui/auto-form'
-import { invoiceInsertSchema } from '../../../faktorio-api/src/zodDbSchemas'
+import { invoiceInsertSchema } from '../../../../faktorio-api/src/zodDbSchemas'
 import { z } from 'zod'
 import cc from 'currency-codes'
 import { trpcClient } from '@/lib/trpcClient'
 import { djs } from '@/lib/djs'
+import { ComboboxDemo } from './ContactComboBox'
 
 export const NewInvoice = () => {
   const [invoicesCount] = trpcClient.invoices.count.useSuspenseQuery()
@@ -33,8 +34,32 @@ export const NewInvoice = () => {
     })
   return (
     <div>
-      <h2>New Invoice</h2>
-      <AutoForm formSchema={formSchema}></AutoForm>
+      <h2 className="mb-5">Nová faktura</h2>
+
+      <ComboboxDemo />
+      <AutoForm
+        formSchema={formSchema}
+        fieldConfig={{
+          currency: {
+            label: 'Měna'
+          },
+          issued_on: {
+            label: 'Datum vystavení faktury'
+          },
+          number: {
+            label: 'Číslo faktury'
+          },
+          payment_method: {
+            label: 'Způsob platby'
+          },
+          taxable_fulfillment_due: {
+            label: 'Datum zdanitelného plnění'
+          },
+          footer_note: {
+            label: 'Poznámka'
+          }
+        }}
+      ></AutoForm>
     </div>
   )
 }

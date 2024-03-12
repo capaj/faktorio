@@ -1,6 +1,6 @@
 import AutoForm from '@/components/ui/auto-form'
 import { userInvoicingDetailsInsertSchema } from '../../../faktorio-api/src/zodDbSchemas'
-import { fieldConfigForContactForm } from './ContactList'
+import { fieldConfigForContactForm } from './ContactList/ContactList'
 import { Button } from '@/components/ui/button'
 import { trpcClient } from '@/lib/trpcClient'
 import { FkButton } from '@/components/FkButton'
@@ -35,6 +35,12 @@ export const MyDetails = () => {
             },
             bank_account: {
               label: 'Číslo bankovního účtu'
+            },
+            phone_number: {
+              label: 'Telefon'
+            },
+            web_url: {
+              label: 'Web'
             }
           }}
           values={q.data ?? undefined}

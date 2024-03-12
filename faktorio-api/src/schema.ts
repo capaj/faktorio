@@ -8,7 +8,6 @@ import {
 } from 'drizzle-orm/sqlite-core'
 import { createId } from '@paralleldrive/cuid2'
 import { sql } from 'drizzle-orm'
-
 // always add postfix Tb to table names
 
 export const contactTb = sqliteTable(

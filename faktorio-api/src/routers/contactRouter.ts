@@ -13,6 +13,12 @@ export const contactRouter = trpcContext.router({
         where: eq(contactTb.user_id, ctx.userId)
       })
     }),
+  byId: protectedProc.input(z.string()).query(async ({ input, ctx }) => {
+    return await ctx.db.query.contactTb.findFirst({
+      where: eq(contactTb.id, input)
+    })
+  }),
+
   create: protectedProc
     .input(contactCreateFormSchema)
     .mutation(async ({ input, ctx }) => {
