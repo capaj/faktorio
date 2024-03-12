@@ -112,13 +112,14 @@ const schema = z.object({
   city: z.string().optional(),
   zip: z.string().optional(),
   country: z.string().optional(),
-  main_email: z.string().email().optional(),
-  phone_number: z.string().optional()
+  main_email: z.string().email().nullish(),
+  phone_number: z.string().nullish()
 })
 
 export const ContactList = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const create = trpcClient.contacts.create.useMutation()
+  const update = trpcClient.contacts.update.useMutation()
   const params = useParams()
 
   const [open, setOpen] = useState(false)
@@ -140,7 +141,8 @@ export const ContactList = () => {
 
   useEffect(() => {
     ;(async () => {
-      if (values.registration_no?.length === 8) {
+      if (values.registration_no?.length === 8 && !values.name) {
+        // seems like a user is trying to add new contact, let's fetch data from ares
         const aresResponse = await fetch(
           `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/${values.registration_no}`
         )
@@ -166,34 +168,36 @@ export const ContactList = () => {
       }
     })()
   }, [values.registration_no])
+
+  const { contactId } = params
   return (
     <div>
-      {params.contactId && (
+      {contactId && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger>
             <Button variant={'default'}>Přidat klienta</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Nový kontakt</DialogTitle>
-              <DialogDescription>
-                <AutoForm
-                  formSchema={schema}
-                  values={values}
-                  onParsedValuesChange={setValues}
-                  onSubmit={async (values) => {
-                    await create.mutateAsync(values)
-                    contactsQuery.refetch()
-                    setOpen(false)
-                    setValues({})
-                  }}
-                  fieldConfig={fieldConfigForContactForm}
-                >
-                  <DialogFooter>
-                    <Button type="submit">Přidat</Button>
-                  </DialogFooter>
-                </AutoForm>
-              </DialogDescription>
+              <DialogTitle>Editace kontaktu</DialogTitle>
+              <AutoForm
+                formSchema={schema}
+                values={values}
+                onParsedValuesChange={setValues}
+                onSubmit={async (values) => {
+                  await update.mutateAsync({
+                    ...values,
+                    id: contactId as string
+                  })
+                  contactsQuery.refetch()
+                  setOpen(false)
+                }}
+                fieldConfig={fieldConfigForContactForm}
+              >
+                <DialogFooter>
+                  <Button type="submit">Uložit</Button>
+                </DialogFooter>
+              </AutoForm>
             </DialogHeader>
           </DialogContent>
         </Dialog>
@@ -203,23 +207,22 @@ export const ContactList = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Nový kontakt</DialogTitle>
-              <DialogDescription>
-                <AutoForm
-                  formSchema={schema}
-                  values={values}
-                  onParsedValuesChange={setValues}
-                  onSubmit={async (values) => {
-                    await create.mutateAsync(values)
-                    contactsQuery.refetch()
-                    setOpen(false)
-                  }}
-                  fieldConfig={fieldConfigForContactForm}
-                >
-                  <DialogFooter>
-                    <Button type="submit">Přidat</Button>
-                  </DialogFooter>
-                </AutoForm>
-              </DialogDescription>
+
+              <AutoForm
+                formSchema={schema}
+                values={values}
+                onParsedValuesChange={setValues}
+                onSubmit={async (values) => {
+                  await create.mutateAsync(values)
+                  contactsQuery.refetch()
+                  setOpen(false)
+                }}
+                fieldConfig={fieldConfigForContactForm}
+              >
+                <DialogFooter>
+                  <Button type="submit">Přidat</Button>
+                </DialogFooter>
+              </AutoForm>
             </DialogHeader>
           </DialogContent>
         </Dialog>
@@ -227,9 +230,7 @@ export const ContactList = () => {
       <SpinnerContainer loading={contactsQuery.isLoading}>
         <Table>
           {(contactsQuery.data?.length ?? 0) > 1 && (
-            <TableCaption>
-              Celkem {contactsQuery.data?.length} kontakty
-            </TableCaption>
+            <TableCaption>Celkem {contactsQuery.data?.length}</TableCaption>
           )}
           <TableHeader>
             <TableRow>
@@ -244,7 +245,16 @@ export const ContactList = () => {
             {contactsQuery.data?.map((contact) => (
               <TableRow key={contact.id}>
                 <TableCell className="font-medium">
-                  <Link href={`/contacts/${contact.id}`}>{contact.name}</Link>
+                  <Link
+                    onClick={() => {
+                      if (contact.id === contactId) {
+                        setOpen(true)
+                      }
+                    }}
+                    href={`/contacts/${contact.id}`}
+                  >
+                    {contact.name}
+                  </Link>
                 </TableCell>
                 <TableCell>
                   {contact.street}, {contact.city}
