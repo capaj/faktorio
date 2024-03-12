@@ -1,24 +1,13 @@
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useState } from 'react'
 
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
-import { CzechInvoicePDF } from './pages/InvoiceDetail/CzechInvoicePDF'
-import { invoiceData } from './invoiceSchema'
-import { Link, Redirect, Route, Switch, useLocation } from 'wouter'
+import { Redirect, Route, Switch, useLocation } from 'wouter'
 // Create Document Component
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  useAuth,
-  UserButton
-} from '@clerk/clerk-react'
-import { Box } from './components/Box'
+import { SignInButton, useAuth, UserButton } from '@clerk/clerk-react'
 import { LandingPage } from './components/LandingPage'
 import { MountainIcon } from './components/MountainIcon'
 import { ButtonLink } from './components/ui/link'
 import { useUser } from '@clerk/clerk-react'
-import { Spinner } from './components/ui/spinner'
 import { Button } from './components/ui/button'
 import { InvoiceDetail } from './pages/InvoiceDetail/InvoiceDetail'
 import { InvoiceList } from './pages/InvoiceList'

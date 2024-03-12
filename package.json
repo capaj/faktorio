@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "cd faktorio-api && bun dev & cd faktorio-fe && bun dev",
     "kill": "kill -9 $(lsof -t -i:9189)",
-    "db": "cd faktorio-api && pnpm generate && pnpm migrate"
+    "db": "cd faktorio-api && pnpm generate && pnpm migrate",
+    "bumpDeps": "ncu -u && cd faktorio-api && cd ../faktorio-fe && pnpm i"
   }
 }
