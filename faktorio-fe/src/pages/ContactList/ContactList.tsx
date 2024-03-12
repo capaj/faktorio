@@ -76,30 +76,44 @@ const AresBusinessInformationSchema = z.object({
   // seznamRegistraci is omitted
 })
 
+const acFieldConfig = {
+  inputProps: {
+    autocomplete: 'off'
+  }
+}
+
 export const fieldConfigForContactForm = {
   name: {
-    label: 'Jméno'
+    label: 'Jméno',
+    ...acFieldConfig
   },
   street: {
-    label: 'Ulice'
+    label: 'Ulice',
+    ...acFieldConfig
   },
   street2: {
-    label: 'Ulice 2'
+    label: 'Ulice 2',
+    ...acFieldConfig
   },
   main_email: {
-    label: 'Email'
+    label: 'Email',
+    ...acFieldConfig
   },
   registration_no: {
-    label: 'IČO'
+    label: 'IČO',
+    ...acFieldConfig
   },
   vat_no: {
-    label: 'DIČ'
+    label: 'DIČ',
+    ...acFieldConfig
   },
   zip: {
-    label: 'Poštovní směrovací číslo'
+    label: 'Poštovní směrovací číslo',
+    ...acFieldConfig
   },
   phone_number: {
-    label: 'Telefon'
+    label: 'Telefon',
+    ...acFieldConfig
   }
 }
 
@@ -132,7 +146,7 @@ export const ContactList = () => {
           (contact) => contact.id === params.contactId
         )
         if (!contact) return
-
+        // @ts-expect-error
         setValues(contact)
         setOpen(true)
       })()
@@ -192,6 +206,7 @@ export const ContactList = () => {
                   contactsQuery.refetch()
                   setOpen(false)
                 }}
+                // @ts-expect-error
                 fieldConfig={fieldConfigForContactForm}
               >
                 <DialogFooter>
@@ -213,10 +228,12 @@ export const ContactList = () => {
                 values={values}
                 onParsedValuesChange={setValues}
                 onSubmit={async (values) => {
+                  // @ts-expect-error
                   await create.mutateAsync(values)
                   contactsQuery.refetch()
                   setOpen(false)
                 }}
+                // @ts-expect-error
                 fieldConfig={fieldConfigForContactForm}
               >
                 <DialogFooter>
