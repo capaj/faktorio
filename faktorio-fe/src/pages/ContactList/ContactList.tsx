@@ -117,19 +117,6 @@ export const fieldConfigForContactForm = {
   }
 }
 
-const schema = z.object({
-  registration_no: z.string().min(8).max(8).optional(),
-  vat_no: z.string().optional(),
-  name: z.string().optional(),
-  street: z.string().optional(),
-  street2: z.string().optional(),
-  city: z.string().optional(),
-  zip: z.string().optional(),
-  country: z.string().optional(),
-  main_email: z.string().email().nullish(),
-  phone_number: z.string().nullish()
-})
-
 export const ContactList = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const create = trpcClient.contacts.create.useMutation()
@@ -184,20 +171,44 @@ export const ContactList = () => {
   }, [values.registration_no])
 
   const { contactId } = params
+
+  const schema = z.object({
+    registration_no: z.string().min(8).max(8).optional(),
+    vat_no: z.string().optional(),
+    name: z
+      .string()
+      .optional()
+      .refine(
+        (name) => {
+          // make sure that the name is unique
+          return !contactsQuery.data?.find((contact) => contact.name === name)
+        },
+        {
+          message: 'Kontakt s tímto jménem již existuje'
+        }
+      ),
+    street: z.string().optional(),
+    street2: z.string().optional(),
+    city: z.string().optional(),
+    zip: z.string().optional(),
+    country: z.string().optional(),
+    main_email: z.string().email().nullish(),
+    phone_number: z.string().nullish()
+  })
+
   return (
     <div>
       {contactId && (
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger>
-            <Button variant={'default'}>Přidat klienta</Button>
-          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Editace kontaktu</DialogTitle>
               <AutoForm
                 formSchema={schema}
                 values={values}
-                onParsedValuesChange={setValues}
+                onParsedValuesChange={(values) => {
+                  setValues(values)
+                }}
                 onSubmit={async (values) => {
                   await update.mutateAsync({
                     ...values,
@@ -218,7 +229,10 @@ export const ContactList = () => {
         </Dialog>
       )}
       {!params.contactId && (
-        <Dialog open={Boolean(open && params.contactId)} onOpenChange={setOpen}>
+        <Dialog open={Boolean(open)} onOpenChange={setOpen}>
+          <DialogTrigger>
+            <Button variant={'default'}>Přidat klienta</Button>
+          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Nový kontakt</DialogTitle>
