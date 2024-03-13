@@ -1,6 +1,7 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from './ui/link'
+import { SignIn, SignInButton } from '@clerk/clerk-react'
 
 export const LandingPage = () => {
   return (
@@ -16,18 +17,14 @@ export const LandingPage = () => {
             </p>
           </div>
           <div className="mx-auto max-w-[400px] space-y-2">
-            <form className="grid gap-2">
-              <Input
-                className="w-full"
-                placeholder="Enter your email"
-                type="email"
-              />
+            <SignInButton>
               <Button className="w-full" type="submit">
-                Sign Up
+                Registrace
               </Button>
-            </form>
+            </SignInButton>
+
             <p className="text-xs text-center text-gray-500 dark:text-gray-400">
-              Zaregistrujte se. Je to zdarma.
+              Zaregistrujte se. Je to zdarma. Navždy.
             </p>
           </div>
         </div>
@@ -41,19 +38,31 @@ export const LandingPage = () => {
             src="/placeholder.svg"
             width="550"
           />
-          <div className="flex flex-col gap-2 min-[400px]:flex-row">
-            <ButtonLink
-              className="inline-flex h-10 items-center justify-center rounded-md bg-gray-900 px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
-              href="#"
-            >
-              Contact Sales
-            </ButtonLink>
-            <ButtonLink
-              className="inline-flex h-10 items-center justify-center rounded-md border border-gray-200 border-gray-200 bg-white px-8 text-sm font-medium shadow-sm transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-800 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus-visible:ring-gray-300"
-              href="#"
-            >
-              Tour the Platform
-            </ButtonLink>
+          <div className="flex flex-col gap-2 min-[400px]:flex-col">
+            Jako živnostník stojící na prahu podnikání jsem čelil jednoduchému,
+            přesto však zdánlivě neřešitelnému dilematu: potřeba vystavovat
+            jednu fakturu měsíčně bez zbytečných komplikací a vysokých nákladů.
+            Tento zdánlivě malý požadavek se po 15 letech stal mým každodenním
+            bojem. Na trhu jsem sice našel řadu řešení, ale všechna přicházela s
+            nepřiměřenými cenami nebo složitostmi, které přesahovaly mé skromné
+            požadavky. Platit 175 Kč měsíčně za vystavení jedné jediné faktury
+            se mi zdálo značně nespravedlivé. Tato frustrující zkušenost mě
+            přivedla k otázce: Co kdyby existovalo řešení, které by bylo
+            speciálně navržené pro malé podnikatele jako jsem já? Řešení, které
+            by bylo jednoduché, cenově dostupné a zbavené všech zbytečných
+            složitostí? S touto myšlenkou jsem se pustil do práce a výsledkem je
+            <p>
+              Faktorio.cz - platforma, která je přesně tím, co malý podnikatel
+              potřebuje. Faktorio.cz je ztělesněním mé vize: jednoduché,
+              intuitivní a cenově dostupné řešení pro vystavování faktur. Již
+              žádné přemrštěné měsíční poplatky za základní služby. S
+              Faktorio.cz můžete vystavit fakturu kdykoliv a odkudkoliv, bez
+              kreditky během několika vteřin po registraci.
+            </p>
+            <p>
+              Provoz faktorio.cz stojí méně, než stojí předplatné fakturoid.cz
+              nebo idoklad.cz a dokud to půjde, bude Faktorio.cz zdarma.
+            </p>
           </div>
         </div>
       </section>
