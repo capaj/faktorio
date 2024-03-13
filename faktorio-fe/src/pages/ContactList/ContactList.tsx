@@ -121,6 +121,7 @@ export const ContactList = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const create = trpcClient.contacts.create.useMutation()
   const update = trpcClient.contacts.update.useMutation()
+  const deleteContact = trpcClient.contacts.delete.useMutation()
   const params = useParams()
 
   const [open, setOpen] = useState(false)
@@ -220,8 +221,22 @@ export const ContactList = () => {
                 // @ts-expect-error
                 fieldConfig={fieldConfigForContactForm}
               >
-                <DialogFooter>
-                  <Button type="submit">Uložit</Button>
+                <DialogFooter className="flex justify-between">
+                  <div className="w-full flex justify-between">
+                    <Button
+                      className="align-left self-start justify-self-start"
+                      variant={'destructive'}
+                      onClick={async (ev) => {
+                        ev.preventDefault()
+                        await deleteContact.mutateAsync(contactId)
+                        contactsQuery.refetch()
+                        setOpen(false)
+                      }}
+                    >
+                      Smazat
+                    </Button>
+                    <Button type="submit">Uložit</Button>
+                  </div>
                 </DialogFooter>
               </AutoForm>
             </DialogHeader>

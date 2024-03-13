@@ -3,7 +3,13 @@
   "ignorePaths": [],
   "dictionaryDefinitions": [],
   "dictionaries": [],
-  "words": ["IBAN", "libsql", "TRPC", "turso"],
+  "words": [
+    "IBAN",
+    "ilike",
+    "libsql",
+    "TRPC",
+    "turso"
+  ],
   "ignoreWords": [],
   "import": []
 }
