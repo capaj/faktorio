@@ -10,10 +10,6 @@ import { useParams } from 'wouter'
 import { trpcClient } from '@/lib/trpcClient'
 
 export const InvoiceDetail = () => {
-  const pdfName = `${snakeCase(invoiceData.supplier.name)}-${
-    invoiceData.invoiceNumber
-  }.pdf`
-
   const { invoiceId } = useParams()
   if (!invoiceId) {
     throw new Error('No invoiceId')
@@ -24,7 +20,10 @@ export const InvoiceDetail = () => {
   if (invoice.isLoading) {
     return <div>Loading...</div>
   }
-  console.log('invoice:', invoice)
+
+  const pdfName = `${snakeCase(invoice.data.your_name)}-${
+    invoiceData.invoiceNumber
+  }.pdf`
   return (
     <>
       <div className="h-full place-content-center flex flex-col">
