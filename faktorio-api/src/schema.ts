@@ -10,36 +10,6 @@ import { createId } from '@paralleldrive/cuid2'
 import { sql } from 'drizzle-orm'
 // always add postfix Tb to table names
 
-export const contactTb = sqliteTable(
-  'contact',
-  {
-    id: text('id')
-      .$defaultFn(() => createId())
-      .primaryKey()
-      .notNull(),
-    user_id: text('user_id').notNull(), // a single user can have multiple of these
-    name: text('name'),
-    street: text('street'),
-    street2: text('street2'),
-    city: text('city'),
-    zip: text('zip'),
-    country: text('country'),
-    registration_no: text('registration_no'),
-    main_email: text('main_email'),
-    vat_no: text('vat_no'),
-    phone_number: text('phone_number'),
-    created_at: text('created_at')
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
-    updated_at: text('updated_at')
-  },
-  (userInvoicingDetails) => {
-    return {
-      userIndex: index('contact_user_idx').on(userInvoicingDetails.user_id)
-    }
-  }
-)
-
 export const invoicesTb = sqliteTable(
   'invoice',
   {
@@ -47,7 +17,7 @@ export const invoicesTb = sqliteTable(
       .$defaultFn(() => createId())
       .primaryKey()
       .notNull(),
-    userId: text('userId').notNull(),
+    user_id: text('user_id').notNull(),
     proforma: integer('proforma', { mode: 'boolean' }),
     partial_proforma: integer('partial_proforma', { mode: 'boolean' }),
     number: text('number').notNull(),
@@ -76,7 +46,7 @@ export const invoicesTb = sqliteTable(
     order_number: text('order_number'),
     issued_on: text('issued_on'), // Dates as text YYYY-MM-DD
     taxable_fulfillment_due: text('taxable_fulfillment_due'), // Dates as text YYYY-MM-DD
-    due: text('due').notNull(),
+    due_in_days: integer('due_in_days').notNull(), // in days how long before the invoice is due
     due_on: text('due_on').notNull(), // Dates as text YYYY-MM-DD
     sent_at: text('sent_at'), // Dates as text YYYY-MM-DD
     paid_on: text('paid_on'), // Dates as text YYYY-MM-DD
@@ -125,12 +95,45 @@ export const invoicesTb = sqliteTable(
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
     updated_at: text('updated_at'),
-    client_contact_id: text('client_contact_id').references(() => contactTb.id) // contact id used for this invoice
+    published_at: text('published_at'), // published invoices are visible on a public secret URL so that the client can view and download them as PDF
+    client_contact_id: text('client_contact_id')
+      .notNull()
+      .references(() => contactTb.id) // contact id used for this invoice
   },
   (invoices) => {
     return {
-      numberUserUniqueIndex: unique().on(invoices.userId, invoices.number),
-      userIndex: index('invoices_user_idx').on(invoices.userId)
+      numberUserUniqueIndex: unique().on(invoices.user_id, invoices.number),
+      userIndex: index('invoices_user_idx').on(invoices.user_id)
+    }
+  }
+)
+
+export const contactTb = sqliteTable(
+  'contact',
+  {
+    id: text('id')
+      .$defaultFn(() => createId())
+      .primaryKey()
+      .notNull(),
+    user_id: text('user_id').notNull(), // a single user can have multiple of these
+    name: text('name'),
+    street: text('street'),
+    street2: text('street2'),
+    city: text('city'),
+    zip: text('zip'),
+    country: text('country'),
+    registration_no: text('registration_no'),
+    main_email: text('main_email'),
+    vat_no: text('vat_no'),
+    phone_number: text('phone_number'),
+    created_at: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updated_at: text('updated_at')
+  },
+  (userInvoicingDetails) => {
+    return {
+      userIndex: index('contact_user_idx').on(userInvoicingDetails.user_id)
     }
   }
 )
@@ -156,7 +159,7 @@ export const userInvoicingDetailsTb = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
     updated_at: text('updated_at'),
     phone_number: text('phone_number'),
-    web_url: text('web_url'),
+    web_url: text('web_url')
   },
   (userInvoicingDetails) => {
     return {
@@ -174,7 +177,9 @@ export const invoiceItemsTb = sqliteTable(
     order: integer('order'),
     invoice_id: text('invoice_id')
       .notNull()
-      .references(() => invoicesTb.id),
+      .references(() => invoicesTb.id, {
+        onDelete: 'cascade'
+      }),
     description: text('description'),
     quantity: real('quantity'),
     unit_price: real('unit_price'),

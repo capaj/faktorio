@@ -18,12 +18,16 @@ import {
 } from '@/components/ui/popover'
 import { trpcClient } from '@/lib/trpcClient'
 
-export function ComboboxDemo() {
+export function ContactComboBox(props: {
+  onChange: (value: string) => void
+  value: string
+  onBlur?: () => void
+}) {
   const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState('')
+  // const [value, setValue] = React.useState('')
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const contacts = contactsQuery.data ?? []
-
+  const { value } = props
   return (
     <div className="flex m-4 center justify-center items-center place-items-center place-content-center">
       <h4 className="mr-6">Kontakt</h4>
@@ -33,10 +37,10 @@ export function ComboboxDemo() {
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[200px] justify-between"
+            className="w-[300px] justify-between"
           >
             {value
-              ? contacts.find((contact) => contact.id === value)?.id
+              ? contacts.find((contact) => contact.id === value)?.name
               : 'Vyberte kontakt...'}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -48,21 +52,25 @@ export function ComboboxDemo() {
             <CommandList>
               <CommandGroup>
                 {contacts.map((contact) => {
-                  const contactKey = contact.name || contact.id
+                  const contactKey = contact.id
                   return (
                     <CommandItem
                       key={contactKey}
                       value={contactKey}
                       onSelect={(currentValue) => {
                         console.log('currentValue:', currentValue)
-                        setValue(currentValue === value ? '' : currentValue)
+                        props.onChange(
+                          currentValue === value ? '' : currentValue
+                        )
                         setOpen(false)
                       }}
                     >
                       <Check
                         className={cn(
                           'mr-2 h-4 w-4',
-                          value === contactKey ? 'opacity-100' : 'opacity-0'
+                          props.value === contactKey
+                            ? 'opacity-100'
+                            : 'opacity-0'
                         )}
                       />
                       {contact.name}

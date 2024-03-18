@@ -1,4 +1,4 @@
-import { createInsertSchema } from 'drizzle-zod'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import * as schemas from './schema'
 import { z } from 'zod'
 
@@ -26,3 +26,10 @@ export type InsertUserInvoicingDetailsType = z.infer<
 >
 export type InsertInvoiceType = z.infer<typeof invoiceInsertSchema>
 export type InsertContactType = z.infer<typeof contactInsertSchema>
+
+export const invoiceItemFormSchema = invoiceItemInsertSchema.omit({
+  invoice_id: true
+})
+
+export const invoiceSelectSchema = createSelectSchema(schemas.invoicesTb)
+export type SelectInvoiceType = z.infer<typeof invoiceSelectSchema>

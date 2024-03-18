@@ -17,6 +17,7 @@ import { NewInvoice } from './pages/NewInvoice/NewInvoice'
 import { ContactList } from './pages/ContactList/ContactList'
 import { MyDetails } from './pages/MyDetails'
 import { SpinnerContainer } from './components/SpinnerContainer'
+import { SuperJSON } from 'superjson'
 
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
@@ -31,6 +32,8 @@ function App() {
   const [queryClient] = useState(() => new QueryClient())
   const [trpc] = useState(() =>
     trpcClient.createClient({
+      transformer: SuperJSON,
+
       links: [
         httpBatchLink({
           url: VITE_API_URL,

@@ -10,6 +10,7 @@ CREATE TABLE `contact` (
 	`registration_no` text,
 	`main_email` text,
 	`vat_no` text,
+	`phone_number` text,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text
 );
@@ -25,12 +26,12 @@ CREATE TABLE `invoice_item` (
 	`vat_rate` real,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text,
-	FOREIGN KEY (`invoice_id`) REFERENCES `invoice`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`invoice_id`) REFERENCES `invoice`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `invoice` (
 	`id` text PRIMARY KEY NOT NULL,
-	`userId` text NOT NULL,
+	`user_id` text NOT NULL,
 	`proforma` integer,
 	`partial_proforma` integer,
 	`number` text NOT NULL,
@@ -59,7 +60,7 @@ CREATE TABLE `invoice` (
 	`order_number` text,
 	`issued_on` text,
 	`taxable_fulfillment_due` text,
-	`due` text NOT NULL,
+	`due_in_days` integer NOT NULL,
 	`due_on` text NOT NULL,
 	`sent_at` text,
 	`paid_on` text,
@@ -104,6 +105,7 @@ CREATE TABLE `invoice` (
 	`payment_method_human` text,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text,
+	`published_at` text,
 	`client_contact_id` text,
 	FOREIGN KEY (`client_contact_id`) REFERENCES `contact`(`id`) ON UPDATE no action ON DELETE no action
 );
@@ -123,13 +125,15 @@ CREATE TABLE `user_invoicing_detail` (
 	`vat_no` text,
 	`registration_no` text,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` text
+	`updated_at` text,
+	`phone_number` text,
+	`web_url` text
 );
 --> statement-breakpoint
 CREATE INDEX `contact_user_idx` ON `contact` (`user_id`);--> statement-breakpoint
 CREATE INDEX `invoice_idx` ON `invoice_item` (`invoice_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `invoice_item_invoice_id_order_unique` ON `invoice_item` (`invoice_id`,`order`);--> statement-breakpoint
-CREATE INDEX `invoices_user_idx` ON `invoice` (`userId`);--> statement-breakpoint
-CREATE UNIQUE INDEX `invoice_userId_number_unique` ON `invoice` (`userId`,`number`);--> statement-breakpoint
+CREATE INDEX `invoices_user_idx` ON `invoice` (`user_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `invoice_user_id_number_unique` ON `invoice` (`user_id`,`number`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_invoicing_detail_user_id_unique` ON `user_invoicing_detail` (`user_id`);--> statement-breakpoint
 CREATE INDEX `user_invoicing_details_user_idx` ON `user_invoicing_detail` (`user_id`);

@@ -10,6 +10,10 @@ import ReactPDF, {
 import { reactMainRender } from '../../main'
 import { InvoiceData } from '../../invoiceSchema'
 import { formatMoneyCzech } from '../../lib/formatMoney'
+import {
+  InsertInvoiceItemType,
+  SelectInvoiceType
+} from '../../../../faktorio-api/src/zodDbSchemas'
 
 Font.register({
   family: 'Inter',
@@ -52,6 +56,20 @@ Font.register({
     }
   ]
 })
+
+// takes a date string in the format YYYY-MM-DD and returns it in the format DD.MM.YYYY
+function reformatDateToCzech(dateString: string) {
+  // Split the input date string into year, month, and day parts
+  const [year, month, day] = dateString.split('-')
+
+  // Check for validity of the input date
+  if (!year || !month || !day || isNaN(new Date(dateString).getTime())) {
+    return 'Invalid date'
+  }
+
+  // Return the date in Czech format (DD.MM.YYYY)
+  return `${parseInt(day, 10)}.${parseInt(month, 10)}.${year}`
+}
 
 const styles = StyleSheet.create({
   page: {
@@ -166,16 +184,17 @@ const ItemDescText = ({
 export const CzechInvoicePDF = ({
   invoiceData
 }: {
-  invoiceData: InvoiceData
+  invoiceData: SelectInvoiceType & { items: InsertInvoiceItemType[] }
 }) => {
   const taxPaidByRate: Record<number, number> = invoiceData.items.reduce(
     (acc, item) => {
-      const total = item.quantity * item.unitPrice
-      const tax = total * item.vatRate
+      const total = (item.quantity ?? 0) * (item.unit_price ?? 0)
+      const vat = item.vat_rate ?? 0
+      const tax = total * (vat / 100)
       return {
         ...acc,
         // @ts-expect-error
-        [item.vatRate]: ((acc[item.vatRate] ?? 0) as number) + tax
+        [vat]: ((acc[vat] ?? 0) as number) + tax
       }
     },
     {}
@@ -186,7 +205,7 @@ export const CzechInvoicePDF = ({
     0
   )
   const invoiceTotal = invoiceData.items.reduce(
-    (acc, item) => acc + item.quantity * item.unitPrice,
+    (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
     0
   )
   console.log('taxPaidByRate:', taxPaidByRate)
@@ -227,7 +246,7 @@ export const CzechInvoicePDF = ({
               >
                 <Text>Faktura</Text>
                 <Text>
-                  <Text>{invoiceData.invoiceNumber}</Text>
+                  <Text>{invoiceData.number}</Text>
                 </Text>
                 <Text
                   style={{
@@ -270,12 +289,11 @@ export const CzechInvoicePDF = ({
                     fontWeight: 500
                   }}
                 >
-                  {invoiceData.supplier.name}
+                  {invoiceData.your_name}
                 </Text>
-                <Text>{invoiceData.supplier.address.street}</Text>
+                <Text>{invoiceData.your_street}</Text>
                 <Text>
-                  {invoiceData.supplier.address.postalCode}{' '}
-                  {invoiceData.supplier.address.city}
+                  {invoiceData.your_zip} {invoiceData.your_city}
                 </Text>
                 {/* Other supplier details */}
               </View>
@@ -287,11 +305,11 @@ export const CzechInvoicePDF = ({
               >
                 <FlexRow>
                   <TextLabel>IČ </TextLabel>
-                  <Text>{invoiceData.supplier.companyId}</Text>
+                  <Text>{invoiceData.your_registration_no}</Text>
                 </FlexRow>
                 <FlexRow>
                   <TextLabel>DIČ </TextLabel>
-                  <Text>{invoiceData.supplier.vatNumber}</Text>
+                  <Text>{invoiceData.your_vat_no}</Text>
                 </FlexRow>
               </Flex>
               <View
@@ -302,19 +320,19 @@ export const CzechInvoicePDF = ({
               >
                 <FlexRow>
                   <TextLabel>Bankovní účet</TextLabel>
-                  <Text>{invoiceData.paymentDetails.account ?? '-'}</Text>
+                  <Text>{invoiceData.bank_account ?? '-'}</Text>
                 </FlexRow>
                 <FlexRow>
                   <TextLabel>IBAN</TextLabel>
-                  <Text>{invoiceData.paymentDetails.IBAN}</Text>
+                  <Text>{invoiceData.iban}</Text>
                 </FlexRow>
                 <FlexRow>
                   <TextLabel>SWIFT/BIC</TextLabel>
-                  <Text>{invoiceData.paymentDetails.swiftCode}</Text>
+                  <Text>{invoiceData.swift_bic}</Text>
                 </FlexRow>
                 <FlexRow>
                   <TextLabel>Variabilní symbol</TextLabel>
-                  <Text>{invoiceData.invoiceNumber.replace('-', '')}</Text>
+                  <Text>{invoiceData.number.replace('-', '')}</Text>
                 </FlexRow>
                 <FlexRow>
                   <TextLabel>Způsob platby</TextLabel>
@@ -339,12 +357,11 @@ export const CzechInvoicePDF = ({
                     fontWeight: 500
                   }}
                 >
-                  {invoiceData.customer.name}
+                  {invoiceData.client_name}
                 </Text>
-                <Text>{invoiceData.customer.address.street}</Text>
+                <Text>{invoiceData.client_street}</Text>
                 <Text>
-                  {invoiceData.customer.address.postalCode}{' '}
-                  {invoiceData.customer.address.city}
+                  {invoiceData.client_zip} {invoiceData.client_city}
                 </Text>
                 <Flex
                   style={{
@@ -353,11 +370,11 @@ export const CzechInvoicePDF = ({
                 >
                   <FlexRow>
                     <TextLabel>IČ </TextLabel>
-                    <Text>{invoiceData.customer.companyId}</Text>
+                    <Text>{invoiceData.client_registration_no}</Text>
                   </FlexRow>
                   <FlexRow>
                     <TextLabel>DIČ </TextLabel>
-                    <Text>{invoiceData.customer.vatNumber}</Text>
+                    <Text>{invoiceData.client_vat_no}</Text>
                   </FlexRow>
                 </Flex>
                 <Flex
@@ -367,15 +384,17 @@ export const CzechInvoicePDF = ({
                 >
                   <FlexRow>
                     <TextLabel>Datum vystavení </TextLabel>
-                    <Text>{invoiceData.issueDate}</Text>
+                    <Text>{reformatDateToCzech(invoiceData.issued_on)}</Text>
                   </FlexRow>
                   <FlexRow>
                     <TextLabel>Datum splatnosti </TextLabel>
-                    <Text>{invoiceData.dueDate}</Text>
+                    <Text>{reformatDateToCzech(invoiceData.due_on)}</Text>
                   </FlexRow>
                   <FlexRow>
                     <TextLabel>Datum zdan. plnění </TextLabel>
-                    <Text>{invoiceData.taxableDate}</Text>
+                    <Text>
+                      {reformatDateToCzech(invoiceData.taxable_fulfillment_due)}
+                    </Text>
                   </FlexRow>
                 </Flex>
               </View>
@@ -415,61 +434,64 @@ export const CzechInvoicePDF = ({
             borderTop: '1px solid #444'
           }}
         >
-          {invoiceData.items.map((item, index) => (
-            <Flex
-              key={index}
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginBottom: 7
-              }}
-            >
+          {invoiceData.items.map((item, index) => {
+            const unitPrice = item.unit_price ?? 0
+            const quantity = item.quantity ?? 0
+            const vatRate = item.vat_rate ?? 0
+            return (
               <Flex
+                key={index}
                 style={{
-                  width: '50%',
                   flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginBottom: 7
+                }}
+              >
+                <Flex
+                  style={{
+                    width: '50%',
+                    flexDirection: 'row',
 
-                  justifyContent: 'flex-start'
-                }}
-              >
-                <ItemDescText
-                  style={{
-                    width: '4%'
+                    justifyContent: 'flex-start'
                   }}
                 >
-                  {item.quantity}
-                </ItemDescText>
-                <ItemDescText
+                  <ItemDescText
+                    style={{
+                      width: '4%'
+                    }}
+                  >
+                    {item.quantity}
+                  </ItemDescText>
+                  <ItemDescText
+                    style={{
+                      width: '14%',
+                      fontSize: 9
+                    }}
+                  >
+                    {item.unit}
+                  </ItemDescText>
+                  <ItemDescText>{item.description}</ItemDescText>
+                </Flex>
+                <Flex
                   style={{
-                    width: '14%',
-                    fontSize: 9
+                    width: '50%',
+                    flexDirection: 'row'
                   }}
                 >
-                  {item.unit}
-                </ItemDescText>
-                <ItemDescText>{item.description}</ItemDescText>
+                  <ThirdWidthColumnRight>{vatRate} %</ThirdWidthColumnRight>
+                  <ThirdWidthColumnRight>
+                    {formatMoneyCzech(unitPrice, invoiceData.currency)}
+                  </ThirdWidthColumnRight>
+                  <ThirdWidthColumnRight>
+                    {formatMoneyCzech(
+                      unitPrice * quantity,
+                      invoiceData.currency
+                    )}
+                  </ThirdWidthColumnRight>
+                </Flex>
               </Flex>
-              <Flex
-                style={{
-                  width: '50%',
-                  flexDirection: 'row'
-                }}
-              >
-                <ThirdWidthColumnRight>
-                  {item.vatRate * 100} %
-                </ThirdWidthColumnRight>
-                <ThirdWidthColumnRight>
-                  {formatMoneyCzech(item.unitPrice, invoiceData.currency)}
-                </ThirdWidthColumnRight>
-                <ThirdWidthColumnRight>
-                  {formatMoneyCzech(
-                    item.unitPrice * item.quantity,
-                    invoiceData.currency
-                  )}
-                </ThirdWidthColumnRight>
-              </Flex>
-            </Flex>
-          ))}
+            )
+          })}
         </View>
         <Flex
           style={{
@@ -503,7 +525,7 @@ export const CzechInvoicePDF = ({
               {Object.entries(taxPaidByRate).map(([rate, tax]) => {
                 return (
                   <FlexRow key={rate}>
-                    <TextLabel>DPH {Number(rate) * 100}%</TextLabel>
+                    <TextLabel>DPH {Number(rate)}%</TextLabel>
                     <Text>{formatMoneyCzech(tax, invoiceData.currency)}</Text>
                   </FlexRow>
                 )
