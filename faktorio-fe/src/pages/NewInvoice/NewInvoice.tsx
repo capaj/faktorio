@@ -4,7 +4,7 @@ import { trpcClient } from '@/lib/trpcClient'
 import { ContactComboBox } from './ContactComboBox'
 import { LucidePlus, LucideTrash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { ButtonWithLoader } from '@/components/ui/button'
 import { getInvoiceCreateSchema } from './getInvoiceCreateSchema'
 import { djs } from '../../../../src/djs'
 import { useZodFormState } from '@/lib/useZodFormState'
@@ -133,8 +133,14 @@ export const NewInvoice = () => {
         <h3>Celkem s DPH: {(total + totalVat).toFixed(2)} </h3>
       </div>
       <Center>
-        <Button
+        <ButtonWithLoader
+          isLoading={createInvoice.isLoading}
           onClick={async () => {
+            if (!formValues.client_contact_id) {
+              alert('Vyberte kontakt')
+              return
+            }
+
             const newInvoice = await createInvoice.mutateAsync({
               invoice: formValues,
               items: invoiceItems
@@ -145,7 +151,7 @@ export const NewInvoice = () => {
           }}
         >
           Vytvořit fakturu a přejít na náhled a odeslání
-        </Button>
+        </ButtonWithLoader>
       </Center>
     </div>
   )
