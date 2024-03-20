@@ -70,24 +70,24 @@ export function InvoiceList() {
                       <span className="ml-2">Editovat</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    <RemoveDialogUncontrolled
-                      title={
-                        <span>
-                          Opravdu chcete smazat fakturu{' '}
-                          <strong>{invoice.number}</strong>?
-                        </span>
-                      }
-                      onRemove={async () => {
-                        await deleteInvoice.mutateAsync({ id: invoice.id })
-                        q.refetch()
-                      }}
-                    >
-                      <Trash2 size={16} strokeWidth="1.5" />
 
+                  <RemoveDialogUncontrolled
+                    title={
+                      <span>
+                        Opravdu chcete smazat fakturu{' '}
+                        <strong>{invoice.number}</strong>?
+                      </span>
+                    }
+                    onRemove={async () => {
+                      await deleteInvoice.mutateAsync({ id: invoice.id })
+                      q.refetch()
+                    }}
+                  >
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Trash2 size={16} strokeWidth="1.5" />
                       <span className="ml-2">Smazat</span>
-                    </RemoveDialogUncontrolled>
-                  </DropdownMenuItem>
+                    </DropdownMenuItem>
+                  </RemoveDialogUncontrolled>
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>
