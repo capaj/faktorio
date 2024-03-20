@@ -158,5 +158,17 @@ export const invoiceRouter = trpcContext.router({
         ...res,
         items
       }
+    }),
+  delete: protectedProc
+    .input(
+      z.object({
+        id: z.string()
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.db
+        .delete(invoicesTb)
+        .where(eq(invoicesTb.id, input.id))
+        .execute()
     })
 })
