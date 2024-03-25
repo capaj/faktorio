@@ -8,7 +8,7 @@ NJCZbjlROUAYbfrqqhLGexChVclm8oQG6Zh9c25dY/pIhH4NMb9T347Ovu/IBHkN
 4wIDAQAB
 -----END PUBLIC KEY-----`
 
-function uint8ArrayFromBase64Url(base64Url) {
+function uint8ArrayFromBase64Url(base64Url: string) {
   // Base64-URL to Base64
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
   // Pad with "=" to make the base64 string length a multiple of 4
@@ -27,7 +27,7 @@ function uint8ArrayFromBase64Url(base64Url) {
   return bytes
 }
 
-async function verifyToken(token) {
+async function verifyToken(token: string) {
   const [headerEncoded, payloadEncoded, signatureEncoded] = token.split('.')
   // Convert the signature and fetch the public key
   const signatureUint8Array = uint8ArrayFromBase64Url(signatureEncoded)
