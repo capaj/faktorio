@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240314.0",
+    "@types/debug": "^4.1.12",
     "@types/jsonwebtoken": "^9.0.6",
     "drizzle-kit": "^0.20.14",
     "typescript": "^5.4.2",
@@ -25,10 +26,12 @@
     "@trpc/server": "^10.45.2",
     "@tsndr/cloudflare-worker-jwt": "^2.5.3",
     "colorette": "^2.0.20",
+    "debug": "^4.3.4",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.4",
     "drizzle-zod": "^0.5.1",
     "jose": "^5.2.3",
+    "node-mailjet": "^6.0.5",
     "zod": "^3.22.4"
   }
 }

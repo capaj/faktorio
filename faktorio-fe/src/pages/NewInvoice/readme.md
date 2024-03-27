@@ -5,8 +5,10 @@
 - enable editing of invoices
 - allow to add expense invoices by drag and drop(parse PDF with chat GPT)
 - allow to send invoice as email
+- be able to share invoice link
 - be able to export as CSV/excel
 - share it on FB/Instagram/Twitter
+- add english invoice rendering
 - hack integration with chatgpt
   - zeptat se treba na veci jako:
     - kolik dlužím na dani z prijmu tento rok?
