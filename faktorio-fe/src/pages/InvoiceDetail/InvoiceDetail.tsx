@@ -18,7 +18,7 @@ export const InvoiceDetail = () => {
   const invoice = trpcClient.invoices.getById.useQuery({ id: invoiceId })
 
   if (invoice.isLoading) {
-    return <div>Loading...</div>
+    return <div>Načítám...</div>
   }
 
   const pdfName = `${snakeCase(invoice.data.your_name)}-${

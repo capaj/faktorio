@@ -27,7 +27,7 @@ export function InvoiceList() {
   const deleteInvoice = trpcClient.invoices.delete.useMutation()
 
   if (q.isLoading) {
-    return <div>Loading...</div>
+    return <div>Načítám...</div>
   }
 
   return (

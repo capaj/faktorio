@@ -1,7 +1,5 @@
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { ButtonLink } from './ui/link'
-import { SignIn, SignInButton } from '@clerk/clerk-react'
+import { SignInButton } from '@clerk/clerk-react'
 
 export const LandingPage = () => {
   return (
@@ -62,6 +60,9 @@ export const LandingPage = () => {
             <p>
               Provoz faktorio.cz stojí méně, než stojí předplatné fakturoid.cz
               nebo idoklad.cz a dokud to půjde, bude Faktorio.cz zdarma.
+            </p>
+            <p>
+              pokud jste programátor a chcete se podílet na vývoji, neváhejte mě kontaktovat. Faktorio sice není open-source, ale rád uvítám dalšího maintainera.
             </p>
           </div>
         </div>
