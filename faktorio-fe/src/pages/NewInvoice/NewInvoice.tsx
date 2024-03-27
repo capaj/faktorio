@@ -27,6 +27,7 @@ const defaultInvoiceItem = {
 
 export const NewInvoice = () => {
   const [invoicesCount] = trpcClient.invoices.count.useSuspenseQuery()
+  const contactsQuery = trpcClient.contacts.all.useQuery()
 
   const invoiceOrdinal = invoicesCount + 1
   const nextInvoiceNumber = `${djs().format('YYYY')}-${invoiceOrdinal.toString().padStart(3, '0')}`
@@ -56,6 +57,22 @@ export const NewInvoice = () => {
         100,
     0
   )
+
+  if (contactsQuery.data?.length === 0) {
+    return (
+      <div>
+        <p>Nejprve si musíte vytvořit aspoň jeden kontakt</p>
+        <Button
+          className="mt-4"
+          onClick={() => {
+            navigate('/contacts/new')
+          }}
+        >
+          Vytvořit kontakt
+        </Button>
+      </div>
+    )
+  }
   return (
     <div>
       <h2 className="mb-5">Nová faktura</h2>

@@ -129,7 +129,12 @@ export const ContactList = () => {
 
   useEffect(() => {
     if (params.contactId) {
-      ;(async () => {
+      if (params.contactId === 'new') { 
+        setOpen(true)
+        return
+      }
+      
+      ; (async () => {
         const contact = contactsQuery.data?.find(
           (contact) => contact.id === params.contactId
         )
