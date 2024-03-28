@@ -64,13 +64,13 @@ export const LandingPage = () => {
             </p>
             <div className='flex flex-col items-center'>
               
-              <Link href="https://twitter.com/capajj" className={'text-'}>
+              <a href="https://twitter.com/capajj" className={'text-xl'}>
                 <Button variant={'link'}>
                 Pokud jste programátor a chcete se podílet na vývoji, neváhejte mě{' '}
                   kontaktovat
                   </Button>
               
-              </Link>Faktorio sice není open-source, ale rád uvítám
+              </a>Faktorio sice není open-source, ale rád uvítám
               další maintainery.
             </div>
           </div>
