@@ -7,7 +7,8 @@
   ],
   "devDependencies": {
     "prettier": "^3.2.5",
-    "tsx": "^4.7.1"
+    "tsx": "^4.7.1",
+    "vitest": "^1.4.0"
   },
   "scripts": {
     "dev": "cd faktorio-api && bun dev & cd faktorio-fe && bun dev",
@@ -15,7 +16,8 @@
     "format": "prettier --write .",
     "db": "cd faktorio-api && pnpm generate && pnpm migrate",
     "dbm": "cd faktorio-api && pnpm migrate",
-    "bumpDeps": "ncu -u && cd faktorio-api && cd ../faktorio-fe && pnpm i"
+    "bumpDeps": "ncu -u && cd faktorio-api && cd ../faktorio-fe && pnpm i",
+    "test": "vitest"
   },
   "dependencies": {
     "dayjs": "^1.11.10",

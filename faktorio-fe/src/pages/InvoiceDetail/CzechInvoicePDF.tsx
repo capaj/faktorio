@@ -5,6 +5,7 @@ import ReactPDF, {
   Text,
   View,
   StyleSheet,
+  Image,
   Font
 } from '@react-pdf/renderer'
 import { reactMainRender } from '../../main'
@@ -14,6 +15,8 @@ import {
   InsertInvoiceItemType,
   SelectInvoiceType
 } from '../../../../faktorio-api/src/zodDbSchemas'
+import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
+import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 
 Font.register({
   family: 'Inter',
@@ -208,8 +211,21 @@ export const CzechInvoicePDF = ({
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
     0
   )
-  console.log('taxPaidByRate:', taxPaidByRate)
-
+  console.log('taxPaidByRate:', {
+    accountNumber: invoiceData.iban,
+    amount: invoiceTotal + taxTotal,
+    currency: invoiceData.currency,
+    variableSymbol: invoiceData.number.replace('-', '')
+  })
+  const qrCodeBase64 = useQRCodeBase64(
+    generateQrPaymentString({
+      accountNumber: invoiceData.iban?.replace(/\s/g, '') ?? '',
+      amount: invoiceTotal + taxTotal,
+      currency: invoiceData.currency,
+      variableSymbol: invoiceData.number.replace('-', ''),
+      message: 'Faktura ' + invoiceData.number
+    })
+  )
   return (
     <Document key={new Date().toISOString()}>
       <Page size="A4" style={styles.page}>
@@ -237,7 +253,28 @@ export const CzechInvoicePDF = ({
                 style={{
                   width: '50%'
                 }}
-              ></View>
+              >
+                <View
+                  style={{
+                    margin: 20
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 13
+                    }}
+                  >
+                    QR platba:
+                  </Text>
+                  <Image
+                    style={{
+                      width: 100,
+                      height: 100
+                    }}
+                    source={qrCodeBase64}
+                  ></Image>
+                </View>
+              </View>
               <Flex
                 style={{
                   flexDirection: 'column',
