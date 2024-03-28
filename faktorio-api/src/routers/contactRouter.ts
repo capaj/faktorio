@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { contactTb } from '../schema'
 import { trpcContext } from '../trpcContext'
-import { and, eq, like } from 'drizzle-orm'
+import { and, asc, desc, eq, like } from 'drizzle-orm'
 import { contactCreateFormSchema } from './contactCreateFormSchema'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { contactInsertSchema } from '../zodDbSchemas'
@@ -20,7 +20,8 @@ export const contactRouter = trpcContext.router({
         where: and(
           eq(contactTb.user_id, ctx.userId),
           like(contactTb.name, `%${input?.search ?? ''}%`)
-        )
+        ),
+        orderBy: [desc(contactTb.created_at)]
       })
     }),
   byId: protectedProc.input(z.string()).query(async ({ input, ctx }) => {

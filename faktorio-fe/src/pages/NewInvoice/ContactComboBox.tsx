@@ -17,6 +17,7 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import { trpcClient } from '@/lib/trpcClient'
+import { useEffect } from 'react'
 
 export function ContactComboBox(props: {
   onChange: (value: string) => void
@@ -28,6 +29,14 @@ export function ContactComboBox(props: {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const contacts = contactsQuery.data ?? []
   const { value } = props
+
+  useEffect(() => {
+    const firstContactId = contactsQuery.data?.[0].id
+    if (firstContactId) {
+      props.onChange(firstContactId) // preselect the last used contact
+    }
+  }, [contactsQuery.data])
+
   return (
     <div className="flex m-4 center justify-center items-center place-items-center place-content-center">
       <h4 className="mr-6">Kontakt</h4>

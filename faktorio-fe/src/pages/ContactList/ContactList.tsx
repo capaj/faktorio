@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table'
 import { trpcClient } from '@/lib/trpcClient'
 
-import { Link, useParams } from 'wouter'
+import { Link, useParams, useLocation } from 'wouter'
 import { contactCreateFormSchema } from '../../../../faktorio-api/src/routers/contactCreateFormSchema'
 import { useEffect, useState } from 'react'
 import { SpinnerContainer } from '@/components/SpinnerContainer'
@@ -126,15 +126,15 @@ export const ContactList = () => {
 
   const [open, setOpen] = useState(false)
   const [values, setValues] = useState<z.infer<typeof schema>>({})
-
+  const [location, navigate] = useLocation()
   useEffect(() => {
     if (params.contactId) {
-      if (params.contactId === 'new') { 
+      if (params.contactId === 'new') {
         setOpen(true)
         return
       }
-      
-      ; (async () => {
+
+      ;(async () => {
         const contact = contactsQuery.data?.find(
           (contact) => contact.id === params.contactId
         )
@@ -204,7 +204,7 @@ export const ContactList = () => {
 
   return (
     <div>
-      {contactId && (
+      {contactId && contactId !== 'new' && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent>
             <DialogHeader>
@@ -236,6 +236,7 @@ export const ContactList = () => {
                         await deleteContact.mutateAsync(contactId)
                         contactsQuery.refetch()
                         setOpen(false)
+                        navigate('/contacts')
                       }}
                     >
                       Smazat
@@ -248,7 +249,7 @@ export const ContactList = () => {
           </DialogContent>
         </Dialog>
       )}
-      {!params.contactId && (
+      {(!contactId || contactId === 'new') && (
         <Dialog open={Boolean(open)} onOpenChange={setOpen}>
           <DialogTrigger>
             <Button variant={'default'}>Přidat klienta</Button>

@@ -62,7 +62,9 @@ export const LandingPage = () => {
               nebo idoklad.cz a dokud to půjde, bude Faktorio.cz zdarma.
             </p>
             <p>
-              pokud jste programátor a chcete se podílet na vývoji, neváhejte mě kontaktovat. Faktorio sice není open-source, ale rád uvítám dalšího maintainera.
+              pokud jste programátor a chcete se podílet na vývoji, neváhejte mě
+              <a href="https://twitter.com/capajj">kontaktovat</a>. Faktorio sice není open-source, ale rád uvítám
+              dalšího maintainera.
             </p>
           </div>
         </div>
