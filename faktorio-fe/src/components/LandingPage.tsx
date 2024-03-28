@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { SignInButton } from '@clerk/clerk-react'
+import { Link } from 'wouter'
 
 export const LandingPage = () => {
   return (
@@ -61,11 +62,17 @@ export const LandingPage = () => {
               Provoz faktorio.cz stojí méně, než stojí předplatné fakturoid.cz
               nebo idoklad.cz a dokud to půjde, bude Faktorio.cz zdarma.
             </p>
-            <p>
-              pokud jste programátor a chcete se podílet na vývoji, neváhejte mě
-              <a href="https://twitter.com/capajj">kontaktovat</a>. Faktorio sice není open-source, ale rád uvítám
-              dalšího maintainera.
-            </p>
+            <div className='flex flex-col items-center'>
+              
+              <Link href="https://twitter.com/capajj" className={'text-'}>
+                <Button variant={'link'}>
+                Pokud jste programátor a chcete se podílet na vývoji, neváhejte mě{' '}
+                  kontaktovat
+                  </Button>
+              
+              </Link>Faktorio sice není open-source, ale rád uvítám
+              další maintainery.
+            </div>
           </div>
         </div>
       </section>
