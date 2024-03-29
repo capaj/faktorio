@@ -15,15 +15,11 @@ export const InvoiceDetail = () => {
     throw new Error('No invoiceId')
   }
 
-  const invoice = trpcClient.invoices.getById.useQuery({ id: invoiceId })
+  const [invoice] = trpcClient.invoices.getById.useSuspenseQuery({
+    id: invoiceId
+  })
 
-  if (invoice.isLoading) {
-    return <div>Načítám...</div>
-  }
-
-  const pdfName = `${snakeCase(invoice.data.your_name)}-${
-    invoiceData.invoiceNumber
-  }.pdf`
+  const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
   return (
     <>
       <div className="h-full place-content-center flex flex-col">
@@ -37,12 +33,12 @@ export const InvoiceDetail = () => {
               height: '1100px'
             }}
           >
-            <CzechInvoicePDF invoiceData={invoice.data} />
+            <CzechInvoicePDF invoiceData={invoice} />
           </PDFViewer>
         </div>
         <div className="flex content-center justify-center m-4">
           <PDFDownloadLink
-            document={<CzechInvoicePDF invoiceData={invoice.data} />}
+            document={<CzechInvoicePDF invoiceData={invoice} />}
             fileName={pdfName}
           >
             {({ blob, url, loading, error }) =>

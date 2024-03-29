@@ -28,6 +28,7 @@ const defaultInvoiceItem = {
 export const NewInvoice = () => {
   const [invoicesCount] = trpcClient.invoices.count.useSuspenseQuery()
   const contactsQuery = trpcClient.contacts.all.useQuery()
+  const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
 
   const invoiceOrdinal = invoicesCount + 1
   const nextInvoiceNumber = `${djs().format('YYYY')}-${invoiceOrdinal.toString().padStart(3, '0')}`
@@ -58,10 +59,26 @@ export const NewInvoice = () => {
     0
   )
 
+  if (!invoicingDetails?.registration_no) {
+    return (
+      <div>
+        <p>Nejprve si musíte vyplnit fakturační údaje</p>
+        <Button
+          className="mt-4"
+          onClick={() => {
+            navigate('/my-details')
+          }}
+        >
+          Vyplnit fakturační údaje
+        </Button>
+      </div>
+    )
+  }
+
   if (contactsQuery.data?.length === 0) {
     return (
       <div>
-        <p>Nejprve si musíte vytvořit aspoň jeden kontakt</p>
+        <p>Ještě si musíte vytvořit aspoň jeden kontakt</p>
         <Button
           className="mt-4"
           onClick={() => {
@@ -73,6 +90,7 @@ export const NewInvoice = () => {
       </div>
     )
   }
+
   return (
     <div>
       <h2 className="mb-5">Nová faktura</h2>
