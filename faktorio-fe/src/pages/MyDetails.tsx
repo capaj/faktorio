@@ -14,16 +14,28 @@ export const upsertInvoicingDetailsSchema =
   })
 
 export const MyDetails = () => {
-  const q = trpcClient.invoicingDetails.useQuery()
+  const [data] = trpcClient.invoicingDetails.useSuspenseQuery()
+
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()
+
   return (
     <>
       <h2>Moje údaje</h2>
+      <p className="text-xs">
+        Zde zadejte údaje, které se budou zobrazovat na fakturách, které
+        vytvoříte.
+      </p>
       <div className="flex mt-5">
         <AutoForm
           formSchema={upsertInvoicingDetailsSchema}
           fieldConfig={{
             ...fieldConfigForContactForm,
+            registration_no: {
+              label: 'IČO',
+              inputProps: {
+                placeholder: '8 čísel'
+              }
+            },
             city: {
               label: 'Město'
             },
@@ -41,9 +53,10 @@ export const MyDetails = () => {
             },
             web_url: {
               label: 'Web'
-            }
+            },
+            containerClassName: 'grid grid-cols-2 gap-x-4'
           }}
-          values={q.data ?? undefined}
+          values={data ?? undefined}
           onSubmit={async (values) => {
             await upsert.mutateAsync(values)
           }}

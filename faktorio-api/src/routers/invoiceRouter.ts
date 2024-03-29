@@ -8,7 +8,7 @@ import {
 import { trpcContext } from '../trpcContext'
 import { asc, count, desc, eq } from 'drizzle-orm'
 import { protectedProc } from '../isAuthorizedMiddleware'
-import { getInvoiceCreateSchema } from '../../../faktorio-fe/src/pages/NewInvoice/getInvoiceCreateSchema'
+import { getInvoiceCreateSchema } from '../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
 import { djs } from '../../../src/djs'
 import { invoiceItemFormSchema } from '../zodDbSchemas'
 

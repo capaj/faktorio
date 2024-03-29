@@ -16,11 +16,10 @@ import {
   Table
 } from '@/components/ui/table'
 import { trpcClient } from '@/lib/trpcClient'
-import { useAuth } from '@clerk/clerk-react'
 import { LucideEllipsisVertical, Pencil, Trash2 } from 'lucide-react'
-import { useEffect } from 'react'
 
 import { Link } from 'wouter'
+import { formatNumberWithSpaces } from './formatNumberWithSpaces'
 
 export function InvoiceList() {
   const q = trpcClient.invoices.all.useQuery({
@@ -32,10 +31,29 @@ export function InvoiceList() {
     return <div>Načítám...</div>
   }
 
+  const total = q.data?.reduce((acc, invoice) => acc + invoice.total, 0)
   return (
     <Table>
       {(q.data?.length ?? 0) > 1 && (
-        <TableCaption>Celkem {q.data?.length}</TableCaption>
+        <TableCaption>
+          <div className="flex flex-col">
+            <div>
+              Celkem {q.data?.length}{' '}
+              {q.data?.length === 1 ? 'faktura' : 'faktury'} za:{' '}
+            </div>
+            <div>
+              {formatNumberWithSpaces(total)} CZK včetně DPH
+              <br />
+              {formatNumberWithSpaces(
+                q.data?.reduce(
+                  (acc, invoice) => acc + (invoice.subtotal ?? 0),
+                  0
+                ) ?? 0
+              )}{' '}
+              CZK bez DPH{' '}
+            </div>
+          </div>
+        </TableCaption>
       )}
       <TableHeader>
         <TableRow>
