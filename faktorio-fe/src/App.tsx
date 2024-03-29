@@ -4,7 +4,7 @@ import { Redirect, Route, Switch, useLocation } from 'wouter'
 // Create Document Component
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SignInButton, useAuth, UserButton } from '@clerk/clerk-react'
-import { LandingPage } from './components/LandingPage'
+import { LandingPage } from './pages/LandingPage'
 import { MountainIcon } from './components/MountainIcon'
 import { ButtonLink } from './components/ui/link'
 import { useUser } from '@clerk/clerk-react'
@@ -18,6 +18,7 @@ import { ContactList } from './pages/ContactList/ContactList'
 import { MyDetails } from './pages/MyDetails'
 import { SpinnerContainer } from './components/SpinnerContainer'
 import { SuperJSON } from 'superjson'
+import { ManifestPage } from './pages/ManifestPage'
 
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
@@ -64,7 +65,7 @@ function App() {
           <header className="px-4 lg:px-6 h-14 flex items-center">
             <ButtonLink
               className="flex items-center justify-center"
-              href={user ? "/invoices": '/'}
+              href={user ? '/invoices' : '/'}
             >
               <MountainIcon className="h-6 w-6" />
               <span className="sr-only">Faktorio</span>
@@ -95,6 +96,7 @@ function App() {
               <Suspense fallback={<SpinnerContainer loading={true} />}>
                 <Switch>
                   <Route path="/" component={LandingPage} />
+                  <Route path="/manifest" component={ManifestPage} />
 
                   {isSignedIn && (
                     <>
