@@ -23,7 +23,9 @@ import { useEffect } from 'react'
 import { Link } from 'wouter'
 
 export function InvoiceList() {
-  const q = trpcClient.invoices.all.useQuery()
+  const q = trpcClient.invoices.all.useQuery({
+    limit: 50 // TODO pagination
+  })
   const deleteInvoice = trpcClient.invoices.delete.useMutation()
 
   if (q.isLoading) {
@@ -39,24 +41,27 @@ export function InvoiceList() {
         <TableRow>
           <TableHead className="w-[100px]">Nr.</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Celkem</TableHead>
+          <TableHead>Celkem s DPH</TableHead>
 
           <TableHead>Zdanitelné plnění datum</TableHead>
+          <TableHead>Vystaveno dne</TableHead>
           <TableHead className="">Odesláno</TableHead>
+          <TableHead className="text-right">Akce</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {q?.data.map((invoice) => (
+        {q?.data?.map((invoice) => (
           <TableRow key={invoice.id}>
             <TableCell className="font-medium">
               <Link href={`/invoices/${invoice.id}`}>{invoice.number}</Link>
             </TableCell>
 
             <TableCell>{invoice.client_name}</TableCell>
-            <TableCell>{invoice.total}</TableCell>
+            <TableCell>{invoice.total} CZK</TableCell>
             <TableCell>{invoice.taxable_fulfillment_due}</TableCell>
+            <TableCell>{invoice.issued_on}</TableCell>
             <TableCell>{invoice.sent_at}</TableCell>
-            <TableCell>
+            <TableCell className="text-right">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="bg-gray-200">

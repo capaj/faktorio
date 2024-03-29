@@ -85,6 +85,11 @@ const acFieldConfig = {
 export const fieldConfigForContactForm = {
   name: {
     label: 'Jméno',
+    className: 'col-span-2',
+    ...acFieldConfig
+  },
+  city: {
+    label: 'Město',
     ...acFieldConfig
   },
   street: {
@@ -100,8 +105,11 @@ export const fieldConfigForContactForm = {
     ...acFieldConfig
   },
   registration_no: {
-    label: 'IČO',
-    ...acFieldConfig
+    label: 'IČO - po vyplnění se automaticky doplní další údaje z ARESU',
+    inputProps: {
+      placeholder: '8 čísel',
+      autocomplete: 'off'
+    }
   },
   vat_no: {
     label: 'DIČ',
@@ -113,6 +121,10 @@ export const fieldConfigForContactForm = {
   },
   phone_number: {
     label: 'Telefon',
+    ...acFieldConfig
+  },
+  country: {
+    label: 'Země',
     ...acFieldConfig
   }
 }
@@ -209,43 +221,44 @@ export const ContactList = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Editace kontaktu</DialogTitle>
-              <AutoForm
-                formSchema={schema}
-                values={values}
-                onParsedValuesChange={(values) => {
-                  setValues(values)
-                }}
-                onSubmit={async (values) => {
-                  await update.mutateAsync({
-                    ...values,
-                    id: contactId as string
-                  })
-                  contactsQuery.refetch()
-                  setOpen(false)
-                }}
-                // @ts-expect-error
-                fieldConfig={fieldConfigForContactForm}
-              >
-                <DialogFooter className="flex justify-between">
-                  <div className="w-full flex justify-between">
-                    <Button
-                      className="align-left self-start justify-self-start"
-                      variant={'destructive'}
-                      onClick={async (ev) => {
-                        ev.preventDefault()
-                        await deleteContact.mutateAsync(contactId)
-                        contactsQuery.refetch()
-                        setOpen(false)
-                        navigate('/contacts')
-                      }}
-                    >
-                      Smazat
-                    </Button>
-                    <Button type="submit">Uložit</Button>
-                  </div>
-                </DialogFooter>
-              </AutoForm>
             </DialogHeader>
+
+            <AutoForm
+              formSchema={schema}
+              values={values}
+              onParsedValuesChange={(values) => {
+                setValues(values)
+              }}
+              onSubmit={async (values) => {
+                await update.mutateAsync({
+                  ...values,
+                  id: contactId as string
+                })
+                contactsQuery.refetch()
+                setOpen(false)
+              }}
+              // @ts-expect-error
+              fieldConfig={fieldConfigForContactForm}
+            >
+              <DialogFooter className="flex justify-between">
+                <div className="w-full flex justify-between">
+                  <Button
+                    className="align-left self-start justify-self-start"
+                    variant={'destructive'}
+                    onClick={async (ev) => {
+                      ev.preventDefault()
+                      await deleteContact.mutateAsync(contactId)
+                      contactsQuery.refetch()
+                      setOpen(false)
+                      navigate('/contacts')
+                    }}
+                  >
+                    Smazat
+                  </Button>
+                  <Button type="submit">Uložit</Button>
+                </div>
+              </DialogFooter>
+            </AutoForm>
           </DialogContent>
         </Dialog>
       )}
@@ -257,25 +270,25 @@ export const ContactList = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Nový kontakt</DialogTitle>
-
-              <AutoForm
-                formSchema={schema}
-                values={values}
-                onParsedValuesChange={setValues}
-                onSubmit={async (values) => {
-                  // @ts-expect-error
-                  await create.mutateAsync(values)
-                  contactsQuery.refetch()
-                  setOpen(false)
-                }}
-                // @ts-expect-error
-                fieldConfig={fieldConfigForContactForm}
-              >
-                <DialogFooter>
-                  <Button type="submit">Přidat</Button>
-                </DialogFooter>
-              </AutoForm>
             </DialogHeader>
+
+            <AutoForm
+              formSchema={schema}
+              values={values}
+              onParsedValuesChange={setValues}
+              onSubmit={async (values) => {
+                // @ts-expect-error
+                await create.mutateAsync(values)
+                contactsQuery.refetch()
+                setOpen(false)
+              }}
+              // @ts-expect-error
+              fieldConfig={fieldConfigForContactForm}
+            >
+              <DialogFooter>
+                <Button type="submit">Přidat kontakt</Button>
+              </DialogFooter>
+            </AutoForm>
           </DialogContent>
         </Dialog>
       )}

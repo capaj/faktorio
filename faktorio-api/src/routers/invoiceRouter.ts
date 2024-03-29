@@ -6,7 +6,7 @@ import {
   userInvoicingDetailsTb
 } from '../schema'
 import { trpcContext } from '../trpcContext'
-import { count, eq } from 'drizzle-orm'
+import { asc, count, desc, eq } from 'drizzle-orm'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { getInvoiceCreateSchema } from '../../../faktorio-fe/src/pages/NewInvoice/getInvoiceCreateSchema'
 import { djs } from '../../../src/djs'
@@ -121,13 +121,24 @@ export const invoiceRouter = trpcContext.router({
         return invoice.id
       })
     }),
-  all: protectedProc.query(async ({ ctx }) => {
-    const invoicesForUser = await ctx.db.query.invoicesTb.findMany({
-      where: eq(invoicesTb.user_id, ctx.userId)
-    })
+  all: protectedProc
+    .input(
+      z.object({
+        limit: z.number().nullable().default(30),
+        offset: z.number().nullish().default(0),
+        filter: z.string().nullish()
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const invoicesForUser = await ctx.db.query.invoicesTb.findMany({
+        where: eq(invoicesTb.user_id, ctx.userId),
+        limit: input.limit ?? undefined,
+        offset: input.offset ?? undefined,
+        orderBy: desc(invoicesTb.created_at)
+      })
 
-    return invoicesForUser
-  }),
+      return invoicesForUser
+    }),
   count: protectedProc.query(async ({ ctx }) => {
     const res = await ctx.db
       .select({ count: count() })

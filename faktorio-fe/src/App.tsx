@@ -13,13 +13,15 @@ import { InvoiceDetail } from './pages/InvoiceDetail/InvoiceDetail'
 import { InvoiceList } from './pages/InvoiceList'
 import { trpcClient } from './lib/trpcClient'
 import { httpBatchLink } from '@trpc/client'
-import { NewInvoice } from './pages/NewInvoice/NewInvoice'
+import { NewInvoice } from './pages/NewInvoice/NewInvoicePage'
 import { ContactList } from './pages/ContactList/ContactList'
 import { MyDetails } from './pages/MyDetails'
 import { SpinnerContainer } from './components/SpinnerContainer'
 import { SuperJSON } from 'superjson'
 import { ManifestPage } from './pages/ManifestPage'
-
+import { Toaster } from '@/components/ui/sonner'
+import { trpcLinks } from './lib/errorToastLink'
+// import {}
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
 function App() {
@@ -36,6 +38,7 @@ function App() {
       transformer: SuperJSON,
 
       links: [
+        ...trpcLinks,
         httpBatchLink({
           url: VITE_API_URL,
           // You can pass any HTTP headers you wish here
@@ -59,71 +62,79 @@ function App() {
   }
 
   return (
-    <trpcClient.Provider client={trpc} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <div className="flex flex-col min-h-[100dvh]">
-          <header className="px-4 lg:px-6 h-14 flex items-center">
-            <ButtonLink
-              className="flex items-center justify-center"
-              href={user ? '/invoices' : '/'}
-            >
-              <MountainIcon className="h-6 w-6" />
-              <span className="sr-only">Faktorio</span>
-            </ButtonLink>
-            <nav className="ml-auto flex gap-4 sm:gap-6">
-              {isSignedIn ? (
-                <>
-                  <ButtonLink href="/contacts">Kontakty</ButtonLink>
-                  <ButtonLink href="/invoices">Faktury</ButtonLink>
-                  <ButtonLink href="/new-invoice">Vystavit fakturu</ButtonLink>
-                  <ButtonLink href="/my-details">Moje údaje</ButtonLink>
-                  <UserButton />
-                </>
-              ) : (
-                <SignInButton>
-                  <Button
-                    variant="link"
-                    className="text-sm font-medium hover:underline underline-offset-4"
-                  >
-                    Přihlásit se
-                  </Button>
-                </SignInButton>
-              )}
-            </nav>
-          </header>
-          <main className="flex-1">
-            <div className="container mx-auto p-4">
-              <Suspense fallback={<SpinnerContainer loading={true} />}>
-                <Switch>
-                  <Route path="/" component={LandingPage} />
-                  <Route path="/manifest" component={ManifestPage} />
+    <>
+      <trpcClient.Provider client={trpc} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <div className="flex flex-col min-h-[100dvh]">
+            <header className="px-4 lg:px-6 h-14 flex items-center">
+              <ButtonLink
+                className="flex items-center justify-center"
+                href={user ? '/invoices' : '/'}
+              >
+                <MountainIcon className="h-6 w-6" />
+                <span className="sr-only">Faktorio</span>
+              </ButtonLink>
+              <nav className="ml-auto flex gap-4 sm:gap-6">
+                {isSignedIn ? (
+                  <>
+                    <ButtonLink href="/contacts">Kontakty</ButtonLink>
+                    <ButtonLink href="/invoices">Faktury</ButtonLink>
+                    <ButtonLink href="/new-invoice">
+                      Vystavit fakturu
+                    </ButtonLink>
+                    <ButtonLink href="/my-details">Moje údaje</ButtonLink>
+                    <UserButton />
+                  </>
+                ) : (
+                  <SignInButton>
+                    <Button
+                      variant="link"
+                      className="text-sm font-medium hover:underline underline-offset-4"
+                    >
+                      Přihlásit se
+                    </Button>
+                  </SignInButton>
+                )}
+              </nav>
+            </header>
+            <main className="flex-1">
+              <div className="container mx-auto p-4">
+                <Suspense fallback={<SpinnerContainer loading={true} />}>
+                  <Switch>
+                    <Route path="/" component={LandingPage} />
+                    <Route path="/manifest" component={ManifestPage} />
 
-                  {isSignedIn && (
-                    <>
-                      <Route path="/invoices" component={InvoiceList}></Route>
-                      <Route path="/contacts" component={ContactList}></Route>
-                      <Route
-                        path="/contacts/:contactId"
-                        component={ContactList}
-                      ></Route>
-                      <Route path="/new-invoice" component={NewInvoice}></Route>
-                      <Route path="/my-details" component={MyDetails}></Route>
-                      <Route
-                        path="/invoices/:invoiceId"
-                        component={InvoiceDetail}
-                      ></Route>
-                    </>
-                  )}
+                    {isSignedIn && (
+                      <>
+                        <Route path="/invoices" component={InvoiceList}></Route>
+                        <Route path="/contacts" component={ContactList}></Route>
+                        <Route
+                          path="/contacts/:contactId"
+                          component={ContactList}
+                        ></Route>
+                        <Route
+                          path="/new-invoice"
+                          component={NewInvoice}
+                        ></Route>
+                        <Route path="/my-details" component={MyDetails}></Route>
+                        <Route
+                          path="/invoices/:invoiceId"
+                          component={InvoiceDetail}
+                        ></Route>
+                      </>
+                    )}
 
-                  {/* Default route in a switch */}
-                  <Route>404: Bohužel neexistuje!</Route>
-                </Switch>
-              </Suspense>
-            </div>
-          </main>
-        </div>
-      </QueryClientProvider>
-    </trpcClient.Provider>
+                    {/* Default route in a switch */}
+                    <Route>404: Bohužel neexistuje!</Route>
+                  </Switch>
+                </Suspense>
+              </div>
+            </main>
+          </div>
+        </QueryClientProvider>
+      </trpcClient.Provider>
+      <Toaster />
+    </>
   )
 }
 

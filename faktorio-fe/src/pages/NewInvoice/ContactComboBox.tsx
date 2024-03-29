@@ -31,9 +31,11 @@ export function ContactComboBox(props: {
   const { value } = props
 
   useEffect(() => {
-    const firstContactId = contactsQuery.data?.[0].id
-    if (firstContactId) {
-      props.onChange(firstContactId) // preselect the last used contact
+    if (!value) {
+      const firstContactId = contactsQuery.data?.[0].id
+      if (firstContactId) {
+        props.onChange(firstContactId) // preselect the last used contact
+      }
     }
   }, [contactsQuery.data])
 
