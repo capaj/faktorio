@@ -35,10 +35,9 @@ export const LandingPage = () => {
         <div className="container grid items-center gap-4 px-4 md:px-6">
           <img
             alt="Image"
-            className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full"
-            height="310"
-            src="/placeholder.svg"
-            width="550"
+            className="mx-auto aspect-video overflow-hidden h-[1100px] rounded-xl object-cover object-center sm:w-full"
+            height="1310"
+            src="/faktura.png"
           />
           <div className="flex flex-col gap-2 min-[400px]:flex-col">
             <Card>
@@ -72,7 +71,7 @@ export const LandingPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                Provoz celé aplikace faktorio.cz mě stojí méně, než stojí jedno
+                Provoz celé aplikace faktorio.cz stojí méně, než stojí jedno
                 předplatné fakturoid.cz nebo idoklad.cz a dokud to půjde, bude
                 Faktorio.cz zdarma. Pokud by se náklady na provoz zvýšily
                 nejspíš přidám do aplikace reklamu a možnost reklamu odstranit
