@@ -4,37 +4,27 @@ import {
   invoiceItemsTb,
   invoicesTb,
   userInvoicingDetailsTb
-} from '../schema'
-import { trpcContext } from '../trpcContext'
+} from '../../schema'
+import { trpcContext } from '../../trpcContext'
 import { asc, count, desc, eq } from 'drizzle-orm'
-import { protectedProc } from '../isAuthorizedMiddleware'
-import { getInvoiceCreateSchema } from '../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
-import { djs } from '../../../src/djs'
-import { invoiceItemFormSchema } from '../zodDbSchemas'
+import { protectedProc } from '../../isAuthorizedMiddleware'
+import { getInvoiceCreateSchema } from '../../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
+import { djs } from '../../../../src/djs'
+import { invoiceItemFormSchema } from '../../zodDbSchemas'
+import { getInvoiceSums } from './getInvoiceSums'
 
+const invoiceSchema = getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001')
 export const invoiceRouter = trpcContext.router({
   create: protectedProc
     .input(
       z.object({
-        invoice: getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001'),
+        invoice: invoiceSchema,
         items: z.array(invoiceItemFormSchema)
       })
     )
     .mutation(async ({ input, ctx }) => {
       const invoiceItems = input.items
-      const subtotal = invoiceItems.reduce(
-        (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
-        0
-      )
-      const subTotalVat = invoiceItems.reduce(
-        (acc, item) =>
-          acc +
-          ((item.quantity ?? 0) *
-            (item.unit_price ?? 0) *
-            (item.vat_rate ?? 0)) /
-            100,
-        0
-      )
+      const invoiceSums = getInvoiceSums(invoiceItems)
 
       if (input.invoice.currency !== 'CZK') {
         throw new Error('Currency not supported') // TODO add support for other currencies
@@ -74,10 +64,7 @@ export const invoiceRouter = trpcContext.router({
             ).format('YYYY-MM-DD'),
             issued_on: djs(input.invoice.issued_on).format('YYYY-MM-DD'),
             client_contact_id: input.invoice.client_contact_id,
-            subtotal: subtotal,
-            total: subtotal + subTotalVat,
-            native_subtotal: subtotal,
-            native_total: subtotal + subTotalVat,
+            ...invoiceSums,
 
             // user
             your_name: user.name,
@@ -181,5 +168,60 @@ export const invoiceRouter = trpcContext.router({
         .delete(invoicesTb)
         .where(eq(invoicesTb.id, input.id))
         .execute()
+    }),
+  update: protectedProc
+    .input(
+      z.object({
+        id: z.string(),
+        invoice: invoiceSchema,
+        items: z.array(invoiceItemFormSchema)
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const invoice = await ctx.db.query.invoicesTb.findFirst({
+        where: eq(invoicesTb.id, input.id),
+
+        columns: {
+          id: true
+        }
+      })
+
+      if (!invoice) {
+        throw new Error('Invoice not found')
+      }
+
+      await ctx.db.transaction(async (tx) => {
+        const invoiceSums = getInvoiceSums(input.items)
+        await tx
+          .update(invoicesTb)
+          .set({
+            ...input.invoice,
+            due_on: djs(input.invoice.issued_on)
+              .add(input.invoice.due_in_days, 'day')
+              .format('YYYY-MM-DD'),
+            taxable_fulfillment_due: djs(
+              input.invoice.taxable_fulfillment_due
+            ).format('YYYY-MM-DD'),
+            issued_on: djs(input.invoice.issued_on).format('YYYY-MM-DD'),
+            ...invoiceSums
+          })
+          .where(eq(invoicesTb.id, input.id))
+          .execute()
+
+        await tx
+          .delete(invoiceItemsTb)
+          .where(eq(invoiceItemsTb.invoice_id, input.id))
+          .execute()
+
+        await tx
+          .insert(invoiceItemsTb)
+          .values(
+            input.items.map((item) => ({
+              ...item,
+              invoice_id: input.id
+            }))
+          )
+          .execute()
+      })
     })
 })

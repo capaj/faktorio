@@ -1,5 +1,5 @@
 import { trpcContext } from './trpcContext'
-import { invoiceRouter } from './routers/invoiceRouter'
+import { invoiceRouter } from './routers/invoices/invoiceRouter'
 import { contactRouter } from './routers/contactRouter'
 import { protectedProc } from './isAuthorizedMiddleware'
 import { userInvoicingDetailsInsertSchema } from './zodDbSchemas'

@@ -88,7 +88,10 @@ export function InvoiceList() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="cursor-pointer">
                   <DropdownMenuItem>
-                    <Link href={`/invoices/${invoice.id}`} className={'flex'}>
+                    <Link
+                      href={`/invoices/${invoice.id}/edit`}
+                      className={'flex'}
+                    >
                       <Pencil size={16} strokeWidth="1.5" />
                       <span className="ml-2">Editovat</span>
                     </Link>

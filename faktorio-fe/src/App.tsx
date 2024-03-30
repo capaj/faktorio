@@ -9,7 +9,7 @@ import { MountainIcon } from './components/MountainIcon'
 import { ButtonLink } from './components/ui/link'
 import { useUser } from '@clerk/clerk-react'
 import { Button } from './components/ui/button'
-import { InvoiceDetail } from './pages/InvoiceDetail/InvoiceDetail'
+import { InvoiceDetailPage } from './pages/InvoiceDetail/InvoiceDetailPage'
 import { InvoiceList } from './pages/InvoiceList'
 import { trpcClient } from './lib/trpcClient'
 import { httpBatchLink } from '@trpc/client'
@@ -21,6 +21,7 @@ import { SuperJSON } from 'superjson'
 import { ManifestPage } from './pages/ManifestPage'
 import { Toaster } from '@/components/ui/sonner'
 import { trpcLinks } from './lib/errorToastLink'
+import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
 // import {}
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
@@ -118,8 +119,12 @@ function App() {
                         ></Route>
                         <Route path="/my-details" component={MyDetails}></Route>
                         <Route
+                          path="/invoices/:invoiceId/edit"
+                          component={EditInvoicePage}
+                        ></Route>
+                        <Route
                           path="/invoices/:invoiceId"
-                          component={InvoiceDetail}
+                          component={InvoiceDetailPage}
                         ></Route>
                       </>
                     )}

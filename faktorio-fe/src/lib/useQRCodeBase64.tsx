@@ -30,7 +30,11 @@ export const useQRCodeBase64 = (data: string) => {
     // Cleanup function to remove canvas if component unmounts early
     return () => {
       if (canvas) {
-        document.body.removeChild(canvas)
+        try {
+          document.body.removeChild(canvas)
+        } catch (err) {
+          console.warn('Error removing canvas:', err)
+        }
       }
     }
   }, [data])

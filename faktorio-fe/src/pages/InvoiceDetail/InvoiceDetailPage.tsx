@@ -9,15 +9,20 @@ import { snakeCase } from 'lodash-es'
 import { useParams } from 'wouter'
 import { trpcClient } from '@/lib/trpcClient'
 
-export const InvoiceDetail = () => {
+export function useInvoiceQueryByUrlParam() {
   const { invoiceId } = useParams()
   if (!invoiceId) {
     throw new Error('No invoiceId')
   }
 
-  const [invoice] = trpcClient.invoices.getById.useSuspenseQuery({
+  const invoiceQuery = trpcClient.invoices.getById.useSuspenseQuery({
     id: invoiceId
   })
+  return invoiceQuery
+}
+
+export const InvoiceDetailPage = () => {
+  const [invoice] = useInvoiceQueryByUrlParam()
 
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
   return (
