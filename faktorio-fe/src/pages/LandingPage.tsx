@@ -35,7 +35,7 @@ export const LandingPage = () => {
         <div className="container grid items-center gap-4 px-4 md:px-6">
           <img
             alt="Image"
-            className="mx-auto aspect-video overflow-hidden h-[1100px] rounded-xl object-cover object-center sm:w-full"
+            className="mx-auto aspect-video overflow-hidden h-[1100px] max-w-[800px] rounded-xl object-cover object-center sm:w-full"
             height="1310"
             src="/faktura.png"
           />
