@@ -39,7 +39,8 @@ function AutoForm<SchemaType extends ZodObjectOrWrapped>({
   fieldConfig,
   children,
   className,
-  dependencies
+  dependencies,
+  containerClassName
 }: {
   formSchema: SchemaType
   values?: Partial<z.infer<SchemaType>>
@@ -49,6 +50,7 @@ function AutoForm<SchemaType extends ZodObjectOrWrapped>({
   fieldConfig?: FieldConfig<z.infer<SchemaType>>
   children?: React.ReactNode
   className?: string
+  containerClassName?: string
   dependencies?: Dependency<z.infer<SchemaType>>[]
 }) {
   const objectFormSchema = getObjectFormSchema(formSchema)
@@ -92,6 +94,7 @@ function AutoForm<SchemaType extends ZodObjectOrWrapped>({
           <AutoFormObject
             schema={objectFormSchema}
             form={form}
+            containerClassName={containerClassName}
             dependencies={dependencies}
             fieldConfig={fieldConfig}
           />

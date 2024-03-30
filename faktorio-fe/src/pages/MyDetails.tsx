@@ -4,6 +4,8 @@ import { fieldConfigForContactForm } from './ContactList/ContactList'
 import { Button } from '@/components/ui/button'
 import { trpcClient } from '@/lib/trpcClient'
 import { FkButton } from '@/components/FkButton'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 export const upsertInvoicingDetailsSchema =
   userInvoicingDetailsInsertSchema.omit({
@@ -25,9 +27,10 @@ export const MyDetails = () => {
         Zde zadejte údaje, které se budou zobrazovat na fakturách, které
         vytvoříte.
       </p>
-      <div className="flex mt-5">
+      <div className="flex mt-5 flex-col">
         <AutoForm
           formSchema={upsertInvoicingDetailsSchema}
+          containerClassName="grid grid-cols-2 gap-x-4"
           fieldConfig={{
             ...fieldConfigForContactForm,
             registration_no: {
@@ -53,14 +56,17 @@ export const MyDetails = () => {
             },
             web_url: {
               label: 'Web'
-            },
-            containerClassName: 'grid grid-cols-2 gap-x-4'
+            }
           }}
           values={data ?? undefined}
           onSubmit={async (values) => {
             await upsert.mutateAsync(values)
           }}
         >
+          {/* <div className="flex items-center space-x-2">
+            <Checkbox id="terms" />
+            <Label htmlFor="terms">Fakturuji většinou počet pracovních dní v měsíci</Label>
+          </div> */}
           <div className="flex justify-end">
             <FkButton
               // disabled={true} // TODO

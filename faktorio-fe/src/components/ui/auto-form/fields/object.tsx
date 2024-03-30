@@ -28,6 +28,7 @@ export default function AutoFormObject<
   schema,
   form,
   fieldConfig,
+  containerClassName,
   path = [],
   dependencies = []
 }: {
@@ -35,6 +36,7 @@ export default function AutoFormObject<
   form: ReturnType<typeof useForm>
   fieldConfig?: FieldConfig<z.infer<SchemaType>>
   path?: string[]
+  containerClassName?: string
   dependencies?: Dependency<z.infer<SchemaType>>[]
 }) {
   const { watch } = useFormContext() // Use useFormContext to access the watch function
@@ -65,7 +67,7 @@ export default function AutoFormObject<
   return (
     <Accordion
       type="multiple"
-      className={`space-y-5 border-none ${fieldConfig?.containerClassName}`}
+      className={`space-y-5 border-none ${containerClassName}`}
     >
       {Object.keys(shape).map((name) => {
         let item = shape[name] as z.ZodAny
