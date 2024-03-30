@@ -1,7 +1,8 @@
 ### TODO
 
 - fix TSC
-- add TSC check on github
+- add TSC check on github'
+- onboarding with recurring invoices question
 - enable editing of invoices
 - allow to add expense invoices by drag and drop(parse PDF with chat GPT)
 - allow to send invoice as email
