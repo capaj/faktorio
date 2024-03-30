@@ -157,11 +157,7 @@ export const EditInvoicePage = () => {
 
             await updateInvoice.mutateAsync({
               id: invoice.id,
-              invoice: {
-                ...formValues,
-                total,
-                
-              },
+              invoice: formValues,
               items: invoiceItems
             })
 
