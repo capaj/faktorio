@@ -6,8 +6,17 @@ import { CzechInvoicePDF } from './CzechInvoicePDF'
 import { invoiceData } from '@/invoiceSchema'
 import { Button } from '@/components/ui/button'
 import { snakeCase } from 'lodash-es'
-import { useParams } from 'wouter'
+import { useLocation, useParams } from 'wouter'
 import { trpcClient } from '@/lib/trpcClient'
+import { EnglishInvoicePDF } from './EnglishInvoicePDF'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from '@/components/ui/select'
+import { useState } from 'react'
 
 export function useInvoiceQueryByUrlParam() {
   const { invoiceId } = useParams()
@@ -23,12 +32,33 @@ export function useInvoiceQueryByUrlParam() {
 
 export const InvoiceDetailPage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
-
+  const params = useParams()
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
+  // const [language, setLanguage] = useState(params.language ?? 'cs')
+  const language = params.language ?? 'cs'
+  const [location, navigate] = useLocation()
+
   return (
     <>
       <div className="h-full place-content-center flex flex-col">
-        <h3 className="text-3xl font-bold mb-4 text-center w-full">Náhled</h3>
+        <div className="flex justify-between">
+          <h3 className="text-3xl font-bold mb-4 text-center w-full">Náhled</h3>
+          <Select
+            value={language}
+            onValueChange={(val) => {
+              navigate(`/invoices/${params.invoiceId}/${val}`)
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Jazyk" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cs">Česky</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="h-full place-content-center flex">
           <PDFViewer
             key={new Date().getTime()}
@@ -38,7 +68,12 @@ export const InvoiceDetailPage = () => {
               height: '1100px'
             }}
           >
-            <CzechInvoicePDF invoiceData={invoice} />
+            {language === 'cs' && (
+              <CzechInvoicePDF key={'cs'} invoiceData={invoice} />
+            )}
+            {language === 'en' && (
+              <EnglishInvoicePDF key={'en'} invoiceData={invoice} />
+            )}
           </PDFViewer>
         </div>
         <div className="flex content-center justify-center m-4">

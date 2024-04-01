@@ -6,11 +6,11 @@ import ReactPDF, {
   View,
   StyleSheet,
   Image,
-  Font
+  Font,
+  Link
 } from '@react-pdf/renderer'
-import { reactMainRender } from '../../main'
-import { InvoiceData } from '../../invoiceSchema'
-import { formatMoneyCzech } from '../../lib/formatMoney'
+
+import { formatMoneyEnglish } from '../../lib/formatMoney'
 import {
   InsertInvoiceItemType,
   SelectInvoiceType
@@ -412,7 +412,7 @@ export const EnglishInvoicePDF = ({
                     <Text>{invoiceData.due_on}</Text>{' '}
                   </FlexRow>
                   <FlexRow>
-                    <TextLabel>Tax Fulfillment Date </TextLabel>
+                    <TextLabel>Taxable fulfillment date </TextLabel>
                     <Text>{invoiceData.taxable_fulfillment_due} </Text>
                   </FlexRow>
                 </Flex>
@@ -442,7 +442,131 @@ export const EnglishInvoicePDF = ({
           </Flex>
         </Flex>
 
-        {/* Items list and totals calculations remain unchanged... */}
+        <View
+          style={{
+            marginTop: 10,
+            marginRight: 22,
+            paddingTop: 7,
+            paddingBottom: 0,
+            marginLeft: 20,
+            fontSize: 10,
+            borderBottom: '1px solid #444',
+            borderTop: '1px solid #444'
+          }}
+        >
+          {invoiceData.items.map((item, index) => {
+            const unitPrice = item.unit_price ?? 0
+            const quantity = item.quantity ?? 0
+            const vatRate = item.vat_rate ?? 0
+            return (
+              <Flex
+                key={index}
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginBottom: 7
+                }}
+              >
+                <Flex
+                  style={{
+                    width: '50%',
+                    flexDirection: 'row',
+
+                    justifyContent: 'flex-start'
+                  }}
+                >
+                  <ItemDescText
+                    style={{
+                      width: '4%'
+                    }}
+                  >
+                    {item.quantity}
+                  </ItemDescText>
+                  <ItemDescText
+                    style={{
+                      width: '14%',
+                      fontSize: 9
+                    }}
+                  >
+                    {item.unit}
+                  </ItemDescText>
+                  <ItemDescText>{item.description}</ItemDescText>
+                </Flex>
+                <Flex
+                  style={{
+                    width: '50%',
+                    flexDirection: 'row'
+                  }}
+                >
+                  <ThirdWidthColumnRight>{vatRate} %</ThirdWidthColumnRight>
+                  <ThirdWidthColumnRight>
+                    {formatMoneyEnglish(unitPrice, invoiceData.currency)}
+                  </ThirdWidthColumnRight>
+                  <ThirdWidthColumnRight>
+                    {formatMoneyEnglish(
+                      unitPrice * quantity,
+                      invoiceData.currency
+                    )}
+                  </ThirdWidthColumnRight>
+                </Flex>
+              </Flex>
+            )
+          })}
+        </View>
+        <Flex
+          style={{
+            marginTop: 30,
+            marginRight: 22,
+            flexDirection: 'row'
+          }}
+        >
+          <Flex
+            style={{
+              width: '60%'
+            }}
+          ></Flex>
+          <Flex
+            style={{
+              flexDirection: 'column',
+              width: '40%'
+            }}
+          >
+            <Flex
+              style={{
+                borderBottom: '1px solid #444'
+              }}
+            >
+              <FlexRow>
+                <TextLabel>Total without VAT</TextLabel>
+                <Text>
+                  {formatMoneyEnglish(invoiceTotal, invoiceData.currency)}
+                </Text>
+              </FlexRow>
+              {Object.entries(taxPaidByRate).map(([rate, tax]) => {
+                return (
+                  <FlexRow key={rate}>
+                    <TextLabel>VAT {Number(rate)}%</TextLabel>
+                    <Text>{formatMoneyEnglish(tax, invoiceData.currency)}</Text>
+                  </FlexRow>
+                )
+              })}
+            </Flex>
+
+            <Text
+              style={{
+                fontSize: 24,
+                marginTop: 6,
+                textAlign: 'right',
+                fontWeight: 500
+              }}
+            >
+              {formatMoneyEnglish(
+                invoiceTotal + taxTotal,
+                invoiceData.currency
+              )}
+            </Text>
+          </Flex>
+        </Flex>
 
         <View
           style={{
@@ -452,9 +576,10 @@ export const EnglishInvoicePDF = ({
             fontSize: 8
           }}
         >
+          {/* This text is required by law to be on each invoice */}
           <Text>Fyzická osoba zapsaná v živnostenském rejstříku.</Text>
           <Text>
-            Invoice issued on <a href="faktorio.cz">faktorio.cz</a>
+            Invoice issued on <Link href="faktorio.cz">faktorio.cz</Link>
           </Text>
         </View>
       </Page>

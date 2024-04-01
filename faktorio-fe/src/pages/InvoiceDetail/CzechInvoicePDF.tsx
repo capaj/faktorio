@@ -6,10 +6,9 @@ import ReactPDF, {
   View,
   StyleSheet,
   Image,
-  Font
+  Font,
+  Link
 } from '@react-pdf/renderer'
-import { reactMainRender } from '../../main'
-import { InvoiceData } from '../../invoiceSchema'
 import { formatMoneyCzech } from '../../lib/formatMoney'
 import {
   InsertInvoiceItemType,
@@ -591,7 +590,10 @@ export const CzechInvoicePDF = ({
           }}
         >
           <Text>Fyzická osoba zapsaná v živnostenském rejstříku.</Text>
-          <Text>Faktura vystavena na faktorio.cz</Text>
+          <Text>
+            Faktura vystavena na{' '}
+            <Link href="https://faktorio.cz">faktorio.cz</Link>
+          </Text>
         </View>
       </Page>
     </Document>

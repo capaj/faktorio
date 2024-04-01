@@ -71,7 +71,7 @@ export function InvoiceList() {
         {q?.data?.map((invoice) => (
           <TableRow key={invoice.id}>
             <TableCell className="font-medium">
-              <Link href={`/invoices/${invoice.id}`}>{invoice.number}</Link>
+              <Link href={`/invoices/${invoice.id}/cs`}>{invoice.number}</Link>
             </TableCell>
 
             <TableCell>{invoice.client_name}</TableCell>

@@ -185,6 +185,10 @@ function App() {
                           path="/invoices/:invoiceId"
                           component={InvoiceDetailPage}
                         ></Route>
+                        <Route
+                          path="/invoices/:invoiceId/:language"
+                          component={InvoiceDetailPage}
+                        ></Route>
                       </>
                     )}
 
