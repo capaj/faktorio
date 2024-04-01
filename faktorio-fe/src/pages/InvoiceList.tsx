@@ -58,7 +58,7 @@ export function InvoiceList() {
       <TableHeader>
         <TableRow>
           <TableHead className="w-[100px]">Nr.</TableHead>
-          <TableHead>Status</TableHead>
+          <TableHead>Klient</TableHead>
           <TableHead>Celkem s DPH</TableHead>
 
           <TableHead>Zdanitelné plnění datum</TableHead>
