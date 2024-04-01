@@ -88,7 +88,7 @@ export const LandingPage = () => {
                     Faktorio sice není open-source, ale rád uvítám další
                     maintainery. Pokud by někdy faktorio mělo mít byť jen
                     nepatrný zisk, bude zisk rozdělen mezi všechny přispěvatele
-                    podle velikosti jejich příspěvku. Pokud vás zajímá jak by se
+                    podle velikosti jejich příspěvku. Zajímá-li jak by se
                     velikost vašeho příspevku počítala, podívejte se na{' '}
                     <a href="https://github.com/capaj/contrib-locs">
                       <Button variant={'link'}>projekt contrib-locs</Button>

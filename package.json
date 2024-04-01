@@ -16,7 +16,7 @@
     "format": "prettier --write .",
     "db": "cd faktorio-api && pnpm generate && pnpm migrate",
     "dbm": "cd faktorio-api && pnpm migrate",
-    "bumpDeps": "ncu -u && cd faktorio-api && cd ../faktorio-fe && pnpm i",
+    "bumpDeps": "ncu -u && cd faktorio-api && ncu -u && cd ../faktorio-fe && ncu -u --minor && pnpm i",
     "test": "vitest"
   },
   "dependencies": {

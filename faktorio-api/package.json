@@ -11,15 +11,15 @@
     "kill": "kill -9 $(lsof -t -i:9189)"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240314.0",
+    "@cloudflare/workers-types": "^4.20240329.0",
     "@types/debug": "^4.1.12",
     "@types/jsonwebtoken": "^9.0.6",
     "drizzle-kit": "^0.20.14",
-    "typescript": "^5.4.2",
-    "wrangler": "^3.35.0"
+    "typescript": "^5.4.3",
+    "wrangler": "^3.42.0"
   },
   "dependencies": {
-    "@libsql/client": "^0.5.6",
+    "@libsql/client": "^0.6.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
     "@trpc/client": "^10.45.2",
@@ -28,7 +28,7 @@
     "colorette": "^2.0.20",
     "debug": "^4.3.4",
     "dotenv": "^16.4.5",
-    "drizzle-orm": "^0.30.4",
+    "drizzle-orm": "^0.30.6",
     "drizzle-zod": "^0.5.1",
     "jose": "^5.2.3",
     "node-mailjet": "^6.0.5",
