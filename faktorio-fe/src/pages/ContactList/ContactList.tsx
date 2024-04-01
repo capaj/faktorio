@@ -159,6 +159,12 @@ export const ContactList = () => {
   }, [params.contactId])
 
   useEffect(() => {
+    if (open === false && params.contactId) {
+      navigate('/contacts')
+    }
+  }, [open])
+
+  useEffect(() => {
     ;(async () => {
       if (values.registration_no?.length === 8 && !values.name) {
         // seems like a user is trying to add new contact, let's fetch data from ares
@@ -218,7 +224,7 @@ export const ContactList = () => {
     <div>
       {contactId && contactId !== 'new' && (
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-screen-lg overflow-y-scroll max-h-screen">
             <DialogHeader>
               <DialogTitle>Editace kontaktu</DialogTitle>
             </DialogHeader>
@@ -267,7 +273,7 @@ export const ContactList = () => {
           <DialogTrigger>
             <Button variant={'default'}>Přidat klienta</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-screen-lg overflow-y-scroll max-h-screen">
             <DialogHeader>
               <DialogTitle>Nový kontakt</DialogTitle>
             </DialogHeader>

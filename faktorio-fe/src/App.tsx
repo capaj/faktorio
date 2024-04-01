@@ -1,5 +1,10 @@
-import { Suspense, useState } from 'react'
-
+import { Suspense, useEffect, useState } from 'react'
+import {
+  SheetTrigger,
+  SheetContent,
+  Sheet,
+  SheetClose
+} from '@/components/ui/sheet'
 import { Redirect, Route, Switch, useLocation } from 'wouter'
 // Create Document Component
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -22,6 +27,7 @@ import { ManifestPage } from './pages/ManifestPage'
 import { Toaster } from '@/components/ui/sonner'
 import { trpcLinks } from './lib/errorToastLink'
 import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
+import { ChevronLeftIcon, LucideMenu } from 'lucide-react'
 // import {}
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
@@ -32,7 +38,7 @@ function App() {
   const [location, navigate] = useLocation()
 
   const { getToken } = useAuth()
-
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [queryClient] = useState(() => new QueryClient())
   const [trpc] = useState(() =>
     trpcClient.createClient({
@@ -54,6 +60,9 @@ function App() {
       ]
     })
   )
+  useEffect(() => {
+    setIsMenuOpen(false)
+  }, [location])
   if (!isLoaded) {
     return <SpinnerContainer loading={true} />
   }
@@ -78,13 +87,63 @@ function App() {
               <nav className="ml-auto flex gap-4 sm:gap-6">
                 {isSignedIn ? (
                   <>
-                    <ButtonLink href="/contacts">Kontakty</ButtonLink>
-                    <ButtonLink href="/invoices">Faktury</ButtonLink>
-                    <ButtonLink href="/new-invoice">
-                      Vystavit fakturu
-                    </ButtonLink>
-                    <ButtonLink href="/my-details">Moje údaje</ButtonLink>
-                    <UserButton />
+                    <div className="hidden sm:flex lg:flex justify-center items-center">
+                      <ButtonLink href="/contacts">Kontakty</ButtonLink>
+                      <ButtonLink href="/invoices">Faktury</ButtonLink>
+                      <ButtonLink href="/new-invoice">
+                        Vystavit fakturu
+                      </ButtonLink>
+                      <ButtonLink href="/my-details">Moje údaje</ButtonLink>
+                      <UserButton />
+                    </div>
+                    <Sheet
+                      open={isMenuOpen}
+                      onOpenChange={(open) => {
+                        setIsMenuOpen(open)
+                      }}
+                    >
+                      <SheetTrigger asChild>
+                        <Button
+                          className="border-0 rounded-full p-2 sm:hidden"
+                          size="icon"
+                          variant="outline"
+                        >
+                          <LucideMenu className="h-6 w-6" />
+                          <span className="sr-only">
+                            Toggle navigation menu
+                          </span>
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="left" className="flex flex-col">
+                        <ButtonLink
+                          className="inline-flex h-9 items-center justify-start rounded-md px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900  focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                          href="/contacts"
+                        >
+                          Kontakty
+                        </ButtonLink>
+
+                        <ButtonLink
+                          className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                          href="/invoices"
+                        >
+                          Faktury
+                        </ButtonLink>
+
+                        <ButtonLink
+                          className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                          href="/new-invoice"
+                        >
+                          Vystavit fakturu
+                        </ButtonLink>
+
+                        <ButtonLink
+                          className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                          href="/my-details"
+                        >
+                          Moje údaje
+                        </ButtonLink>
+                      </SheetContent>
+                    </Sheet>
                   </>
                 ) : (
                   <SignInButton>
