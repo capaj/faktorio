@@ -126,6 +126,15 @@ export const invoiceRouter = trpcContext.router({
 
       return invoicesForUser
     }),
+
+  lastInvoice: protectedProc.query(async ({ ctx }) => {
+    const lastInvoice = await ctx.db.query.invoicesTb.findFirst({
+      where: eq(invoicesTb.user_id, ctx.userId),
+      orderBy: desc(invoicesTb.created_at)
+    })
+
+    return lastInvoice
+  }),
   count: protectedProc.query(async ({ ctx }) => {
     const res = await ctx.db
       .select({ count: count() })

@@ -26,11 +26,12 @@ const defaultInvoiceItem = {
 }
 
 export const NewInvoice = () => {
-  const [invoicesCount] = trpcClient.invoices.count.useSuspenseQuery()
+  const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
 
-  const invoiceOrdinal = invoicesCount + 1
+  const invoiceOrdinal =
+    parseInt(lastInvoice?.number?.split('-')[1] ?? '0', 10) + 1
   const nextInvoiceNumber = `${djs().format('YYYY')}-${invoiceOrdinal.toString().padStart(3, '0')}`
   const formSchema = getInvoiceCreateSchema(nextInvoiceNumber).extend({
     client_contact_id: z.string().optional()
