@@ -68,10 +68,6 @@ function App() {
     return <SpinnerContainer loading={true} />
   }
 
-  if (user && location === '/') {
-    return <Redirect to="/invoices" />
-  }
-
   return (
     <>
       <trpcClient.Provider client={trpc} queryClient={queryClient}>
@@ -162,7 +158,10 @@ function App() {
               <div className="container mx-auto p-4">
                 <Suspense fallback={<SpinnerContainer loading={true} />}>
                   <Switch>
-                    <Route path="/" component={LandingPage} />
+                    <Route
+                      path="/"
+                      component={isSignedIn ? InvoiceList : LandingPage}
+                    />
                     <Route path="/manifest" component={ManifestPage} />
                     <Route path="/privacy" component={PrivacyPage} />
 
