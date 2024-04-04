@@ -19,12 +19,17 @@ import { trpcClient } from '@/lib/trpcClient'
 import { LucideEllipsisVertical, Pencil, Trash2 } from 'lucide-react'
 
 import { Link } from 'wouter'
-import { formatNumberWithSpaces } from './formatNumberWithSpaces'
+import { formatNumberWithSpaces } from '../formatNumberWithSpaces'
+import { InvoicesDownloadButton } from './InvoicesDownloadButton'
+
+export function useFilteredInvoicesQuery() {
+  return trpcClient.invoices.all.useQuery({
+    limit: 50
+  })
+}
 
 export function InvoiceList() {
-  const q = trpcClient.invoices.all.useQuery({
-    limit: 50 // TODO pagination
-  })
+  const q = useFilteredInvoicesQuery()
   const deleteInvoice = trpcClient.invoices.delete.useMutation()
 
   if (q.isLoading) {
@@ -36,34 +41,37 @@ export function InvoiceList() {
     <Table>
       {(q.data?.length ?? 0) > 1 && (
         <TableCaption>
-          <div className="flex flex-col">
-            <div>
-              Celkem {q.data?.length}{' '}
-              {q.data?.length === 1 ? 'faktura' : 'faktury'} za:{' '}
-            </div>
-            <div>
-              {formatNumberWithSpaces(total)} CZK včetně DPH
-              <br />
-              {formatNumberWithSpaces(
-                q.data?.reduce(
-                  (acc, invoice) => acc + (invoice.subtotal ?? 0),
-                  0
-                ) ?? 0
-              )}{' '}
-              CZK bez DPH{' '}
+          <div className="flex flex-row">
+            <div className="flex flex-col ml-[40%]">
+              <div>
+                Celkem {q.data?.length}{' '}
+                {q.data?.length === 1 ? 'faktura' : 'faktury'} za:{' '}
+              </div>
+              <div>
+                {formatNumberWithSpaces(total)} CZK včetně DPH
+                <br />
+                {formatNumberWithSpaces(
+                  q.data?.reduce(
+                    (acc, invoice) => acc + (invoice.subtotal ?? 0),
+                    0
+                  ) ?? 0
+                )}{' '}
+                CZK bez DPH{' '}
+              </div>
             </div>
           </div>
         </TableCaption>
       )}
-      <TableHeader>
+      <TableHeader className="bg-gray-50">
         <TableRow>
           <TableHead className="w-[100px]">Nr.</TableHead>
           <TableHead>Klient</TableHead>
-          <TableHead>Celkem s DPH</TableHead>
 
           <TableHead>Zdanitelné plnění datum</TableHead>
           <TableHead>Vystaveno dne</TableHead>
           <TableHead className="">Odesláno</TableHead>
+          <TableHead>s DPH</TableHead>
+          <TableHead>bez DPH</TableHead>
           <TableHead className="text-right">Akce</TableHead>
         </TableRow>
       </TableHeader>
@@ -75,10 +83,12 @@ export function InvoiceList() {
             </TableCell>
 
             <TableCell>{invoice.client_name}</TableCell>
-            <TableCell>{invoice.total} CZK</TableCell>
+
             <TableCell>{invoice.taxable_fulfillment_due}</TableCell>
             <TableCell>{invoice.issued_on}</TableCell>
             <TableCell>{invoice.sent_at}</TableCell>
+            <TableCell>{invoice.total} CZK</TableCell>
+            <TableCell>{invoice.subtotal} CZK</TableCell>
             <TableCell className="text-right">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -119,6 +129,22 @@ export function InvoiceList() {
             </TableCell>
           </TableRow>
         ))}
+        <TableRow className="bg-gray-200">
+          <TableCell colSpan={5}>
+            Celkem {q.data?.length}{' '}
+            {q.data?.length === 1 ? 'faktura' : 'faktury'}
+          </TableCell>
+          <TableCell>{formatNumberWithSpaces(total)} CZK</TableCell>
+          <TableCell>
+            {formatNumberWithSpaces(
+              q.data?.reduce((acc, invoice) => acc + invoice.subtotal, 0) ?? 0
+            )}{' '}
+            CZK
+          </TableCell>
+          <TableCell>
+            <InvoicesDownloadButton />
+          </TableCell>
+        </TableRow>
       </TableBody>
     </Table>
   )

@@ -9,6 +9,7 @@
     "ilike",
     "libsql",
     "Lucide",
+    "papaparse",
     "TRPC",
     "turso"
   ],
