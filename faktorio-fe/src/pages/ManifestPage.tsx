@@ -1,7 +1,9 @@
+import { PageShell } from './PageShell'
+
 export const ManifestPage = () => {
   return (
     <>
-      <main className="container mx-auto px-4 py-6 md:py-12 lg:py-16 xl:py-24">
+      <PageShell>
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
           Manifest
         </h1>
@@ -45,7 +47,7 @@ export const ManifestPage = () => {
           tak mě to motivuje k tomu pokračovat.
         </p>
         {/* TODO add donation links */}
-      </main>
+      </PageShell>
     </>
   )
 }
