@@ -43,7 +43,7 @@
     "@types/papaparse": "^5.3.14",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
-    "cmdk": "^1.0.0",
+    "cmdk": "^0.2.1",
     "currency-codes": "^2.1.0",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",

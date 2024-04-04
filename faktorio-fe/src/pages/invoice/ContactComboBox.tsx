@@ -25,19 +25,21 @@ export function ContactComboBox(props: {
   onBlur?: () => void
 }) {
   const [open, setOpen] = React.useState(false)
+  const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
+
   // const [value, setValue] = React.useState('')
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const contacts = contactsQuery.data ?? []
   const { value } = props
 
-  // useEffect(() => {
-  //   if (!value) {
-  //     const firstContactId = contactsQuery.data?.[0].id
-  //     if (firstContactId) {
-  //       props.onChange(firstContactId) // preselect the last used contact
-  //     }
-  //   }
-  // }, [contactsQuery.data])
+  useEffect(() => {
+    if (!value) {
+      const lastUsedContactId = lastInvoice?.client_contact_id
+      if (lastUsedContactId) {
+        props.onChange(lastUsedContactId) // preselect the last used contact
+      }
+    }
+  }, [contactsQuery.data])
 
   return (
     <div className="flex m-4 center justify-center items-center place-items-center place-content-center">
@@ -56,7 +58,7 @@ export function ContactComboBox(props: {
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
+        <PopoverContent className="p-0">
           <Command>
             <CommandInput placeholder="Hledat ..." />
             <CommandEmpty>Takový kontakt nenalezen</CommandEmpty>
