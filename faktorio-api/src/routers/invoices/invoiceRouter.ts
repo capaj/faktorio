@@ -6,7 +6,7 @@ import {
   userInvoicingDetailsTb
 } from '../../schema'
 import { trpcContext } from '../../trpcContext'
-import { asc, count, desc, eq } from 'drizzle-orm'
+import { and, asc, count, desc, eq } from 'drizzle-orm'
 import { protectedProc } from '../../isAuthorizedMiddleware'
 import { getInvoiceCreateSchema } from '../../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
 import { djs } from '../../../../src/djs'
@@ -29,7 +29,7 @@ export const invoiceRouter = trpcContext.router({
       if (input.invoice.currency !== 'CZK') {
         throw new Error('Currency not supported') // TODO add support for other currencies
       }
-      const client = await ctx.db.query.contactTb
+    const client = await ctx.db.query.contactTb
         .findFirst({
           where: eq(contactTb.id, input.invoice.client_contact_id)
         })
@@ -55,7 +55,6 @@ export const invoiceRouter = trpcContext.router({
           .insert(invoicesTb)
           .values({
             ...input.invoice,
-            user_id: ctx.userId,
             due_on: djs(input.invoice.issued_on)
               .add(input.invoice.due_in_days, 'day')
               .format('YYYY-MM-DD'),
@@ -87,7 +86,8 @@ export const invoiceRouter = trpcContext.router({
             client_zip: client.zip,
             client_country: client.country,
             client_registration_no: client.registration_no,
-            client_vat_no: client.vat_no
+            client_vat_no: client.vat_no,
+            user_id: ctx.userId
           })
           .returning({
             id: invoicesTb.id
@@ -153,7 +153,10 @@ export const invoiceRouter = trpcContext.router({
     .query(async ({ input, ctx }) => {
       const res = await ctx.db.query.invoicesTb
         .findFirst({
-          where: eq(invoicesTb.id, input.id)
+          where: and(
+            eq(invoicesTb.id, input.id),
+            eq(invoicesTb.user_id, ctx.userId)
+          )
         })
         .execute()
 
@@ -175,7 +178,9 @@ export const invoiceRouter = trpcContext.router({
     .mutation(async ({ input, ctx }) => {
       return await ctx.db
         .delete(invoicesTb)
-        .where(eq(invoicesTb.id, input.id))
+        .where(
+          and(eq(invoicesTb.id, input.id), eq(invoicesTb.user_id, ctx.userId))
+        )
         .execute()
     }),
   update: protectedProc
@@ -188,7 +193,10 @@ export const invoiceRouter = trpcContext.router({
     )
     .mutation(async ({ input, ctx }) => {
       const invoice = await ctx.db.query.invoicesTb.findFirst({
-        where: eq(invoicesTb.id, input.id),
+        where: and(
+          eq(invoicesTb.id, input.id),
+          eq(invoicesTb.user_id, ctx.userId)
+        ),
 
         columns: {
           id: true
