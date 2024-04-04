@@ -14,8 +14,8 @@ import { useFilteredInvoicesQuery } from './InvoiceList'
 import Papa from 'papaparse'
 
 export function InvoicesDownloadButton() {
-  const invoices = useFilteredInvoicesQuery()
-
+  const q = useFilteredInvoicesQuery()
+  const invoices = q.data ?? []
   return (
     <div className="flex items-center space-x-2">
       <DropdownMenu>
@@ -28,10 +28,10 @@ export function InvoicesDownloadButton() {
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             onClick={async () => {
-              const csv = Papa.unparse(invoices.data)
+              const csv = Papa.unparse(invoices)
 
-              const firstInvoice = invoices.data?.[0]
-              const lastInvoice = invoices.data?.[invoices.data.length - 1]
+              const firstInvoice = invoices[0]
+              const lastInvoice = invoices[invoices.length - 1]
               const blob = new Blob([csv], { type: 'text/csv' })
               const url = URL.createObjectURL(blob)
               const a = document.createElement('a')

@@ -36,7 +36,8 @@ export function InvoiceList() {
     return <div>Načítám...</div>
   }
 
-  const total = q.data?.reduce((acc, invoice) => acc + invoice.total, 0)
+  const invoices = q.data ?? []
+  const total = invoices.reduce((acc, invoice) => acc + invoice.total, 0)
   return (
     <Table>
       <TableHeader className="bg-gray-50">
@@ -53,7 +54,7 @@ export function InvoiceList() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {q?.data?.map((invoice) => (
+        {invoices.map((invoice) => (
           <TableRow key={invoice.id}>
             <TableCell className="font-medium">
               <Link href={`/invoices/${invoice.id}/cs`}>{invoice.number}</Link>
@@ -106,7 +107,7 @@ export function InvoiceList() {
             </TableCell>
           </TableRow>
         ))}
-        {q.data.length > 1 && (
+        {invoices.length > 1 && (
           <TableRow className="bg-gray-200">
             <TableCell colSpan={5}>
               Celkem {q.data?.length}{' '}
@@ -115,7 +116,10 @@ export function InvoiceList() {
             <TableCell>{formatNumberWithSpaces(total)} CZK</TableCell>
             <TableCell>
               {formatNumberWithSpaces(
-                q.data?.reduce((acc, invoice) => acc + invoice.subtotal, 0) ?? 0
+                q.data?.reduce(
+                  (acc, invoice) => acc + (invoice.subtotal ?? 0),
+                  0
+                ) ?? 0
               )}{' '}
               CZK
             </TableCell>
