@@ -29,6 +29,7 @@ import { trpcLinks } from './lib/errorToastLink'
 import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
 import { ChevronLeftIcon, LucideMenu } from 'lucide-react'
 import { PrivacyPage } from './pages/PrivacyPage'
+import { TermsOfServicePage } from './pages/TermsOfService'
 // import {}
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
@@ -164,6 +165,10 @@ function App() {
                     />
                     <Route path="/manifest" component={ManifestPage} />
                     <Route path="/privacy" component={PrivacyPage} />
+                    <Route
+                      path="/terms-of-service"
+                      component={TermsOfServicePage}
+                    />
 
                     {isSignedIn && (
                       <>
