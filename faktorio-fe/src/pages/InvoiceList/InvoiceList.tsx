@@ -39,29 +39,6 @@ export function InvoiceList() {
   const total = q.data?.reduce((acc, invoice) => acc + invoice.total, 0)
   return (
     <Table>
-      {(q.data?.length ?? 0) > 1 && (
-        <TableCaption>
-          <div className="flex flex-row">
-            <div className="flex flex-col ml-[40%]">
-              <div>
-                Celkem {q.data?.length}{' '}
-                {q.data?.length === 1 ? 'faktura' : 'faktury'} za:{' '}
-              </div>
-              <div>
-                {formatNumberWithSpaces(total)} CZK včetně DPH
-                <br />
-                {formatNumberWithSpaces(
-                  q.data?.reduce(
-                    (acc, invoice) => acc + (invoice.subtotal ?? 0),
-                    0
-                  ) ?? 0
-                )}{' '}
-                CZK bez DPH{' '}
-              </div>
-            </div>
-          </div>
-        </TableCaption>
-      )}
       <TableHeader className="bg-gray-50">
         <TableRow>
           <TableHead className="w-[100px]">Nr.</TableHead>
@@ -129,22 +106,24 @@ export function InvoiceList() {
             </TableCell>
           </TableRow>
         ))}
-        <TableRow className="bg-gray-200">
-          <TableCell colSpan={5}>
-            Celkem {q.data?.length}{' '}
-            {q.data?.length === 1 ? 'faktura' : 'faktury'}
-          </TableCell>
-          <TableCell>{formatNumberWithSpaces(total)} CZK</TableCell>
-          <TableCell>
-            {formatNumberWithSpaces(
-              q.data?.reduce((acc, invoice) => acc + invoice.subtotal, 0) ?? 0
-            )}{' '}
-            CZK
-          </TableCell>
-          <TableCell>
-            <InvoicesDownloadButton />
-          </TableCell>
-        </TableRow>
+        {q.data.length > 1 && (
+          <TableRow className="bg-gray-200">
+            <TableCell colSpan={5}>
+              Celkem {q.data?.length}{' '}
+              {q.data?.length === 1 ? 'faktura' : 'faktury'}
+            </TableCell>
+            <TableCell>{formatNumberWithSpaces(total)} CZK</TableCell>
+            <TableCell>
+              {formatNumberWithSpaces(
+                q.data?.reduce((acc, invoice) => acc + invoice.subtotal, 0) ?? 0
+              )}{' '}
+              CZK
+            </TableCell>
+            <TableCell>
+              <InvoicesDownloadButton />
+            </TableCell>
+          </TableRow>
+        )}
       </TableBody>
     </Table>
   )
