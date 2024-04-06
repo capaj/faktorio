@@ -47,8 +47,7 @@ export const LandingPage = () => {
                   <CardTitle className="flex flex-row gap-4">
                     <MountainIcon className="h-6 w-6" />
                     <h2>
-                      Faktorio.cz - platforma, která je přesně tím, co malý
-                      podnikatel potřebuje.
+                      Faktorio.cz - nabízí jen to co malý podnikatel potřebuje.
                     </h2>
                   </CardTitle>
                 </CardHeader>
@@ -111,6 +110,18 @@ export const LandingPage = () => {
                       </a>
                     </p>
                   </div>
+                  <p>
+                    Tech stack projektu je:
+                    <ul className="ml-4">
+                      <li>Typescript</li>
+                      <li>React.js</li>
+                      <li>Drizzle ORM</li>
+                      <li>TRPC</li>
+                      <li>Turso</li>
+                      <li>Shadcn</li>
+                      <li>Cloudflare workers</li>
+                    </ul>
+                  </p>
                 </CardContent>
               </Card>
             </div>
