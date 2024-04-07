@@ -72,11 +72,12 @@ export const LandingPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  Provoz celé aplikace faktorio.cz stojí méně, než cena jednoho
-                  měsíčního předplatného fakturoid.cz nebo idoklad.cz. Dokud to
-                  půjde, bude Faktorio.cz zdarma. Pokud by se náklady na provoz
-                  razantně zvýšily nejspíš přidám do aplikace reklamu a možnost
-                  reklamu odstranit za drobný poplatek-například 500 kč ročně.
+                  Provoz celé aplikace faktorio.cz na rok momentálně stojí méně,
+                  než cena jednoho měsíčního předplatného fakturoid.cz nebo
+                  idoklad.cz. Dokud to půjde, bude Faktorio.cz zdarma. Pokud by
+                  se náklady na provoz razantně zvýšily nejspíš přidám do
+                  aplikace reklamu a možnost reklamu odstranit za drobný
+                  poplatek-například 500 kč ročně.
                 </CardContent>
               </Card>
               <Card>

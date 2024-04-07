@@ -6,7 +6,7 @@ import {
   userInvoicingDetailsTb
 } from '../../schema'
 import { trpcContext } from '../../trpcContext'
-import { and, asc, count, desc, eq } from 'drizzle-orm'
+import { SQL, and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm'
 import { protectedProc } from '../../isAuthorizedMiddleware'
 import { getInvoiceCreateSchema } from '../../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
 import { djs } from '../../../../src/djs'
@@ -14,6 +14,10 @@ import { invoiceItemFormSchema } from '../../zodDbSchemas'
 import { getInvoiceSums } from './getInvoiceSums'
 
 const invoiceSchema = getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001')
+const dateSchema = z
+  .string()
+  .nullish()
+  .refine((v) => !v || djs(v).isValid(), 'Invalid date')
 export const invoiceRouter = trpcContext.router({
   create: protectedProc
     .input(
@@ -29,7 +33,7 @@ export const invoiceRouter = trpcContext.router({
       if (input.invoice.currency !== 'CZK') {
         throw new Error('Currency not supported') // TODO add support for other currencies
       }
-    const client = await ctx.db.query.contactTb
+      const client = await ctx.db.query.contactTb
         .findFirst({
           where: eq(contactTb.id, input.invoice.client_contact_id)
         })
@@ -113,12 +117,42 @@ export const invoiceRouter = trpcContext.router({
       z.object({
         limit: z.number().nullable().default(30),
         offset: z.number().nullish().default(0),
-        filter: z.string().nullish()
+        filter: z.string().nullish(),
+        from_date: dateSchema, // YYYY-MM-DD
+        to_date: dateSchema
       })
     )
     .query(async ({ ctx, input }) => {
+      let whereCondition = eq(invoicesTb.user_id, ctx.userId)
+
+      if (input.filter) {
+        whereCondition = and(
+          whereCondition,
+          or(
+            like(invoicesTb.client_name, `%${input.filter}%`),
+            like(invoicesTb.number, `%${input.filter}%`),
+            like(invoicesTb.client_registration_no, `%${input.filter}%`),
+            like(invoicesTb.client_vat_no, `%${input.filter}%`)
+          )
+        ) as SQL<unknown>
+      }
+
+      if (input.from_date) {
+        whereCondition = and(
+          whereCondition,
+          gte(invoicesTb.taxable_fulfillment_due, input.from_date)
+        ) as SQL<unknown>
+      }
+
+      if (input.to_date) {
+        whereCondition = and(
+          whereCondition,
+          lte(invoicesTb.taxable_fulfillment_due, input.to_date)
+        ) as SQL<unknown>
+      }
+
       const invoicesForUser = await ctx.db.query.invoicesTb.findMany({
-        where: eq(invoicesTb.user_id, ctx.userId),
+        where: whereCondition,
         limit: input.limit ?? undefined,
         offset: input.offset ?? undefined,
         orderBy: desc(invoicesTb.created_at)

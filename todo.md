@@ -11,11 +11,14 @@
 - add english invoice rendering
 - be able to export as excel
 - hack integration with chatgpt
+
   - zeptat se treba na veci jako:
     - kolik dlužím na dani z prijmu tento rok?
     - kolik jsem vystavil faktur tento rok?
     - kolik musím zaplatit na konci ctvrletí dan z prijmu?
     -
+
+- migrate from clerk
 
 ## Done
 
