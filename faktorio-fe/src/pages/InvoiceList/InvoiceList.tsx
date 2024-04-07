@@ -40,6 +40,7 @@ export function InvoiceList() {
   const total = invoices.reduce((acc, invoice) => acc + invoice.total, 0)
   return (
     <>
+      {q.isInitialLoading && <p>Načítám faktury...</p>}
       <Input
         value={search}
         className="m-4 max-w-[50%]"
