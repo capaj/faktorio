@@ -87,20 +87,21 @@ export const LandingPage = () => {
                 <CardContent>
                   <div className="flex flex-col items-center">
                     <p>
-                      Faktorio sice není open-source, ale rád uvítám další
-                      maintainery. Pokud by někdy faktorio mělo mít byť jen
-                      nepatrný zisk, bude zisk rozdělen mezi všechny
-                      přispěvatele podle velikosti jejich příspěvku. Zajímá-li
-                      jak by se velikost vašeho příspevku počítala, podívejte se
-                      na{' '}
+                      Faktorio je open-source a rád uvítám další maintainery.
+                      Pokud by někdy faktorio mělo mít byť jen nepatrný zisk,
+                      bude zisk rozdělen mezi všechny přispěvatele podle
+                      velikosti jejich příspěvku. Zajímá-li jak by se velikost
+                      vašeho příspevku počítala, podívejte se na{' '}
                       <a href="https://github.com/capaj/contrib-locs">
                         <Button variant={'link'}>projekt contrib-locs</Button>
                       </a>
                     </p>
 
                     <p>
-                      Pokud jste programátor a chcete se podílet na vývoji,
-                      neváhejte mě kontaktovat:
+                      Jste programátor a chcete se podílet na vývoji, neváhejte
+                      <a href="https://github.com/capaj/faktorio">
+                        forknout na GH
+                      </a>
                       <a
                         href="https://twitter.com/capajj"
                         className={'text-xl'}
