@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
+// @ts-ignore
 import { getGitHash } from '../src/getGitHash'
 
 const gitHash = getGitHash()
