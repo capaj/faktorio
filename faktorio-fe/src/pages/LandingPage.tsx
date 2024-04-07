@@ -98,10 +98,7 @@ export const LandingPage = () => {
                     </p>
 
                     <p>
-                      Jste programátor a chcete se podílet na vývoji, neváhejte
-                      <a href="https://github.com/capaj/faktorio">
-                        forknout na GH
-                      </a>
+                      Autor:
                       <a
                         href="https://twitter.com/capajj"
                         className={'text-xl'}
@@ -109,6 +106,12 @@ export const LandingPage = () => {
                         <Button variant={'link'}>
                           <LucideTwitter></LucideTwitter> @capajj
                         </Button>
+                      </a>
+                    </p>
+                    <p>
+                      Jste programátor a chcete se podílet na vývoji, neváhejte{' '}
+                      <a href="https://github.com/capaj/faktorio">
+                        forknout na GH
                       </a>
                     </p>
                   </div>
