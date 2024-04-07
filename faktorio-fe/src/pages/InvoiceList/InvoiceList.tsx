@@ -40,7 +40,6 @@ export function InvoiceList() {
   const total = invoices.reduce((acc, invoice) => acc + invoice.total, 0)
   return (
     <>
-      {q.isInitialLoading && <p>Načítám faktury...</p>}
       <Input
         value={search}
         className="m-4 max-w-[50%]"
@@ -119,6 +118,8 @@ export function InvoiceList() {
               </TableCell>
             </TableRow>
           ))}
+          {q.isInitialLoading && <p>Načítám faktury...</p>}
+
           {invoices.length > 0 && (
             <TableRow className="bg-gray-200">
               <TableCell colSpan={5}>
