@@ -108,12 +108,6 @@ export const LandingPage = () => {
                         </Button>
                       </a>
                     </p>
-                    <p>
-                      Jste programátor a chcete se podílet na vývoji, neváhejte{' '}
-                      <a href="https://github.com/capaj/faktorio">
-                        forknout na GH
-                      </a>
-                    </p>
                   </div>
                   <p>
                     Tech stack projektu je:
@@ -126,6 +120,12 @@ export const LandingPage = () => {
                       <li>Shadcn</li>
                       <li>Cloudflare workers</li>
                     </ul>
+                  </p>
+                  <p>
+                    Jste programátor a chcete se podílet na vývoji, neváhejte{' '}
+                    <a href="https://github.com/capaj/faktorio">
+                      forknout na GH
+                    </a>
                   </p>
                 </CardContent>
               </Card>
