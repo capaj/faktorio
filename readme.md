@@ -16,4 +16,4 @@ Tech stack is:
 ## Project status
 There is already a free invoicing solution which does everything that faktorio does and much more here: https://www.fakturovac.cz/
 Use that one if you need to invoice in Czech republic.
-If fakturovac ever shuts down, I might come back to develop faktorio bit more.
+I might come back to develop faktorio bit more if I ever get bored in the future or when fakturovac shuts down.
