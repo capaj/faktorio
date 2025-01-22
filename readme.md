@@ -16,9 +16,10 @@ Tech stack is:
 ## How to run from scratch for local development
 
 1. `pnpm i`
-2. `cp .env.example .env`
-3. fill in missing env vars
-4. `pnpm dev`
+2. `cd faktorio-fe && cp .env.example .env`
+3. `cd faktorio-api && cp .dev.vars.example .dev.vars`
+4. fill in missing env vars in both files
+5. `pnpm dev`
 
 ## Project status
 
