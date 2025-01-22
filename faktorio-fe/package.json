@@ -14,7 +14,7 @@
     "kill": "kill-port 5174"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^4.30.10",
+    "@clerk/clerk-react": "^5.22.4",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@hookform/resolvers": "^3.10.0",
@@ -47,9 +47,9 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
-    "framer-motion": "^11.17.0",
+    "framer-motion": "^12.0.1",
     "lodash-es": "^4.17.21",
-    "lucide-react": "^0.471.0",
+    "lucide-react": "^0.473.0",
     "next-themes": "^0.4.4",
     "papaparse": "^5.5.1",
     "qrcode": "^1.5.4",
@@ -58,7 +58,7 @@
     "react-day-picker": "^9.5.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
-    "sonner": "^1.7.1",
+    "sonner": "^1.7.2",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "usehooks-ts": "^3.1.0",
@@ -67,20 +67,20 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@types/react": "^19.0.4",
-    "@types/react-dom": "^19.0.2",
-    "@typescript-eslint/eslint-plugin": "^8.19.1",
-    "@typescript-eslint/parser": "^8.19.1",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
     "@vitejs/plugin-react-swc": "^3.7.2",
     "autoprefixer": "^10.4.20",
-    "drizzle-kit": "^0.30.1",
+    "drizzle-kit": "^0.30.2",
     "eslint": "^9.18.0",
     "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.16",
-    "postcss": "^8.4.49",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
-    "vite": "^6.0.7",
-    "wrangler": "^3.101.0"
+    "vite": "^6.0.11",
+    "wrangler": "^3.104.0"
   }
 }

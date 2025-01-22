@@ -1,18 +1,14 @@
-name: Deploy API
+name: Test
 
 on:
   push:
-    paths:
-      - 'faktorio-api/**'
-      - '.github/workflows/deploy-api.yaml'
-
     branches:
       - main
 
 jobs:
-  deploy-api:
+  deploy-fe:
     runs-on: ubuntu-latest
-    name: Deploy API
+    name: Test
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,20 +39,5 @@ jobs:
       - name: Install deps (with cache)
         run: pnpm install
 
-      - name: Deploy API
-        uses: cloudflare/wrangler-action@v3
-        env:
-          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
-          MAILJET_API_SECRET: ${{ secrets.MAILJET_API_SECRET }}
-        with:
-          packageManager: pnpm
-          secrets: |
-            TURSO_DATABASE_URL
-            TURSO_AUTH_TOKEN
-            CLERK_SECRET_KEY
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: './faktorio-api'
+      - name: Test
+        run: pnpm test
