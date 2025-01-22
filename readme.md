@@ -13,6 +13,13 @@ Tech stack is:
 - Shadcn
 - Cloudflare workers
 
+## How to run from scratch for local development
+
+1. `pnpm i`
+2. `cp .env.example .env`
+3. fill in missing env vars
+4. `pnpm dev`
+
 ## Project status
 
 There is already a free invoicing solution which does everything that faktorio does and much more here: https://www.fakturovac.cz/
