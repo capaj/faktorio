@@ -11,6 +11,7 @@
     "Lucide",
     "papaparse",
     "TRPC",
+    "tsndr",
     "turso"
   ],
   "ignoreWords": [],

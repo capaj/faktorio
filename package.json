@@ -6,9 +6,9 @@
     "faktorio-fe"
   ],
   "devDependencies": {
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.4",
-    "vitest": "^1.4.0"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
   },
   "scripts": {
     "dev": "cd faktorio-api && bun dev & cd faktorio-fe && bun dev",
@@ -20,7 +20,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "dayjs": "^1.11.10",
-    "superjson": "^2.2.1"
+    "dayjs": "^1.11.13",
+    "superjson": "^2.2.2"
   }
 }

@@ -10,6 +10,9 @@ const gitHash = getGitHash()
 export default defineConfig({
   clearScreen: false,
   plugins: [react()],
+  server: {
+    cors: true
+  },
   build: {
     rollupOptions: {
       output: {

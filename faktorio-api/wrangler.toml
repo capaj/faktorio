@@ -1,7 +1,7 @@
 name = "faktorio-api"
 main = "src/index.ts"
-compatibility_date = "2024-03-04"
-node_compat = true
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 usage_model = 'unbound'
 
 

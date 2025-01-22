@@ -13,10 +13,16 @@ if (!PUBLISHABLE_KEY) {
   throw new Error('Missing Publishable Key')
 }
 
+if (
+  PUBLISHABLE_KEY.includes('pk_live') &&
+  location.host.includes('localhost')
+) {
+  throw new Error('Publishable key must start with pk_test')
+}
+
 let reactRoot: ReactDOM.Root
 
 export const reactMainRender = () => {
-  // @ts-expect-error
   const reactRootDiv = document.getElementById('root')!
 
   if (reactRoot) {
