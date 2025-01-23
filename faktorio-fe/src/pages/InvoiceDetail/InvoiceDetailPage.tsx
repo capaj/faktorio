@@ -16,7 +16,7 @@ import {
   SelectContent,
   SelectItem
 } from '@/components/ui/select'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export function useInvoiceQueryByUrlParam() {
   const { invoiceId } = useParams()
@@ -34,9 +34,10 @@ export const InvoiceDetailPage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const params = useParams()
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
-  // const [language, setLanguage] = useState(params.language ?? 'cs')
   const language = params.language ?? 'cs'
   const [location, navigate] = useLocation()
+
+  const PdfContent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
 
   return (
     <>
@@ -61,27 +62,23 @@ export const InvoiceDetailPage = () => {
 
         <div className="h-full place-content-center flex">
           <PDFViewer
-            key={new Date().getTime()}
+            key={`pdf-container-${language}-${invoice.id}`}
             showToolbar={false}
             style={{
               width: '70vw',
               height: '1100px'
             }}
           >
-            {language === 'cs' && (
-              <CzechInvoicePDF key={'cs'} invoiceData={invoice} />
-            )}
-            {language === 'en' && (
-              <EnglishInvoicePDF key={'en'} invoiceData={invoice} />
-            )}
+            <PdfContent key={language} invoiceData={invoice} />
           </PDFViewer>
         </div>
+
         <div className="flex content-center justify-center m-4">
           <PDFDownloadLink
-            document={<CzechInvoicePDF invoiceData={invoice} />}
+            document={<PdfContent invoiceData={invoice} />}
             fileName={pdfName}
           >
-            {({ blob, url, loading, error }) =>
+            {({ loading }) =>
               loading ? (
                 'Loading document...'
               ) : (
