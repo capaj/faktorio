@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactPDF, {
+import {
   Document,
   Page,
   Text,
@@ -7,7 +7,8 @@ import ReactPDF, {
   StyleSheet,
   Image,
   Font,
-  Link
+  Link,
+  DocumentProps
 } from '@react-pdf/renderer'
 
 import { formatMoneyEnglish } from '../../lib/formatMoney'
@@ -85,7 +86,7 @@ const Flex = ({
   style
 }: {
   children?: React.ReactNode
-  style?: ReactPDF.DocumentProps['style']
+  style?: DocumentProps['style']
 }) => {
   return (
     <View
@@ -156,7 +157,7 @@ const ItemDescText = ({
   style
 }: {
   children: React.ReactNode
-  style?: ReactPDF.DocumentProps['style']
+  style?: DocumentProps['style']
 }) => {
   return (
     <Text

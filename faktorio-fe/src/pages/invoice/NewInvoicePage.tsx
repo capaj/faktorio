@@ -100,7 +100,7 @@ export const NewInvoice = () => {
         formSchema={formSchema}
         values={formValues}
         onParsedValuesChange={(values) => {
-          setFormValues(values)
+          setFormValues(values as z.infer<typeof formSchema>)
         }}
         fieldConfig={{
           currency: {
@@ -172,13 +172,17 @@ export const NewInvoice = () => {
         <ButtonWithLoader
           isLoading={createInvoice.isLoading}
           onClick={async () => {
-            if (!formValues.client_contact_id) {
+            const contactId = formValues.client_contact_id
+            if (!contactId) {
               alert('Vyberte kontakt')
               return
             }
 
             const newInvoice = await createInvoice.mutateAsync({
-              invoice: formValues,
+              invoice: {
+                ...formValues,
+                client_contact_id: contactId
+              },
               items: invoiceItems
             })
 

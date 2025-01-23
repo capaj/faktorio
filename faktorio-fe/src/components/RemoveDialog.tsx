@@ -84,7 +84,7 @@ export function RemoveDialogUncontrolled({
 
     if (!root.current) {
       root.current = ReactDOM.createRoot(
-        document.getElementById('portal-root') // This is the target for the portal
+        document.getElementById('portal-root') as HTMLElement // This is the target for the portal
       )
     }
     if (!root.current) {

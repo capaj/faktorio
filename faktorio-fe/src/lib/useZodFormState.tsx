@@ -79,7 +79,6 @@ export function useZodFormState<
       }
     },
     parseErrors:
-      // @ts-expect-error typing reduce is hard
       (parseResult.error?.issues.reduce((acc, issue) => {
         return { ...acc, [issue.path[0]]: issue }
       }, {}) as { [key in keyof SchemaOutput]?: { message: string } }) ?? {}

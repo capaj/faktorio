@@ -41,8 +41,10 @@ export const EditInvoicePage = () => {
   const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(
     formSchema.parse({
       ...invoice,
-      issued_on: new Date(invoice.issued_on),
-      taxable_fulfillment_due: new Date(invoice.taxable_fulfillment_due)
+      issued_on: invoice.issued_on ? new Date(invoice.issued_on) : new Date(),
+      taxable_fulfillment_due: invoice.taxable_fulfillment_due
+        ? new Date(invoice.taxable_fulfillment_due)
+        : new Date()
     })
   )
 
@@ -70,7 +72,7 @@ export const EditInvoicePage = () => {
         formSchema={formSchema}
         values={formValues}
         onParsedValuesChange={(values) => {
-          setFormValues(values)
+          setFormValues(values as z.infer<typeof formSchema>)
         }}
         fieldConfig={{
           currency: {
@@ -150,6 +152,10 @@ export const EditInvoicePage = () => {
         <ButtonWithLoader
           isLoading={updateInvoice.isLoading}
           onClick={async () => {
+            if (!invoice.id) {
+              alert('Faktura nebyla nalezena')
+              return
+            }
             if (!formValues.client_contact_id) {
               alert('Vyberte kontakt')
               return
@@ -157,7 +163,10 @@ export const EditInvoicePage = () => {
 
             await updateInvoice.mutateAsync({
               id: invoice.id,
-              invoice: formValues,
+              invoice: {
+                ...formValues,
+                client_contact_id: formValues.client_contact_id
+              },
               items: invoiceItems
             })
 

@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 // @ts-ignore
@@ -9,7 +10,7 @@ const gitHash = getGitHash()
 // https://vitejs.dev/config/
 export default defineConfig({
   clearScreen: false,
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     cors: true
   },

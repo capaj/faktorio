@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -21,7 +20,6 @@ import {
 import { trpcClient } from '@/lib/trpcClient'
 
 import { Link, useParams, useLocation } from 'wouter'
-import { contactCreateFormSchema } from '../../../../faktorio-api/src/routers/contactCreateFormSchema'
 import { useEffect, useState } from 'react'
 import { SpinnerContainer } from '@/components/SpinnerContainer'
 import { z } from 'zod'
@@ -224,7 +222,7 @@ export const ContactList = () => {
     <div>
       {contactId && contactId !== 'new' && (
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-screen-lg overflow-y-scroll max-h-screen">
+          <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
             <DialogHeader>
               <DialogTitle>Editace kontaktu</DialogTitle>
             </DialogHeader>

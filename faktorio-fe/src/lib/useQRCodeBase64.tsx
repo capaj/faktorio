@@ -13,7 +13,7 @@ export const useQRCodeBase64 = (data: string) => {
     document.body.appendChild(canvas)
 
     // Generate the QR code on the canvas
-    QRCode.toCanvas(canvas, data, (error) => {
+    QRCode.toCanvas(canvas, data, (error: any) => {
       if (error) {
         console.error('Error generating QR code:', error)
         return
