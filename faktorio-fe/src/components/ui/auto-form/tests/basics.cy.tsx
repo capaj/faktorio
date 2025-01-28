@@ -1,3 +1,4 @@
+// @ts-nocheck
 import AutoForm from '../index'
 import { z } from 'zod'
 

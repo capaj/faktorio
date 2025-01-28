@@ -11,7 +11,6 @@ export const upsertInvoicingDetailsSchema =
   userInvoicingDetailsInsertSchema.omit({
     created_at: true,
     updated_at: true,
-    id: true,
     user_id: true
   })
 
@@ -31,6 +30,7 @@ export const MyDetails = () => {
         <AutoForm
           formSchema={upsertInvoicingDetailsSchema}
           containerClassName="grid grid-cols-2 gap-x-4"
+          // @ts-expect-error
           fieldConfig={{
             ...fieldConfigForContactForm,
             registration_no: {

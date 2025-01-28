@@ -5,3 +5,4 @@ dist
 .flaskenv*
 !.env.project
 !.env.vault
+.turbo

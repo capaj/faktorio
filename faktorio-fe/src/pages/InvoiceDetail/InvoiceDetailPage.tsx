@@ -16,7 +16,6 @@ import {
   SelectContent,
   SelectItem
 } from '@/components/ui/select'
-import { useState, useEffect } from 'react'
 
 export function useInvoiceQueryByUrlParam() {
   const { invoiceId } = useParams()
@@ -69,22 +68,18 @@ export const InvoiceDetailPage = () => {
               height: '1100px'
             }}
           >
+            {/* @ts-expect-error */}
             <PdfContent key={language} invoiceData={invoice} />
           </PDFViewer>
         </div>
 
         <div className="flex content-center justify-center m-4">
           <PDFDownloadLink
+            // @ts-expect-error
             document={<PdfContent invoiceData={invoice} />}
             fileName={pdfName}
           >
-            {({ loading }) =>
-              loading ? (
-                'Loading document...'
-              ) : (
-                <Button variant={'default'}>Stáhnout {pdfName}</Button>
-              )
-            }
+            <Button variant={'default'}>Stáhnout {pdfName}</Button>
           </PDFDownloadLink>
         </div>
       </div>

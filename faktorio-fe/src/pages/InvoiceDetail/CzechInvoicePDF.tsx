@@ -7,7 +7,8 @@ import ReactPDF, {
   StyleSheet,
   Image,
   Font,
-  Link
+  Link,
+  DocumentProps
 } from '@react-pdf/renderer'
 import { formatMoneyCzech } from '../../lib/formatMoney'
 import {
@@ -98,7 +99,7 @@ const Flex = ({
   style
 }: {
   children?: React.ReactNode
-  style?: ReactPDF.DocumentProps['style']
+  style?: DocumentProps['style']
 }) => {
   return (
     <View
@@ -169,7 +170,7 @@ const ItemDescText = ({
   style
 }: {
   children: React.ReactNode
-  style?: ReactPDF.DocumentProps['style']
+  style?: DocumentProps['style']
 }) => {
   return (
     <Text
@@ -420,7 +421,9 @@ export const CzechInvoicePDF = ({
                 >
                   <FlexRow>
                     <TextLabel>Datum vystavení </TextLabel>
-                    <Text>{reformatDateToCzech(invoiceData.issued_on)}</Text>
+                    <Text>
+                      {reformatDateToCzech(invoiceData.issued_on ?? '')}
+                    </Text>
                   </FlexRow>
                   <FlexRow>
                     <TextLabel>Datum splatnosti </TextLabel>
@@ -429,7 +432,9 @@ export const CzechInvoicePDF = ({
                   <FlexRow>
                     <TextLabel>Datum zdan. plnění </TextLabel>
                     <Text>
-                      {reformatDateToCzech(invoiceData.taxable_fulfillment_due)}
+                      {reformatDateToCzech(
+                        invoiceData.taxable_fulfillment_due ?? ''
+                      )}
                     </Text>
                   </FlexRow>
                 </Flex>
