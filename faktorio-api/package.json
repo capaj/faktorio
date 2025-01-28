@@ -8,7 +8,8 @@
     "start": "wrangler dev",
     "migrate": "tsx migrate.ts",
     "generate": "drizzle-kit generate:sqlite",
-    "kill": "kill -9 $(lsof -t -i:9189)"
+    "kill": "kill -9 $(lsof -t -i:9189)",
+    "tscTODO": "tsc --noEmit"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250124.3",

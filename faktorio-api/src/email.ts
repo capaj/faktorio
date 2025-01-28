@@ -15,13 +15,13 @@ if (
 ) {
   client = {
     post: () => ({
-      request: (attrs) => {
+      request: (attrs: any) => {
         console.log(
           `would have sent emails to ${attrs.Messages.map(
             (m: any) => m.To[0].Email
           ).join(', ')}`
         )
-        sentEmails.push(attrs as any)
+        sentEmails.push(attrs)
         // console.log(sentEmails)
 
         return Promise.resolve({
@@ -44,7 +44,7 @@ export const sendEmail = async (
     Messages: [
       {
         From: {
-          Email: 'admin@faktorio.pages.dev',
+          Email: 'admin@faktorio.cz',
           Name: 'Faktorio.cz'
         },
         To: [

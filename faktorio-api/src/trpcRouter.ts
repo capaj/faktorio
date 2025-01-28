@@ -4,7 +4,7 @@ import { contactRouter } from './routers/contactRouter'
 import { protectedProc } from './isAuthorizedMiddleware'
 import { userInvoicingDetailsInsertSchema } from './zodDbSchemas'
 import { userInvoicingDetailsTb } from './schema'
-import { conflictUpdateSetAll } from './drizzle-utils/aa'
+import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
 import { eq } from 'drizzle-orm'
 import { upsertInvoicingDetailsSchema } from '../../faktorio-fe/src/pages/MyDetails'
 

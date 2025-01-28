@@ -43,6 +43,7 @@ async function verifyToken(token: string) {
       name: 'RSASSA-PKCS1-v1_5',
       hash: { name: 'SHA-256' }
     },
+    // @ts-expect-error
     publicKey, // from getPublicKey(), converted to CryptoKey
     signatureUint8Array,
     data

@@ -1,11 +1,8 @@
 import AutoForm from '@/components/ui/auto-form'
 import { userInvoicingDetailsInsertSchema } from '../../../faktorio-api/src/zodDbSchemas'
 import { fieldConfigForContactForm } from './ContactList/ContactList'
-import { Button } from '@/components/ui/button'
 import { trpcClient } from '@/lib/trpcClient'
 import { FkButton } from '@/components/FkButton'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 
 export const upsertInvoicingDetailsSchema =
   userInvoicingDetailsInsertSchema.omit({

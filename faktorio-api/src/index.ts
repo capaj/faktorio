@@ -40,12 +40,11 @@ async function handleOptions(request: Request) {
   ) {
     // Handle CORS preflight requests.
     return new Response(null, {
-      // @ts-expect-error
       headers: {
         ...corsHeaders,
         'Access-Control-Allow-Headers': request.headers.get(
           'Access-Control-Request-Headers'
-        )
+        ) as string
       }
     })
   } else {
