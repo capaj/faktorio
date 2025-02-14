@@ -164,14 +164,15 @@ function App() {
                         path="/"
                         component={isSignedIn ? InvoiceList : LandingPage}
                       />
-                      <Route path="/blog" component={BlogIndex} />
-                      <Route path="/blog/:slug" component={BlogPost} />
-                      <Route path="/manifest" component={ManifestPage} />
-                      <Route path="/privacy" component={PrivacyPage} />
-                      <Route
-                        path="/terms-of-service"
-                        component={TermsOfServicePage}
-                      />
+                      <Route path="/blog">{() => <BlogIndex />}</Route>
+                      <Route path="/blog/:slug">
+                        {(params) => <BlogPost slug={params.slug} />}
+                      </Route>
+                      <Route path="/manifest">{() => <ManifestPage />}</Route>
+                      <Route path="/privacy">{() => <PrivacyPage />}</Route>
+                      <Route path="/terms-of-service">
+                        {() => <TermsOfServicePage />}
+                      </Route>
 
                       {isSignedIn && (
                         <>
