@@ -11,7 +11,7 @@
     "typescript": "^5.7.3",
     "vitest": "^3.0.3"
   },
-  "packageManager": "pnpm@10",
+  "packageManager": "pnpm@10.4.0",
   "scripts": {
     "dev:fe": "cd faktorio-fe && bun dev",
     "dev:api": "cd faktorio-api && bun dev",
