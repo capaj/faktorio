@@ -25,6 +25,8 @@ import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
 import { LucideMenu } from 'lucide-react'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { TermsOfServicePage } from './pages/TermsOfService'
+import { BlogIndex } from './pages/blog/BlogIndex'
+import { BlogPost } from './pages/blog/BlogPost'
 
 import { ErrorBoundary } from './ErrorBoundary'
 // import {}
@@ -80,6 +82,7 @@ function App() {
                   <MountainIcon className="h-6 w-6" />
                   <span className="sr-only">Faktorio</span>
                 </ButtonLink>
+                <ButtonLink href="/blog">Blog</ButtonLink>
                 <nav className="ml-auto flex gap-4 sm:gap-6">
                   {isSignedIn ? (
                     <>
@@ -161,6 +164,8 @@ function App() {
                         path="/"
                         component={isSignedIn ? InvoiceList : LandingPage}
                       />
+                      <Route path="/blog" component={BlogIndex} />
+                      <Route path="/blog/:slug" component={BlogPost} />
                       <Route path="/manifest" component={ManifestPage} />
                       <Route path="/privacy" component={PrivacyPage} />
                       <Route

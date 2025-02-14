@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": ["/blog-content/*", "/blog/*"],
+  "routes": [
+    {
+      "src": "^/blog/?$",
+      "dest": "/blog/index.html"
+    },
+    {
+      "src": "^/blog/([^/]+)/?$",
+      "dest": "/blog/$1.html"
+    },
+    {
+      "src": "/blog-content/.*",
+      "headers": {
+        "Cache-Control": "public, max-age=86400"
+      }
+    },
+    {
+      "src": "^/blog/.*",
+      "dest": "/blog/index.html"
+    },
+    {
+      "src": ".*",
+      "dest": "/index.html"
+    }
+  ]
+}
