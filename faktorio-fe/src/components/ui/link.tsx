@@ -24,7 +24,11 @@ export function ButtonLink({
     >
       <Button
         variant="link"
-        className={cn(props.className, isActive ? 'underline' : '')}
+        className={cn(
+          props.className,
+          isActive ? 'underline' : '',
+          'cursor-pointer'
+        )}
       >
         {children}
       </Button>
