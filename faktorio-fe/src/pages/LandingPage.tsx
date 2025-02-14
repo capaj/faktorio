@@ -78,6 +78,21 @@ export const LandingPage = () => {
                   se náklady na provoz razantně zvýšily nejspíš přidám do
                   aplikace reklamu a možnost reklamu odstranit za drobný
                   poplatek-například 500 kč ročně.
+                  <p className="mt-3">
+                    Přispět na provoz faktorio.cz můžete zasláním peněz na můj{' '}
+                    <a
+                      className="text-accent underline underline-offset-2 bg-accent text-black"
+                      href="https://revolut.me/capaj"
+                    >
+                      revolut účet
+                    </a>
+                    <br />
+                    Nezapomeňte uvést do poznámky faktorio.cz
+                  </p>
+                  <p className="mt-3">
+                    Preferujete-li kryptoměnu, můžete mi poslat litecoin na
+                    adresu: LKpED8uFA2tj8da8JYNEGWCUNjorEbetrQ
+                  </p>
                 </CardContent>
               </Card>
               <Card>
@@ -121,7 +136,7 @@ export const LandingPage = () => {
                       <li>Cloudflare workers</li>
                     </ul>
                   </p>
-                  <p>
+                  <p className="mt-3">
                     Jste programátor a chcete se podílet na vývoji, neváhejte{' '}
                     <a href="https://github.com/capaj/faktorio">
                       forknout na GH
