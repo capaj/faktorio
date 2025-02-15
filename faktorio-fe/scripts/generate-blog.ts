@@ -10,6 +10,7 @@ import React from 'react'
 const BLOG_DIR = path.join(process.cwd(), 'content/blog')
 const OUTPUT_DIR = path.join(process.cwd(), 'public/blog')
 const JSON_OUTPUT_DIR = path.join(process.cwd(), 'public/blog-content')
+const DIST_INDEX_PATH = path.join(process.cwd(), 'dist/index.html')
 
 interface BlogPost {
   slug: string
@@ -19,24 +20,26 @@ interface BlogPost {
   excerpt: string
 }
 
-const htmlTemplate = (
-  content: string,
-  title: string,
-  description: string
-) => `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
-    <meta name="description" content="${description}">
-    <link rel="stylesheet" href="/src/globals.css">
-</head>
-<body>
-    <div id="root">${content}</div>
-    <script type="module" src="/src/main.tsx"></script>
-</body>
-</html>`
+/**
+ * generates a template for the blog posts based on the dist/index.html
+ */
+function getHtmlTemplate() {
+  const indexHtml = fs.readFileSync(DIST_INDEX_PATH, 'utf-8')
+  return (content: string, title: string, description: string) => {
+    const withTitle = indexHtml.replace(
+      /<title>.*?<\/title>/,
+      `<title>${title}</title>`
+    )
+    const withDescription = withTitle.replace(
+      /<\/title>/,
+      `</title>\n    <meta name="description" content="${description}">`
+    )
+    return withDescription.replace(
+      '<div id="root"></div>',
+      `<div id="root">${content}</div>`
+    )
+  }
+}
 
 async function generateBlog() {
   // Create output directories
@@ -46,6 +49,7 @@ async function generateBlog() {
     }
   })
 
+  const htmlTemplate = getHtmlTemplate()
   const posts: BlogPost[] = []
   const files = fs.readdirSync(BLOG_DIR)
 
