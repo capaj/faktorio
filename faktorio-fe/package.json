@@ -9,7 +9,7 @@
     "checkAndBuild": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "build": "tsx scripts/generate-blog.ts && vite build",
+    "build": "vite build && tsx scripts/generate-blog.ts",
     "generate-blog": "tsx scripts/generate-blog.ts",
     "deploy": "vite build && bunx wrangler pages deploy dist",
     "kill": "kill-port 5174",
