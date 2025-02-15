@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'wouter'
 
@@ -14,7 +15,7 @@ interface BlogIndexProps {
 }
 
 export function BlogIndex({ posts }: BlogIndexProps) {
-  const [sortAscending, setSortAscending] = useState(false)
+  const [sortAscending, setSortAscending] = useState(true)
   const isSSR = typeof window === 'undefined'
 
   const sortedPosts = [...posts].sort((a, b) => {
@@ -22,16 +23,20 @@ export function BlogIndex({ posts }: BlogIndexProps) {
     return order * (new Date(b.date).getTime() - new Date(a.date).getTime())
   })
 
+  const handleSortChange = (value: string) => {
+    setSortAscending(value === 'newest')
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-12">
         <h1 className="text-4xl font-bold">Blog</h1>
-        <Button
-          onClick={() => setSortAscending(!sortAscending)}
-          className="px-4 py-2 text-white rounded"
-        >
-          {sortAscending ? 'Sort Newest First' : 'Sort Oldest First'}
-        </Button>
+        <Tabs defaultValue="newest" onValueChange={handleSortChange}>
+          <TabsList>
+            <TabsTrigger value="oldest">Od nejstaršího</TabsTrigger>
+            <TabsTrigger value="newest">Od nejnovějšího</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       <div className="space-y-12">
         {sortedPosts.map((post) => (
@@ -58,14 +63,14 @@ export function BlogIndex({ posts }: BlogIndexProps) {
                 href={`/blog/${post.slug}`}
                 className="text-blue-600 hover:underline inline-block text-lg"
               >
-                Read more →
+                Celý článek →
               </a>
             ) : (
               <Link
                 href={`/blog/${post.slug}`}
                 className="text-blue-600 hover:underline inline-block text-lg"
               >
-                Read more →
+                Celý článek →
               </Link>
             )}
           </article>
