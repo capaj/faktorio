@@ -29,12 +29,20 @@ import { BlogIndex } from './pages/blog/BlogIndex'
 import { BlogPost } from './pages/blog/BlogPost'
 
 import { ErrorBoundary } from './ErrorBoundary'
-// import {}
+
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
+
+interface BlogPost {
+  slug: string
+  title: string
+  date: string
+  excerpt: string
+}
 
 function App() {
   const [count, setCount] = useState(0)
   const { isSignedIn, user, isLoaded } = useUser()
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
 
   const [location, navigate] = useLocation()
 
@@ -61,9 +69,17 @@ function App() {
       ]
     })
   )
+
+  useEffect(() => {
+    fetch('/blog-content/index.json')
+      .then((res) => res.json())
+      .then((data) => setBlogPosts(data))
+  }, [])
+
   useEffect(() => {
     setIsMenuOpen(false)
   }, [location])
+
   if (!isLoaded) {
     return <SpinnerContainer loading={true} />
   }
@@ -164,7 +180,9 @@ function App() {
                         path="/"
                         component={isSignedIn ? InvoiceList : LandingPage}
                       />
-                      <Route path="/blog">{() => <BlogIndex />}</Route>
+                      <Route path="/blog">
+                        {() => <BlogIndex posts={blogPosts} />}
+                      </Route>
                       <Route path="/blog/:slug">
                         {(params) => <BlogPost slug={params.slug} />}
                       </Route>

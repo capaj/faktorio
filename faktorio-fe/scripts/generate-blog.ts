@@ -58,7 +58,10 @@ async function generateBlog() {
     const slug = file.replace('.md', '')
 
     const htmlContent = await marked(content)
-    const excerpt = content.split('\n')[0].slice(0, 150) + '...'
+    const firstParagraph =
+      content.split('\n').find((line) => line.trim().length > 0) || ''
+    const excerpt =
+      firstParagraph.slice(0, 150) + (firstParagraph.length > 150 ? '...' : '')
 
     const post: BlogPost = {
       slug,
@@ -102,7 +105,7 @@ async function generateBlog() {
 
   // Generate index HTML file using BlogIndex component
   const blogIndexHtml = ReactDOMServer.renderToString(
-    React.createElement(BlogIndexComponent, { initialPosts: posts })
+    React.createElement(BlogIndexComponent, { posts })
   )
 
   fs.writeFileSync(

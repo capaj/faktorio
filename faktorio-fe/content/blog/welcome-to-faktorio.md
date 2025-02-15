@@ -1,6 +1,6 @@
 ---
 title: Vítejte v blogu Faktorio
-date: 2024-03-20
+date: 2024-12-20
 ---
 
 Vítejte v blogu Faktorio! Budeme zde sdílet aktualizace o naší fakturační platformě, tipy pro freelancery a malé firmy a novinky o připravovaných funkcích.

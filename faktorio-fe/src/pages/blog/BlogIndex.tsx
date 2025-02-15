@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'wouter'
 
 interface BlogPost {
@@ -9,26 +10,31 @@ interface BlogPost {
 }
 
 interface BlogIndexProps {
-  initialPosts?: BlogPost[]
+  posts: BlogPost[]
 }
 
-export function BlogIndex({ initialPosts }: BlogIndexProps) {
-  const [posts, setPosts] = useState<BlogPost[]>(initialPosts || [])
+export function BlogIndex({ posts }: BlogIndexProps) {
+  const [sortAscending, setSortAscending] = useState(false)
   const isSSR = typeof window === 'undefined'
 
-  useEffect(() => {
-    if (!initialPosts) {
-      fetch('/blog-content/index.json')
-        .then((res) => res.json())
-        .then((data) => setPosts(data))
-    }
-  }, [initialPosts])
+  const sortedPosts = [...posts].sort((a, b) => {
+    const order = sortAscending ? 1 : -1
+    return order * (new Date(b.date).getTime() - new Date(a.date).getTime())
+  })
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-12">Blog</h1>
+      <div className="flex justify-between items-center mb-12">
+        <h1 className="text-4xl font-bold">Blog</h1>
+        <Button
+          onClick={() => setSortAscending(!sortAscending)}
+          className="px-4 py-2 text-white rounded"
+        >
+          {sortAscending ? 'Sort Newest First' : 'Sort Oldest First'}
+        </Button>
+      </div>
       <div className="space-y-12">
-        {posts.map((post) => (
+        {sortedPosts.map((post) => (
           <article key={post.slug} className="border-b pb-12">
             <h2 className="text-3xl font-semibold mb-3">
               {isSSR ? (

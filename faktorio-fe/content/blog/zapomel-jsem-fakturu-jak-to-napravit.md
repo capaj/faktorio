@@ -1,6 +1,6 @@
 ---
 title: Zapomněl jsem zahrnout fakturu do daňového přiznání, jak to opravit?
-date: 2024-03-20
+date: 2025-02-12
 ---
 
 Mně osobně se to stalo několikrát, a když se mi to stalo teď nedávno, tak mě to motivovalo napsat tento článek, protože postup opravdu není jednoduchý, jak by se zdálo.
