@@ -122,7 +122,7 @@ export const NewInvoice = () => {
             label: 'Poznámka'
           },
           client_contact_id: {
-            label: 'Kontakt',
+            label: 'Odběratel',
             fieldType: ({ field }) => <ContactComboBox {...field} />
           },
           due_in_days: {

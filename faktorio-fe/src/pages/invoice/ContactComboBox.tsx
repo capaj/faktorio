@@ -43,7 +43,7 @@ export function ContactComboBox(props: {
 
   return (
     <div className="flex m-4 center justify-center items-center place-items-center place-content-center">
-      <h4 className="mr-6">Kontakt</h4>
+      <h4 className="mr-6">Odběratel</h4>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -65,7 +65,7 @@ export function ContactComboBox(props: {
             <CommandList>
               <CommandGroup>
                 {contacts.map((contact) => {
-                  const contactKey = contact.id
+                  const contactKey = contact.name ?? contact.id
                   return (
                     <CommandItem
                       key={contactKey}
