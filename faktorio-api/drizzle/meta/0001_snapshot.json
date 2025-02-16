@@ -1,6 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
+  "id": "65b085e7-57f6-4486-b179-6cc7f774f809",
+  "prevId": "c552ac37-7a95-44ae-9562-7ddc2325d67d",
   "tables": {
     "contact": {
       "name": "contact",
@@ -23,7 +25,7 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "street": {
@@ -112,6 +114,14 @@
             "user_id"
           ],
           "isUnique": false
+        },
+        "contact_user_id_name_unique": {
+          "name": "contact_user_id_name_unique",
+          "columns": [
+            "user_id",
+            "name"
+          ],
+          "isUnique": true
         }
       },
       "foreignKeys": {},
@@ -215,15 +225,15 @@
         "invoice_item_invoice_id_invoice_id_fk": {
           "name": "invoice_item_invoice_id_invoice_id_fk",
           "tableFrom": "invoice_item",
+          "tableTo": "invoice",
           "columnsFrom": [
             "invoice_id"
           ],
-          "tableTo": "invoice",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -771,7 +781,7 @@
           "name": "client_contact_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
@@ -796,15 +806,15 @@
         "invoice_client_contact_id_contact_id_fk": {
           "name": "invoice_client_contact_id_contact_id_fk",
           "tableFrom": "invoice",
+          "tableTo": "contact",
           "columnsFrom": [
             "client_contact_id"
           ],
-          "tableTo": "contact",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -957,12 +967,14 @@
       "checkConstraints": {}
     }
   },
+  "views": {},
   "enums": {},
   "_meta": {
+    "schemas": {},
     "tables": {},
     "columns": {}
   },
-  "id": "c552ac37-7a95-44ae-9562-7ddc2325d67d",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "views": {}
+  "internal": {
+    "indexes": {}
+  }
 }

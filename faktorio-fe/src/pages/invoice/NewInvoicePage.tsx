@@ -9,10 +9,7 @@ import { getInvoiceCreateSchema } from './getInvoiceCreateSchema'
 import { djs } from '../../../../src/djs'
 import { useZodFormState } from '@/lib/useZodFormState'
 import { z } from 'zod'
-import {
-  invoiceItemFormSchema,
-  invoiceItemInsertSchema
-} from '../../../../faktorio-api/src/zodDbSchemas'
+import { invoiceItemFormSchema } from '../../../../faktorio-api/src/zodDbSchemas'
 import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
@@ -33,9 +30,13 @@ export const NewInvoice = () => {
   const invoiceOrdinal =
     parseInt(lastInvoice?.number?.split('-')[1] ?? '0', 10) + 1
   const nextInvoiceNumber = `${djs().format('YYYY')}-${invoiceOrdinal.toString().padStart(3, '0')}`
-  const formSchema = getInvoiceCreateSchema(nextInvoiceNumber).extend({
-    client_contact_id: z.string().optional()
-  })
+  const formSchema = getInvoiceCreateSchema(nextInvoiceNumber)
+    .omit({
+      client_contact_id: true
+    })
+    .extend({
+      client_contact_name: z.string().optional()
+    })
   const [location, navigate] = useLocation()
   const createInvoice = trpcClient.invoices.create.useMutation()
   const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(
@@ -92,6 +93,11 @@ export const NewInvoice = () => {
     )
   }
 
+  const contact = contactsQuery.data?.find(
+    (contact: { name: string | null }) =>
+      contact.name === formValues.client_contact_name
+  )
+
   return (
     <div>
       <h2 className="mb-5">Nová faktura</h2>
@@ -99,6 +105,7 @@ export const NewInvoice = () => {
       <AutoForm
         formSchema={formSchema}
         values={formValues}
+        containerClassName="grid grid-cols-2 gap-4"
         onParsedValuesChange={(values) => {
           setFormValues(values as z.infer<typeof formSchema>)
         }}
@@ -121,9 +128,11 @@ export const NewInvoice = () => {
           footer_note: {
             label: 'Poznámka'
           },
-          client_contact_id: {
+          client_contact_name: {
             label: 'Odběratel',
-            fieldType: ({ field }) => <ContactComboBox {...field} />
+            fieldType: ({ field }) => {
+              return <ContactComboBox {...field} />
+            }
           },
           due_in_days: {
             label: 'Splatnost (v dnech)'
@@ -171,17 +180,17 @@ export const NewInvoice = () => {
       <Center>
         <ButtonWithLoader
           isLoading={createInvoice.isLoading}
+          disabled={!contact || total === 0}
           onClick={async () => {
-            const contactId = formValues.client_contact_id
-            if (!contactId) {
-              alert('Vyberte kontakt')
+            if (!contact) {
+              alert('Kontakt nenalezen')
               return
             }
 
             const newInvoice = await createInvoice.mutateAsync({
               invoice: {
                 ...formValues,
-                client_contact_id: contactId
+                client_contact_id: contact.id
               },
               items: invoiceItems
             })

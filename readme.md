@@ -21,6 +21,18 @@ Tech stack is:
 4. fill in missing env vars in both files
 5. `pnpm dev`
 
+## How to generate new migrations
+
+1. `cd faktorio-api`
+2. `pnpm generate`
+
+## How to run migrations
+
+1. `cd faktorio-api`
+2. `pnpm migrate`
+
+Migration do not run on CI. They must be run manually for now.
+
 ## Project status
 
 There is already a free invoicing solution which does everything that faktorio does and much more here: https://www.fakturovac.cz/
@@ -35,3 +47,4 @@ make sure to use `pk_test` clerk key. Clerk won't even load when you use product
 
 - add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
 - add feature to import expense invoices by OCRing them with google gemini 2.0
+- add support for foreign currencies

@@ -20,9 +20,10 @@ import { trpcClient } from '@/lib/trpcClient'
 import { useEffect } from 'react'
 
 export function ContactComboBox(props: {
-  onChange: (value: string) => void
+  onChange?: (value: string) => void
   value: string
   onBlur?: () => void
+  disabled?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
   const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
@@ -36,13 +37,18 @@ export function ContactComboBox(props: {
     if (!value) {
       const lastUsedContactId = lastInvoice?.client_contact_id
       if (lastUsedContactId) {
-        props.onChange(lastUsedContactId) // preselect the last used contact
+        props.onChange?.(lastUsedContactId) // preselect the last used contact
       }
     }
   }, [contactsQuery.data])
 
   return (
-    <div className="flex m-4 center justify-center items-center place-items-center place-content-center">
+    <div
+      className="flex m-4 center justify-center items-center place-items-center place-content-center"
+      style={{
+        opacity: props.disabled ? 0.7 : 1
+      }}
+    >
       <h4 className="mr-6">Odběratel</h4>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -51,9 +57,10 @@ export function ContactComboBox(props: {
             role="combobox"
             aria-expanded={open}
             className="w-[300px] justify-between"
+            disabled={props.disabled}
           >
             {value
-              ? contacts.find((contact) => contact.id === value)?.name
+              ? contacts.find((contact) => contact.name === value)?.name
               : 'Vyberte kontakt...'}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -72,7 +79,7 @@ export function ContactComboBox(props: {
                       value={contactKey}
                       onSelect={(currentValue) => {
                         console.log('currentValue:', currentValue)
-                        props.onChange(
+                        props.onChange?.(
                           currentValue === value ? '' : currentValue
                         )
                         setOpen(false)

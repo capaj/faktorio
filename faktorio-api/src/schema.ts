@@ -116,7 +116,7 @@ export const contactTb = sqliteTable(
       .primaryKey()
       .notNull(),
     user_id: text('user_id').notNull(), // a single user can have multiple of these
-    name: text('name'),
+    name: text('name').notNull(),
     street: text('street'),
     street2: text('street2'),
     city: text('city'),
@@ -133,7 +133,11 @@ export const contactTb = sqliteTable(
   },
   (userInvoicingDetails) => {
     return {
-      userIndex: index('contact_user_idx').on(userInvoicingDetails.user_id)
+      userIndex: index('contact_user_idx').on(userInvoicingDetails.user_id),
+      nameUserUniqueIndex: unique().on(
+        userInvoicingDetails.user_id,
+        userInvoicingDetails.name
+      )
     }
   }
 )

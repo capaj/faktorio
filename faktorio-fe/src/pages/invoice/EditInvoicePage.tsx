@@ -10,9 +10,7 @@ import { djs } from '../../../../src/djs'
 import { useZodFormState } from '@/lib/useZodFormState'
 import { z } from 'zod'
 import {
-  invoiceItemFormSchema,
-  invoiceItemInsertSchema
-} from '../../../../faktorio-api/src/zodDbSchemas'
+  invoiceItemFormSchema} from '../../../../faktorio-api/src/zodDbSchemas'
 import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
@@ -33,14 +31,21 @@ export const EditInvoicePage = () => {
 
   const formSchema = getInvoiceCreateSchema(
     invoice.number ?? djs().get('year').toString()
-  ).extend({
-    client_contact_id: z.string().optional()
+  ).omit({
+    client_contact_id: true
   })
+
+
   const [location, navigate] = useLocation()
   const updateInvoice = trpcClient.invoices.update.useMutation()
+  const contact = contactsQuery.data?.find(
+    (contact) => contact.id === invoice.client_contact_id
+  )
+  console.log('contact', contact)
   const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(
     formSchema.parse({
       ...invoice,
+      client_contact_name: contact?.name,
       issued_on: invoice.issued_on ? new Date(invoice.issued_on) : new Date(),
       taxable_fulfillment_due: invoice.taxable_fulfillment_due
         ? new Date(invoice.taxable_fulfillment_due)
@@ -64,11 +69,16 @@ export const EditInvoicePage = () => {
     0
   )
 
+  if (contactsQuery.data?.length === 0) {
+    return null
+  }
+
   return (
     <div>
       <h2 className="mb-5">Upravit fakturu {invoice.number}</h2>
 
       <AutoForm
+        containerClassName="grid grid-cols-2 gap-4"
         formSchema={formSchema}
         values={formValues}
         onParsedValuesChange={(values) => {
@@ -96,20 +106,15 @@ export const EditInvoicePage = () => {
           footer_note: {
             label: 'Poznámka'
           },
-          // client_contact_id: { // TODO make this work
-          //   label: 'Kontakt',
-          //   fieldType: ({ field }) => <ContactComboBox {...field} />
-          // },
           due_in_days: {
             label: 'Splatnost (v dnech)'
-          },
-          client_contact_id: {
-            inputProps: {
-              disabled: true
-            }
           }
         }}
       ></AutoForm>
+
+      {contact?.name && (
+        <ContactComboBox disabled={true} value={contact.name} />
+      )}
       <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
         <h3 className="flex items-center gap-2">Položky</h3>
         {invoiceItems.map((item, index) => {
@@ -156,16 +161,16 @@ export const EditInvoicePage = () => {
               alert('Faktura nebyla nalezena')
               return
             }
-            if (!formValues.client_contact_id) {
-              alert('Vyberte kontakt')
+
+            if (!contact) {
+              alert('Kontakt nenalezen')
               return
             }
-
             await updateInvoice.mutateAsync({
               id: invoice.id,
               invoice: {
                 ...formValues,
-                client_contact_id: formValues.client_contact_id
+                client_contact_id: contact.id
               },
               items: invoiceItems
             })
@@ -196,7 +201,7 @@ const InvoiceItemForm = ({
   }, [zodForm.formState])
 
   return (
-    <div className="flex justify-between">
+    <div className="grid grid-cols-[2fr_1fr] gap-4">
       <div className="flex gap-4">
         <Input
           className="w-[190px]"
@@ -217,7 +222,7 @@ const InvoiceItemForm = ({
           {...zodForm.inputProps('description')}
         />
       </div>
-      <div className="flex gap-4">
+      <div className="flex gap-4 justify-end">
         <Input
           className="w-32"
           placeholder="cena"

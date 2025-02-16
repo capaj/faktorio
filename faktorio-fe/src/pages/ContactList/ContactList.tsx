@@ -135,7 +135,37 @@ export const ContactList = () => {
   const params = useParams()
 
   const [open, setOpen] = useState(false)
-  const [values, setValues] = useState<z.infer<typeof schema>>({})
+
+  const schema = z.object({
+    registration_no: z.string().min(8).max(8).optional(),
+    vat_no: z.string().optional(),
+    name: z.string().refine(
+      (name) => {
+        // make sure that the name is unique
+        return !contactsQuery.data?.find((contact) => contact.name === name)
+      },
+      {
+        message: 'Kontakt s tímto jménem již existuje'
+      }
+    ),
+    street: z.string().optional(),
+    street2: z.string().optional(),
+    city: z.string().optional(),
+    zip: z.string().optional(),
+    country: z.string().optional(),
+    main_email: z.string().email().nullish(),
+    phone_number: z.string().nullish()
+  })
+
+  const [values, setValues] = useState<z.infer<typeof schema>>({
+    name: '',
+    street: '',
+    street2: '',
+    city: '',
+    zip: '',
+    country: '',
+    main_email: ''
+  })
   const [location, navigate] = useLocation()
   useEffect(() => {
     if (params.contactId) {
@@ -194,30 +224,6 @@ export const ContactList = () => {
 
   const { contactId } = params
 
-  const schema = z.object({
-    registration_no: z.string().min(8).max(8).optional(),
-    vat_no: z.string().optional(),
-    name: z
-      .string()
-      .optional()
-      .refine(
-        (name) => {
-          // make sure that the name is unique
-          return !contactsQuery.data?.find((contact) => contact.name === name)
-        },
-        {
-          message: 'Kontakt s tímto jménem již existuje'
-        }
-      ),
-    street: z.string().optional(),
-    street2: z.string().optional(),
-    city: z.string().optional(),
-    zip: z.string().optional(),
-    country: z.string().optional(),
-    main_email: z.string().email().nullish(),
-    phone_number: z.string().nullish()
-  })
-
   return (
     <div>
       {contactId && contactId !== 'new' && (
@@ -236,6 +242,7 @@ export const ContactList = () => {
               onSubmit={async (values) => {
                 await update.mutateAsync({
                   ...values,
+                  name: values.name as string,
                   id: contactId as string
                 })
                 contactsQuery.refetch()
