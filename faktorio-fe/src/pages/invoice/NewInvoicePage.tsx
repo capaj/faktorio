@@ -30,13 +30,9 @@ export const NewInvoice = () => {
   const invoiceOrdinal =
     parseInt(lastInvoice?.number?.split('-')[1] ?? '0', 10) + 1
   const nextInvoiceNumber = `${djs().format('YYYY')}-${invoiceOrdinal.toString().padStart(3, '0')}`
-  const formSchema = getInvoiceCreateSchema(nextInvoiceNumber)
-    .omit({
-      client_contact_id: true
-    })
-    .extend({
-      client_contact_name: z.string().optional()
-    })
+  const formSchema = getInvoiceCreateSchema(nextInvoiceNumber).extend({
+    client_contact_name: z.string()
+  })
   const [location, navigate] = useLocation()
   const createInvoice = trpcClient.invoices.create.useMutation()
   const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(
@@ -44,6 +40,17 @@ export const NewInvoice = () => {
       due_in_days: 14
     })
   )
+
+  const { data: rate } = trpcClient.invoices.getRateForCurrency.useQuery(
+    { currency: formValues.currency },
+    { enabled: formValues.currency !== 'CZK' }
+  )
+
+  useEffect(() => {
+    if (rate && formValues.currency !== 'CZK') {
+      setFormValues({ ...formValues, exchange_rate: rate })
+    }
+  }, [rate])
 
   const [invoiceItems, setInvoiceItems] = useState<
     z.infer<typeof invoiceItemFormSchema>[]
@@ -111,7 +118,14 @@ export const NewInvoice = () => {
         }}
         fieldConfig={{
           currency: {
-            label: 'Měna'
+            label: 'Měna',
+            fieldType: ({ field }) => (
+              <select {...field}>
+                <option value="CZK">CZK</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+              </select>
+            )
           },
           issued_on: {
             label: 'Datum vystavení faktury'
@@ -136,6 +150,10 @@ export const NewInvoice = () => {
           },
           due_in_days: {
             label: 'Splatnost (v dnech)'
+          },
+          exchange_rate: {
+            label: 'Kurz',
+            fieldType: ({ field }) => <Input disabled={true} {...field} />
           }
         }}
       ></AutoForm>

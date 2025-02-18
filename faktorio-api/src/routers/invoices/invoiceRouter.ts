@@ -12,6 +12,7 @@ import { getInvoiceCreateSchema } from '../../../../faktorio-fe/src/pages/invoic
 import { djs } from '../../../../src/djs'
 import { invoiceItemFormSchema } from '../../zodDbSchemas'
 import { getInvoiceSums } from './getInvoiceSums'
+import { getCurrencyRates } from '../../utils/getCurrencyRates'
 
 const invoiceSchema = getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001')
 const dateSchema = z
@@ -274,5 +275,11 @@ export const invoiceRouter = trpcContext.router({
           )
           .execute()
       })
+    }),
+  getRateForCurrency: protectedProc
+    .input(z.object({ currency: z.string() }))
+    .query(async ({ input }) => {
+      const rates = await getCurrencyRates()
+      return rates[input.currency] ?? null
     })
 })

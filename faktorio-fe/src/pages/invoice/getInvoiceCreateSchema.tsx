@@ -13,7 +13,8 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
       footer_note: true,
       taxable_fulfillment_due: true,
       due_in_days: true,
-      client_contact_id: true
+      client_contact_id: true,
+      exchange_rate: true
     })
     .extend({
       // @ts-expect-error
