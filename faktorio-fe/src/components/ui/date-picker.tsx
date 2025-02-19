@@ -24,10 +24,12 @@ export const DatePicker = forwardRef<
     date ? format(date, 'yyyy-MM-dd') : ''
   )
   const [isInvalid, setIsInvalid] = useState(false)
+  const [calendarMonth, setCalendarMonth] = useState<Date | undefined>(date)
 
   useEffect(() => {
     setInputValue(date ? format(date, 'yyyy-MM-dd') : '')
     setIsInvalid(false)
+    setCalendarMonth(date)
   }, [date])
 
   return (
@@ -42,6 +44,7 @@ export const DatePicker = forwardRef<
           if (!value) {
             setDate(undefined)
             setIsInvalid(false)
+            setCalendarMonth(undefined)
             return
           }
 
@@ -56,6 +59,7 @@ export const DatePicker = forwardRef<
 
           if (valid) {
             setDate(parsed)
+            setCalendarMonth(parsed)
           }
         }}
         className={cn(isInvalid && 'border-red-500 focus-visible:ring-red-500')}
@@ -74,6 +78,7 @@ export const DatePicker = forwardRef<
           <Calendar
             mode="single"
             selected={date}
+            defaultMonth={calendarMonth}
             onSelect={(newDate) => {
               setDate(newDate)
             }}

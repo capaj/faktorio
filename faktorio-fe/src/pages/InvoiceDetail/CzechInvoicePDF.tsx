@@ -261,18 +261,22 @@ export const CzechInvoicePDF = ({
                 >
                   <Text
                     style={{
-                      fontSize: 13
+                      fontSize: 13,
+                      marginLeft: 10,
+                      marginTop: -20
                     }}
                   >
                     QR platba:
                   </Text>
-                  <Image
-                    style={{
-                      width: 100,
-                      height: 100
-                    }}
-                    source={qrCodeBase64}
-                  ></Image>
+                  {qrCodeBase64 && (
+                    <Image
+                      style={{
+                        width: 100,
+                        height: 100
+                      }}
+                      source={qrCodeBase64}
+                    ></Image>
+                  )}
                 </View>
               </View>
               <Flex
