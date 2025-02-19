@@ -33,7 +33,7 @@ export function AutoFormSubmit({
 function AutoForm<SchemaType extends ZodObjectOrWrapped>({
   formSchema,
   values: valuesProp,
-  onValuesChange: onValuesChangeProp,
+  onValuesChange,
   onParsedValuesChange,
   onSubmit: onSubmitProp,
   fieldConfig,
@@ -44,7 +44,7 @@ function AutoForm<SchemaType extends ZodObjectOrWrapped>({
 }: {
   formSchema: SchemaType
   values?: Partial<z.infer<SchemaType>>
-  onValuesChange?: (values: Partial<z.infer<SchemaType>>) => void
+  onValuesChange?: (values: z.infer<SchemaType>) => void
   onParsedValuesChange?: (values: z.infer<SchemaType>) => void
   onSubmit?: (values: z.infer<SchemaType>) => void
   fieldConfig?: FieldConfig<z.infer<SchemaType>>
@@ -75,7 +75,8 @@ function AutoForm<SchemaType extends ZodObjectOrWrapped>({
   const valuesString = JSON.stringify(values)
 
   React.useEffect(() => {
-    onValuesChangeProp?.(values)
+    onValuesChange?.(values)
+
     const parsedValues = formSchema.safeParse(values)
     if (parsedValues.success) {
       onParsedValuesChange?.(parsedValues.data)

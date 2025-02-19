@@ -41,7 +41,7 @@ const AddressSchema = z.object({
   kodAdresnihoMista: z.number(),
   psc: z.number(),
   textovaAdresa: z.string(),
-  typCisloDomovni: z.string(),
+  typCisloDomovni: z.number(),
   standardizaceAdresy: z.boolean(),
   kodSpravnihoObvodu: z.number().optional(),
   nazevSpravnihoObvodu: z.string().optional(),
@@ -54,7 +54,7 @@ const AddressSchema = z.object({
 
 const DeliveryAddressSchema = z.object({
   radekAdresy1: z.string(),
-  radekAdresy2: z.string(),
+  radekAdresy2: z.string().optional(),
   radekAdresy3: z.string().optional() // Added optional third line
 })
 
@@ -153,7 +153,7 @@ export const ContactList = () => {
     city: z.string().optional(),
     zip: z.string().optional(),
     country: z.string().optional(),
-    main_email: z.string().email().nullish(),
+    main_email: z.string().email().nullable(),
     phone_number: z.string().nullish()
   })
 
@@ -164,7 +164,7 @@ export const ContactList = () => {
     city: '',
     zip: '',
     country: '',
-    main_email: ''
+    main_email: null
   })
   const [location, navigate] = useLocation()
   useEffect(() => {
@@ -202,9 +202,10 @@ export const ContactList = () => {
         const parse = AresBusinessInformationSchema.safeParse(
           await aresResponse.json()
         )
-
+        console.log('parse', parse)
         if (parse.success) {
           const aresData = parse.data
+          console.log('aresData', aresData)
           setValues({
             ...values,
             name: aresData.obchodniJmeno,
@@ -234,16 +235,21 @@ export const ContactList = () => {
             </DialogHeader>
 
             <AutoForm
+              containerClassName="grid grid-cols-2 gap-4"
               formSchema={schema}
               values={values}
               onParsedValuesChange={(values) => {
+                setValues(values)
+              }}
+              onValuesChange={(values) => {
                 setValues(values)
               }}
               onSubmit={async (values) => {
                 await update.mutateAsync({
                   ...values,
                   name: values.name as string,
-                  id: contactId as string
+                  id: contactId as string,
+                  main_email: values.main_email || null
                 })
                 contactsQuery.refetch()
                 setOpen(false)
@@ -274,11 +280,11 @@ export const ContactList = () => {
         </Dialog>
       )}
       {(!contactId || contactId === 'new') && (
-        <Dialog open={Boolean(open)} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger>
             <Button variant={'default'}>Přidat klienta</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-screen-lg overflow-y-scroll max-h-screen">
+          <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
             <DialogHeader>
               <DialogTitle>Nový kontakt</DialogTitle>
             </DialogHeader>
@@ -287,6 +293,10 @@ export const ContactList = () => {
               formSchema={schema}
               values={values}
               onParsedValuesChange={setValues}
+              onValuesChange={(values) => {
+                setValues(values)
+              }}
+              containerClassName="grid grid-cols-2 gap-4"
               onSubmit={async (values) => {
                 // @ts-expect-error
                 await create.mutateAsync(values)
