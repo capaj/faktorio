@@ -48,3 +48,7 @@ make sure to use `pk_test` clerk key. Clerk won't even load when you use product
 - add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
 - add feature to import expense invoices by OCRing them with google gemini 2.0
 - add support for foreign currencies
+- localfirst
+- DPH priznani na konci roku
+- import z fakturoidu
+- calendar selector

@@ -1,5 +1,5 @@
 'use client'
-import { format } from 'date-fns'
+import { format, parse, isValid } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -10,7 +10,8 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
-import { forwardRef } from 'react'
+import { forwardRef, useState, useEffect } from 'react'
+import { Input } from './input'
 
 export const DatePicker = forwardRef<
   HTMLDivElement,
@@ -19,28 +20,67 @@ export const DatePicker = forwardRef<
     setDate: (date?: Date) => void
   }
 >(function DatePickerCmp({ date, setDate }, ref) {
+  const [inputValue, setInputValue] = useState(
+    date ? format(date, 'yyyy-MM-dd') : ''
+  )
+  const [isInvalid, setIsInvalid] = useState(false)
+
+  useEffect(() => {
+    setInputValue(date ? format(date, 'yyyy-MM-dd') : '')
+    setIsInvalid(false)
+  }, [date])
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant={'outline'}
-          className={cn(
-            'w-full justify-start text-left font-normal',
-            !date && 'text-muted-foreground'
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, 'PPP') : <span>Pick a date</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" ref={ref}>
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={setDate}
-          initialFocus
-        />
-      </PopoverContent>
-    </Popover>
+    <div className="flex gap-2">
+      <Input
+        type="text"
+        value={inputValue}
+        onChange={(e) => {
+          const value = e.target.value
+          setInputValue(value)
+
+          if (!value) {
+            setDate(undefined)
+            setIsInvalid(false)
+            return
+          }
+
+          if (value.length !== 10) {
+            setIsInvalid(true)
+            return
+          }
+
+          const parsed = parse(value, 'yyyy-MM-dd', new Date())
+          const valid = isValid(parsed)
+          setIsInvalid(!valid)
+
+          if (valid) {
+            setDate(parsed)
+          }
+        }}
+        className={cn(isInvalid && 'border-red-500 focus-visible:ring-red-500')}
+        placeholder="YYYY-MM-DD"
+      />
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant={'outline'}
+            className={cn('px-3', !date && 'text-muted-foreground')}
+          >
+            <CalendarIcon className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" ref={ref}>
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(newDate) => {
+              setDate(newDate)
+            }}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
   )
 })
