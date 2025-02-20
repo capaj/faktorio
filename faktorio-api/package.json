@@ -9,7 +9,8 @@
     "migrate": "tsx migrate.ts",
     "generate": "drizzle-kit generate",
     "dup": "drizzle-kit up",
-    "kill": "kill -9 $(lsof -t -i:9189)"
+    "kill": "kill -9 $(lsof -t -i:9189)",
+    "test": "vitest"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250214.0",
@@ -17,6 +18,7 @@
     "@types/jsonwebtoken": "^9.0.8",
     "drizzle-kit": "^0.30.4",
     "typescript": "^5.7.3",
+    "vitest": "^3.0.6",
     "wrangler": "^3.109.2"
   },
   "dependencies": {

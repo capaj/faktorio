@@ -13,7 +13,8 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
       footer_note: true,
       taxable_fulfillment_due: true,
       due_in_days: true,
-      client_contact_id: true
+      client_contact_id: true,
+      exchange_rate: true
     })
     .extend({
       // @ts-expect-error
@@ -25,7 +26,8 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
         .default('bank'),
       taxable_fulfillment_due: z
         .date()
-        .default(djs().subtract(1, 'month').endOf('month').toDate())
+        .default(djs().subtract(1, 'month').endOf('month').toDate()),
+      exchange_rate: z.number().default(1)
       // due_on: z.date().default(djs().add(14, 'day').toDate())
       // sent_at: z.date().nullable().default(null),
       // paid_on: z.date().nullable().default(null),

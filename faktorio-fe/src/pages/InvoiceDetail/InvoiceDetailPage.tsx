@@ -28,7 +28,7 @@ export function useInvoiceQueryByUrlParam() {
   })
   return invoiceQuery
 }
-
+// TODO here we currently only show the invoice PDF, but we should also show the invoice details
 export const InvoiceDetailPage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const params = useParams()

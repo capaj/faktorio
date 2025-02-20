@@ -12,12 +12,14 @@ import { getInvoiceCreateSchema } from '../../../../faktorio-fe/src/pages/invoic
 import { djs } from '../../../../src/djs'
 import { invoiceItemFormSchema } from '../../zodDbSchemas'
 import { getInvoiceSums } from './getInvoiceSums'
+import { getCNBExchangeRate } from './getCNBExchangeRate'
 
 const invoiceSchema = getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001')
 const dateSchema = z
   .string()
   .nullish()
   .refine((v) => !v || djs(v).isValid(), 'Invalid date')
+
 export const invoiceRouter = trpcContext.router({
   create: protectedProc
     .input(
@@ -30,9 +32,6 @@ export const invoiceRouter = trpcContext.router({
       const invoiceItems = input.items
       const invoiceSums = getInvoiceSums(invoiceItems)
 
-      if (input.invoice.currency !== 'CZK') {
-        throw new Error('Currency not supported') // TODO add support for other currencies
-      }
       const client = await ctx.db.query.contactTb
         .findFirst({
           where: eq(contactTb.id, input.invoice.client_contact_id)
@@ -274,5 +273,15 @@ export const invoiceRouter = trpcContext.router({
           )
           .execute()
       })
+    }),
+  getExchangeRate: protectedProc
+    .input(
+      z.object({
+        currency: z.string(),
+        date: z.date().nullish()
+      })
+    )
+    .query(async ({ input }) => {
+      return getCNBExchangeRate(input.currency, input.date)
     })
 })

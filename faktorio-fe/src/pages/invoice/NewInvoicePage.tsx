@@ -26,6 +26,7 @@ export const NewInvoice = () => {
   const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
+  const utils = trpcClient.useUtils()
 
   const invoiceOrdinal =
     parseInt(lastInvoice?.number?.split('-')[1] ?? '0', 10) + 1
@@ -44,6 +45,29 @@ export const NewInvoice = () => {
       due_in_days: 14
     })
   )
+
+  useEffect(() => {
+    if (formValues.currency === 'CZK') {
+      setFormValues((prev) => ({
+        ...prev,
+        exchange_rate: 1
+      }))
+      return
+    }
+    const fetchRate = async () => {
+      const rate = await utils.invoices.getExchangeRate.fetch({
+        currency: formValues.currency,
+        date: formValues.taxable_fulfillment_due
+      })
+      if (rate !== null) {
+        setFormValues((prev) => ({
+          ...prev,
+          exchange_rate: rate
+        }))
+      }
+    }
+    fetchRate()
+  }, [formValues.currency])
 
   const [invoiceItems, setInvoiceItems] = useState<
     z.infer<typeof invoiceItemFormSchema>[]
@@ -97,6 +121,7 @@ export const NewInvoice = () => {
     (contact: { name: string | null }) =>
       contact.name === formValues.client_contact_name
   )
+  const isCzkInvoice = formValues.currency !== 'CZK'
 
   return (
     <div>
@@ -136,6 +161,14 @@ export const NewInvoice = () => {
           },
           due_in_days: {
             label: 'Splatnost (v dnech)'
+          },
+          exchange_rate: {
+            inputProps: {
+              type: 'number',
+              min: 0,
+              disabled: !isCzkInvoice
+            },
+            label: 'Kurz'
           }
         }}
       ></AutoForm>
@@ -170,12 +203,36 @@ export const NewInvoice = () => {
           </Button>
         </div>
       </div>
-      <div className="flex gap-6 flex-col items-end justify-end mt-8">
-        <h3>
-          Celkem: {total} {formValues.currency}
-        </h3>
-        <h3>DPH: {totalVat} </h3>
-        <h3>Celkem s DPH: {(total + totalVat).toFixed(2)} </h3>
+      <div className="grid grid-cols-2 gap-6 mt-8">
+        <>
+          {isCzkInvoice && (
+            <span className="text-sm text-gray-500">
+              Celkem: {total * formValues.exchange_rate} CZK
+            </span>
+          )}
+          <h3
+            className={`text-md text-right ${isCzkInvoice ? '' : 'col-span-2'}`}
+          >
+            Celkem: {total} {formValues.currency}
+          </h3>
+          {isCzkInvoice && (
+            <span className="text-sm text-gray-500">
+              DPH: {totalVat * formValues.exchange_rate} CZK
+            </span>
+          )}
+          <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
+            DPH: {totalVat} {formValues.currency}
+          </h3>
+
+          {isCzkInvoice && (
+            <span className="text-sm text-gray-500">
+              Celkem s DPH: {(total + totalVat) * formValues.exchange_rate} CZK
+            </span>
+          )}
+          <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
+            Celkem s DPH: {(total + totalVat).toFixed(2)} {formValues.currency}
+          </h3>
+        </>
       </div>
       <Center>
         <ButtonWithLoader
