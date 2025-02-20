@@ -35,20 +35,34 @@ Migration do not run on CI. They must be run manually for now.
 
 ## Project status
 
-There is already a free invoicing solution which does everything that faktorio does and much more here: https://www.fakturovac.cz/
-Use that one if you need to invoice in Czech republic.
-I might come back to develop faktorio bit more if I ever get bored in the future or when fakturovac shuts down or turns into paid only
+Project is under active development. The aim is to make this a number one invoicing app in Czech republic for freelancers and small companies.
 
 ## Common issues
 
 make sure to use `pk_test` clerk key. Clerk won't even load when you use production key on localhost
 
-## TODO
+## Planned features
 
 - add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
 - add feature to import expense invoices by OCRing them with google gemini 2.0
 - add support for foreign currencies
-- localfirst
-- DPH priznani na konci roku
-- import z fakturoidu
-- calendar selector
+- local-first and offline-first
+- DPH priznani at the end of the year
+- import from fakturoid
+- automated DPH and Kontrolni hlaseni submission to ADIS every month/quarter for you with automated pupeteer script
+
+## Features
+
+- generate invoice PDF
+- search through invoices
+- contact management(integrated with ARES)
+- support for foreign currencies ![nová faktura](images/cdc8dd7ed308322d42c6d5af6b481be7f7dff3cca6de0dcb16921f0e6f44ccbb.png)
+- export invoices to Excel, CSV
+
+## Free Alternatives
+
+### https://www.fakturovac.cz/
+
+- has most features same as faktorio, but it does not have any other currencies than CZK, so you cannot invoice in EUR for example
+
+## Paid Alternatives
