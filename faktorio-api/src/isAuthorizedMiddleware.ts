@@ -1,8 +1,8 @@
 import { TRPCError } from '@trpc/server'
 import { loggerMiddleware } from './loggerMiddleware'
-import { trpcContext } from './trpcContext'
+import { tc } from './trpcContext'
 
-const isAuthorizedMiddleware = trpcContext.middleware(async ({ ctx, next }) => {
+const isAuthorizedMiddleware = tc.middleware(async ({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
@@ -16,6 +16,6 @@ const isAuthorizedMiddleware = trpcContext.middleware(async ({ ctx, next }) => {
   })
 })
 
-export const protectedProc = trpcContext.procedure
+export const protectedProc = tc.procedure
   .use(loggerMiddleware)
   .use(isAuthorizedMiddleware)

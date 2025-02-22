@@ -1,12 +1,12 @@
 import { z } from 'zod'
-import { contactTb, invoicesTb } from '../schema'
-import { trpcContext } from '../trpcContext'
-import { and, count, desc, eq, like } from 'drizzle-orm'
+import { contactTb } from '../schema'
+import { tc } from '../trpcContext'
+import { and, asc, desc, eq, like } from 'drizzle-orm'
 import { contactCreateFormSchema } from './contactCreateFormSchema'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { contactInsertSchema } from '../zodDbSchemas'
 
-export const contactRouter = trpcContext.router({
+export const contactRouter = tc.router({
   all: protectedProc
     .input(
       z

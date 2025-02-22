@@ -1,5 +1,5 @@
 {
-  "name": "faktorio",
+  "name": "faktorio-fe",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -36,7 +36,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@react-oauth/google": "^0.12.1",
     "@react-pdf/renderer": "^4.3.0",
-    "@tanstack/react-query": "5",
+    "@tanstack/react-query": "^5.72.0",
     "@trpc/client": "^11.0.3",
     "@trpc/react-query": "^11.0.3",
     "@trpc/server": "^11.0.3",
@@ -64,6 +64,7 @@
     "react-hook-form": "^7.55.0",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
+    "sql.js": "^1.13.0",
     "tailwindcss-animate": "^1.0.7",
     "usehooks-ts": "^3.1.1",
     "wouter": "^3.6.0",
@@ -74,6 +75,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.3",
     "@types/qrcode": "^1.5.5",
+    "@types/sql.js": "^1.4.9",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
     "@vitejs/plugin-react-swc": "^3.8.1",
