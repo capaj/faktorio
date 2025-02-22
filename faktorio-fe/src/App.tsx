@@ -17,8 +17,12 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AuthProvider, useAuth } from './lib/AuthContext'
 
 import { ErrorBoundary } from './ErrorBoundary'
-import { Header } from './components/Header'
-import { SignedInRoutes } from './SignedInRoutes'
+import { PocPage } from './pages/dev/poc'
+import { appRouter } from '../../faktorio-api/src/trpcRouter'
+import { RUN_LOCAL_FIRST } from './RUN_LOCAL_FIRST'
+import { tc } from '../../faktorio-api/src/trpcContext'
+import { initSqlDb } from './lib/initSql'
+const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
 interface BlogPost {
   slug: string
@@ -27,12 +31,50 @@ interface BlogPost {
   excerpt: string
 }
 
-function AppContent() {
+const createCaller = tc.createCallerFactory(appRouter)
+
+function App() {
+  const [count, setCount] = useState(0)
+  const { isSignedIn, user, isLoaded } = useUser()
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
   const [location] = useLocation()
   const { isLoaded, token } = useAuth()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [queryClient] = useState(() => new QueryClient())
+  const [trpc] = useState<any>(() => {
+    if (RUN_LOCAL_FIRST) {
+      const caller = createCaller({
+        sessionId: '123',
+        userId: '123',
+        db: {}
+      })
+
+      caller.test().then((res) => {
+        console.log(res)
+      })
+      return caller
+    } else {
+      return trpcClient.createClient({
+        transformer: SuperJSON,
+
+        links: [
+          ...trpcLinks,
+          httpBatchLink({
+            url: VITE_API_URL,
+            // You can pass any HTTP headers you wish here
+            async headers() {
+              const token = await getToken()
+
+              return {
+                authorization: `Bearer ${token}`
+              }
+            }
+          })
+        ]
+      })
+    }
+  })
 
   useEffect(() => {
     fetch('/blog-content/index.json')
@@ -82,10 +124,98 @@ function AppContent() {
 
                   {token && <SignedInRoutes />}
 
-                  {/* Default route in a switch */}
-                  <Route>404: Bohužel neexistuje!</Route>
-                </Switch>
-              </Suspense>
+                          <ButtonLink
+                            className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                            href="/new-invoice"
+                          >
+                            Vystavit fakturu
+                          </ButtonLink>
+
+                          <ButtonLink
+                            className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                            href="/my-details"
+                          >
+                            Moje údaje
+                          </ButtonLink>
+                        </SheetContent>
+                      </Sheet>
+                    </>
+                  ) : (
+                    <SignInButton>
+                      <Button
+                        variant="link"
+                        className="text-sm font-medium hover:underline underline-offset-4"
+                      >
+                        Přihlásit se
+                      </Button>
+                    </SignInButton>
+                  )}
+                </nav>
+              </header>
+              <main className="flex-1">
+                <div className="container mx-auto p-4">
+                  <Suspense fallback={<SpinnerContainer loading={true} />}>
+                    <Switch>
+                      <Route
+                        path="/"
+                        component={isSignedIn ? InvoiceList : LandingPage}
+                      />
+                      <Route path="/blog">
+                        {() => <BlogIndex posts={blogPosts} />}
+                      </Route>
+                      <Route path="/blog/:slug">
+                        {(params) => <BlogPost slug={params.slug} />}
+                      </Route>
+                      <Route path="/manifest">{() => <ManifestPage />}</Route>
+                      <Route path="/privacy">{() => <PrivacyPage />}</Route>
+                      <Route path="/poc">{() => <PocPage />}</Route>
+                      <Route path="/terms-of-service">
+                        {() => <TermsOfServicePage />}
+                      </Route>
+
+                      {isSignedIn && (
+                        <>
+                          <Route
+                            path="/invoices"
+                            component={InvoiceList}
+                          ></Route>
+                          <Route
+                            path="/contacts"
+                            component={ContactList}
+                          ></Route>
+                          <Route
+                            path="/contacts/:contactId"
+                            component={ContactList}
+                          ></Route>
+                          <Route
+                            path="/new-invoice"
+                            component={NewInvoice}
+                          ></Route>
+                          <Route
+                            path="/my-details"
+                            component={MyDetails}
+                          ></Route>
+                          <Route
+                            path="/invoices/:invoiceId/edit"
+                            component={EditInvoicePage}
+                          ></Route>
+                          <Route
+                            path="/invoices/:invoiceId"
+                            component={InvoiceDetailPage}
+                          ></Route>
+                          <Route
+                            path="/invoices/:invoiceId/:language"
+                            component={InvoiceDetailPage}
+                          ></Route>
+                        </>
+                      )}
+
+                      {/* Default route in a switch */}
+                      <Route>404: Bohužel neexistuje!</Route>
+                    </Switch>
+                  </Suspense>
+                </div>
+              </main>
             </div>
           </main>
         </div>

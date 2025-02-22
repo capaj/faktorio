@@ -1,3 +1,4 @@
 packages:
   - 'faktorio-api/**'
   - 'faktorio-fe/**'
+  - 'fuck/**'
