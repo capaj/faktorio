@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
+
 // @ts-ignore
 import { getGitHash } from '../src/getGitHash'
 
@@ -14,6 +15,7 @@ export default defineConfig({
   server: {
     cors: true
   },
+  assetsInclude: ['**/*.sql'],
   build: {
     rollupOptions: {
       output: {
@@ -27,7 +29,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src'),
+      '@api': path.resolve(__dirname, '../faktorio-api')
     }
   }
 })

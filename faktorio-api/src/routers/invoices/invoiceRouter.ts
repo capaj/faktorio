@@ -5,7 +5,7 @@ import {
   invoicesTb,
   userInvoicingDetailsTb
 } from '../../schema'
-import { trpcContext } from '../../trpcContext'
+import { tc } from '../../trpcContext'
 import { SQL, and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm'
 import { protectedProc } from '../../isAuthorizedMiddleware'
 import { getInvoiceCreateSchema } from '../../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
@@ -20,7 +20,7 @@ const dateSchema = z
   .nullish()
   .refine((v) => !v || djs(v).isValid(), 'Invalid date')
 
-export const invoiceRouter = trpcContext.router({
+export const invoiceRouter = tc.router({
   create: protectedProc
     .input(
       z.object({

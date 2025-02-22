@@ -9,6 +9,8 @@ export type TrpcContext = {
   sessionId: string | undefined
 }
 
-export const trpcContext = initTRPC.context<TrpcContext>().create({
-  transformer: superjson
+export const tc = initTRPC.create({
+  transformer: superjson,
+  allowOutsideOfServer: true,
+  isServer: false
 })
