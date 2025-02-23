@@ -19,8 +19,8 @@ importers:
         version: 2.2.2
     devDependencies:
       prettier:
-        specifier: ^3.5.1
-        version: 3.5.1
+        specifier: ^3.5.2
+        version: 3.5.2
       turbo:
         specifier: ^2.4.2
         version: 2.4.2
@@ -70,8 +70,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0(drizzle-orm@0.39.3(@cloudflare/workers-types@4.20250214.0)(@libsql/client@0.14.0))(zod@3.24.2)
       jose:
-        specifier: ^5.10.0
-        version: 5.10.0
+        specifier: ^6.0.4
+        version: 6.0.4
       node-mailjet:
         specifier: ^6.0.6
         version: 6.0.6(debug@4.4.0)
@@ -86,8 +86,8 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
       '@types/jsonwebtoken':
-        specifier: ^9.0.8
-        version: 9.0.8
+        specifier: ^9.0.9
+        version: 9.0.9
       drizzle-kit:
         specifier: ^0.30.4
         version: 0.30.4
@@ -2288,8 +2288,8 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@types/jsonwebtoken@9.0.8':
-    resolution: {integrity: sha512-7fx54m60nLFUVYlxAB1xpe9CBWX2vSrk50Y6ogRJ1v5xxtba7qXTg5BgYDN5dq+yuQQ9HaVlHJyAAt1/mxryFg==}
+  '@types/jsonwebtoken@9.0.9':
+    resolution: {integrity: sha512-uoe+GxEuHbvy12OUQct2X9JenKM3qAscquYymuQN4fMWG9DBQtykrQEFcAbVACF7qaLw9BePSodUL0kquqBJpQ==}
 
   '@types/lodash-es@4.17.12':
     resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
@@ -3375,8 +3375,8 @@ packages:
     resolution: {integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==}
     hasBin: true
 
-  jose@5.10.0:
-    resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
+  jose@6.0.4:
+    resolution: {integrity: sha512-GTWKmlIq0xs50pnwa7q+8eG0ZLR1DVcHxa75s2VArJcriBd+YEC18uK/kbTObF3gMXgqBeZXAoZA9eMLhPjSpQ==}
 
   js-base64@3.7.7:
     resolution: {integrity: sha512-7rCnleh0z2CkXhH67J8K1Ytz0b2Y+yxTPL+/KOJoa20hfnVQ/3/T6W/KflYI4bRHRagNeXeU2bkNGI3v1oS/lw==}
@@ -3801,8 +3801,8 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
-  prettier@3.5.1:
-    resolution: {integrity: sha512-hPpFQvHwL3Qv5AdRvBFMhnKo4tYxp0ReXiPn2bxkiohEX6mBeBwEpBSQTkD458RaaDKQMYSp4hX4UtfUTA5wDw==}
+  prettier@3.5.2:
+    resolution: {integrity: sha512-lc6npv5PH7hVqozBR7lkBNOGXV9vMwROAPlumdBkX0wTbbzPu/U1hk5yL8p2pt4Xoc+2mkT8t/sow2YrV/M5qg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -6233,7 +6233,7 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/jsonwebtoken@9.0.8':
+  '@types/jsonwebtoken@9.0.9':
     dependencies:
       '@types/ms': 2.1.0
       '@types/node': 22.13.4
@@ -7466,7 +7466,7 @@ snapshots:
 
   jiti@2.4.2: {}
 
-  jose@5.10.0: {}
+  jose@6.0.4: {}
 
   js-base64@3.7.7: {}
 
@@ -7857,7 +7857,7 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier@3.5.1: {}
+  prettier@3.5.2: {}
 
   printable-characters@1.0.42: {}
 

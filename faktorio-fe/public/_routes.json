@@ -15,7 +15,8 @@
       "src": "/blog-content/.*",
       "headers": {
         "Cache-Control": "public, max-age=86400"
-      }
+      },
+      "dest": "/blog-content/:splat"
     },
     {
       "src": "^/blog/.*",
