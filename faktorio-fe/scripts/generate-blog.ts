@@ -8,8 +8,8 @@ import { BlogIndex as BlogIndexComponent } from '../src/pages/blog/BlogIndex'
 import React from 'react'
 
 const BLOG_DIR = path.join(process.cwd(), 'content/blog')
-const OUTPUT_DIR = path.join(process.cwd(), 'public/blog')
-const JSON_OUTPUT_DIR = path.join(process.cwd(), 'public/blog-content')
+const OUTPUT_DIR = path.join(process.cwd(), 'dist/public/blog')
+const JSON_OUTPUT_DIR = path.join(process.cwd(), 'dist/blog-content')
 const DIST_INDEX_PATH = path.join(process.cwd(), 'dist/index.html')
 
 interface BlogPost {
