@@ -1,7 +1,7 @@
 {
   "version": 1,
   "include": ["/*"],
-  "exclude": ["/blog-content/*", "/blog/*"],
+  "exclude": ["/blog/*"],
   "routes": [
     {
       "src": "^/blog/?$",
@@ -14,7 +14,16 @@
     {
       "src": "/blog-content/.*",
       "headers": {
-        "Cache-Control": "public, max-age=86400"
+        "Cache-Control": "public, max-age=86400",
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "src": "^/blog-content/(.*)$",
+      "dest": "/blog-content/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=86400",
+        "Content-Type": "application/json"
       }
     },
     {
