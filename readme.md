@@ -15,6 +15,11 @@ Not a serious project, just did it for fun and to try using shadcn/tailwind on r
 
 ## How to run from scratch for local development
 
+### Prerequisites
+
+You need to have clerk account and turso DB setup. You cannot run without these two.
+Mailjet is not used yet anywhere.
+
 1. `pnpm i`
 2. `cd faktorio-fe && cp .env.example .env`
 3. `cd faktorio-api && cp .dev.vars.example .dev.vars`
