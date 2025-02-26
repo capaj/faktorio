@@ -55,6 +55,7 @@ make sure to use `pk_test` clerk key. Clerk won't even load when you use product
 - DPH priznani at the end of the year
 - import from fakturoid
 - automated DPH and Kontrolni hlaseni submission to ADIS every month/quarter for you with automated pupeteer script
+- integrate with Fio bank API to be able to mark invoices as paid when you receive money
 
 ## Features
 
