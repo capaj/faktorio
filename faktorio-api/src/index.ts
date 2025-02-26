@@ -2,10 +2,10 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
 import { drizzle } from 'drizzle-orm/libsql'
 import { appRouter } from './trpcRouter'
-import { LibSQLDatabase } from 'drizzle-orm/libsql'
-import { Client, createClient } from '@libsql/client'
+
+import { createClient } from '@libsql/client'
 import jwt, { type JwtPayload } from '@tsndr/cloudflare-worker-jwt'
-import { jwtVerify, importSPKI } from 'jose'
+
 import * as schema from './schema'
 import colorize from '@pinojs/json-colorizer'
 import { TrpcContext } from './trpcContext'
@@ -16,16 +16,6 @@ export interface Env {
   CLERK_SECRET_KEY: string
 }
 
-// async function injectDB(request: RequestWithDb, env: Env) {
-//   const turso = createClient({
-//     url: env.TURSO_DATABASE_URL!,
-//     authToken: env.TURSO_AUTH_TOKEN
-//   })
-//   request.dbClient = turso
-// 	request.db = drizzle(turso)
-
-// 	return turso
-// }
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
@@ -38,18 +28,14 @@ async function handleOptions(request: Request) {
     request.headers.get('Access-Control-Request-Method') !== null &&
     request.headers.get('Access-Control-Request-Headers') !== null
   ) {
-    // Handle CORS preflight requests.
     return new Response(null, {
-      // @ts-expect-error
       headers: {
         ...corsHeaders,
-        'Access-Control-Allow-Headers': request.headers.get(
-          'Access-Control-Request-Headers'
-        )
+        'Access-Control-Allow-Headers':
+          request.headers.get('Access-Control-Request-Headers') || ''
       }
     })
   } else {
-    // Handle standard OPTIONS request.
     return new Response(null, {
       headers: {
         Allow: 'GET, HEAD, POST, OPTIONS'
@@ -84,22 +70,28 @@ export default {
     })
 
     const createTrpcContext = async () => {
-      const publicKey = await importSPKI(publicKeyPEM, 'RS256')
-
       const authHeader = request.headers.get('Authorization')
 
       let jwtPayload
       if (authHeader) {
         const token = authHeader.split(' ')[1]
 
-        jwtPayload = await jwtVerify(token, publicKey, {
-          algorithms: ['RS256']
-        })
+        try {
+          const isValid = await jwt.verify(token, publicKeyPEM, {
+            algorithm: 'RS256'
+          })
+
+          if (isValid) {
+            jwtPayload = jwt.decode(token) as JwtPayload
+          }
+        } catch (error) {
+          console.error(error)
+        }
       }
       return {
         db: drizzle(turso, { schema }),
-        userId: jwtPayload?.payload.sub,
-        sessionId: jwtPayload?.payload.sid as string
+        userId: jwtPayload?.payload?.sub,
+        sessionId: jwtPayload?.payload?.sid as string
       }
     }
 
@@ -123,11 +115,9 @@ export default {
         }
         console.error(`${type} ${path} failed for:`)
         console.error(
-          colorize(
-            // @ts-expect-error types in colorize are wrong, it can accept anything same as console.log
-            { input, ctxUser: ctx.user },
-            { pretty: true }
-          )
+          colorize(JSON.stringify({ input, userId: ctx.userId }), {
+            pretty: true
+          })
         )
 
         return errCtx
