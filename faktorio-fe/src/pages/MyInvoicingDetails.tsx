@@ -17,11 +17,11 @@ export const upsertInvoicingDetailsSchema =
   })
 
 export const MyInvoicingDetails = () => {
-  const [data] = trpcClient.invoicingDetails.useSuspenseQuery()
+  const query = trpcClient.invoicingDetails.useQuery()
 
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()
 
-  const [values, setValues] = useState(data)
+  const [values, setValues] = useState(query.data)
   useEffect(() => {
     ;(async () => {
       if (values?.registration_no?.length === 8 && !values?.name) {
