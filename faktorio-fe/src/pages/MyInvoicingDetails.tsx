@@ -11,7 +11,7 @@ export const upsertInvoicingDetailsSchema =
     user_id: true
   })
 
-export const MyDetails = () => {
+export const MyInvoicingDetails = () => {
   const [data] = trpcClient.invoicingDetails.useSuspenseQuery()
 
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()

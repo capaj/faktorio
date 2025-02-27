@@ -5,7 +5,7 @@ import { protectedProc } from './isAuthorizedMiddleware'
 import { userInvoicingDetailsTb } from './schema'
 import { conflictUpdateSetAll } from './drizzle-utils/aa'
 import { eq } from 'drizzle-orm'
-import { upsertInvoicingDetailsSchema } from '../../faktorio-fe/src/pages/MyDetails'
+import { upsertInvoicingDetailsSchema } from '../../faktorio-fe/src/pages/MyInvoicingDetails'
 import { authRouter } from './routers/authRouter'
 export const appRouter = trpcContext.router({
   auth: authRouter,

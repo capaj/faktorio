@@ -9,7 +9,7 @@ import { trpcClient } from './lib/trpcClient'
 import { httpBatchLink } from '@trpc/client'
 import { NewInvoice } from './pages/invoice/NewInvoicePage'
 import { ContactList } from './pages/ContactList/ContactList'
-import { MyDetails } from './pages/MyDetails'
+import { MyInvoicingDetails } from './pages/MyInvoicingDetails'
 import { SpinnerContainer } from './components/SpinnerContainer'
 import { SuperJSON } from 'superjson'
 import { ManifestPage } from './pages/ManifestPage'
@@ -25,6 +25,7 @@ import { SignupPage } from './pages/SignupPage'
 import { RequestPasswordResetPage } from './pages/RequestPasswordResetPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AuthProvider, useAuth } from './lib/AuthContext'
+import { ManageLoginDetails } from './pages/ManageLoginDetails'
 
 import { ErrorBoundary } from './ErrorBoundary'
 import { Header } from './components/Header'
@@ -136,7 +137,11 @@ function AppContent() {
                           ></Route>
                           <Route
                             path="/my-details"
-                            component={MyDetails}
+                            component={MyInvoicingDetails}
+                          ></Route>
+                          <Route
+                            path="/manage-login-details"
+                            component={ManageLoginDetails}
                           ></Route>
                           <Route
                             path="/invoices/:invoiceId/edit"

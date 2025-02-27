@@ -17,7 +17,6 @@ import {
 
 export const Header = () => {
   const { isSignedIn, user, logout } = useAuth()
-  console.log(user)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [location, navigate] = useLocation()
 

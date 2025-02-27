@@ -393,6 +393,60 @@ export const authRouter = trpcContext.router({
       })
 
       return { success: true }
+    }),
+  changePassword: trpcContext.procedure
+    .input(
+      z.object({
+        currentPassword: z.string().min(6),
+        newPassword: z.string().min(6)
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      if (!ctx.user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to change your password'
+        })
+      }
+
+      // Check if user has a password (might be using Google auth)
+      const user = await ctx.db.query.userT.findFirst({
+        where: eq(userT.id, ctx.user.id)
+      })
+
+      if (!user || !user.passwordHash) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message:
+            'Cannot change password for accounts without password authentication'
+        })
+      }
+
+      // Verify current password
+      const passwordMatch = await verifyPassword(
+        user.passwordHash,
+        input.currentPassword
+      )
+      if (!passwordMatch) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Current password is incorrect'
+        })
+      }
+
+      // Hash new password
+      const hashedPassword = await hashPassword(
+        input.newPassword,
+        strToUint8Array(user.id)
+      )
+
+      // Update password
+      await ctx.db
+        .update(userT)
+        .set({ passwordHash: hashedPassword })
+        .where(eq(userT.id, user.id))
+
+      return { success: true }
     })
 })
 
