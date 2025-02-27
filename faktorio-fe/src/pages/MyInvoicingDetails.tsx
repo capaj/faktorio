@@ -53,6 +53,10 @@ export const MyInvoicingDetails = () => {
     })()
   }, [values?.registration_no])
 
+  useEffect(() => {
+    setValues(query.data)
+  }, [query.data])
+
   return (
     <>
       <h2>Moje fakturační údaje</h2>
