@@ -1,7 +1,6 @@
 # Faktorio.cz
 
-Monorepo containing BE and FE for faktorio.cz app.
-Not a serious project, just did it for fun and to try using shadcn/tailwind on real world project.
+Monorepo containing BE and FE for faktorio.cz app. A free open source app for invoicing targeted at self-employed OSVČ or tiny companies.
 
 ## Tech stack
 
