@@ -3,7 +3,7 @@ import { loggerMiddleware } from './loggerMiddleware'
 import { trpcContext } from './trpcContext'
 
 const isAuthorizedMiddleware = trpcContext.middleware(async ({ ctx, next }) => {
-  if (!ctx.userId) {
+  if (!ctx.user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: 'Not authorized'
@@ -11,7 +11,7 @@ const isAuthorizedMiddleware = trpcContext.middleware(async ({ ctx, next }) => {
   }
   return next({
     ctx: {
-      userId: ctx.userId as string
+      user: ctx.user
     }
   })
 })

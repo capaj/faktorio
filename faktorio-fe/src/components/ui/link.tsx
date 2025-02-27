@@ -9,6 +9,14 @@ export function ButtonLink({
   children: React.ReactNode
   className?: string
   href: string
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link'
+  size?: 'default' | 'sm' | 'lg' | 'icon'
   target?: string
   rel?: string
 }) {
@@ -23,7 +31,8 @@ export function ButtonLink({
       }}
     >
       <Button
-        variant="link"
+        variant={props.variant ?? 'link'}
+        size={props.size}
         className={cn(
           props.className,
           isActive ? 'underline' : '',

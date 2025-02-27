@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { SignInButton } from '@clerk/clerk-react'
 import { Link } from 'wouter'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LucidePiggyBank, LucideTwitter } from 'lucide-react'
@@ -21,11 +20,11 @@ export const LandingPage = () => {
               </p>
             </div>
             <div className="mx-auto max-w-[400px] space-y-2">
-              <SignInButton>
+              <Link href="/signup">
                 <Button className="w-full" type="submit">
                   Registrace
                 </Button>
-              </SignInButton>
+              </Link>
 
               <p className="text-xs text-center text-gray-500 dark:text-gray-400">
                 Zaregistrujte se. Je to zdarma. Navždy.
@@ -54,9 +53,9 @@ export const LandingPage = () => {
                 <CardContent>
                   Faktorio.cz - platforma, která je přesně tím, co malý
                   podnikatel potřebuje. Faktorio.cz má minimalistickou vizi:
-                  jednoduché, intuitivní a téměř zdarma řešení pro vystavování
-                  faktur. S Faktorio.cz můžete vystavit fakturu kdykoliv a
-                  odkudkoliv, bez kreditky během několika vteřin po registraci.{' '}
+                  jednoduché, intuitivní a levné řešení pro vystavování faktur.
+                  S Faktorio.cz můžete vystavit fakturu kdykoliv a odkudkoliv,
+                  bez kreditky během několika vteřin po registraci.{' '}
                   <Link href="/manifest" className={'flex justify-end'}>
                     <p className="text-xl mt-3">
                       Celý manifest faktorio.cz si můžete přečíst zde.

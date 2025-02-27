@@ -58,12 +58,12 @@ const DeliveryAddressSchema = z.object({
   radekAdresy3: z.string().optional() // Added optional third line
 })
 
-const AresBusinessInformationSchema = z.object({
+export const AresBusinessInformationSchema = z.object({
   ico: z.string(),
   obchodniJmeno: z.string(),
   sidlo: AddressSchema,
   pravniForma: z.string(),
-  financniUrad: z.string(),
+  financniUrad: z.string().nullish(),
   datumVzniku: z.string(),
   datumAktualizace: z.string(),
   dic: z.string().optional(), // Made optional to ensure compatibility with future data that might not include this

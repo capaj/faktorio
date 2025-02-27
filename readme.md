@@ -17,13 +17,17 @@ Not a serious project, just did it for fun and to try using shadcn/tailwind on r
 
 ### Prerequisites
 
-You need to have clerk account and turso DB setup. You cannot run without these two.
-Mailjet is not used yet anywhere.
+- Node.js 22+
+- pnpm
+- turso DB on your turso cloud account
+
+You need to have turso DB setup. You only need google client ID for google login.
+Mailjet you only need if you want to send emails.
 
 1. `pnpm i`
 2. `cd faktorio-fe && cp .env.example .env`
 3. `cd faktorio-api && cp .dev.vars.example .dev.vars`
-4. fill in missing env vars in both files
+4. fill in missing env vars in both files, keep empty those you don't want to use(mailjet, google client ID)
 5. `pnpm dev`
 
 ## How to generate new migrations

@@ -4,16 +4,22 @@ import { drizzle } from 'drizzle-orm/libsql'
 import { appRouter } from './trpcRouter'
 
 import { createClient } from '@libsql/client'
-import jwt, { type JwtPayload } from '@tsndr/cloudflare-worker-jwt'
 
 import * as schema from './schema'
 import colorize from '@pinojs/json-colorizer'
 import { TrpcContext } from './trpcContext'
+import { extractUserFromAuthHeader, generateToken } from './jwtUtils'
+
+// Add ExecutionContext type from Cloudflare Workers
+type ExecutionContext = {
+  waitUntil(promise: Promise<any>): void
+  passThroughOnException(): void
+}
 
 export interface Env {
   TURSO_DATABASE_URL: string
   TURSO_AUTH_TOKEN: string
-  CLERK_SECRET_KEY: string
+  JWT_SECRET: string
 }
 
 const corsHeaders = {
@@ -44,16 +50,6 @@ async function handleOptions(request: Request) {
   }
 }
 
-const publicKeyPEM = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0aB2UX8USw+6f+eVO+ut
-TD/fFXKg3SQ/Yte6O0FUcyfpnDpFHWKD324BptsO56d3wOJgStg8t2rCSijuMDpz
-JpgXqA7IUw4wa8510k9c6hziG26ZW8nn1ywNELYfYWf0M+8siiwY7H79FNW8WeQ0
-3Ny2ylFfOevsy/wbK6P0iMJmxJ1x+qjRDvPW8s4k/q5haX7W+iam+nTyBetDvzBB
-YP2wCVnoJKc8xPRcgSLVpnMuHJ9vJ6GTauUqCekGP8l8EvVVIuIqjf0x1NaazGwi
-NJCZbjlROUAYbfrqqhLGexChVclm8oQG6Zh9c25dY/pIhH4NMb9T347Ovu/IBHkN
-4wIDAQAB
------END PUBLIC KEY-----`
-
 export default {
   async fetch(
     request: Request,
@@ -69,29 +65,16 @@ export default {
       authToken: env.TURSO_AUTH_TOKEN
     })
 
-    const createTrpcContext = async () => {
-      const authHeader = request.headers.get('Authorization')
+    const createTrpcContext = async (): Promise<TrpcContext> => {
+      const authHeader = request.headers.get('authorization')
+      const user = await extractUserFromAuthHeader(authHeader, env.JWT_SECRET)
 
-      let jwtPayload
-      if (authHeader) {
-        const token = authHeader.split(' ')[1]
-
-        try {
-          const isValid = await jwt.verify(token, publicKeyPEM, {
-            algorithm: 'RS256'
-          })
-
-          if (isValid) {
-            jwtPayload = jwt.decode(token) as JwtPayload
-          }
-        } catch (error) {
-          console.error(error)
-        }
-      }
       return {
         db: drizzle(turso, { schema }),
-        userId: jwtPayload?.payload?.sub,
-        sessionId: jwtPayload?.payload?.sid as string
+        env,
+        user,
+        req: request,
+        generateToken: (user) => generateToken(user, env.JWT_SECRET)
       }
     }
 
@@ -113,9 +96,10 @@ export default {
           ctx: TrpcContext
           req: any
         }
+        console.error(errCtx.error)
         console.error(`${type} ${path} failed for:`)
         console.error(
-          colorize(JSON.stringify({ input, userId: ctx.userId }), {
+          colorize(JSON.stringify({ input, userId: ctx.user?.id }), {
             pretty: true
           })
         )

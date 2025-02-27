@@ -145,7 +145,7 @@ export const contactTb = sqliteTable(
 export const userInvoicingDetailsTb = sqliteTable(
   'user_invoicing_detail',
   {
-    user_id: text('user_id').notNull().unique().primaryKey(), // single user has exactly one of this
+    user_id: text('user_id').notNull().unique().primaryKey(),
     name: text('name'),
     street: text('street'),
     street2: text('street2'),
@@ -201,3 +201,38 @@ export const invoiceItemsTb = sqliteTable(
     }
   }
 )
+
+export const userT = sqliteTable('users', {
+  id: text('id')
+    .$defaultFn(() => createId())
+    .primaryKey()
+    .notNull(),
+  email: text('email').notNull().unique(),
+  name: text('name').notNull(),
+  passwordHash: text('password_hash'),
+  pictureUrl: text('picture_url'),
+  googleId: text('google_id').unique(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`)
+})
+
+export const passwordResetTokenT = sqliteTable('password_reset_tokens', {
+  id: text('id')
+    .$defaultFn(() => createId())
+    .primaryKey()
+    .notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => userT.id, { onDelete: 'cascade' }),
+  requestedFromIp: text('requested_from_ip').notNull(),
+  token: text('token').notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  usedAt: integer('used_at', { mode: 'timestamp' })
+})

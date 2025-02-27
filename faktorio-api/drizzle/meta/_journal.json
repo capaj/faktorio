@@ -15,6 +15,20 @@
       "when": 1739700343385,
       "tag": "0001_glossy_siren",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1740595396831,
+      "tag": "0002_groovy_cammi",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1740629586977,
+      "tag": "0003_glorious_hiroim",
+      "breakpoints": true
     }
   ]
 }

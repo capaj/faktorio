@@ -122,7 +122,7 @@ export const NewInvoice = () => {
       contact.name === formValues.client_contact_name
   )
   const isCzkInvoice = formValues.currency !== 'CZK'
-
+  const exchangeRate = formValues.exchange_rate ?? 1
   return (
     <div>
       <h2 className="mb-5">Nová faktura</h2>
@@ -207,7 +207,7 @@ export const NewInvoice = () => {
         <>
           {isCzkInvoice && (
             <span className="text-sm text-gray-500">
-              Celkem: {total * formValues.exchange_rate} CZK
+              Celkem: {total * exchangeRate} CZK
             </span>
           )}
           <h3
@@ -217,7 +217,7 @@ export const NewInvoice = () => {
           </h3>
           {isCzkInvoice && (
             <span className="text-sm text-gray-500">
-              DPH: {totalVat * formValues.exchange_rate} CZK
+              DPH: {totalVat * exchangeRate} CZK
             </span>
           )}
           <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
@@ -226,7 +226,7 @@ export const NewInvoice = () => {
 
           {isCzkInvoice && (
             <span className="text-sm text-gray-500">
-              Celkem s DPH: {(total + totalVat) * formValues.exchange_rate} CZK
+              Celkem s DPH: {(total + totalVat) * exchangeRate} CZK
             </span>
           )}
           <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
