@@ -447,6 +447,74 @@ export const authRouter = trpcContext.router({
         .where(eq(userT.id, user.id))
 
       return { success: true }
+    }),
+  changeEmail: trpcContext.procedure
+    .input(
+      z.object({
+        currentPassword: z.string().min(6),
+        newEmail: z.string().email()
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      if (!ctx.user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to change your email'
+        })
+      }
+
+      // Check if user has a password (might be using Google auth)
+      const user = await ctx.db.query.userT.findFirst({
+        where: eq(userT.id, ctx.user.id)
+      })
+
+      if (!user || !user.passwordHash) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message:
+            'Cannot change email for accounts without password authentication'
+        })
+      }
+
+      // Verify current password
+      const passwordMatch = await verifyPassword(
+        user.passwordHash,
+        input.currentPassword
+      )
+      if (!passwordMatch) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Current password is incorrect'
+        })
+      }
+
+      // Check if the new email is already in use
+      const existingUser = await ctx.db.query.userT.findFirst({
+        where: eq(userT.email, input.newEmail)
+      })
+
+      if (existingUser && existingUser.id !== user.id) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'This email is already in use'
+        })
+      }
+
+      // Update email
+      const [updatedUser] = await ctx.db
+        .update(userT)
+        .set({ email: input.newEmail })
+        .where(eq(userT.id, user.id))
+        .returning()
+
+      // Generate new JWT token with updated user info
+      const token = await ctx.generateToken(updatedUser)
+
+      return {
+        success: true,
+        user: updatedUser,
+        token
+      }
     })
 })
 
