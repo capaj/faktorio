@@ -10,6 +10,12 @@ import colorize from '@pinojs/json-colorizer'
 import { TrpcContext } from './trpcContext'
 import { extractUserFromAuthHeader, generateToken } from './jwtUtils'
 
+// Add ExecutionContext type from Cloudflare Workers
+type ExecutionContext = {
+  waitUntil(promise: Promise<any>): void
+  passThroughOnException(): void
+}
+
 export interface Env {
   TURSO_DATABASE_URL: string
   TURSO_AUTH_TOKEN: string
