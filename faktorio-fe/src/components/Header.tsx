@@ -40,7 +40,13 @@ export const Header = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   {user?.pictureUrl ? (
-                    <img src={user.pictureUrl} alt="User" className="h-4 w-4" />
+                    <div
+                      style={{
+                        backgroundImage: `url(${user.pictureUrl})`,
+                        backgroundSize: 'cover'
+                      }}
+                      className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200"
+                    ></div>
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200">
                       <User className="h-4 w-4 text-gray-800" />
@@ -50,10 +56,10 @@ export const Header = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => navigate('/my-details')}
+                    onClick={() => navigate('/manage-login-details')}
                   >
                     <User className="mr-2 h-4 w-4" />
-                    <span>Můj profil</span>
+                    <span>Přihlašovací údaje</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer" onClick={logout}>
                     <LogOut className="mr-2 h-4 w-4" />

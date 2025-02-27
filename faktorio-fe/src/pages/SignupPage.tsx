@@ -14,6 +14,7 @@ import {
 } from '../components/ui/card'
 import { toast } from 'sonner'
 import { ButtonLink } from '../components/ui/link'
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 
 export function SignupPage() {
   const [email, setEmail] = useState('')
@@ -21,7 +22,7 @@ export function SignupPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { signup } = useAuth()
+  const { signup, googleSignup } = useAuth()
   const [, navigate] = useLocation()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,6 +54,30 @@ export function SignupPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      setIsLoading(true)
+      if (credentialResponse.credential) {
+        await googleSignup(credentialResponse.credential)
+        toast.success('Registrace úspěšná')
+        navigate('/')
+      }
+    } catch (error: any) {
+      if (error.message?.includes('already exists')) {
+        toast.error('Uživatel s tímto emailem již existuje')
+      } else {
+        toast.error('Registrace pomocí Google selhala.')
+      }
+      console.error('Google signup error:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleError = () => {
+    toast.error('Registrace pomocí Google selhala.')
   }
 
   return (
@@ -106,6 +131,31 @@ export function SignupPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
+            </div>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Nebo se zaregistrujte pomocí
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <GoogleOAuthProvider clientId="652541081757-chbj3hkclmff7vsfnq3ttuqvo70i0lje.apps.googleusercontent.com">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  useOneTap
+                  theme="outline"
+                  text="signup_with"
+                  shape="rectangular"
+                  locale="cs_CZ"
+                />
+              </GoogleOAuthProvider>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">

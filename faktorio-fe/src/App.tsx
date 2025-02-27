@@ -1,12 +1,8 @@
 import { Suspense, useEffect, useState } from 'react'
-import { SheetTrigger, SheetContent, Sheet } from '@/components/ui/sheet'
 import { Route, Switch, useLocation } from 'wouter'
 // Create Document Component
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LandingPage } from './pages/LandingPage'
-import { MountainIcon } from './components/MountainIcon'
-import { ButtonLink } from './components/ui/link'
-import { Button } from './components/ui/button'
 import { InvoiceDetailPage } from './pages/InvoiceDetail/InvoiceDetailPage'
 import { InvoiceList } from './pages/InvoiceList/InvoiceList'
 import { trpcClient } from './lib/trpcClient'
@@ -20,7 +16,6 @@ import { ManifestPage } from './pages/ManifestPage'
 import { Toaster } from '@/components/ui/sonner'
 import { trpcLinks } from './lib/errorToastLink'
 import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
-import { LucideMenu, LogOut, User } from 'lucide-react'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { TermsOfServicePage } from './pages/TermsOfService'
 import { BlogIndex } from './pages/blog/BlogIndex'
@@ -29,15 +24,9 @@ import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { RequestPasswordResetPage } from './pages/RequestPasswordResetPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
-import { AuthProvider, useAuth, useUser } from './lib/AuthContext'
+import { AuthProvider, useAuth } from './lib/AuthContext'
 
 import { ErrorBoundary } from './ErrorBoundary'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from './components/ui/dropdown-menu'
 import { Header } from './components/Header'
 
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
@@ -51,11 +40,12 @@ interface BlogPost {
 
 function AppContent() {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
-  const [location, navigate] = useLocation()
-  const { isSignedIn, user, isLoaded, logout, getToken } = useAuth()
+  const [location] = useLocation()
+  const { isSignedIn, isLoaded, token } = useAuth()
+
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [queryClient] = useState(() => new QueryClient())
-  const [trpc] = useState(() =>
+  const [trpc] = useState(
     trpcClient.createClient({
       transformer: SuperJSON,
 
@@ -64,8 +54,6 @@ function AppContent() {
         httpBatchLink({
           url: VITE_API_URL,
           async headers() {
-            const token = await getToken()
-            console.log('token', token)
             return token
               ? {
                   Authorization: `Bearer ${token}`

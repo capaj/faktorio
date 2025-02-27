@@ -11,6 +11,7 @@ import { httpBatchLink } from '@trpc/client'
 import { SuperJSON } from 'superjson'
 import { trpcLinks } from './errorToastLink'
 import { userT } from '../../../faktorio-api/src/schema'
+import { useLocation } from 'wouter'
 
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
@@ -21,13 +22,22 @@ interface AuthContextType {
   token: string | null
   isSignedIn: boolean
   isLoaded: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (
+    email: string,
+    password: string,
+    googleToken?: string
+  ) => Promise<void>
   signup: (email: string, fullName: string, password: string) => Promise<void>
+  googleSignup: (googleToken: string) => Promise<void>
   logout: () => void
-  getToken: () => Promise<string | null>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+function storeAuthToken(result: { token: string; user: User }) {
+  localStorage.setItem('auth_token', result.token)
+  localStorage.setItem('auth_user', JSON.stringify(result.user))
+}
 
 // This component handles the actual authentication logic using TRPC hooks
 const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
@@ -38,11 +48,14 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     localStorage.getItem('auth_token')
   )
   const [isLoaded, setIsLoaded] = useState(false)
+  const [location, navigate] = useLocation()
 
   // Get TRPC mutations
   const loginMutation = trpcClient.auth.login.useMutation()
   const signupMutation = trpcClient.auth.signup.useMutation()
   const logoutMutation = trpcClient.auth.logout.useMutation()
+  const googleLoginMutation = trpcClient.auth.googleLogin.useMutation()
+  const googleSignupMutation = trpcClient.auth.googleSignup.useMutation()
 
   // Check for token in localStorage on initial load
   useEffect(() => {
@@ -56,14 +69,22 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
   }, [])
 
   const login = useCallback(
-    async (email: string, password: string) => {
-      const result = await loginMutation.mutateAsync({ email, password })
+    async (email: string, password: string, googleToken?: string) => {
+      let result
+
+      if (googleToken) {
+        // Login with Google
+        result = await googleLoginMutation.mutateAsync({ token: googleToken })
+      } else {
+        // Login with email/password
+        result = await loginMutation.mutateAsync({ email, password })
+      }
+
       setUser(result.user)
       setToken(result.token)
-      localStorage.setItem('auth_token', result.token)
-      localStorage.setItem('auth_user', JSON.stringify(result.user))
+      storeAuthToken(result)
     },
-    [loginMutation]
+    [loginMutation, googleLoginMutation]
   )
 
   const signup = useCallback(
@@ -75,10 +96,21 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
       })
       setUser(result.user)
       setToken(result.token)
-      localStorage.setItem('auth_token', result.token)
-      localStorage.setItem('auth_user', JSON.stringify(result.user))
+      storeAuthToken(result)
     },
     [signupMutation]
+  )
+
+  const googleSignup = useCallback(
+    async (googleToken: string) => {
+      const result = await googleSignupMutation.mutateAsync({
+        token: googleToken
+      })
+      setUser(result.user)
+      setToken(result.token)
+      storeAuthToken(result)
+    },
+    [googleSignupMutation]
   )
 
   const logout = useCallback(() => {
@@ -86,12 +118,10 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     setToken(null)
     localStorage.removeItem('auth_token')
     localStorage.removeItem('auth_user')
-    logoutMutation.mutate()
-  }, [logoutMutation])
 
-  const getToken = useCallback(async (): Promise<string | null> => {
-    return token
-  }, [token])
+    logoutMutation.mutate()
+    navigate('/')
+  }, [logoutMutation])
 
   const value = {
     user,
@@ -100,8 +130,8 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     isLoaded,
     login,
     signup,
-    logout,
-    getToken
+    googleSignup,
+    logout
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

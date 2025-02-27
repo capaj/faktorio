@@ -209,7 +209,7 @@ export const userT = sqliteTable('users', {
     .notNull(),
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
-  passwordHash: text('password_hash').notNull(),
+  passwordHash: text('password_hash'),
   pictureUrl: text('picture_url'),
   googleId: text('google_id').unique(),
   createdAt: integer('created_at', { mode: 'timestamp' })

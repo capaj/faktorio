@@ -47,6 +47,29 @@ export const logoutUser = async () => {
   return
 }
 
+// Function to verify Google token
+async function verifyGoogleToken(token: string): Promise<{
+  email: string
+  name: string
+  picture: string
+  sub: string
+} | null> {
+  try {
+    const response = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
+    )
+
+    if (!response.ok) {
+      return null
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error('Error verifying Google token:', error)
+    return null
+  }
+}
+
 export const authRouter = trpcContext.router({
   login: trpcContext.procedure
     .input(z.object({ email: z.string().email(), password: z.string().min(6) }))
@@ -61,6 +84,13 @@ export const authRouter = trpcContext.router({
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'Invalid credentials'
+        })
+      }
+
+      if (!user.passwordHash) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Cannot login with credentials'
         })
       }
 
@@ -81,9 +111,9 @@ export const authRouter = trpcContext.router({
         token
       }
     }),
-  logout: trpcContext.procedure.mutation(() => {
-    // With JWT, server-side logout is not needed
-    // The client should remove the token from storage
+  logout: trpcContext.procedure.mutation(({ ctx }) => {
+    console.log(`logout ${ctx.user?.id}`)
+    // todo: invalidate token when we have upstash
     return { success: true }
   }),
   signup: trpcContext.procedure
@@ -119,6 +149,121 @@ export const authRouter = trpcContext.router({
           name: input.fullName,
           email,
           passwordHash: hashedPassword
+        })
+        .returning()
+
+      // Generate JWT token
+      const token = await ctx.generateToken(user)
+
+      return {
+        user,
+        token
+      }
+    }),
+  googleLogin: trpcContext.procedure
+    .input(z.object({ token: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const googleUser = await verifyGoogleToken(input.token)
+
+      if (!googleUser) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Invalid Google token'
+        })
+      }
+
+      // Check if user exists with this Google ID
+      let user = await ctx.db.query.userT.findFirst({
+        where: eq(userT.googleId, googleUser.sub)
+      })
+
+      // If not found by Google ID, try to find by email
+      if (!user) {
+        user = await ctx.db.query.userT.findFirst({
+          where: eq(userT.email, googleUser.email)
+        })
+
+        // If user exists with this email but no Google ID, update the user with Google ID
+        if (user) {
+          ;[user] = await ctx.db
+            .update(userT)
+            .set({
+              googleId: googleUser.sub,
+              pictureUrl: googleUser.picture || user.pictureUrl || null
+            })
+            .where(eq(userT.id, user.id))
+            .returning()
+        }
+      }
+
+      // If user doesn't exist at all, create a new one
+      if (!user) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'User not found. Please sign up with Google first.'
+        })
+      }
+
+      // Generate JWT token
+      const token = await ctx.generateToken(user)
+
+      return {
+        user,
+        token
+      }
+    }),
+  googleSignup: trpcContext.procedure
+    .input(z.object({ token: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const googleUser = await verifyGoogleToken(input.token)
+
+      if (!googleUser) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Invalid Google token'
+        })
+      }
+
+      // Check if user already exists
+      const existingUser = await ctx.db.query.userT.findFirst({
+        where: eq(userT.email, googleUser.email)
+      })
+
+      if (existingUser) {
+        // If user exists but doesn't have Google ID, update it
+        if (!existingUser.googleId) {
+          const [updatedUser] = await ctx.db
+            .update(userT)
+            .set({
+              googleId: googleUser.sub,
+              pictureUrl: googleUser.picture || existingUser.pictureUrl
+            })
+            .where(eq(userT.id, existingUser.id))
+            .returning()
+
+          const token = await ctx.generateToken(updatedUser)
+
+          return {
+            user: updatedUser,
+            token
+          }
+        }
+
+        // If user already exists with Google ID
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `User with email ${googleUser.email} already exists`
+        })
+      }
+
+      const [user] = await ctx.db
+        .insert(userT)
+        .values({
+          name: googleUser.name,
+          email: googleUser.email,
+          passwordHash: null,
+          googleId: googleUser.sub,
+          pictureUrl: googleUser.picture
         })
         .returning()
 
