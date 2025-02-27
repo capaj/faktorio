@@ -18,7 +18,7 @@ export const contactRouter = trpcContext.router({
     .query(async ({ input, ctx }) => {
       return await ctx.db.query.contactTb.findMany({
         where: and(
-          eq(contactTb.user_id, ctx.userId),
+          eq(contactTb.user_id, ctx.user.id),
           like(contactTb.name, `%${input?.search ?? ''}%`)
         ),
         orderBy: [desc(contactTb.created_at)]
@@ -26,7 +26,7 @@ export const contactRouter = trpcContext.router({
     }),
   byId: protectedProc.input(z.string()).query(async ({ input, ctx }) => {
     return await ctx.db.query.contactTb.findFirst({
-      where: and(eq(contactTb.id, input), eq(contactTb.user_id, ctx.userId))
+      where: and(eq(contactTb.id, input), eq(contactTb.user_id, ctx.user.id))
     })
   }),
 
@@ -43,7 +43,7 @@ export const contactRouter = trpcContext.router({
         .update(contactTb)
         .set(input)
         .where(
-          and(eq(contactTb.id, input.id), eq(contactTb.user_id, ctx.userId))
+          and(eq(contactTb.id, input.id), eq(contactTb.user_id, ctx.user.id))
         )
         .execute()
 
@@ -57,7 +57,7 @@ export const contactRouter = trpcContext.router({
         .insert(contactTb)
         .values({
           ...input,
-          user_id: ctx.userId
+          user_id: ctx.user.id
         })
         .execute()
 
@@ -66,7 +66,7 @@ export const contactRouter = trpcContext.router({
   delete: protectedProc.input(z.string()).mutation(async ({ input, ctx }) => {
     await ctx.db
       .delete(contactTb)
-      .where(and(eq(contactTb.id, input), eq(contactTb.user_id, ctx.userId)))
+      .where(and(eq(contactTb.id, input), eq(contactTb.user_id, ctx.user.id)))
       .execute()
   })
 })

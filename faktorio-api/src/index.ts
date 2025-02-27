@@ -9,11 +9,11 @@ import jwt, { type JwtPayload } from '@tsndr/cloudflare-worker-jwt'
 import * as schema from './schema'
 import colorize from '@pinojs/json-colorizer'
 import { TrpcContext } from './trpcContext'
-
+import { userT } from './schema'
 export interface Env {
   TURSO_DATABASE_URL: string
   TURSO_AUTH_TOKEN: string
-  CLERK_SECRET_KEY: string
+  JWT_SECRET: string
 }
 
 const corsHeaders = {
@@ -21,6 +21,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
   'Access-Control-Max-Age': '86400'
 }
+
+// Token expiration time in seconds (1 year)
+const JWT_EXPIRATION = 60 * 60 * 24 * 365
 
 async function handleOptions(request: Request) {
   if (
@@ -44,16 +47,6 @@ async function handleOptions(request: Request) {
   }
 }
 
-const publicKeyPEM = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0aB2UX8USw+6f+eVO+ut
-TD/fFXKg3SQ/Yte6O0FUcyfpnDpFHWKD324BptsO56d3wOJgStg8t2rCSijuMDpz
-JpgXqA7IUw4wa8510k9c6hziG26ZW8nn1ywNELYfYWf0M+8siiwY7H79FNW8WeQ0
-3Ny2ylFfOevsy/wbK6P0iMJmxJ1x+qjRDvPW8s4k/q5haX7W+iam+nTyBetDvzBB
-YP2wCVnoJKc8xPRcgSLVpnMuHJ9vJ6GTauUqCekGP8l8EvVVIuIqjf0x1NaazGwi
-NJCZbjlROUAYbfrqqhLGexChVclm8oQG6Zh9c25dY/pIhH4NMb9T347Ovu/IBHkN
-4wIDAQAB
------END PUBLIC KEY-----`
-
 export default {
   async fetch(
     request: Request,
@@ -69,18 +62,15 @@ export default {
       authToken: env.TURSO_AUTH_TOKEN
     })
 
-    const createTrpcContext = async () => {
-      const authHeader = request.headers.get('Authorization')
+    const createTrpcContext = async (): Promise<TrpcContext> => {
+      const authHeader = request.headers.get('authorization')
 
       let jwtPayload
       if (authHeader) {
         const token = authHeader.split(' ')[1]
 
         try {
-          const isValid = await jwt.verify(token, publicKeyPEM, {
-            algorithm: 'RS256'
-          })
-
+          const isValid = await jwt.verify(token, env.JWT_SECRET)
           if (isValid) {
             jwtPayload = jwt.decode(token) as JwtPayload
           }
@@ -90,8 +80,23 @@ export default {
       }
       return {
         db: drizzle(turso, { schema }),
-        userId: jwtPayload?.payload?.sub,
-        sessionId: jwtPayload?.payload?.sid as string
+        env,
+        user: jwtPayload?.payload?.user as typeof userT.$inferSelect,
+        req: request,
+        generateToken: async (user: typeof userT.$inferSelect) => {
+          const payload = {
+            ...user,
+            passwordHash: undefined,
+            googleId: undefined
+          }
+          return await jwt.sign(
+            {
+              user: payload,
+              exp: Math.floor(Date.now() / 1000) + JWT_EXPIRATION
+            },
+            env.JWT_SECRET
+          )
+        }
       }
     }
 
@@ -113,9 +118,10 @@ export default {
           ctx: TrpcContext
           req: any
         }
+        console.error(errCtx.error)
         console.error(`${type} ${path} failed for:`)
         console.error(
-          colorize(JSON.stringify({ input, userId: ctx.userId }), {
+          colorize(JSON.stringify({ input, userId: ctx.user?.id }), {
             pretty: true
           })
         )

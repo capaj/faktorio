@@ -16,7 +16,6 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.23.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@hookform/resolvers": "^4.1.2",

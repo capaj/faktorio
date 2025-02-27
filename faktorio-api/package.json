@@ -15,7 +15,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250224.0",
     "@types/debug": "^4.1.12",
-    "@types/jsonwebtoken": "^9.0.9",
     "drizzle-kit": "^0.30.5",
     "typescript": "^5.7.3",
     "vitest": "^3.0.7",

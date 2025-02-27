@@ -40,7 +40,7 @@ export const invoiceRouter = trpcContext.router({
 
       const user = await ctx.db.query.userInvoicingDetailsTb
         .findFirst({
-          where: eq(userInvoicingDetailsTb.user_id, ctx.userId)
+          where: eq(userInvoicingDetailsTb.user_id, ctx.user.id)
         })
         .execute()
 
@@ -90,7 +90,7 @@ export const invoiceRouter = trpcContext.router({
             client_country: client.country,
             client_registration_no: client.registration_no,
             client_vat_no: client.vat_no,
-            user_id: ctx.userId
+            user_id: ctx.user.id
           })
           .returning({
             id: invoicesTb.id
@@ -122,7 +122,7 @@ export const invoiceRouter = trpcContext.router({
       })
     )
     .query(async ({ ctx, input }) => {
-      let whereCondition = eq(invoicesTb.user_id, ctx.userId)
+      let whereCondition = eq(invoicesTb.user_id, ctx.user.id)
 
       if (input.filter) {
         whereCondition = and(
@@ -162,17 +162,17 @@ export const invoiceRouter = trpcContext.router({
 
   lastInvoice: protectedProc.query(async ({ ctx }) => {
     const lastInvoice = await ctx.db.query.invoicesTb.findFirst({
-      where: eq(invoicesTb.user_id, ctx.userId),
+      where: eq(invoicesTb.user_id, ctx.user.id),
       orderBy: desc(invoicesTb.created_at)
     })
 
-    return lastInvoice
+    return lastInvoice ?? null
   }),
   count: protectedProc.query(async ({ ctx }) => {
     const res = await ctx.db
       .select({ count: count() })
       .from(invoicesTb)
-      .where(eq(invoicesTb.user_id, ctx.userId))
+      .where(eq(invoicesTb.user_id, ctx.user.id))
       .execute()
 
     return res[0].count
@@ -188,7 +188,7 @@ export const invoiceRouter = trpcContext.router({
         .findFirst({
           where: and(
             eq(invoicesTb.id, input.id),
-            eq(invoicesTb.user_id, ctx.userId)
+            eq(invoicesTb.user_id, ctx.user.id)
           )
         })
         .execute()
@@ -212,7 +212,7 @@ export const invoiceRouter = trpcContext.router({
       return await ctx.db
         .delete(invoicesTb)
         .where(
-          and(eq(invoicesTb.id, input.id), eq(invoicesTb.user_id, ctx.userId))
+          and(eq(invoicesTb.id, input.id), eq(invoicesTb.user_id, ctx.user.id))
         )
         .execute()
     }),
@@ -228,7 +228,7 @@ export const invoiceRouter = trpcContext.router({
       const invoice = await ctx.db.query.invoicesTb.findFirst({
         where: and(
           eq(invoicesTb.id, input.id),
-          eq(invoicesTb.user_id, ctx.userId)
+          eq(invoicesTb.user_id, ctx.user.id)
         ),
 
         columns: {

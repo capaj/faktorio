@@ -1,0 +1,155 @@
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback
+} from 'react'
+import { trpcClient } from './trpcClient'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { httpBatchLink } from '@trpc/client'
+import { SuperJSON } from 'superjson'
+import { trpcLinks } from './errorToastLink'
+import { userT } from '../../../faktorio-api/src/schema'
+
+const VITE_API_URL = import.meta.env.VITE_API_URL as string
+
+type User = typeof userT.$inferSelect
+
+interface AuthContextType {
+  user: User | null
+  token: string | null
+  isSignedIn: boolean
+  isLoaded: boolean
+  login: (email: string, password: string) => Promise<void>
+  signup: (email: string, fullName: string, password: string) => Promise<void>
+  logout: () => void
+  getToken: () => Promise<string | null>
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+// This component handles the actual authentication logic using TRPC hooks
+const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
+  children
+}) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem('auth_token')
+  )
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  // Get TRPC mutations
+  const loginMutation = trpcClient.auth.login.useMutation()
+  const signupMutation = trpcClient.auth.signup.useMutation()
+  const logoutMutation = trpcClient.auth.logout.useMutation()
+
+  // Check for token in localStorage on initial load
+  useEffect(() => {
+    const storedUser = localStorage.getItem('auth_user')
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
+    }
+
+    setIsLoaded(true)
+  }, [])
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const result = await loginMutation.mutateAsync({ email, password })
+      setUser(result.user)
+      setToken(result.token)
+      localStorage.setItem('auth_token', result.token)
+      localStorage.setItem('auth_user', JSON.stringify(result.user))
+    },
+    [loginMutation]
+  )
+
+  const signup = useCallback(
+    async (email: string, fullName: string, password: string) => {
+      const result = await signupMutation.mutateAsync({
+        email,
+        fullName,
+        password
+      })
+      setUser(result.user)
+      setToken(result.token)
+      localStorage.setItem('auth_token', result.token)
+      localStorage.setItem('auth_user', JSON.stringify(result.user))
+    },
+    [signupMutation]
+  )
+
+  const logout = useCallback(() => {
+    setUser(null)
+    setToken(null)
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('auth_user')
+    logoutMutation.mutate()
+  }, [logoutMutation])
+
+  const getToken = useCallback(async (): Promise<string | null> => {
+    return token
+  }, [token])
+
+  const value = {
+    user,
+    token,
+    isSignedIn: !!user,
+    isLoaded,
+    login,
+    signup,
+    logout,
+    getToken
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children
+}) => {
+  const [queryClient] = useState(() => new QueryClient())
+  const [trpc] = useState(() =>
+    trpcClient.createClient({
+      transformer: SuperJSON,
+      links: [
+        ...trpcLinks,
+        httpBatchLink({
+          url: VITE_API_URL,
+          async headers() {
+            const token = localStorage.getItem('auth_token')
+            return token
+              ? {
+                  authorization: `Bearer ${token}`
+                }
+              : {}
+          }
+        })
+      ]
+    })
+  )
+
+  return (
+    <trpcClient.Provider client={trpc} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProviderInner>{children}</AuthProviderInner>
+      </QueryClientProvider>
+    </trpcClient.Provider>
+  )
+}
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
+
+// For compatibility with existing code that uses useUser
+export const useUser = () => {
+  const { user, isSignedIn, isLoaded } = useAuth()
+  return { user, isSignedIn, isLoaded }
+}
