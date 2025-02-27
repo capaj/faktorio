@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../lib/AuthContext'
-import { useLocation } from 'wouter'
+import { Link, useLocation } from 'wouter'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
@@ -62,28 +62,30 @@ export function LoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Heslo</Label>
+
               <Input
                 id="password"
                 type="password"
                 value={password}
+                tabIndex={-1}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <div className="text-right">
-                <ButtonLink
-                  href="/request-password-reset"
-                  variant="link"
-                  className="p-0 h-auto text-sm"
-                >
-                  Zapomněli jste heslo?
-                </ButtonLink>
-              </div>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Přihlašování...' : 'Přihlásit se'}
             </Button>
+            <div className="text-right text-sm">
+              Zapomněli jste heslo?{' '}
+              <ButtonLink
+                href="/request-password-reset"
+                className="p-0 h-auto text-sm"
+              >
+                Resetovat heslo
+              </ButtonLink>
+            </div>
             <div className="text-center text-sm">
               Nemáte účet?{' '}
               <ButtonLink href="/signup" variant="link" className="p-0">

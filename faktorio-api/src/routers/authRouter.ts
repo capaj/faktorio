@@ -49,7 +49,7 @@ export const logoutUser = async () => {
 
 export const authRouter = trpcContext.router({
   login: trpcContext.procedure
-    .input(z.object({ email: z.string(), password: z.string() }))
+    .input(z.object({ email: z.string().email(), password: z.string().min(6) }))
     .mutation(async ({ input, ctx }) => {
       const { email, password } = input
 
@@ -89,9 +89,9 @@ export const authRouter = trpcContext.router({
   signup: trpcContext.procedure
     .input(
       z.object({
-        email: z.string(),
-        fullName: z.string(),
-        password: z.string()
+        email: z.string().email(),
+        fullName: z.string().min(2),
+        password: z.string().min(6)
       })
     )
     .mutation(async ({ input, ctx }) => {
