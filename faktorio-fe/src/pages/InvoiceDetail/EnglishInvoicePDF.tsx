@@ -18,6 +18,7 @@ import {
 } from '../../../../faktorio-api/src/zodDbSchemas'
 import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
 import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
+import { reactMainRender } from '@/main'
 
 Font.register({
   family: 'Inter',
@@ -590,6 +591,6 @@ export const EnglishInvoicePDF = ({
 
 if (import.meta.hot) {
   import.meta.hot.accept(() => {
-    // reactMainRender() // clerk breaks on this, we  need to put the invoice in a separate index.html file
+    reactMainRender() // force rerender of whole app
   })
 }

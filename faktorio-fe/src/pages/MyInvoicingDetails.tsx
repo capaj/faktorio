@@ -1,8 +1,13 @@
 import AutoForm from '@/components/ui/auto-form'
 import { userInvoicingDetailsInsertSchema } from '../../../faktorio-api/src/zodDbSchemas'
-import { fieldConfigForContactForm } from './ContactList/ContactList'
+import {
+  AresBusinessInformationSchema,
+  fieldConfigForContactForm
+} from './ContactList/ContactList'
 import { trpcClient } from '@/lib/trpcClient'
 import { FkButton } from '@/components/FkButton'
+import { useEffect } from 'react'
+import { useState } from 'react'
 
 export const upsertInvoicingDetailsSchema =
   userInvoicingDetailsInsertSchema.omit({
@@ -15,6 +20,38 @@ export const MyInvoicingDetails = () => {
   const [data] = trpcClient.invoicingDetails.useSuspenseQuery()
 
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()
+
+  const [values, setValues] = useState(data)
+  useEffect(() => {
+    ;(async () => {
+      if (values?.registration_no?.length === 8 && !values?.name) {
+        // seems like a user is trying to add new contact, let's fetch data from ares
+        const aresResponse = await fetch(
+          `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/${values.registration_no}`
+        )
+        const parse = AresBusinessInformationSchema.safeParse(
+          await aresResponse.json()
+        )
+        console.log('parse', parse)
+        if (parse.success) {
+          const aresData = parse.data
+          console.log('aresData', aresData)
+          setValues({
+            ...values,
+            name: aresData.obchodniJmeno,
+            street: aresData.sidlo.nazevUlice,
+            street2: aresData.sidlo.nazevCastiObce,
+            city: aresData.sidlo.nazevObce,
+            zip: String(aresData.sidlo.psc),
+            vat_no: aresData.dic ?? null,
+            country: aresData.sidlo.nazevStatu
+          })
+        } else {
+          console.error(parse.error)
+        }
+      }
+    })()
+  }, [values?.registration_no])
 
   return (
     <>
@@ -31,7 +68,8 @@ export const MyInvoicingDetails = () => {
           fieldConfig={{
             ...fieldConfigForContactForm,
             registration_no: {
-              label: 'IČO',
+              label:
+                'IČO - po vyplnění se automaticky doplní další údaje z ARESU',
               inputProps: {
                 placeholder: '8 čísel'
               }
@@ -55,7 +93,11 @@ export const MyInvoicingDetails = () => {
               label: 'Web'
             }
           }}
-          values={data ?? undefined}
+          values={values ?? {}}
+          onParsedValuesChange={(values) => {
+            // @ts-expect-error
+            setValues(values)
+          }}
           onSubmit={async (values) => {
             await upsert.mutateAsync(values)
           }}
