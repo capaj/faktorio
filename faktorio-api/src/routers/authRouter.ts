@@ -7,6 +7,7 @@ import { TRPCError } from '@trpc/server'
 import jwt from '@tsndr/cloudflare-worker-jwt'
 
 import cuid2 from '@paralleldrive/cuid2'
+import { protectedProc } from '../isAuthorizedMiddleware'
 // We'll define a simple user schema here since we can't find the imported one
 const userSchema = z.object({
   id: z.string(),
@@ -448,7 +449,7 @@ export const authRouter = trpcContext.router({
 
       return { success: true }
     }),
-  changeEmail: trpcContext.procedure
+  changeEmail: protectedProc
     .input(
       z.object({
         currentPassword: z.string().min(6),
@@ -462,9 +463,7 @@ export const authRouter = trpcContext.router({
           message: 'You must be logged in to change your email'
         })
       }
-
-      // Check if user has a password (might be using Google auth)
-      const user = await ctx.db.query.userT.findFirst({
+      let user = await ctx.db.query.userT.findFirst({
         where: eq(userT.id, ctx.user.id)
       })
 
@@ -488,24 +487,34 @@ export const authRouter = trpcContext.router({
         })
       }
 
-      // Check if the new email is already in use
-      const existingUser = await ctx.db.query.userT.findFirst({
-        where: eq(userT.email, input.newEmail)
+      let updatedUser
+      await ctx.db.transaction(async (tx) => {
+        const existingUser = await tx.query.userT.findFirst({
+          where: eq(userT.email, input.newEmail)
+        })
+
+        if (existingUser && existingUser.id !== ctx.user.id) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'This email is already in use'
+          })
+        }
+
+        ;[user] = await tx
+          .update(userT)
+          .set({ email: input.newEmail })
+          .where(eq(userT.id, ctx.user!.id))
+          .returning()
+
+        updatedUser = user
       })
 
-      if (existingUser && existingUser.id !== user.id) {
+      if (!updatedUser) {
         throw new TRPCError({
-          code: 'CONFLICT',
-          message: 'This email is already in use'
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to update email'
         })
       }
-
-      // Update email
-      const [updatedUser] = await ctx.db
-        .update(userT)
-        .set({ email: input.newEmail })
-        .where(eq(userT.id, user.id))
-        .returning()
 
       // Generate new JWT token with updated user info
       const token = await ctx.generateToken(updatedUser)
