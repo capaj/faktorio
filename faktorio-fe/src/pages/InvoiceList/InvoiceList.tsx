@@ -76,8 +76,12 @@ export function InvoiceList() {
               <TableCell>{invoice.taxable_fulfillment_due}</TableCell>
               <TableCell>{invoice.issued_on}</TableCell>
               <TableCell>{invoice.sent_at}</TableCell>
-              <TableCell>{invoice.total} CZK</TableCell>
-              <TableCell>{invoice.subtotal} CZK</TableCell>
+              <TableCell>
+                {invoice.total} {invoice.currency}
+              </TableCell>
+              <TableCell>
+                {invoice.subtotal} {invoice.currency}
+              </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
