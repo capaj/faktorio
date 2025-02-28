@@ -35,9 +35,8 @@ export const LandingPage = () => {
         <section className="w-full py-12 md:py-24">
           <div className="container grid items-center gap-4 px-4 md:px-6">
             <img
-              alt="Image"
-              className="mx-auto  overflow-hidden  rounded-xl  sm:w-full sm:h-[1100px]"
-              height="1310"
+              alt="Invoice preview"
+              className="mx-auto rounded-xl object-contain max-h-[1100px] w-auto"
               src="/faktura.png"
             />
             <div className="flex flex-col gap-2 min-[400px]:flex-col">
