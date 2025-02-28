@@ -77,7 +77,7 @@ export function SignupPage() {
   }
 
   const handleGoogleError = () => {
-    toast.error('Registrace pomocí Google selhala.')
+    // toast.error('Registrace pomocí Google selhala.')
   }
 
   return (

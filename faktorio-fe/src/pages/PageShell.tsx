@@ -11,30 +11,36 @@ export const PageShell = ({ children }: { children: React.ReactNode }) => {
         minHeight: screen.height - 90
       }}
     >
-      <div className="flex-grow container mx-auto px-4 py-6 md:py-12 lg:py-16 xl:py-24">
+      <div className="flex-grow container mx-auto px-4 py-6 md:py-12 lg:py-16 xl:py-24 overflow-y-auto overflow-x-hidden">
         {children}
       </div>
-      <footer className="mt-auto">
-        <div className="container flex flex-col md:flex-row items-center justify-center md:gap-4 px-4 text-center md:px-6">
-          <ButtonLink
-            className="text-sm font-semibold underline underline-offset-2 hover:underline-dotted transition-colors"
-            href="/privacy"
-          >
-            Zásady ochrany osobních údajů
-          </ButtonLink>
-          <ButtonLink
-            className="text-sm font-semibold underline underline-offset-2 hover:underline-dotted transition-colors"
-            href="/terms-of-service"
-          >
-            Obchodní podmínky
-          </ButtonLink>
-        </div>
-        <div className="container mx-auto p-4">
-          <div className="text-center text-sm text-gray-600">
-            © {new Date().getFullYear()} Faktorio
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
+  )
+}
+
+export function Footer() {
+  return (
+    <footer className="mt-auto">
+      <div className="container flex flex-col md:flex-row items-center justify-center md:gap-4 px-4 text-center md:px-6">
+        <ButtonLink
+          className="text-sm font-semibold underline underline-offset-2 hover:underline-dotted transition-colors"
+          href="/privacy"
+        >
+          Zásady ochrany osobních údajů
+        </ButtonLink>
+        <ButtonLink
+          className="text-sm font-semibold underline underline-offset-2 hover:underline-dotted transition-colors"
+          href="/terms-of-service"
+        >
+          Obchodní podmínky
+        </ButtonLink>
+      </div>
+    <div className="container mx-auto p-4">
+        <div className="text-center text-sm text-gray-600">
+          © {new Date().getFullYear()} Faktorio
+        </div>
+      </div>
+    </footer>
   )
 }

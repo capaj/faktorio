@@ -3,12 +3,12 @@ import { Link } from 'wouter'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LucidePiggyBank, LucideTwitter } from 'lucide-react'
 import { MountainIcon } from '@/components/MountainIcon'
-import { PageShell } from './PageShell'
+import { Footer, PageShell } from './PageShell'
 
 export const LandingPage = () => {
   return (
     <>
-      <PageShell>
+      <div>
         <section className="w-full py-6 md:py-12 lg:py-16 xl:py-24">
           <div className="container flex flex-col items-center justify-center space-y-2 px-4 md:px-6 text-center">
             <div className="space-y-2">
@@ -26,8 +26,8 @@ export const LandingPage = () => {
                 </Button>
               </Link>
 
-              <p className="text-xs text-center text-gray-500 dark:text-gray-400">
-                Zaregistrujte se. Je to zdarma. Navždy.
+              <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
+                Zkuste to. Zabere to minutu a je to zdarma. Navždy.
               </p>
             </div>
           </div>
@@ -36,7 +36,7 @@ export const LandingPage = () => {
           <div className="container grid items-center gap-4 px-4 md:px-6">
             <img
               alt="Image"
-              className="mx-auto aspect-video overflow-hidden h-[1100px] max-w-[800px] rounded-xl object-cover object-center sm:w-full"
+              className="mx-auto  overflow-hidden  rounded-xl  sm:w-full sm:h-[1100px]"
               height="1310"
               src="/faktura.png"
             />
@@ -146,7 +146,8 @@ export const LandingPage = () => {
             </div>
           </div>
         </section>
-      </PageShell>
+      </div>
+      <Footer />
     </>
   )
 }
