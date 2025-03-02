@@ -20,7 +20,7 @@ import {
 import { trpcClient } from '@/lib/trpcClient'
 
 import { Link, useParams, useLocation } from 'wouter'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { SpinnerContainer } from '@/components/SpinnerContainer'
 import { z } from 'zod'
 import Papa from 'papaparse'
@@ -145,12 +145,12 @@ export const ContactList = () => {
   const params = useParams()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [open, setOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [newDialogOpen, setNewDialogOpen] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
-  const [manualClose, setManualClose] = useState(false)
 
   const schema = z.object({
-    registration_no: z.string().min(8).max(8).optional(),
+    registration_no: z.string().min(1).max(16).optional(), // 16 should be long enough for any registration number in the world
     vat_no: z.string().optional(),
     name: z.string().refine(
       (name) => {
@@ -180,11 +180,13 @@ export const ContactList = () => {
     main_email: null
   })
   const [location, navigate] = useLocation()
+
   useEffect(() => {
     // Only run this effect when contactId changes and we have data
     if (params.contactId && contactsQuery.data) {
       if (params.contactId === 'new') {
-        setOpen(true)
+        setNewDialogOpen(true)
+        setEditDialogOpen(false)
         return
       }
 
@@ -194,27 +196,37 @@ export const ContactList = () => {
 
       if (contact) {
         setValues(contact as z.infer<typeof schema>)
-        setOpen(true)
-        setManualClose(false)
+        setEditDialogOpen(true)
+        setNewDialogOpen(false)
       } else {
         // If contact not found, navigate back to contacts
-        console.log('Contact not found, navigating back')
+        navigate('/contacts')
+      }
+    } else {
+      // No contactId in URL, close both dialogs
+      setEditDialogOpen(false)
+      setNewDialogOpen(false)
+    }
+  }, [params.contactId, contactsQuery.data, navigate])
+
+  // Handle edit modal close
+  const handleEditModalClose = (isOpen: boolean) => {
+    setEditDialogOpen(isOpen)
+
+    if (!isOpen) {
+      // Only navigate back if we're on a contact detail page
+      if (params.contactId && params.contactId !== 'new') {
         navigate('/contacts')
       }
     }
-  }, [params.contactId, contactsQuery.data])
+  }
 
-  // Handle modal close
-  const handleModalClose = (isOpen: boolean) => {
-    setOpen(isOpen)
+  // Handle new contact modal close
+  const handleNewModalClose = (isOpen: boolean) => {
+    setNewDialogOpen(isOpen)
 
-    if (!isOpen) {
-      setManualClose(true)
-      // Only navigate back if we're on a contact detail page
-      if (params.contactId && params.contactId !== 'new') {
-        console.log('Modal closed manually, navigating back')
-        navigate('/contacts')
-      }
+    if (!isOpen && params.contactId === 'new') {
+      navigate('/contacts')
     }
   }
 
@@ -333,134 +345,163 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
     })
   }
 
+  // Handle form submission for updating a contact
+  const handleUpdateSubmit = async (values: z.infer<typeof schema>) => {
+    await update.mutateAsync({
+      ...values,
+      name: values.name as string,
+      id: contactId as string,
+      main_email: values.main_email || null
+    })
+    contactsQuery.refetch()
+    setEditDialogOpen(false)
+    navigate('/contacts')
+  }
+
+  // Handle form submission for creating a new contact
+  const handleCreateSubmit = async (values: z.infer<typeof schema>) => {
+    await create.mutateAsync(values)
+    contactsQuery.refetch()
+    setNewDialogOpen(false)
+    navigate('/contacts')
+  }
+
+  // Handle contact deletion
+  const handleDeleteContact = async (ev: React.MouseEvent) => {
+    ev.preventDefault()
+    if (contactId) {
+      await deleteContact.mutateAsync(contactId)
+      contactsQuery.refetch()
+      setEditDialogOpen(false)
+      navigate('/contacts')
+    }
+  }
+
+  // Handle opening the new contact dialog
+  const handleAddClientClick = () => {
+    setValues({
+      name: '',
+      street: '',
+      street2: '',
+      city: '',
+      zip: '',
+      country: '',
+      main_email: null
+    })
+    navigate('/contacts/new')
+  }
+
   return (
     <div>
-      {contactId && contactId !== 'new' && (
-        <Dialog open={open} onOpenChange={handleModalClose}>
-          <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
-            <DialogHeader>
-              <DialogTitle>Editace kontaktu</DialogTitle>
-            </DialogHeader>
-
-            <AutoForm
-              containerClassName="grid grid-cols-2 gap-4"
-              formSchema={schema}
-              values={values}
-              onParsedValuesChange={(values) => {
-                setValues(values)
-              }}
-              onValuesChange={(values) => {
-                setValues(values)
-              }}
-              onSubmit={async (values) => {
-                await update.mutateAsync({
-                  ...values,
-                  name: values.name as string,
-                  id: contactId as string,
-                  main_email: values.main_email || null
-                })
-                contactsQuery.refetch()
-                setOpen(false)
-              }}
-              // @ts-expect-error
-              fieldConfig={fieldConfigForContactForm}
-            >
-              <DialogFooter className="flex justify-between">
-                <div className="w-full flex justify-between">
-                  <Button
-                    className="align-left self-start justify-self-start"
-                    variant={'destructive'}
-                    onClick={async (ev) => {
-                      ev.preventDefault()
-                      await deleteContact.mutateAsync(contactId)
-                      contactsQuery.refetch()
-                      setOpen(false)
-                      navigate('/contacts')
-                    }}
-                  >
-                    Smazat
-                  </Button>
-                  <Button type="submit">Uložit</Button>
+      {/* Add Client Button - Outside of dialogs */}
+      <div className="flex gap-2 mb-4">
+        <Button variant={'default'} onClick={handleAddClientClick}>
+          Přidat klienta
+        </Button>
+        <div className="relative flex items-end ml-auto">
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isImporting}
+          >
+            <UploadIcon className="mr-2 h-4 w-4" />
+            {isImporting ? 'Importuji...' : 'Import CSV'}
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".csv"
+            className="hidden"
+            onChange={handleCsvImport}
+            disabled={isImporting}
+          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="ml-1">
+                  <HelpCircleIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-md">
+                <div>
+                  <p className="font-semibold mb-1">CSV formát:</p>
+                  <p className="mb-2">
+                    Soubor musí obsahovat hlavičku s názvy sloupců. Povinné pole
+                    je pouze "name".
+                  </p>
+                  <p className="text-xs font-mono bg-muted p-2 rounded whitespace-pre-wrap overflow-x-auto">
+                    {csvFormatExample}
+                  </p>
                 </div>
-              </DialogFooter>
-            </AutoForm>
-          </DialogContent>
-        </Dialog>
-      )}
-      {(!contactId || contactId === 'new') && (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <div className="flex gap-2 mb-4">
-            <DialogTrigger>
-              <Button variant={'default'}>Přidat klienta</Button>
-            </DialogTrigger>
-            <div className="relative flex items-end ml-auto">
-              <Button
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isImporting}
-              >
-                <UploadIcon className="mr-2 h-4 w-4" />
-                {isImporting ? 'Importuji...' : 'Import CSV'}
-              </Button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept=".csv"
-                className="hidden"
-                onChange={handleCsvImport}
-                disabled={isImporting}
-              />
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="ml-1">
-                      <HelpCircleIcon className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-md">
-                    <div>
-                      <p className="font-semibold mb-1">CSV formát:</p>
-                      <p className="mb-2">
-                        Soubor musí obsahovat hlavičku s názvy sloupců. Povinné
-                        pole je pouze "name".
-                      </p>
-                      <p className="text-xs font-mono bg-muted p-2 rounded whitespace-pre-wrap overflow-x-auto">
-                        {csvFormatExample}
-                      </p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </div>
-          <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
-            <DialogHeader>
-              <DialogTitle>Nový kontakt</DialogTitle>
-            </DialogHeader>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
 
-            <AutoForm
-              formSchema={schema}
-              values={values}
-              onParsedValuesChange={setValues}
-              onValuesChange={(values) => {
-                setValues(values)
-              }}
-              containerClassName="grid grid-cols-2 gap-4"
-              onSubmit={async (values) => {
-                await create.mutateAsync(values)
-                contactsQuery.refetch()
-                setOpen(false)
-              }}
-              // @ts-expect-error
-              fieldConfig={fieldConfigForContactForm}
-            >
-              <DialogFooter>
-                <Button type="submit">Přidat kontakt</Button>
-              </DialogFooter>
-            </AutoForm>
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Edit Contact Dialog - Always in DOM */}
+      <Dialog open={editDialogOpen} onOpenChange={handleEditModalClose}>
+        <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
+          <DialogHeader>
+            <DialogTitle>Editace kontaktu</DialogTitle>
+          </DialogHeader>
+
+          <AutoForm
+            containerClassName="grid grid-cols-2 gap-4"
+            formSchema={schema}
+            values={values}
+            onParsedValuesChange={(values) => {
+              setValues(values)
+            }}
+            onValuesChange={(values) => {
+              setValues(values)
+            }}
+            onSubmit={handleUpdateSubmit}
+            // @ts-expect-error
+            fieldConfig={fieldConfigForContactForm}
+          >
+            <DialogFooter className="flex justify-between">
+              <div className="w-full flex justify-between">
+                <Button
+                  className="align-left self-start justify-self-start"
+                  variant={'destructive'}
+                  onClick={handleDeleteContact}
+                >
+                  Smazat
+                </Button>
+                <Button type="submit">Uložit</Button>
+              </div>
+            </DialogFooter>
+          </AutoForm>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Contact Dialog - Always in DOM */}
+      <Dialog open={newDialogOpen} onOpenChange={handleNewModalClose}>
+        <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
+          <DialogHeader>
+            <DialogTitle>Nový kontakt</DialogTitle>
+          </DialogHeader>
+
+          <AutoForm
+            formSchema={schema}
+            values={values}
+            onParsedValuesChange={setValues}
+            onValuesChange={(values) => {
+              setValues(values)
+            }}
+            containerClassName="grid grid-cols-2 gap-4"
+            onSubmit={handleCreateSubmit}
+            // @ts-expect-error
+            fieldConfig={fieldConfigForContactForm}
+          >
+            <DialogFooter>
+              <Button type="submit">Přidat kontakt</Button>
+            </DialogFooter>
+          </AutoForm>
+        </DialogContent>
+      </Dialog>
+
       <SpinnerContainer loading={contactsQuery.isLoading}>
         <Table>
           {(contactsQuery.data?.length ?? 0) > 1 && (
