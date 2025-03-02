@@ -20,9 +20,18 @@ import {
 import { trpcClient } from '@/lib/trpcClient'
 
 import { Link, useParams, useLocation } from 'wouter'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { SpinnerContainer } from '@/components/SpinnerContainer'
 import { z } from 'zod'
+import Papa from 'papaparse'
+import { toast } from 'sonner'
+import { UploadIcon, HelpCircleIcon } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 
 const AddressSchema = z.object({
   kodStatu: z.string(),
@@ -130,11 +139,14 @@ export const fieldConfigForContactForm = {
 export const ContactList = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const create = trpcClient.contacts.create.useMutation()
+  const createMany = trpcClient.contacts.createMany.useMutation()
   const update = trpcClient.contacts.update.useMutation()
   const deleteContact = trpcClient.contacts.delete.useMutation()
   const params = useParams()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [open, setOpen] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
 
   const schema = z.object({
     registration_no: z.string().min(8).max(8).optional(),
@@ -153,7 +165,7 @@ export const ContactList = () => {
     city: z.string().optional(),
     zip: z.string().optional(),
     country: z.string().optional(),
-    main_email: z.string().email().nullable(),
+    main_email: z.string().email().nullish(),
     phone_number: z.string().nullish()
   })
 
@@ -179,8 +191,7 @@ export const ContactList = () => {
           (contact) => contact.id === params.contactId
         )
         if (!contact) return
-        // @ts-expect-error
-        setValues(contact)
+        setValues(contact as z.infer<typeof schema>)
         setOpen(true)
       })()
     }
@@ -224,6 +235,82 @@ export const ContactList = () => {
   }, [values.registration_no])
 
   const { contactId } = params
+
+  const csvFormatExample = `name,street,city,zip,country,registration_no,vat_no,email
+Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
+
+  const handleCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsImporting(true)
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        try {
+          const contacts = results.data as Record<string, string>[]
+
+          // Map CSV fields to contact fields
+          const mappedContacts = contacts.map((contact) => ({
+            name: contact.name || '',
+            street: contact.street || '',
+            street2: contact.street2 || '',
+            city: contact.city || '',
+            zip: contact.zip || '',
+            country: contact.country || '',
+            registration_no: contact.registration_no || '',
+            vat_no: contact.vat_no || '',
+            bank_account: contact.bank_account || '',
+            iban: contact.iban || '',
+            web: contact.web || '',
+            variable_symbol: contact.variable_symbol || '',
+            full_name: contact.full_name || '',
+            phone: contact.phone || '',
+            main_email: contact.email || '',
+            email: contact.email || '',
+            email_copy: contact.email_copy || '',
+            private_note: contact.private_note || '',
+            type: contact.type || '',
+            due: contact.due ? parseInt(contact.due) : undefined,
+            currency: contact.currency || '',
+            language: contact.language || ''
+          }))
+
+          // Filter out contacts with empty names
+          const validContacts = mappedContacts.filter(
+            (contact) => contact.name.trim() !== ''
+          )
+
+          if (validContacts.length === 0) {
+            toast.error('Žádné platné kontakty k importu')
+            setIsImporting(false)
+            return
+          }
+
+          await createMany.mutateAsync(validContacts)
+          contactsQuery.refetch()
+          toast.success(`Úspěšně importováno ${validContacts.length} kontaktů`)
+
+          // Reset file input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+          }
+        } catch (error) {
+          console.error('Import failed:', error)
+          toast.error('Import selhal')
+        } finally {
+          setIsImporting(false)
+        }
+      },
+      error: (error) => {
+        console.error('CSV parsing error:', error)
+        toast.error('Chyba při parsování CSV souboru')
+        setIsImporting(false)
+      }
+    })
+  }
 
   return (
     <div>
@@ -281,9 +368,50 @@ export const ContactList = () => {
       )}
       {(!contactId || contactId === 'new') && (
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger>
-            <Button variant={'default'}>Přidat klienta</Button>
-          </DialogTrigger>
+          <div className="flex gap-2 mb-4">
+            <DialogTrigger>
+              <Button variant={'default'}>Přidat klienta</Button>
+            </DialogTrigger>
+            <div className="relative flex items-end ml-auto">
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isImporting}
+              >
+                <UploadIcon className="mr-2 h-4 w-4" />
+                {isImporting ? 'Importuji...' : 'Import CSV'}
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".csv"
+                className="hidden"
+                onChange={handleCsvImport}
+                disabled={isImporting}
+              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="ml-1">
+                      <HelpCircleIcon className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-md">
+                    <div>
+                      <p className="font-semibold mb-1">CSV formát:</p>
+                      <p className="mb-2">
+                        Soubor musí obsahovat hlavičku s názvy sloupců. Povinné
+                        pole je pouze "name".
+                      </p>
+                      <p className="text-xs font-mono bg-muted p-2 rounded whitespace-pre-wrap overflow-x-auto">
+                        {csvFormatExample}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
           <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
             <DialogHeader>
               <DialogTitle>Nový kontakt</DialogTitle>
@@ -298,7 +426,6 @@ export const ContactList = () => {
               }}
               containerClassName="grid grid-cols-2 gap-4"
               onSubmit={async (values) => {
-                // @ts-expect-error
                 await create.mutateAsync(values)
                 contactsQuery.refetch()
                 setOpen(false)

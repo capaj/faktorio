@@ -18,7 +18,7 @@
     "dev": "npm-run-all --parallel dev:*",
     "kill": "kill -9 $(lsof -t -i:9189)",
     "format": "prettier --write .",
-    "db": "cd faktorio-api && pnpm generate && pnpm migrate",
+    "dbg": "cd faktorio-api && pnpm generate",
     "dbm": "cd faktorio-api && pnpm migrate",
     "bumpDeps:api": "cd faktorio-api && ncu -u",
     "bumpDeps:fe": "cd faktorio-fe && ncu -u",
