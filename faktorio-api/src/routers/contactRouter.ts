@@ -63,6 +63,21 @@ export const contactRouter = trpcContext.router({
 
       return contact
     }),
+  createMany: protectedProc
+    .input(z.array(contactCreateFormSchema))
+    .mutation(async ({ input, ctx }) => {
+      const contacts = await ctx.db
+        .insert(contactTb)
+        .values(
+          input.map((contact) => ({
+            ...contact,
+            user_id: ctx.user.id
+          }))
+        )
+        .execute()
+
+      return contacts
+    }),
   delete: protectedProc.input(z.string()).mutation(async ({ input, ctx }) => {
     await ctx.db
       .delete(contactTb)

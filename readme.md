@@ -53,12 +53,11 @@ make sure to use `pk_test` clerk key. Clerk won't even load when you use product
 
 - add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
 - add feature to import expense invoices by OCRing them with google gemini 2.0
-- add support for foreign currencies
-- local-first and offline-first
+- be able to run local-first/fully offline using local sqlite db
 - DPH priznani at the end of the year
-- import from fakturoid
 - automated DPH and Kontrolni hlaseni submission to ADIS every month/quarter for you with automated pupeteer script
 - integrate with Fio bank API to be able to mark invoices as paid when you receive money
+- ability to import contact and invoice data from fakturoid
 
 ## Features
 
@@ -74,4 +73,8 @@ make sure to use `pk_test` clerk key. Clerk won't even load when you use product
 
 - has most features same as faktorio, but it does not have any other currencies than CZK, so you cannot invoice in EUR for example
 
-## Paid Alternatives
+## Commercial Alternatives
+
+### https://www.fakturoid.cz/
+
+### https://www.idoklad.cz/
