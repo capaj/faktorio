@@ -27,7 +27,6 @@ const defaultInvoiceItem = {
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const contactsQuery = trpcClient.contacts.all.useQuery()
-  const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
 
   const formSchema = getInvoiceCreateSchema(
     invoice.number ?? djs().get('year').toString()

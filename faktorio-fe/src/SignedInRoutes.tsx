@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Route } from 'wouter'
 // Create Document Component
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -14,6 +14,7 @@ import { trpcLinks } from './lib/errorToastLink'
 import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
 import { useAuth } from './lib/AuthContext'
 import { ManageLoginDetails } from './pages/ManageLoginDetails'
+import { SpinnerContainer } from './components/SpinnerContainer'
 
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
@@ -40,27 +41,29 @@ export const SignedInRoutes = () => {
     <>
       <trpcClient.Provider client={trpc} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <Route path="/invoices" component={InvoiceList}></Route>
-          <Route path="/contacts" component={ContactList}></Route>
-          <Route path="/contacts/:contactId" component={ContactList}></Route>
-          <Route path="/new-invoice" component={NewInvoice}></Route>
-          <Route path="/my-details" component={MyInvoicingDetails}></Route>
-          <Route
-            path="/manage-login-details"
-            component={ManageLoginDetails}
-          ></Route>
-          <Route
-            path="/invoices/:invoiceId/edit"
-            component={EditInvoicePage}
-          ></Route>
-          <Route
-            path="/invoices/:invoiceId"
-            component={InvoiceDetailPage}
-          ></Route>
-          <Route
-            path="/invoices/:invoiceId/:language"
-            component={InvoiceDetailPage}
-          ></Route>
+          <Suspense fallback={<SpinnerContainer loading={true} />}>
+            <Route path="/invoices" component={InvoiceList}></Route>
+            <Route path="/contacts" component={ContactList}></Route>
+            <Route path="/contacts/:contactId" component={ContactList}></Route>
+            <Route path="/new-invoice" component={NewInvoice}></Route>
+            <Route path="/my-details" component={MyInvoicingDetails}></Route>
+            <Route
+              path="/manage-login-details"
+              component={ManageLoginDetails}
+            ></Route>
+            <Route
+              path="/invoices/:invoiceId/edit"
+              component={EditInvoicePage}
+            ></Route>
+            <Route
+              path="/invoices/:invoiceId/render"
+              component={InvoiceDetailPage}
+            ></Route>
+            <Route
+              path="/invoices/:invoiceId/:language"
+              component={InvoiceDetailPage}
+            ></Route>
+          </Suspense>
         </QueryClientProvider>
       </trpcClient.Provider>
     </>
