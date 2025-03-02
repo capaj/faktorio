@@ -147,6 +147,7 @@ export const ContactList = () => {
 
   const [open, setOpen] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
+  const [manualClose, setManualClose] = useState(false)
 
   const schema = z.object({
     registration_no: z.string().min(8).max(8).optional(),
@@ -180,28 +181,48 @@ export const ContactList = () => {
   })
   const [location, navigate] = useLocation()
   useEffect(() => {
-    if (params.contactId) {
+    // Only run this effect when contactId changes and we have data
+    if (params.contactId && contactsQuery.data) {
       if (params.contactId === 'new') {
         setOpen(true)
         return
       }
 
-      ;(async () => {
-        const contact = contactsQuery.data?.find(
-          (contact) => contact.id === params.contactId
-        )
-        if (!contact) return
+      const contact = contactsQuery.data.find(
+        (contact) => contact.id === params.contactId
+      )
+
+      if (contact) {
         setValues(contact as z.infer<typeof schema>)
         setOpen(true)
-      })()
+        setManualClose(false)
+      } else {
+        // If contact not found, navigate back to contacts
+        console.log('Contact not found, navigating back')
+        navigate('/contacts')
+      }
     }
-  }, [params.contactId])
+  }, [params.contactId, contactsQuery.data])
 
-  useEffect(() => {
-    if (open === false && params.contactId) {
-      navigate('/contacts')
+  // Handle modal close
+  const handleModalClose = (isOpen: boolean) => {
+    setOpen(isOpen)
+
+    if (!isOpen) {
+      setManualClose(true)
+      // Only navigate back if we're on a contact detail page
+      if (params.contactId && params.contactId !== 'new') {
+        console.log('Modal closed manually, navigating back')
+        navigate('/contacts')
+      }
     }
-  }, [open])
+  }
+
+  // Handle contact link click
+  const handleContactClick = (e: React.MouseEvent, contactId: string) => {
+    e.preventDefault()
+    navigate(`/contacts/${contactId}`)
+  }
 
   useEffect(() => {
     ;(async () => {
@@ -315,7 +336,7 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
   return (
     <div>
       {contactId && contactId !== 'new' && (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleModalClose}>
           <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
             <DialogHeader>
               <DialogTitle>Editace kontaktu</DialogTitle>
@@ -459,11 +480,7 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
               <TableRow key={contact.id}>
                 <TableCell className="font-medium">
                   <Link
-                    onClick={() => {
-                      if (contact.id === contactId) {
-                        setOpen(true)
-                      }
-                    }}
+                    onClick={(e) => handleContactClick(e, contact.id)}
                     href={`/contacts/${contact.id}`}
                   >
                     {contact.name}
