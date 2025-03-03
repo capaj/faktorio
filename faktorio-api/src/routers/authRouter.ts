@@ -524,6 +524,67 @@ export const authRouter = trpcContext.router({
         user: updatedUser,
         token
       }
+    }),
+  deleteAccount: protectedProc
+    .input(
+      z.object({
+        password: z.string().optional(),
+        confirmText: z.string().optional()
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      if (!ctx.user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to delete your account'
+        })
+      }
+
+      // Get user with password hash
+      const user = await ctx.db.query.userT.findFirst({
+        where: eq(userT.id, ctx.user.id)
+      })
+
+      if (!user) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'User not found'
+        })
+      }
+
+      // If user has password authentication, verify password
+      if (user.passwordHash) {
+        if (!input.password) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Password is required'
+          })
+        }
+
+        const passwordMatch = await verifyPassword(
+          user.passwordHash,
+          input.password
+        )
+        if (!passwordMatch) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'Password is incorrect'
+          })
+        }
+      } else {
+        // For users without password (e.g., social login), verify confirmation text
+        if (!input.confirmText || input.confirmText.toLowerCase() !== 'ano') {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Pro potvrzení je nutné zadat "ano"'
+          })
+        }
+      }
+
+      // Delete the user
+      await ctx.db.delete(userT).where(eq(userT.id, ctx.user.id))
+
+      return { success: true }
     })
 })
 
