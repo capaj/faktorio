@@ -56,11 +56,7 @@ export const SignedInRoutes = () => {
               component={EditInvoicePage}
             ></Route>
             <Route
-              path="/invoices/:invoiceId/render"
-              component={InvoiceDetailPage}
-            ></Route>
-            <Route
-              path="/invoices/:invoiceId/:language"
+              path="/invoices/:invoiceId"
               component={InvoiceDetailPage}
             ></Route>
           </Suspense>

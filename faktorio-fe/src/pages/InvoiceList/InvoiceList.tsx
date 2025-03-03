@@ -66,7 +66,7 @@ export function InvoiceList() {
           {invoices.map((invoice) => (
             <TableRow key={invoice.id}>
               <TableCell className="font-medium">
-                <Link href={`/invoices/${invoice.id}/cs`}>
+                <Link href={`/invoices/${invoice.id}/?language=cs`}>
                   {invoice.number}
                 </Link>
               </TableCell>

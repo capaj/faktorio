@@ -6,7 +6,7 @@ import { CzechInvoicePDF } from './CzechInvoicePDF'
 import { invoiceData } from '@/invoiceSchema'
 import { Button } from '@/components/ui/button'
 import { snakeCase } from 'lodash-es'
-import { useLocation, useParams } from 'wouter'
+import { useLocation, useParams, useSearchParams } from 'wouter'
 import { trpcClient } from '@/lib/trpcClient'
 import { EnglishInvoicePDF } from './EnglishInvoicePDF'
 import {
@@ -33,7 +33,8 @@ export const InvoiceDetailPage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const params = useParams()
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
-  const language = params.language ?? 'cs'
+  const [searchParams] = useSearchParams()
+  const language = searchParams.get('language') ?? 'cs'
   const [location, navigate] = useLocation()
 
   const PdfContent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
@@ -46,7 +47,7 @@ export const InvoiceDetailPage = () => {
           <Select
             value={language}
             onValueChange={(val) => {
-              navigate(`/invoices/${params.invoiceId}/${val}`)
+              navigate(`/invoices/${params.invoiceId}?language=${val}`)
             }}
           >
             <SelectTrigger className="w-[180px]">
