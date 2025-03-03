@@ -24,6 +24,12 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion'
 
 const changePasswordSchema = z
   .object({
@@ -189,269 +195,278 @@ export const ManageLoginDetails = () => {
     <>
       <h2 className="text-2xl font-bold mb-6">Správa přihlašovacích údajů</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Změna hesla</h3>
-          <Form {...passwordForm}>
-            <form
-              onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-              className="space-y-6"
-            >
-              <FormField
-                control={passwordForm.control}
-                name="currentPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Aktuální heslo</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="change-password">
+          <AccordionTrigger className="text-xl font-semibold">
+            Změna hesla
+          </AccordionTrigger>
+          <AccordionContent>
+            <Form {...passwordForm}>
+              <form
+                onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+                className="space-y-6 p-4 grid grid-cols-2 gap-4 items-center"
+              >
+                <FormField
+                  control={passwordForm.control}
+                  name="currentPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Aktuální heslo</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={passwordForm.control}
-                name="newPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nové heslo</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={passwordForm.control}
+                  name="newPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nové heslo</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={passwordForm.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Potvrzení nového hesla</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={passwordForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Potvrzení nového hesla</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="flex justify-end">
-                <FkButton
-                  type="submit"
-                  isLoading={isPasswordLoading}
-                  disabled={
-                    !passwordForm.formState.isDirty ||
-                    !passwordForm.formState.isValid ||
-                    Object.keys(passwordForm.formState.errors).length > 0
-                  }
-                >
-                  Změnit heslo
-                </FkButton>
-              </div>
-            </form>
-          </Form>
-        </div>
+                <div className="flex justify-end">
+                  <FkButton
+                    type="submit"
+                    isLoading={isPasswordLoading}
+                    disabled={
+                      !passwordForm.formState.isDirty ||
+                      !passwordForm.formState.isValid ||
+                      Object.keys(passwordForm.formState.errors).length > 0
+                    }
+                  >
+                    Změnit heslo
+                  </FkButton>
+                </div>
+              </form>
+            </Form>
+          </AccordionContent>
+        </AccordionItem>
 
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Přihlašovací email</h3>
+        <AccordionItem value="change-email">
+          <AccordionTrigger className="text-xl font-semibold">
+            Přihlašovací email
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="mb-4 p-3 bg-muted rounded-md">
+              <p className="text-sm font-medium text-muted-foreground">
+                Aktuální email
+              </p>
+              <p className="font-medium">{user?.email}</p>
+            </div>
 
-          <div className="mb-4 p-3 bg-muted rounded-md">
-            <p className="text-sm font-medium text-muted-foreground">
-              Aktuální email
+            <Form {...emailForm}>
+              <form
+                onSubmit={emailForm.handleSubmit(onEmailSubmit)}
+                className="space-y-6 p-4 grid grid-cols-3 gap-4 items-center"
+              >
+                <FormField
+                  control={emailForm.control}
+                  name="newEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nový email</FormLabel>
+                      <FormControl>
+                        <Input type="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={emailForm.control}
+                  name="currentPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Aktuální heslo</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end">
+                  <FkButton
+                    type="submit"
+                    isLoading={isEmailLoading}
+                    disabled={
+                      !emailForm.formState.isDirty ||
+                      !emailForm.formState.isValid ||
+                      Object.keys(emailForm.formState.errors).length > 0
+                    }
+                  >
+                    Změnit email
+                  </FkButton>
+                </div>
+              </form>
+            </Form>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="delete-account">
+          <AccordionTrigger className="text-xl font-semibold text-destructive">
+            Smazání účtu
+          </AccordionTrigger>
+          <AccordionContent>
+            <p className="mb-6 text-muted-foreground">
+              Smazání účtu je nevratná akce. Všechna vaše data budou trvale
+              odstraněna.
             </p>
-            <p className="font-medium">{user?.email}</p>
-          </div>
 
-          <Form {...emailForm}>
-            <form
-              onSubmit={emailForm.handleSubmit(onEmailSubmit)}
-              className="space-y-6"
-            >
-              <FormField
-                control={emailForm.control}
-                name="newEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nový email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={emailForm.control}
-                name="currentPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Aktuální heslo</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end">
-                <FkButton
-                  type="submit"
-                  isLoading={isEmailLoading}
-                  disabled={
-                    !emailForm.formState.isDirty ||
-                    !emailForm.formState.isValid ||
-                    Object.keys(emailForm.formState.errors).length > 0
-                  }
+            {user?.passwordHash ? (
+              <Form {...deleteAccountPasswordForm}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    if (deleteAccountPasswordForm.formState.isValid) {
+                      setIsDeleteDialogOpen(true)
+                    } else {
+                      deleteAccountPasswordForm.trigger()
+                    }
+                  }}
+                  className="space-y-6 max-w-md p-4 grid grid-cols-2 gap-4 items-center"
                 >
-                  Změnit email
-                </FkButton>
-              </div>
-            </form>
-          </Form>
-        </div>
-      </div>
+                  <FormField
+                    control={deleteAccountPasswordForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Zadejte heslo pro potvrzení</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-      <div className="mt-12 border-t pt-8">
-        <h3 className="text-xl font-semibold mb-4 text-destructive">
-          Smazání účtu
-        </h3>
-        <p className="mb-6 text-muted-foreground">
-          Smazání účtu je nevratná akce. Všechna vaše data budou trvale
-          odstraněna.
-        </p>
+                  <div>
+                    <FkButton
+                      type="submit"
+                      isLoading={deleteAccountMutation.isLoading}
+                      variant="destructive"
+                      disabled={
+                        !deleteAccountPasswordForm.formState.isDirty ||
+                        !deleteAccountPasswordForm.formState.isValid ||
+                        Object.keys(deleteAccountPasswordForm.formState.errors)
+                          .length > 0
+                      }
+                    >
+                      Smazat účet
+                    </FkButton>
+                  </div>
+                </form>
+              </Form>
+            ) : (
+              <Form {...deleteAccountConfirmForm}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    if (deleteAccountConfirmForm.formState.isValid) {
+                      setIsDeleteDialogOpen(true)
+                    } else {
+                      deleteAccountConfirmForm.trigger()
+                    }
+                  }}
+                  className="space-y-6 max-w-md"
+                >
+                  <FormField
+                    control={deleteAccountConfirmForm.control}
+                    name="confirmText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pro potvrzení napište "ano"</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-        {user?.passwordHash ? (
-          <Form {...deleteAccountPasswordForm}>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                if (deleteAccountPasswordForm.formState.isValid) {
-                  setIsDeleteDialogOpen(true)
+                  <div>
+                    <FkButton
+                      type="submit"
+                      isLoading={deleteAccountMutation.isLoading}
+                      variant="destructive"
+                      disabled={
+                        !deleteAccountConfirmForm.formState.isDirty ||
+                        !deleteAccountConfirmForm.formState.isValid ||
+                        Object.keys(deleteAccountConfirmForm.formState.errors)
+                          .length > 0
+                      }
+                    >
+                      Smazat účet
+                    </FkButton>
+                  </div>
+                </form>
+              </Form>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Opravdu chcete smazat svůj účet?</DialogTitle>
+            <DialogDescription>
+              Tato akce je nevratná. Všechna vaše data budou trvale odstraněna a
+              nebude možné je obnovit.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Zrušit
+            </Button>
+            <Button
+              onClick={() => {
+                if (user?.passwordHash) {
+                  deleteAccountPasswordForm.handleSubmit(
+                    onDeleteAccountPasswordSubmit
+                  )()
                 } else {
-                  deleteAccountPasswordForm.trigger()
+                  deleteAccountConfirmForm.handleSubmit(
+                    onDeleteAccountConfirmSubmit
+                  )()
                 }
               }}
-              className="space-y-6 max-w-md"
+              variant="destructive"
             >
-              <FormField
-                control={deleteAccountPasswordForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Zadejte heslo pro potvrzení</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div>
-                <FkButton
-                  type="submit"
-                  isLoading={deleteAccountMutation.isLoading}
-                  variant="destructive"
-                  disabled={
-                    !deleteAccountPasswordForm.formState.isDirty ||
-                    !deleteAccountPasswordForm.formState.isValid ||
-                    Object.keys(deleteAccountPasswordForm.formState.errors)
-                      .length > 0
-                  }
-                >
-                  Smazat účet
-                </FkButton>
-              </div>
-            </form>
-          </Form>
-        ) : (
-          <Form {...deleteAccountConfirmForm}>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                if (deleteAccountConfirmForm.formState.isValid) {
-                  setIsDeleteDialogOpen(true)
-                } else {
-                  deleteAccountConfirmForm.trigger()
-                }
-              }}
-              className="space-y-6 max-w-md"
-            >
-              <FormField
-                control={deleteAccountConfirmForm.control}
-                name="confirmText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pro potvrzení napište "ano"</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div>
-                <FkButton
-                  type="submit"
-                  isLoading={deleteAccountMutation.isLoading}
-                  variant="destructive"
-                  disabled={
-                    !deleteAccountConfirmForm.formState.isDirty ||
-                    !deleteAccountConfirmForm.formState.isValid ||
-                    Object.keys(deleteAccountConfirmForm.formState.errors)
-                      .length > 0
-                  }
-                >
-                  Smazat účet
-                </FkButton>
-              </div>
-            </form>
-          </Form>
-        )}
-
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Opravdu chcete smazat svůj účet?</DialogTitle>
-              <DialogDescription>
-                Tato akce je nevratná. Všechna vaše data budou trvale odstraněna
-                a nebude možné je obnovit.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsDeleteDialogOpen(false)}
-              >
-                Zrušit
-              </Button>
-              <Button
-                onClick={() => {
-                  if (user?.passwordHash) {
-                    deleteAccountPasswordForm.handleSubmit(
-                      onDeleteAccountPasswordSubmit
-                    )()
-                  } else {
-                    deleteAccountConfirmForm.handleSubmit(
-                      onDeleteAccountConfirmSubmit
-                    )()
-                  }
-                }}
-                variant="destructive"
-              >
-                Ano, smazat účet
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+              Ano, smazat účet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
