@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { contactTb } from '../schema'
+import { contactTb, invoicesTb } from '../schema'
 import { trpcContext } from '../trpcContext'
-import { and, asc, desc, eq, like } from 'drizzle-orm'
+import { and, count, desc, eq, like } from 'drizzle-orm'
 import { contactCreateFormSchema } from './contactCreateFormSchema'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { contactInsertSchema } from '../zodDbSchemas'
@@ -77,6 +77,83 @@ export const contactRouter = trpcContext.router({
         .execute()
 
       return contacts
+    }),
+  getInvoiceCount: protectedProc
+    .input(
+      z.object({
+        contactId: z.string()
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      // First check if the contact belongs to the user
+      const contact = await ctx.db.query.contactTb.findFirst({
+        where: and(
+          eq(contactTb.id, input.contactId),
+          eq(contactTb.user_id, ctx.user.id)
+        )
+      })
+
+      if (!contact) {
+        throw new Error('Contact not found')
+      }
+
+      // Count invoices for this contact
+      const result = await ctx.db
+        .select({ count: count() })
+        .from(invoicesTb)
+        .where(
+          and(
+            eq(invoicesTb.client_contact_id, input.contactId),
+            eq(invoicesTb.user_id, ctx.user.id)
+          )
+        )
+        .execute()
+
+      return result[0]?.count || 0
+    }),
+  deleteWithInvoices: protectedProc
+    .input(
+      z.object({
+        contactId: z.string(),
+        deleteInvoices: z.boolean()
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      // First check if the contact belongs to the user
+      const contact = await ctx.db.query.contactTb.findFirst({
+        where: and(
+          eq(contactTb.id, input.contactId),
+          eq(contactTb.user_id, ctx.user.id)
+        )
+      })
+
+      if (!contact) {
+        throw new Error('Contact not found')
+      }
+
+      // If deleteInvoices is true, delete all invoices for this contact
+      if (input.deleteInvoices) {
+        await ctx.db
+          .delete(invoicesTb)
+          .where(
+            and(
+              eq(invoicesTb.client_contact_id, input.contactId),
+              eq(invoicesTb.user_id, ctx.user.id)
+            )
+          )
+          .execute()
+      }
+
+      // Delete the contact
+      await ctx.db
+        .delete(contactTb)
+        .where(
+          and(
+            eq(contactTb.id, input.contactId),
+            eq(contactTb.user_id, ctx.user.id)
+          )
+        )
+        .execute()
     }),
   delete: protectedProc.input(z.string()).mutation(async ({ input, ctx }) => {
     await ctx.db

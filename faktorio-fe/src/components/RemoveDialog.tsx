@@ -59,6 +59,54 @@ export function RemoveDialogInner({
   )
 }
 
+// New version that supports open and onOpenChange props
+export function RemoveDialogControlled({
+  open,
+  onOpenChange,
+  onRemove,
+  title,
+  description,
+  loading
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onRemove: () => void
+  title: React.ReactNode
+  description?: React.ReactNode
+  loading?: boolean
+}) {
+  return (
+    <Dialog open={open} onOpenChange={!loading ? onOpenChange : undefined}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription className="pt-2">{description}</DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
+            Zrušit
+          </Button>
+
+          <Button
+            className="flex items-center gap-2"
+            variant="destructive"
+            onClick={() => onRemove()}
+            disabled={loading}
+          >
+            {loading && <Spinner />}
+            Smazat
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function RemoveDialogUncontrolled({
   onRemove,
   title,

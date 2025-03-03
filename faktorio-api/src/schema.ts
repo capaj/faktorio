@@ -103,7 +103,10 @@ export const invoicesTb = sqliteTable(
   (invoices) => {
     return {
       numberUserUniqueIndex: unique().on(invoices.user_id, invoices.number),
-      userIndex: index('invoices_user_idx').on(invoices.user_id)
+      userIndex: index('invoices_user_idx').on(invoices.user_id),
+      clientContactIdIndex: index('invoices_client_contact_id_idx').on(
+        invoices.client_contact_id
+      )
     }
   }
 )

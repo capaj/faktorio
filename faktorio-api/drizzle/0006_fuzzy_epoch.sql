@@ -1,0 +1,1 @@
+CREATE INDEX `invoices_client_contact_id_idx` ON `invoice` (`client_contact_id`);

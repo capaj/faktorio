@@ -6,7 +6,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
+  DialogDescription
 } from '@/components/ui/dialog'
 import {
   TableCaption,
@@ -32,6 +33,8 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Spinner } from '@/components/ui/spinner'
 
 const AddressSchema = z.object({
   kodStatu: z.string(),
@@ -142,12 +145,29 @@ export const ContactList = () => {
   const createMany = trpcClient.contacts.createMany.useMutation()
   const update = trpcClient.contacts.update.useMutation()
   const deleteContact = trpcClient.contacts.delete.useMutation()
+  const deleteWithInvoices =
+    trpcClient.contacts.deleteWithInvoices.useMutation()
   const params = useParams()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const contactId = params.contactId
+
+  // Query to get the invoice count for the current contact
+  const invoiceCountQuery = trpcClient.contacts.getInvoiceCount.useQuery(
+    {
+      contactId: contactId || ''
+    },
+    {
+      enabled: !!contactId && contactId !== 'new'
+    }
+  )
+  const invoiceCount = invoiceCountQuery.data || 0
+  const hasInvoices = invoiceCount > 0
 
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [newDialogOpen, setNewDialogOpen] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
+  const [deleteInvoices, setDeleteInvoices] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const schema = z.object({
     registration_no: z.string().min(1).max(16).optional(), // 16 should be long enough for any registration number in the world
@@ -267,8 +287,6 @@ export const ContactList = () => {
     })()
   }, [values.registration_no])
 
-  const { contactId } = params
-
   const csvFormatExample = `name,street,city,zip,country,registration_no,vat_no,email
 Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
 
@@ -367,14 +385,23 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
   }
 
   // Handle contact deletion
-  const handleDeleteContact = async (ev: React.MouseEvent) => {
-    ev.preventDefault()
+  const handleDeleteContact = async () => {
     if (contactId) {
-      await deleteContact.mutateAsync(contactId)
+      await deleteWithInvoices.mutateAsync({
+        contactId,
+        deleteInvoices
+      })
       contactsQuery.refetch()
       setEditDialogOpen(false)
+      setShowDeleteDialog(false)
       navigate('/contacts')
     }
+  }
+
+  // Show delete confirmation dialog
+  const handleShowDeleteDialog = (ev: React.MouseEvent) => {
+    ev.preventDefault()
+    setShowDeleteDialog(true)
   }
 
   // Handle opening the new contact dialog
@@ -462,17 +489,71 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
           >
             <DialogFooter className="flex justify-between">
               <div className="w-full flex justify-between">
-                <Button
-                  className="align-left self-start justify-self-start"
-                  variant={'destructive'}
-                  onClick={handleDeleteContact}
-                >
-                  Smazat
-                </Button>
+                <div className="flex flex-col items-start gap-2">
+                  {hasInvoices && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="delete-invoices"
+                        checked={deleteInvoices}
+                        onCheckedChange={(checked) =>
+                          setDeleteInvoices(checked === true)
+                        }
+                      />
+                      <label
+                        htmlFor="delete-invoices"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Smazat všechny faktury kontaktu ({invoiceCount})
+                      </label>
+                    </div>
+                  )}
+                  <Button
+                    className="align-left self-start justify-self-start"
+                    variant={'destructive'}
+                    onClick={handleShowDeleteDialog}
+                    disabled={hasInvoices && !deleteInvoices}
+                  >
+                    Smazat
+                  </Button>
+                </div>
                 <Button type="submit">Uložit</Button>
               </div>
             </DialogFooter>
           </AutoForm>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              Opravdu chcete smazat kontakt <strong>{values.name}</strong>?
+            </DialogTitle>
+            {hasInvoices && deleteInvoices && (
+              <DialogDescription className="pt-2 text-red-500">
+                Budou smazány také všechny faktury ({invoiceCount}) spojené s
+                tímto kontaktem!
+              </DialogDescription>
+            )}
+          </DialogHeader>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Zrušit
+            </Button>
+
+            <Button
+              className="flex items-center gap-2"
+              variant="destructive"
+              onClick={handleDeleteContact}
+            >
+              {deleteWithInvoices.isLoading && <Spinner />}
+              Smazat
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
