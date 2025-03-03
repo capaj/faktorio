@@ -36,7 +36,7 @@ export const NewInvoice = () => {
       client_contact_id: true
     })
     .extend({
-      client_contact_name: z.string().optional()
+      client_contact_id: z.string().optional()
     })
   const [location, navigate] = useLocation()
   const createInvoice = trpcClient.invoices.create.useMutation()
@@ -118,8 +118,7 @@ export const NewInvoice = () => {
   }
 
   const contact = contactsQuery.data?.find(
-    (contact: { name: string | null }) =>
-      contact.name === formValues.client_contact_name
+    (contact) => contact.id === formValues.client_contact_id
   )
   const isCzkInvoice = formValues.currency !== 'CZK'
   const exchangeRate = formValues.exchange_rate ?? 1
@@ -153,7 +152,7 @@ export const NewInvoice = () => {
           footer_note: {
             label: 'Poznámka'
           },
-          client_contact_name: {
+          client_contact_id: {
             label: 'Odběratel',
             fieldType: ({ field }) => {
               return <ContactComboBox {...field} />
@@ -241,6 +240,11 @@ export const NewInvoice = () => {
           onClick={async () => {
             if (!contact) {
               alert('Kontakt nenalezen')
+              return
+            }
+
+            if (!formValues.client_contact_id) {
+              alert('Vyberte kontakt')
               return
             }
 

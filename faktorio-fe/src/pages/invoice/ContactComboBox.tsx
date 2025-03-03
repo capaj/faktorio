@@ -28,7 +28,6 @@ export function ContactComboBox(props: {
   const [open, setOpen] = React.useState(false)
   const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
 
-  // const [value, setValue] = React.useState('')
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const contacts = contactsQuery.data ?? []
   const { value } = props
@@ -41,6 +40,9 @@ export function ContactComboBox(props: {
       }
     }
   }, [contactsQuery.data])
+
+  // Find the selected contact by ID
+  const selectedContact = contacts.find((contact) => contact.id === value)
 
   return (
     <div
@@ -59,9 +61,7 @@ export function ContactComboBox(props: {
             className="w-[300px] justify-between"
             disabled={props.disabled}
           >
-            {value
-              ? contacts.find((contact) => contact.name === value)?.name
-              : 'Vyberte kontakt...'}
+            {selectedContact ? selectedContact.name : 'Vyberte kontakt...'}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -72,25 +72,19 @@ export function ContactComboBox(props: {
             <CommandList>
               <CommandGroup>
                 {contacts.map((contact) => {
-                  const contactKey = contact.name ?? contact.id
                   return (
                     <CommandItem
-                      key={contactKey}
-                      value={contactKey}
-                      onSelect={(currentValue) => {
-                        console.log('currentValue:', currentValue)
-                        props.onChange?.(
-                          currentValue === value ? '' : currentValue
-                        )
+                      key={contact.id}
+                      value={contact.name}
+                      onSelect={() => {
+                        props.onChange?.(contact.id === value ? '' : contact.id)
                         setOpen(false)
                       }}
                     >
                       <Check
                         className={cn(
                           'mr-2 h-4 w-4',
-                          props.value === contactKey
-                            ? 'opacity-100'
-                            : 'opacity-0'
+                          value === contact.id ? 'opacity-100' : 'opacity-0'
                         )}
                       />
                       {contact.name}

@@ -9,8 +9,7 @@ import { getInvoiceCreateSchema } from './getInvoiceCreateSchema'
 import { djs } from '../../../../src/djs'
 import { useZodFormState } from '@/lib/useZodFormState'
 import { z } from 'zod'
-import {
-  invoiceItemFormSchema} from '../../../../faktorio-api/src/zodDbSchemas'
+import { invoiceItemFormSchema } from '../../../../faktorio-api/src/zodDbSchemas'
 import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
@@ -33,7 +32,6 @@ export const EditInvoicePage = () => {
   ).omit({
     client_contact_id: true
   })
-
 
   const [location, navigate] = useLocation()
   const updateInvoice = trpcClient.invoices.update.useMutation()
@@ -111,9 +109,7 @@ export const EditInvoicePage = () => {
         }}
       ></AutoForm>
 
-      {contact?.name && (
-        <ContactComboBox disabled={true} value={contact.name} />
-      )}
+      {contact?.id && <ContactComboBox disabled={true} value={contact.id} />}
       <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
         <h3 className="flex items-center gap-2">Položky</h3>
         {invoiceItems.map((item, index) => {

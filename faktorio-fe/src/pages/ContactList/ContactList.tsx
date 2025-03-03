@@ -170,7 +170,7 @@ export const ContactList = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const schema = z.object({
-    registration_no: z.string().min(1).max(16).optional(), // 16 should be long enough for any registration number in the world
+    registration_no: z.string().max(16).optional(), // 16 should be long enough for any registration number in the world
     vat_no: z.string().optional(),
     name: z.string().refine(
       (name) => {

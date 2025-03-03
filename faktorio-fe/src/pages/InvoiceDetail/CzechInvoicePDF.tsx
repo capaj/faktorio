@@ -503,7 +503,7 @@ export const CzechInvoicePDF = ({
                 >
                   <ItemDescText
                     style={{
-                      width: '4%'
+                      width: '5%'
                     }}
                   >
                     {item.quantity}
@@ -521,7 +521,9 @@ export const CzechInvoicePDF = ({
                 <Flex
                   style={{
                     width: '50%',
-                    flexDirection: 'row'
+                    flexDirection: 'row',
+                    alignItems: 'baseline',
+                    justifyContent: 'flex-start'
                   }}
                 >
                   <ThirdWidthColumnRight>{vatRate} %</ThirdWidthColumnRight>
@@ -590,7 +592,9 @@ export const CzechInvoicePDF = ({
             </Text>
           </Flex>
         </Flex>
-
+        <Text style={{ marginLeft: 22, marginTop: 10, fontSize: 10 }}>
+          {invoiceData.footer_note}
+        </Text>
         <View
           style={{
             position: 'absolute',

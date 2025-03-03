@@ -473,13 +473,13 @@ export const EnglishInvoicePDF = ({
                   style={{
                     width: '50%',
                     flexDirection: 'row',
-
+                    alignItems: 'baseline',
                     justifyContent: 'flex-start'
                   }}
                 >
                   <ItemDescText
                     style={{
-                      width: '4%'
+                      width: '5%'
                     }}
                   >
                     {item.quantity}
@@ -515,6 +515,7 @@ export const EnglishInvoicePDF = ({
             )
           })}
         </View>
+
         <Flex
           style={{
             marginTop: 30,
@@ -569,7 +570,9 @@ export const EnglishInvoicePDF = ({
             </Text>
           </Flex>
         </Flex>
-
+        <Text style={{ marginLeft: 22, marginTop: 10, fontSize: 10 }}>
+          {invoiceData.footer_note}
+        </Text>
         <View
           style={{
             position: 'absolute',
