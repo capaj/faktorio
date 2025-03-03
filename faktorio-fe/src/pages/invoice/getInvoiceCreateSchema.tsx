@@ -14,7 +14,10 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
       taxable_fulfillment_due: true,
       due_in_days: true,
       client_contact_id: true,
-      exchange_rate: true
+      exchange_rate: true,
+      bank_account: true,
+      iban: true,
+      swift_bic: true
     })
     .extend({
       // @ts-expect-error

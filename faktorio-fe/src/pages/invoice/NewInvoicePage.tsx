@@ -13,6 +13,12 @@ import { invoiceItemFormSchema } from '../../../../faktorio-api/src/zodDbSchemas
 import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion'
 
 const defaultInvoiceItem = {
   description: '',
@@ -40,9 +46,20 @@ export const NewInvoice = () => {
     })
   const [location, navigate] = useLocation()
   const createInvoice = trpcClient.invoices.create.useMutation()
+
+  // Create a separate schema for bank account fields
+  const bankAccountSchema = formSchema.pick({
+    bank_account: true,
+    iban: true,
+    swift_bic: true
+  })
+
   const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(
     formSchema.parse({
-      due_in_days: 14
+      due_in_days: 14,
+      bank_account: invoicingDetails?.bank_account || '',
+      iban: invoicingDetails?.iban || '',
+      swift_bic: invoicingDetails?.swift_bic || ''
     })
   )
 
@@ -168,9 +185,57 @@ export const NewInvoice = () => {
               disabled: !isCzkInvoice
             },
             label: 'Kurz'
+          },
+          // Hide bank account fields from the main form
+          bank_account: {
+            fieldType: () => null
+          },
+          iban: {
+            fieldType: () => null
+          },
+          swift_bic: {
+            fieldType: () => null
           }
         }}
       ></AutoForm>
+
+      <Accordion type="single" collapsible className="mt-4 mb-6">
+        <AccordionItem value="bank-details">
+          <AccordionTrigger className="font-semibold">
+            Bankovní údaje
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <AutoForm
+                formSchema={bankAccountSchema}
+                values={{
+                  bank_account: formValues.bank_account,
+                  iban: formValues.iban,
+                  swift_bic: formValues.swift_bic
+                }}
+                onParsedValuesChange={(values) => {
+                  setFormValues((prev) => ({
+                    ...prev,
+                    ...values
+                  }))
+                }}
+                fieldConfig={{
+                  bank_account: {
+                    label: 'Číslo účtu'
+                  },
+                  iban: {
+                    label: 'IBAN'
+                  },
+                  swift_bic: {
+                    label: 'SWIFT/BIC'
+                  }
+                }}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
       <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
         <h3 className="flex items-center gap-2">Položky</h3>
         {invoiceItems.map((item, index) => {

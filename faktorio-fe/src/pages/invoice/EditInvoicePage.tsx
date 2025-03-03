@@ -105,6 +105,15 @@ export const EditInvoicePage = () => {
           },
           due_in_days: {
             label: 'Splatnost (v dnech)'
+          },
+          bank_account: {
+            label: 'Číslo účtu'
+          },
+          iban: {
+            label: 'IBAN'
+          },
+          swift_bic: {
+            label: 'SWIFT/BIC'
           }
         }}
       ></AutoForm>
