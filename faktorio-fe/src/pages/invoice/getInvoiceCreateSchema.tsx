@@ -30,7 +30,10 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
       taxable_fulfillment_due: z
         .date()
         .default(djs().subtract(1, 'month').endOf('month').toDate()),
-      exchange_rate: z.number().nullable().default(1)
+      exchange_rate: z.number().nullable().default(1),
+      bank_account: z.string().optional().default(''),
+      iban: z.string().optional().default(''),
+      swift_bic: z.string().optional().default('')
       // due_on: z.date().default(djs().add(14, 'day').toDate())
       // sent_at: z.date().nullable().default(null),
       // paid_on: z.date().nullable().default(null),

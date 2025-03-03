@@ -48,11 +48,17 @@ export const NewInvoice = () => {
   const createInvoice = trpcClient.invoices.create.useMutation()
 
   // Create a separate schema for bank account fields
-  const bankAccountSchema = formSchema.pick({
-    bank_account: true,
-    iban: true,
-    swift_bic: true
-  })
+  const bankAccountSchema = formSchema
+    .pick({
+      bank_account: true,
+      iban: true,
+      swift_bic: true
+    })
+    .extend({
+      bank_account: z.string().default(''),
+      iban: z.string().default(''),
+      swift_bic: z.string().default('')
+    })
 
   const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(
     formSchema.parse({
