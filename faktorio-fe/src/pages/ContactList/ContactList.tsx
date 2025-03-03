@@ -175,7 +175,9 @@ export const ContactList = () => {
     name: z.string().refine(
       (name) => {
         // make sure that the name is unique
-        return !contactsQuery.data?.find((contact) => contact.name === name)
+        return !contactsQuery.data?.find((contact) => {
+          return contact.name === name && contact.id !== contactId
+        })
       },
       {
         message: 'Kontakt s tímto jménem již existuje'

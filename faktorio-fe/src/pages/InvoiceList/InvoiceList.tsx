@@ -27,7 +27,7 @@ import { useQueryParamState } from './useQueryParamState'
 export function useFilteredInvoicesQuery(search: string = '') {
   return trpcClient.invoices.all.useQuery({
     filter: search,
-    limit: 50
+    limit: 100
   })
 }
 
