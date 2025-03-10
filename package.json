@@ -6,10 +6,10 @@
     "faktorio-fe"
   ],
   "devDependencies": {
-    "prettier": "^3.5.2",
+    "prettier": "^3.5.3",
     "turbo": "^2.4.4",
     "typescript": "^5.8.2",
-    "vitest": "^3.0.7"
+    "vitest": "^3.0.8"
   },
   "packageManager": "pnpm@10.4.0",
   "scripts": {
