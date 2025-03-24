@@ -2,7 +2,8 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
 import { drizzle } from 'drizzle-orm/libsql'
 import { appRouter } from './trpcRouter'
-
+import util from 'util'
+import { inspect } from 'util'
 import { createClient } from '@libsql/client'
 
 import * as schema from './schema'
@@ -60,6 +61,8 @@ export default {
       return handleOptions(request)
     }
 
+    console.log(request.body)
+
     const turso = createClient({
       url: env.TURSO_DATABASE_URL,
       authToken: env.TURSO_AUTH_TOKEN
@@ -99,7 +102,7 @@ export default {
         console.error(errCtx.error)
         console.error(`${type} ${path} failed for:`)
         console.error(
-          colorize(JSON.stringify({ input, userId: ctx.user?.id }), {
+          colorize(JSON.stringify({ errCtx: inspect(errCtx), userId: ctx.user?.id }), {
             pretty: true
           })
         )
