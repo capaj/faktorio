@@ -113,7 +113,7 @@ export const MyInvoicingDetails = () => {
           <div className="flex justify-end">
             <FkButton
               // disabled={true} // TODO
-              isLoading={upsert.isLoading}
+              isLoading={upsert.isPending}
               type="submit"
             >
               Uložit

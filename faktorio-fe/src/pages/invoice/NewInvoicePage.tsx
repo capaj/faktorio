@@ -306,7 +306,7 @@ export const NewInvoice = () => {
       </div>
       <Center>
         <ButtonWithLoader
-          isLoading={createInvoice.isLoading}
+          isLoading={createInvoice.isPending}
           disabled={!contact || total === 0}
           onClick={async () => {
             if (!contact) {

@@ -369,7 +369,7 @@ export const ManageLoginDetails = () => {
                   <div>
                     <FkButton
                       type="submit"
-                      isLoading={deleteAccountMutation.isLoading}
+                      isLoading={deleteAccountMutation.isPending}
                       variant="destructive"
                       disabled={
                         !deleteAccountPasswordForm.formState.isDirty ||
@@ -413,7 +413,7 @@ export const ManageLoginDetails = () => {
                   <div>
                     <FkButton
                       type="submit"
-                      isLoading={deleteAccountMutation.isLoading}
+                      isLoading={deleteAccountMutation.isPending}
                       variant="destructive"
                       disabled={
                         !deleteAccountConfirmForm.formState.isDirty ||
