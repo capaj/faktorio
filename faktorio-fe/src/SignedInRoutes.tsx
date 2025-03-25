@@ -24,11 +24,10 @@ export const SignedInRoutes = () => {
   const [queryClient] = useState(() => new QueryClient())
   const [trpc] = useState(
     trpcClient.createClient({
-      transformer: SuperJSON,
-
       links: [
         ...trpcLinks,
         httpBatchLink({
+          transformer: SuperJSON,
           url: VITE_API_URL,
           headers: {
             Authorization: `Bearer ${token}`

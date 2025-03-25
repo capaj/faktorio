@@ -143,10 +143,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [queryClient] = useState(() => new QueryClient())
   const [trpc] = useState(() =>
     trpcClient.createClient({
-      transformer: SuperJSON,
       links: [
         ...trpcLinks,
         httpBatchLink({
+          transformer: SuperJSON,
           url: VITE_API_URL,
           async headers() {
             const token = localStorage.getItem('auth_token')

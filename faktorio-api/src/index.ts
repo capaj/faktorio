@@ -2,8 +2,7 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
 import { drizzle } from 'drizzle-orm/libsql'
 import { appRouter } from './trpcRouter'
-import util from 'util'
-import { inspect } from 'util'
+
 import { createClient } from '@libsql/client'
 
 import * as schema from './schema'
@@ -102,7 +101,7 @@ export default {
         console.error(errCtx.error)
         console.error(`${type} ${path} failed for:`)
         console.error(
-          colorize(JSON.stringify({ errCtx: inspect(errCtx), userId: ctx.user?.id }), {
+          colorize(JSON.stringify({ errCtx: input, userId: ctx.user?.id }), {
             pretty: true
           })
         )
