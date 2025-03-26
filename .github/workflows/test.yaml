@@ -37,6 +37,12 @@ jobs:
 
       - name: Run Playwright tests
         run: pnpm test:e2e
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_API_SECRET: ${{ secrets.MAILJET_API_SECRET }}
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
