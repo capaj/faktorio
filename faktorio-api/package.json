@@ -18,7 +18,7 @@
     "drizzle-kit": "^0.30.5",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9",
-    "wrangler": "^4.4.0"
+    "wrangler": "^4.4.1"
   },
   "dependencies": {
     "@libsql/client": "^0.15.1",
