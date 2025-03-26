@@ -8,6 +8,8 @@ import { trpcClient } from '@/lib/trpcClient'
 import { FkButton } from '@/components/FkButton'
 import { useEffect } from 'react'
 import { useState } from 'react'
+import omit from 'lodash/omit'
+import diff from "microdiff";
 
 export const upsertInvoicingDetailsSchema =
   userInvoicingDetailsInsertSchema.omit({
@@ -17,13 +19,13 @@ export const upsertInvoicingDetailsSchema =
   })
 
 export const MyInvoicingDetails = () => {
-  const query = trpcClient.invoicingDetails.useQuery()
+  const [data] = trpcClient.invoicingDetails.useSuspenseQuery()
 
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()
 
-  const [values, setValues] = useState(query.data)
+  const [values, setValues] = useState(data)
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       if (values?.registration_no?.length === 8 && !values?.name) {
         // seems like a user is trying to add new contact, let's fetch data from ares
         const aresResponse = await fetch(
@@ -52,10 +54,19 @@ export const MyInvoicingDetails = () => {
       }
     })()
   }, [values?.registration_no])
-
+  const [isDirty, setIsDirty] = useState(false)
   useEffect(() => {
-    setValues(query.data)
-  }, [query.data])
+
+    const dataForDirtyCheck = omit(data, ['user_id', 'created_at', 'updated_at'])
+    const valDiff = diff(dataForDirtyCheck, values)
+    console.log('valDiff', valDiff)
+    if (valDiff.length > 0) {
+
+      setIsDirty(true)
+    } else {
+      setIsDirty(false)
+    }
+  }, [data, values])
 
   return (
     <>
@@ -99,7 +110,6 @@ export const MyInvoicingDetails = () => {
           }}
           values={values ?? {}}
           onParsedValuesChange={(values) => {
-            // @ts-expect-error
             setValues(values)
           }}
           onSubmit={async (values) => {
@@ -112,7 +122,7 @@ export const MyInvoicingDetails = () => {
           </div> */}
           <div className="flex justify-end">
             <FkButton
-              // disabled={true} // TODO
+              disabled={!isDirty} // Enable button only if form is dirty
               isLoading={upsert.isPending}
               type="submit"
             >
