@@ -21,24 +21,17 @@ export function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(true)
-  const [isTokenValid, setIsTokenValid] = useState(false)
+
   const [, navigate] = useLocation()
 
   const verifyTokenQuery = trpcClient.auth.verifyResetToken.useQuery(
     { token: token || '' },
     {
-      enabled: !!token,
-      onSuccess: (data) => {
-        setIsTokenValid(data.valid)
-        setIsVerifying(false)
-      },
-      onError: () => {
-        setIsTokenValid(false)
-        setIsVerifying(false)
-      }
+      enabled: !!token
     }
   )
+  const [isTokenValid, setIsTokenValid] = useState(verifyTokenQuery.data?.valid)
+
 
   const setNewPasswordMutation = trpcClient.auth.setNewPassword.useMutation()
 
@@ -83,7 +76,7 @@ export function ResetPasswordPage() {
     }
   }
 
-  if (isVerifying) {
+  if (verifyTokenQuery.isLoading) {
     return <SpinnerContainer loading={true} />
   }
 

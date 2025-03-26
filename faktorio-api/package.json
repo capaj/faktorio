@@ -13,27 +13,27 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250303.0",
+    "@cloudflare/workers-types": "^4.20250321.0",
     "@types/debug": "^4.1.12",
     "drizzle-kit": "^0.30.5",
     "typescript": "^5.8.2",
-    "vitest": "^3.0.8",
-    "wrangler": "^3.114.0"
+    "vitest": "^3.0.9",
+    "wrangler": "^4.4.1"
   },
   "dependencies": {
-    "@libsql/client": "^0.14.0",
+    "@libsql/client": "^0.15.1",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
     "@tanstack/react-query": "5",
-    "@trpc/client": "^10.45.2",
-    "@trpc/react-query": "^10.45.2",
-    "@trpc/server": "^10.45.2",
-    "@tsndr/cloudflare-worker-jwt": "^3.1.3",
+    "@trpc/client": "^11.0.0",
+    "@trpc/react-query": "^11.0.0",
+    "@trpc/server": "^11.0.0",
+    "@tsndr/cloudflare-worker-jwt": "^3.1.4",
     "debug": "^4.4.0",
     "dotenv": "^16.4.7",
-    "drizzle-orm": "^0.40.0",
+    "drizzle-orm": "^0.41.0",
     "drizzle-zod": "^0.7.0",
-    "node-mailjet": "^6.0.7",
+    "node-mailjet": "^6.0.8",
     "zod": "^3.24.2"
   }
 }

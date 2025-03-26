@@ -6,15 +6,17 @@
     "faktorio-fe"
   ],
   "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "@types/node": "^22.13.13",
     "prettier": "^3.5.3",
     "turbo": "^2.4.4",
     "typescript": "^5.8.2",
-    "vitest": "^3.0.8"
+    "vitest": "^3.0.9"
   },
-  "packageManager": "pnpm@10.4.0",
+  "packageManager": "pnpm@10.6.5",
   "scripts": {
-    "dev:fe": "cd faktorio-fe && bun dev",
-    "dev:api": "cd faktorio-api && bun dev",
+    "dev:fe": "cd faktorio-fe && pnpm dev",
+    "dev:api": "cd faktorio-api && pnpm dev",
     "dev": "npm-run-all --parallel dev:*",
     "kill": "kill -9 $(lsof -t -i:9189)",
     "format": "prettier --write .",
@@ -25,7 +27,8 @@
     "bumpDeps:root": "ncu -u",
     "bump": "npm-run-all --parallel bumpDeps:* && pnpm i",
     "typecheck": "turbo tsc",
-    "test": "vitest"
+    "test": "vitest",
+    "test:e2e": "pnpm exec playwright test"
   },
   "dependencies": {
     "dayjs": "^1.11.13",

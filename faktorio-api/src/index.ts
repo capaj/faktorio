@@ -60,6 +60,8 @@ export default {
       return handleOptions(request)
     }
 
+    console.log(request.body)
+
     const turso = createClient({
       url: env.TURSO_DATABASE_URL,
       authToken: env.TURSO_AUTH_TOKEN
@@ -99,7 +101,7 @@ export default {
         console.error(errCtx.error)
         console.error(`${type} ${path} failed for:`)
         console.error(
-          colorize(JSON.stringify({ input, userId: ctx.user?.id }), {
+          colorize(JSON.stringify({ errCtx: input, userId: ctx.user?.id }), {
             pretty: true
           })
         )

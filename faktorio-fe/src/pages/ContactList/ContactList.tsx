@@ -552,7 +552,7 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
               variant="destructive"
               onClick={handleDeleteContact}
             >
-              {deleteWithInvoices.isLoading && <Spinner />}
+              {deleteWithInvoices.isPending && <Spinner />}
               Smazat
             </Button>
           </DialogFooter>

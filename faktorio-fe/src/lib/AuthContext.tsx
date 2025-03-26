@@ -13,7 +13,11 @@ import { trpcLinks } from './errorToastLink'
 import { userT } from '../../../faktorio-api/src/schema'
 import { useLocation } from 'wouter'
 
-const VITE_API_URL = import.meta.env.VITE_API_URL as string
+const VITE_API_URL = import.meta.env.VITE_API_URL
+
+if (!VITE_API_URL) {
+  throw new Error('VITE_API_URL must be defined')
+}
 
 type User = typeof userT.$inferSelect
 
@@ -143,17 +147,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [queryClient] = useState(() => new QueryClient())
   const [trpc] = useState(() =>
     trpcClient.createClient({
-      transformer: SuperJSON,
       links: [
         ...trpcLinks,
         httpBatchLink({
+          transformer: SuperJSON,
           url: VITE_API_URL,
           async headers() {
             const token = localStorage.getItem('auth_token')
             return token
               ? {
-                  authorization: `Bearer ${token}`
-                }
+                authorization: `Bearer ${token}`
+              }
               : {}
           }
         })

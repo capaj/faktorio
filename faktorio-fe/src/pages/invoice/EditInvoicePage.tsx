@@ -159,7 +159,7 @@ export const EditInvoicePage = () => {
       </div>
       <Center>
         <ButtonWithLoader
-          isLoading={updateInvoice.isLoading}
+          isLoading={updateInvoice.isPending}
           onClick={async () => {
             if (!invoice.id) {
               alert('Faktura nebyla nalezena')
