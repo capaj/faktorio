@@ -155,6 +155,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), blogPlugin()],
   server: {
     cors: true,
+    host: true,
     fs: {
       // Allow serving files from one level up from the package root
       allow: ['..']
