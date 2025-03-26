@@ -27,7 +27,8 @@
     "bumpDeps:root": "ncu -u",
     "bump": "npm-run-all --parallel bumpDeps:* && pnpm i",
     "typecheck": "turbo tsc",
-    "test": "vitest"
+    "test": "vitest",
+    "test:e2e": "pnpm exec playwright test"
   },
   "dependencies": {
     "dayjs": "^1.11.13",
