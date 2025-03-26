@@ -57,11 +57,13 @@ export const MyInvoicingDetails = () => {
   const [isDirty, setIsDirty] = useState(false)
   useEffect(() => {
 
+    if (!values) {
+      return
+    }
     const dataForDirtyCheck = omit(data, ['user_id', 'created_at', 'updated_at'])
     const valDiff = diff(dataForDirtyCheck, values)
-    console.log('valDiff', valDiff)
-    if (valDiff.length > 0) {
 
+    if (valDiff.length > 0) {
       setIsDirty(true)
     } else {
       setIsDirty(false)
@@ -110,6 +112,7 @@ export const MyInvoicingDetails = () => {
           }}
           values={values ?? {}}
           onParsedValuesChange={(values) => {
+            // @ts-expect-error
             setValues(values)
           }}
           onSubmit={async (values) => {
