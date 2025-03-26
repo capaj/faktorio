@@ -15,8 +15,8 @@
   },
   "packageManager": "pnpm@10.6.5",
   "scripts": {
-    "dev:fe": "cd faktorio-fe && bun dev",
-    "dev:api": "cd faktorio-api && bun dev",
+    "dev:fe": "cd faktorio-fe && pnpm dev",
+    "dev:api": "cd faktorio-api && pnpm dev",
     "dev": "npm-run-all --parallel dev:*",
     "kill": "kill -9 $(lsof -t -i:9189)",
     "format": "prettier --write .",
