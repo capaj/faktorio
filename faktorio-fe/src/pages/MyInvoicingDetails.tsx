@@ -8,7 +8,7 @@ import { trpcClient } from '@/lib/trpcClient'
 import { FkButton } from '@/components/FkButton'
 import { useEffect } from 'react'
 import { useState } from 'react'
-import omit from 'lodash/omit'
+import { omit } from 'lodash-es'
 import diff from "microdiff";
 
 export const upsertInvoicingDetailsSchema =
