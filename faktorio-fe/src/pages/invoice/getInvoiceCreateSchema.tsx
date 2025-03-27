@@ -22,14 +22,20 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
     .extend({
       // @ts-expect-error
       currency: z.enum([...cc.codes()]).default('CZK'),
-      issued_on: z.date().default(new Date()),
+      issued_on: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .default(djs().format('YYYY-MM-DD')),
       number: z.string().default(nextInvoiceNumber),
       payment_method: z
         .enum(['bank', 'cash', 'card', 'cod', 'crypto', 'other'])
         .default('bank'),
       taxable_fulfillment_due: z
-        .date()
-        .default(djs().subtract(1, 'month').endOf('month').toDate()),
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .default(
+          djs().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')
+        ),
       exchange_rate: z.number().nullable().default(1),
       bank_account: z.string().optional().default(''),
       iban: z.string().optional().default(''),

@@ -170,10 +170,21 @@ export const EditInvoicePage = () => {
               alert('Kontakt nenalezen')
               return
             }
+
+            // Convert all date fields to YYYY-MM-DD string format
+            // to avoid timezone issues when serializing/deserializing
+            const formattedInvoice = {
+              ...formValues,
+              issued_on: djs(formValues.issued_on).format('YYYY-MM-DD'),
+              taxable_fulfillment_due: djs(
+                formValues.taxable_fulfillment_due
+              ).format('YYYY-MM-DD')
+            }
+
             await updateInvoice.mutateAsync({
               id: invoice.id,
               invoice: {
-                ...formValues,
+                ...formattedInvoice,
                 client_contact_id: contact.id
               },
               items: invoiceItems

@@ -54,17 +54,20 @@ export const invoiceRouter = trpcContext.router({
       console.log('user:', user)
 
       return await ctx.db.transaction(async (tx) => {
+        // Handle date fields consistently like in the update mutation
+
+        // Calculate due_on based on issued_on
+        const due_on = djs(input.invoice.issued_on)
+          .add(input.invoice.due_in_days, 'day')
+          .format('YYYY-MM-DD')
+
         const [invoice] = await tx
           .insert(invoicesTb)
           .values({
             ...input.invoice,
-            due_on: djs(input.invoice.issued_on)
-              .add(input.invoice.due_in_days, 'day')
-              .format('YYYY-MM-DD'),
-            taxable_fulfillment_due: djs(
-              input.invoice.taxable_fulfillment_due
-            ).format('YYYY-MM-DD'),
-            issued_on: djs(input.invoice.issued_on).format('YYYY-MM-DD'),
+            due_on,
+            taxable_fulfillment_due: input.invoice.taxable_fulfillment_due,
+            issued_on: input.invoice.issued_on,
             client_contact_id: input.invoice.client_contact_id,
             ...invoiceSums,
 
@@ -242,17 +245,23 @@ export const invoiceRouter = trpcContext.router({
 
       await ctx.db.transaction(async (tx) => {
         const invoiceSums = getInvoiceSums(input.items)
+        console.log(
+          'Update invoice input - taxable_fulfillment_due:',
+          input.invoice.taxable_fulfillment_due
+        )
+
+        // No need for additional conversion - client now sends a string in YYYY-MM-DD format
+
+        // Calculate due_on based on issued_on
+        const due_on = djs(input.invoice.issued_on)
+          .add(input.invoice.due_in_days, 'day')
+          .format('YYYY-MM-DD')
+
         await tx
           .update(invoicesTb)
           .set({
             ...input.invoice,
-            due_on: djs(input.invoice.issued_on)
-              .add(input.invoice.due_in_days, 'day')
-              .format('YYYY-MM-DD'),
-            taxable_fulfillment_due: djs(
-              input.invoice.taxable_fulfillment_due
-            ).format('YYYY-MM-DD'),
-            issued_on: djs(input.invoice.issued_on).format('YYYY-MM-DD'),
+            due_on,
             ...invoiceSums
           })
           .where(eq(invoicesTb.id, input.id))
