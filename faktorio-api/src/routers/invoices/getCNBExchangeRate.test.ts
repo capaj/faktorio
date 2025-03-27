@@ -18,7 +18,7 @@ USA|dolar|1|USD|24,065`
   })
 
   it('returns 1 for CZK', async () => {
-    const rate = await getCNBExchangeRate('CZK')
+    const rate = await getCNBExchangeRate({ currency: 'CZK' })
     expect(rate).toBe(1)
   })
 
@@ -27,7 +27,7 @@ USA|dolar|1|USD|24,065`
       text: () => Promise.resolve(mockResponse)
     } as Response)
 
-    const rate = await getCNBExchangeRate('EUR')
+    const rate = await getCNBExchangeRate({ currency: 'EUR' })
     expect(rate).toBe(25.1)
   })
 
@@ -36,7 +36,7 @@ USA|dolar|1|USD|24,065`
       text: () => Promise.resolve(mockResponse)
     } as Response)
 
-    const rate = await getCNBExchangeRate('USD')
+    const rate = await getCNBExchangeRate({ currency: 'USD' })
     expect(rate).toBe(24.065)
   })
 
@@ -45,8 +45,8 @@ USA|dolar|1|USD|24,065`
       text: () => Promise.resolve(mockResponse)
     } as Response)
 
-    const date = new Date('2023-02-19')
-    const rate = await getCNBExchangeRate('EUR', date)
+    const date = '2023-02-19'
+    const rate = await getCNBExchangeRate({ currency: 'EUR', date })
     expect(rate).toBe(25.1)
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
       'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt?date=19.02.2023'
@@ -58,8 +58,8 @@ USA|dolar|1|USD|24,065`
       text: () => Promise.resolve(mockResponse)
     } as Response)
 
-    const futureDate = new Date('2025-02-19')
-    const rate = await getCNBExchangeRate('EUR', futureDate)
+    const futureDate = '2025-02-19'
+    const rate = await getCNBExchangeRate({ currency: 'EUR', date: futureDate })
     expect(rate).toBe(25.1)
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
       'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt'
@@ -71,13 +71,15 @@ USA|dolar|1|USD|24,065`
       text: () => Promise.resolve(mockResponse)
     } as Response)
 
-    const rate = await getCNBExchangeRate('XXX')
+    const rate = await getCNBExchangeRate({ currency: 'XXX' })
     expect(rate).toBeNull()
   })
 
   it('handles network errors', async () => {
     vi.mocked(fetch).mockRejectedValueOnce(new Error('Network error'))
 
-    await expect(getCNBExchangeRate('EUR')).rejects.toThrow('Network error')
+    await expect(getCNBExchangeRate({ currency: 'EUR' })).rejects.toThrow(
+      'Network error'
+    )
   })
 })

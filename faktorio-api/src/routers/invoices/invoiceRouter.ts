@@ -287,10 +287,16 @@ export const invoiceRouter = trpcContext.router({
     .input(
       z.object({
         currency: z.string(),
-        date: z.date().nullish()
+        date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .nullish()
       })
     )
     .query(async ({ input }) => {
-      return getCNBExchangeRate(input.currency, input.date)
+      return getCNBExchangeRate({
+        currency: input.currency,
+        date: input.date
+      })
     })
 })

@@ -1,7 +1,10 @@
-export async function getCNBExchangeRate(
-  currency: string,
-  date?: Date | null
-): Promise<number | null> {
+import { djs } from '../../../../src/djs'
+
+export async function getCNBExchangeRate(params: {
+  currency: string
+  date?: string | null
+}): Promise<number | null> {
+  const { currency, date } = params
   if (currency === 'CZK') {
     return 1
   }
@@ -9,12 +12,12 @@ export async function getCNBExchangeRate(
   let url =
     'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt'
   if (date) {
-    const now = new Date()
+    const dayjsDate = djs(date)
     // if date is in the future, we ignore it and use today's rate
-    if (date.getTime() <= now.getTime()) {
-      const day = date.getDate().toString().padStart(2, '0')
-      const month = (date.getMonth() + 1).toString().padStart(2, '0')
-      const year = date.getFullYear()
+    if (dayjsDate.isBefore(djs())) {
+      const day = date.split('-')[2]
+      const month = date.split('-')[1]
+      const year = date.split('-')[0]
       url += `?date=${day}.${month}.${year}`
     }
   }

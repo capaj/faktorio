@@ -80,7 +80,7 @@ export const NewInvoice = () => {
     const fetchRate = async () => {
       const rate = await utils.invoices.getExchangeRate.fetch({
         currency: formValues.currency,
-        date: formValues.taxable_fulfillment_due
+        date: djs(formValues.taxable_fulfillment_due).toDate()
       })
       if (rate !== null) {
         setFormValues((prev) => ({
