@@ -42,11 +42,7 @@ export const EditInvoicePage = () => {
   const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(
     formSchema.parse({
       ...invoice,
-      client_contact_name: contact?.name,
-      issued_on: invoice.issued_on ? new Date(invoice.issued_on) : new Date(),
-      taxable_fulfillment_due: invoice.taxable_fulfillment_due
-        ? new Date(invoice.taxable_fulfillment_due)
-        : new Date()
+      client_contact_name: contact?.name
     })
   )
 
