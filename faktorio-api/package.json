@@ -13,26 +13,26 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250321.0",
+    "@cloudflare/workers-types": "^4.20250327.0",
     "@types/debug": "^4.1.12",
-    "drizzle-kit": "^0.30.5",
+    "drizzle-kit": "^0.30.6",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9",
-    "wrangler": "^4.5.0"
+    "wrangler": "^4.6.0"
   },
   "dependencies": {
     "@libsql/client": "^0.15.1",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
     "@tanstack/react-query": "5",
-    "@trpc/client": "^11.0.0",
-    "@trpc/react-query": "^11.0.0",
-    "@trpc/server": "^11.0.0",
+    "@trpc/client": "^11.0.1",
+    "@trpc/react-query": "^11.0.1",
+    "@trpc/server": "^11.0.1",
     "@tsndr/cloudflare-worker-jwt": "^3.1.4",
     "debug": "^4.4.0",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.41.0",
-    "drizzle-zod": "^0.7.0",
+    "drizzle-zod": "^0.7.1",
     "node-mailjet": "^6.0.8",
     "zod": "^3.24.2"
   }

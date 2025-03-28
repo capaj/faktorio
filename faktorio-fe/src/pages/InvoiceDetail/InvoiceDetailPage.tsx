@@ -3,7 +3,6 @@ import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 // Create Document Component
 
 import { CzechInvoicePDF } from './CzechInvoicePDF'
-import { invoiceData } from '@/invoiceSchema'
 import { Button } from '@/components/ui/button'
 import { snakeCase } from 'lodash-es'
 import { useLocation, useParams, useSearchParams } from 'wouter'
