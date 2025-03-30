@@ -1,16 +1,17 @@
-import { tc } from './trpcContext'
+import { trpcContext } from './trpcContext'
 import { invoiceRouter } from './routers/invoices/invoiceRouter'
 import { contactRouter } from './routers/contactRouter'
 import { protectedProc } from './isAuthorizedMiddleware'
 import { userInvoicingDetailsTb } from './schema'
 import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
 import { eq } from 'drizzle-orm'
-import { upsertInvoicingDetailsSchema } from '../../faktorio-fe/src/pages/MyDetails'
-
-export const appRouter = tc.router({
-  test: tc.procedure.query(async ({ ctx }) => {
+import { upsertInvoicingDetailsSchema } from '../../faktorio-fe/src/pages/MyInvoicingDetails'
+import { authRouter } from './routers/authRouter'
+export const appRouter = trpcContext.router({
+  test: trpcContext.procedure.query(async ({ ctx }) => {
     return 'test ' + new Date()
   }),
+  auth: authRouter,
   invoices: invoiceRouter,
   contacts: contactRouter,
   invoicingDetails: protectedProc.query(async ({ ctx }) => {

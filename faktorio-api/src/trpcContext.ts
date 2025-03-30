@@ -16,7 +16,7 @@ export type TrpcContext = {
   generateToken: (user: typeof userT.$inferSelect) => Promise<string>
 }
 
-export const tc = initTRPC.create({
+export const trpcContext = initTRPC.create({
   transformer: superjson,
   allowOutsideOfServer: true,
   isServer: false
