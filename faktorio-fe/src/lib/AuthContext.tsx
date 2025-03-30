@@ -7,12 +7,21 @@ import React, {
 } from 'react'
 import { trpcClient } from './trpcClient'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { httpBatchLink } from '@trpc/client'
+import { httpBatchLink, TRPCLink } from '@trpc/client'
 import { SuperJSON } from 'superjson'
 import { trpcLinks } from './errorToastLink'
 import { userT } from '../../../faktorio-api/src/schema'
 import { useLocation } from 'wouter'
-
+import { RUN_LOCAL_FIRST } from '@/RUN_LOCAL_FIRST'
+import { trpcContext, TrpcContext } from '../../../faktorio-api/src/trpcContext'
+import { AppRouter, appRouter } from '../../../faktorio-api/src/trpcRouter'
+import { AnyRouter, inferRouterContext } from '@trpc/server'
+import { observable } from '@trpc/server/observable'
+import { TRPCResponseMessage } from '@trpc/server/unstable-core-do-not-import'
+import initSqlJs, { Database, SqlValue } from 'sql.js'
+import { drizzle } from 'drizzle-orm/sql-js'
+import { initSqlDb } from './initSql'
+import * as schema from '../../../faktorio-api/src/schema'
 const VITE_API_URL = import.meta.env.VITE_API_URL
 
 if (!VITE_API_URL) {
@@ -143,29 +152,139 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+const createCaller = trpcContext.createCallerFactory(appRouter)
+
+interface LocalCallerLinkOptions<TRouter extends AnyRouter> {
+  router: TRouter
+  createContext: () =>
+    | Promise<inferRouterContext<TRouter>>
+    | inferRouterContext<TRouter>
+}
+
+/**
+ * Creates a tRPC link that executes procedures locally using the router's createCaller.
+ */
+export function createLocalCallerLink<TRouter extends AnyRouter>(
+  opts: LocalCallerLinkOptions<TRouter>
+): TRPCLink<TRouter> {
+  return () => {
+    const caller = createCaller(opts.createContext())
+    // This function is called for each operation
+    return ({ op }) => {
+      // Returns an observable for the operation result
+      return observable((observer) => {
+        const { path, input, type, id } = op
+
+        console.log(op)
+
+        // Asynchronously create the context, then the caller
+        Promise.resolve(opts.createContext())
+          .then((ctx) => {
+            // Use the official createCaller method from the router
+
+            // Dynamically access the procedure function on the caller
+            const procedureFn = path
+              .split('.')
+              .reduce(
+                (obj, key) => obj?.[key as keyof typeof obj],
+                caller as any
+              )
+
+            if (typeof procedureFn !== 'function') {
+              throw new Error(`Procedure not found at path: ${path}`)
+            }
+
+            // Execute the procedure
+            return procedureFn(input)
+          })
+          .then((data) => {
+            // Successfully executed
+            const response: TRPCResponseMessage = {
+              id,
+              result: {
+                type: 'data',
+                data
+              }
+            }
+            console.log(response)
+            observer.next(response)
+            observer.complete()
+          })
+          .catch((cause) => {
+            // Handle errors
+            console.error(cause)
+            const response: TRPCResponseMessage = {
+              id,
+              error: {
+                code: -32603, // Internal error code
+                message: cause instanceof Error ? cause.message : String(cause),
+                data: {
+                  code: 'INTERNAL_SERVER_ERROR',
+                  httpStatus: 500,
+                  stack: cause instanceof Error ? cause.stack : undefined,
+                  path,
+                  input,
+                  type
+                }
+              }
+            }
+            observer.next(response)
+            observer.complete()
+          })
+
+        // No cleanup needed for simple caller execution
+        return () => {}
+      })
+    }
+  }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children
 }) => {
   const [queryClient] = useState(() => new QueryClient())
-  const [trpc] = useState(() =>
-    trpcClient.createClient({
-      links: [
-        ...trpcLinks,
-        httpBatchLink({
-          transformer: SuperJSON,
-          url: VITE_API_URL,
-          async headers() {
-            const token = localStorage.getItem('auth_token')
-            return token
-              ? {
-                authorization: `Bearer ${token}`
+
+  const [trpc] = useState<any>(() => {
+    if (RUN_LOCAL_FIRST) {
+      return trpcClient.createClient({
+        links: [
+          createLocalCallerLink({
+            router: appRouter,
+            createContext: () => {
+              return {
+                sessionId: '123',
+                userId: '123',
+                user: {
+                  id: '123',
+                  email: 'test@test.com',
+                  fullName: 'Test User'
+                },
+                db: drizzle(window.sqldb, { schema })
               }
-              : {}
-          }
-        })
-      ]
-    })
-  )
+            }
+          })
+        ]
+      })
+    } else {
+      return trpcClient.createClient({
+        links: [
+          ...trpcLinks,
+          httpBatchLink({
+            transformer: SuperJSON,
+            url: VITE_API_URL,
+            async headers() {
+              const token = localStorage.getItem('auth_token')
+              return token
+                ? {
+                    authorization: `Bearer ${token}`
+                  }
+                : {}
+            }
+          })
+        ]
+      })
+    }
+  })
 
   return (
     <trpcClient.Provider client={trpc} queryClient={queryClient}>

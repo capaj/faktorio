@@ -214,6 +214,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
+      drizzle-orm:
+        specifier: ^0.41.0
+        version: 0.41.0(@cloudflare/workers-types@4.20250407.0)(@libsql/client@0.15.2)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21

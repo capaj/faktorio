@@ -42,7 +42,9 @@ export const initSqlDb = async () => {
     // Apply migrations
     const migrations = [migration0000, migration0001]
     for (const migration of migrations) {
-      const statements = migration.split('-->').filter((stmt) => stmt.trim())
+      const statements = migration
+        .split('--> statement-breakpoint')
+        .filter((stmt) => stmt.trim())
       for (const statement of statements) {
         try {
           db.run(statement)

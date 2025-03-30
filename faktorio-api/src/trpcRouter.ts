@@ -7,11 +7,13 @@ import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
 import { eq } from 'drizzle-orm'
 import { upsertInvoicingDetailsSchema } from '../../faktorio-fe/src/pages/MyInvoicingDetails'
 import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
+import { authRouter } from './routers/authRouter'
 
 export const appRouter = tc.router({
   test: tc.procedure.query(async ({ ctx }) => {
     return 'test ' + new Date()
   }),
+  auth: authRouter,
   invoices: invoiceRouter,
   contacts: contactRouter,
   receivedInvoices: receivedInvoicesRouter,
