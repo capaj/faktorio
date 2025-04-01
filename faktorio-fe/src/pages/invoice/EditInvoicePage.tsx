@@ -82,7 +82,8 @@ export const EditInvoicePage = () => {
             label: 'Měna'
           },
           issued_on: {
-            label: 'Datum vystavení faktury'
+            label: 'Datum vystavení faktury',
+            fieldType: 'date'
           },
           number: {
             label: 'Číslo faktury',
@@ -94,7 +95,8 @@ export const EditInvoicePage = () => {
             label: 'Způsob platby'
           },
           taxable_fulfillment_due: {
-            label: 'Datum zdanitelného plnění'
+            label: 'Datum zdanitelného plnění',
+            fieldType: 'date'
           },
           footer_note: {
             label: 'Poznámka'
