@@ -1,6 +1,7 @@
 import initSqlJs, { Database } from 'sql.js'
 import migration0000 from '@api/drizzle/0000_dry_rick_jones.sql?raw'
 import migration0001 from '@api/drizzle/0001_glossy_siren.sql?raw'
+// import { migrate } from 'drizzle-orm/sql-js/migrator' // TODO try using this
 
 async function saveDatabaseToOPFS(db: Database, filename: string) {
   const binaryData = db.export()
