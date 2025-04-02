@@ -134,6 +134,7 @@ export default function AutoFormObject<
 
         return (
           <FormField
+            // @ts-expect-error
             control={form.control}
             name={key}
             key={key}
