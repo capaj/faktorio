@@ -14,6 +14,7 @@ import {
 import { toast } from 'sonner'
 import { ButtonLink } from '../components/ui/link'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
+import { PasswordInput } from '@/components/ui/password-input'
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 export function LoginPage() {
@@ -122,9 +123,8 @@ export function LoginPage() {
             <div className="space-y-2">
               <Label htmlFor="password">Heslo</Label>
 
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 tabIndex={-1}
                 onChange={(e) => setPassword(e.target.value)}
