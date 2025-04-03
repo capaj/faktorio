@@ -51,13 +51,7 @@ make sure to use `pk_test` clerk key. Clerk won't even load when you use product
 
 ## Planned features
 
-- add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
-- add feature to import expense invoices by OCRing them with google gemini 2.0
-- be able to run local-first/fully offline using local sqlite db
-- DPH priznani at the end of the year
-- automated DPH and Kontrolni hlaseni submission to ADIS every month/quarter for you with automated pupeteer script
-- integrate with Fio bank API to be able to mark invoices as paid when you receive money
-- ability to import contact and invoice data from fakturoid
+are all listed in [roadmap.md](roadmap.md)
 
 ## Features
 
