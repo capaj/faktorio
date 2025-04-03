@@ -1,0 +1,235 @@
+{
+  "type": "object",
+  "required": [
+    "supplier_name",
+    "invoice_number",
+    "issue_date",
+    "due_date",
+    "total_with_vat"
+  ],
+  "properties": {
+    "supplier_contact_id": {
+      "type": "string",
+      "nullable": true,
+      "description": "Reference to a contact in the contacts table"
+    },
+    "supplier_name": {
+      "type": "string",
+      "description": "Name of the supplier/vendor"
+    },
+    "supplier_street": {
+      "type": "string",
+      "nullable": true
+    },
+    "supplier_street2": {
+      "type": "string",
+      "nullable": true
+    },
+    "supplier_city": {
+      "type": "string",
+      "nullable": true
+    },
+    "supplier_zip": {
+      "type": "string",
+      "nullable": true
+    },
+    "supplier_country": {
+      "type": "string",
+      "nullable": true
+    },
+    "supplier_registration_no": {
+      "type": "string",
+      "nullable": true,
+      "description": "IČ (Company ID) in Czech Republic"
+    },
+    "supplier_vat_no": {
+      "type": "string",
+      "nullable": true,
+      "description": "DIČ (VAT ID) in Czech Republic"
+    },
+    "supplier_email": {
+      "type": "string",
+      "nullable": true
+    },
+    "supplier_phone": {
+      "type": "string",
+      "nullable": true
+    },
+    "invoice_number": {
+      "type": "string",
+      "description": "Supplier's invoice number"
+    },
+    "internal_number": {
+      "type": "string",
+      "nullable": true,
+      "description": "Your internal reference number"
+    },
+    "variable_symbol": {
+      "type": "string",
+      "nullable": true,
+      "description": "Payment identification number (variabilní symbol)"
+    },
+    "expense_category": {
+      "type": "string",
+      "nullable": true,
+      "description": "Categorization of expense type"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when invoice was issued (YYYY-MM-DD)"
+    },
+    "taxable_supply_date": {
+      "type": "string",
+      "format": "date",
+      "nullable": true,
+      "description": "DUZP - Datum uskutečnění zdanitelného plnění (YYYY-MM-DD)"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Payment due date (YYYY-MM-DD)"
+    },
+    "receipt_date": {
+      "type": "string",
+      "format": "date",
+      "nullable": true,
+      "description": "Date when invoice was received (YYYY-MM-DD)"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date",
+      "nullable": true,
+      "description": "Date when invoice was paid (YYYY-MM-DD)"
+    },
+    "total_without_vat": {
+      "type": "number",
+      "nullable": true,
+      "description": "Total amount without VAT"
+    },
+    "total_with_vat": {
+      "type": "number",
+      "description": "Total amount including VAT"
+    },
+    "currency": {
+      "type": "string",
+      "default": "CZK",
+      "description": "Currency code (ISO)"
+    },
+    "exchange_rate": {
+      "type": "number",
+      "nullable": true,
+      "description": "Exchange rate to CZK if foreign currency"
+    },
+    "vat_base_21": {
+      "type": "number",
+      "nullable": true,
+      "description": "Base for 21% VAT"
+    },
+    "vat_21": {
+      "type": "number",
+      "nullable": true,
+      "description": "Amount of 21% VAT"
+    },
+    "vat_base_15": {
+      "type": "number",
+      "nullable": true,
+      "description": "Base for 15% VAT"
+    },
+    "vat_15": {
+      "type": "number",
+      "nullable": true,
+      "description": "Amount of 15% VAT"
+    },
+    "vat_base_10": {
+      "type": "number",
+      "nullable": true,
+      "description": "Base for 10% VAT"
+    },
+    "vat_10": {
+      "type": "number",
+      "nullable": true,
+      "description": "Amount of 10% VAT"
+    },
+    "vat_base_0": {
+      "type": "number",
+      "nullable": true,
+      "description": "Non-taxable amount"
+    },
+    "reverse_charge": {
+      "type": "boolean",
+      "nullable": true,
+      "description": "Přenesená daňová povinnost (reverse charge mechanism)"
+    },
+    "vat_regime": {
+      "type": "string",
+      "nullable": true,
+      "description": "Standard, non-VAT payer, special regime, etc."
+    },
+    "payment_method": {
+      "type": "string",
+      "nullable": true,
+      "description": "Bank transfer, cash, card, etc."
+    },
+    "bank_account": {
+      "type": "string",
+      "nullable": true
+    },
+    "iban": {
+      "type": "string",
+      "nullable": true
+    },
+    "swift_bic": {
+      "type": "string",
+      "nullable": true
+    },
+    "items": {
+      "type": "array",
+      "description": "Invoice line items stored as JSON",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "unit_price": {
+            "type": "number",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "vat_rate": {
+            "type": "number",
+            "nullable": true,
+            "description": "VAT rate as percentage (e.g., 21 for 21%)"
+          },
+          "total_without_vat": {
+            "type": "number",
+            "nullable": true
+          },
+          "total_with_vat": {
+            "type": "number",
+            "nullable": true
+          },
+          "accounting_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "For linking with accounting software"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["received", "verified", "disputed", "paid"],
+      "default": "received"
+    }
+  }
+}

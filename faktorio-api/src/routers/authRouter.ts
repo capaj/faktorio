@@ -8,6 +8,8 @@ import jwt from '@tsndr/cloudflare-worker-jwt'
 
 import cuid2 from '@paralleldrive/cuid2'
 import { protectedProc } from '../isAuthorizedMiddleware'
+import { verifyPassword, hashPassword } from '../lib/crypto'
+
 // We'll define a simple user schema here since we can't find the imported one
 const userSchema = z.object({
   id: z.string(),
@@ -15,27 +17,6 @@ const userSchema = z.object({
   email: z.string().email(),
   passwordHash: z.string()
 })
-
-// Mock these functions since we can't find the imported ones
-async function hashPassword(
-  password: string,
-  salt: Uint8Array
-): Promise<string> {
-  // In a real implementation, this would use a proper hashing algorithm
-  return `hashed_${password}_${salt}`
-}
-
-function strToUint8Array(str: string): Uint8Array {
-  return new TextEncoder().encode(str)
-}
-
-async function verifyPassword(
-  hash: string,
-  password: string
-): Promise<boolean> {
-  // In a real implementation, this would verify the hash
-  return hash.startsWith(`hashed_${password}`)
-}
 
 // Mock the email sending function
 async function sendMailjetEmail(emailData: any, env: any): Promise<void> {
@@ -138,10 +119,8 @@ export const authRouter = trpcContext.router({
         })
       }
       const userId = cuid2.createId()
-      const hashedPassword = await hashPassword(
-        password,
-        strToUint8Array(userId)
-      )
+      // Pass only the password, bcrypt handles salt
+      const hashedPassword = await hashPassword(password)
 
       const [user] = await ctx.db
         .insert(userT)
@@ -376,9 +355,10 @@ export const authRouter = trpcContext.router({
         })
       }
 
+      // Pass only the password, bcrypt handles salt
       const hashedPassword = await hashPassword(
         input.password,
-        strToUint8Array(resetToken.userId)
+        new Uint8Array(Buffer.from(resetToken.userId))
       )
 
       await ctx.db.transaction(async (tx) => {
@@ -436,10 +416,8 @@ export const authRouter = trpcContext.router({
       }
 
       // Hash new password
-      const hashedPassword = await hashPassword(
-        input.newPassword,
-        strToUint8Array(user.id)
-      )
+      // Pass only the password, bcrypt handles salt
+      const hashedPassword = await hashPassword(input.newPassword)
 
       // Update password
       await ctx.db

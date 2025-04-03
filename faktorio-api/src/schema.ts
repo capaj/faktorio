@@ -252,3 +252,111 @@ export const passwordResetTokenT = sqliteTable('password_reset_tokens', {
     .default(sql`(strftime('%s', 'now'))`),
   usedAt: integer('used_at', { mode: 'timestamp' })
 })
+
+export const receivedInvoicesTb = sqliteTable(
+  'received_invoice',
+  {
+    id: text('id')
+      .$defaultFn(() => createId())
+      .primaryKey()
+      .notNull(),
+    user_id: text('user_id').notNull(),
+
+    // Supplier/vendor details
+    supplier_contact_id: text('supplier_contact_id').references(
+      () => contactTb.id
+    ),
+    supplier_name: text('supplier_name').notNull(),
+    supplier_street: text('supplier_street'),
+    supplier_street2: text('supplier_street2'),
+    supplier_city: text('supplier_city'),
+    supplier_zip: text('supplier_zip'),
+    supplier_country: text('supplier_country'),
+    supplier_registration_no: text('supplier_registration_no'),
+    supplier_vat_no: text('supplier_vat_no'),
+    supplier_email: text('supplier_email'),
+    supplier_phone: text('supplier_phone'),
+
+    // Invoice identification
+    invoice_number: text('invoice_number').notNull(), // Supplier's invoice number
+    internal_number: text('internal_number'), // Your internal reference number if needed
+    variable_symbol: text('variable_symbol'), // Variable symbol for payment identification
+
+    // Category/classification for accounting
+    expense_category: text('expense_category'), // Categorization of expense type
+
+    // Dates - following Czech accounting requirements
+    issue_date: text('issue_date').notNull(), // Date invoice was issued
+    taxable_supply_date: text('taxable_supply_date'), // DUZP - Date of taxable supply
+    due_date: text('due_date').notNull(), // Payment due date
+    receipt_date: text('receipt_date'), // Date when invoice was received
+    payment_date: text('payment_date'), // Date when invoice was paid
+
+    // Financial information
+    total_without_vat: real('total_without_vat'), // Základ daně
+    total_with_vat: real('total_with_vat').notNull(), // Total amount including VAT
+    currency: text('currency').notNull().default('CZK'),
+    exchange_rate: real('exchange_rate'),
+
+    // VAT breakdown - required for Czech VAT reporting
+    vat_base_21: real('vat_base_21'), // Základ daně 21%
+    vat_21: real('vat_21'), // VAT amount at 21%
+    vat_base_15: real('vat_base_15'), // Základ daně 15%
+    vat_15: real('vat_15'), // VAT amount at 15%
+    vat_base_10: real('vat_base_10'), // Základ daně 10%
+    vat_10: real('vat_10'), // VAT amount at 10%
+    vat_base_0: real('vat_base_0'), // Non-taxable amount (0%)
+
+    // Special VAT handling
+    reverse_charge: integer('reverse_charge', { mode: 'boolean' }), // Přenesená daňová povinnost
+    vat_regime: text('vat_regime'), // Standard, non-VAT payer, special regime
+
+    // Payment details
+    payment_method: text('payment_method'), // Bank transfer, cash, card, etc.
+    bank_account: text('bank_account'),
+    iban: text('iban'),
+    swift_bic: text('swift_bic'),
+
+    // Invoice items stored as JSON
+    items: text('items', { mode: 'json' }).$type<
+      Array<{
+        description?: string
+        quantity?: number
+        unit_price?: number
+        unit?: string
+        vat_rate?: number
+        total_without_vat?: number
+        total_with_vat?: number
+        accounting_code?: string
+      }>
+    >(),
+
+    // Administrative fields
+    status: text('status').notNull().default('received'), // received, verified, disputed, paid, etc.
+    attachment_path: text('attachment_path'), // Path to scanned invoice/receipt
+    notes: text('notes'),
+    tags: text('tags', { mode: 'json' }).$type<string[]>(),
+
+    // Tracking fields
+    created_at: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updated_at: text('updated_at'),
+    accounting_period: text('accounting_period') // Účetní období (YYYY-MM format)
+  },
+  (receivedInvoices) => {
+    return {
+      userIndex: index('received_invoices_user_idx').on(
+        receivedInvoices.user_id
+      ),
+      supplierContactIdIndex: index(
+        'received_invoices_supplier_contact_id_idx'
+      ).on(receivedInvoices.supplier_contact_id),
+      invoiceNumberUserUniqueIndex: unique().on(
+        receivedInvoices.user_id,
+        receivedInvoices.supplier_name,
+        receivedInvoices.invoice_number
+      )
+    }
+  }
+)
