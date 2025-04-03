@@ -53,7 +53,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
   )
   const [isLoaded, setIsLoaded] = useState(false)
   const [location, navigate] = useLocation()
-
+  const utils = trpcClient.useUtils()
   // Get TRPC mutations
   const loginMutation = trpcClient.auth.login.useMutation()
   const signupMutation = trpcClient.auth.signup.useMutation()
@@ -122,6 +122,8 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     setToken(null)
     localStorage.removeItem('auth_token')
     localStorage.removeItem('auth_user')
+
+    utils.invalidate()
 
     logoutMutation.mutate()
     navigate('/')
