@@ -154,7 +154,12 @@ function blogPlugin(): Plugin {
 export default defineConfig({
   clearScreen: false,
   plugins: [
-    VitePWA({ registerType: 'autoUpdate' }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        maximumFileSizeToCacheInBytes: 3000000
+      }
+    }),
     react(),
     tailwindcss(),
     blogPlugin()
