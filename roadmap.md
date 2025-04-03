@@ -7,7 +7,7 @@
 - add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
 - add feature to import expense invoices by OCRing them with google gemini 2.0
 - DPH priznani at the end of the year
-- automated DPH and Kontrolni hlaseni submission to ADIS every month/quarter for you with automated pupeteer script
+- automated DPH and Kontrolni hlaseni submission to ADIS every month/quarter for you with automated puppeteer script
 - integrate with Fio bank API to be able to mark invoices as paid when you receive money
 - ability to import contact and invoice data from fakturoid
 - dovolit oznacit faktury jako zaplacenou
@@ -23,7 +23,7 @@
   - zeptat se treba na veci jako:
     - kolik dlužím na dani z prijmu tento rok?
     - kolik jsem vystavil faktur tento rok?
-    - kolik musím zaplatit na konci ctvrletí dan z prijmu?
+    - kolik musím zaplatit na konci čtvrtletí dan z prijmu?
     - kolik jsem vystavil faktur v roce 2024?
 
 ## Done
