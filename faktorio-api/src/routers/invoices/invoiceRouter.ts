@@ -298,5 +298,51 @@ export const invoiceRouter = trpcContext.router({
         currency: input.currency,
         date: input.date
       })
+    }),
+
+  markAsPaid: protectedProc
+    .input(
+      z.object({
+        id: z.string(),
+        // Allow string date (YYYY-MM-DD) or null to mark as unpaid
+        paidOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format, expected YYYY-MM-DD').nullable()
+          .describe(
+            'Payment date in YYYY-MM-DD format, or null to mark as unpaid'
+          )
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const invoice = await ctx.db.query.invoicesTb.findFirst({
+        where: and(
+          eq(invoicesTb.id, input.id),
+          eq(invoicesTb.user_id, ctx.user.id)
+        ),
+        columns: {
+          id: true
+        }
+      })
+
+      if (!invoice) {
+        throw new Error('Invoice not found')
+      }
+
+      // If input.paidOn is explicitly null, use null. Otherwise, use the provided date or default to today.
+      const paidOnValue = input.paidOn === null ? null : (input.paidOn || djs().format('YYYY-MM-DD'))
+
+      const result = await ctx.db
+        .update(invoicesTb)
+        .set({
+          paid_on: paidOnValue, // Use the determined value (date string or null)
+          updated_at: djs().toISOString() // Always update timestamp
+        })
+        .where(eq(invoicesTb.id, input.id))
+        .returning({
+          id: invoicesTb.id,
+          number: invoicesTb.number,
+          paid_on: invoicesTb.paid_on
+        })
+        .execute()
+
+      return result[0]
     })
 })

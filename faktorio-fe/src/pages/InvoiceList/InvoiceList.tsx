@@ -16,13 +16,15 @@ import {
   Table
 } from '@/components/ui/table'
 import { trpcClient } from '@/lib/trpcClient'
-import { LucideEllipsisVertical, Pencil, Trash2 } from 'lucide-react'
+import { LucideEllipsisVertical, Pencil, Trash2, CheckCircle, XCircle } from 'lucide-react' // Import XCircle
 
+import { useState } from 'react' // Import useState
 import { Link } from 'wouter'
 import { formatNumberWithSpaces } from '../formatNumberWithSpaces'
 import { InvoicesDownloadButton } from './InvoicesDownloadButton'
 import { Input } from '@/components/ui/input'
 import { useQueryParamState } from './useQueryParamState'
+import { MarkAsPaidDialog } from './MarkAsPaidDialog'
 
 export function useFilteredInvoicesQuery(search: string = '') {
   return trpcClient.invoices.all.useQuery({
@@ -34,7 +36,21 @@ export function useFilteredInvoicesQuery(search: string = '') {
 export function InvoiceList() {
   const [search, setSearch] = useQueryParamState('search')
   const q = useFilteredInvoicesQuery(search)
+  // State to manage which invoice's "Mark as Paid" dialog is open
+  const [markAsPaidInvoice, setMarkAsPaidInvoice] = useState<{ id: string; number: string } | null>(null)
+
   const deleteInvoice = trpcClient.invoices.delete.useMutation()
+  // Mutation hook for marking as unpaid directly from the menu
+  const markAsUnpaidMutation = trpcClient.invoices.markAsPaid.useMutation({
+    onSuccess: () => {
+      q.refetch() // Refetch data after marking as unpaid
+    },
+    onError: (error) => console.error("Failed to mark invoice as unpaid:", error)
+  })
+
+  const handleOpenMarkAsPaidDialog = (invoiceId: string, invoiceNumber: string) => {
+    setMarkAsPaidInvoice({ id: invoiceId, number: invoiceNumber })
+  }
 
   const invoices = q.data ?? []
   const total = invoices.reduce((acc, invoice) => acc + invoice.total, 0)
@@ -59,6 +75,7 @@ export function InvoiceList() {
             <TableHead className="">Odesláno</TableHead>
             <TableHead>s DPH</TableHead>
             <TableHead>bez DPH</TableHead>
+            <TableHead>Datum platby</TableHead>
             <TableHead className="text-right">Akce</TableHead>
           </TableRow>
         </TableHeader>
@@ -82,6 +99,11 @@ export function InvoiceList() {
               <TableCell>
                 {invoice.subtotal} {invoice.currency}
               </TableCell>
+              <TableCell>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${invoice.paid_on ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                  {invoice.paid_on ? invoice.paid_on : 'Nezaplaceno'}
+                </span>
+              </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -99,6 +121,33 @@ export function InvoiceList() {
                         <span className="ml-2">Editovat</span>
                       </Link>
                     </DropdownMenuItem>
+
+                    {!invoice.paid_on && (
+                      <DropdownMenuItem
+                        // Prevent default closing and trigger dialog open
+                        onSelect={(e) => e.preventDefault()} // Use onSelect for DropdownMenuItem to prevent closing
+                        onClick={() => handleOpenMarkAsPaidDialog(invoice.id, invoice.number)}
+                      >
+                        <CheckCircle size={16} strokeWidth="1.5" className="text-green-600" />
+                        <span className="ml-2">Označit jako zaplacené</span>
+                      </DropdownMenuItem>
+                    )}
+
+                    {/* Add Mark as Unpaid option if already paid */}
+                    {invoice.paid_on && (
+                      <DropdownMenuItem
+                        className="text-red-600 focus:text-red-700 focus:bg-red-50" // Optional: style differently
+                        onSelect={(e) => e.preventDefault()} // Prevent closing
+                        onClick={async () => {
+                          // Call mutation to mark as unpaid (paidOn: null)
+                          await markAsUnpaidMutation.mutateAsync({ id: invoice.id, paidOn: null })
+                        }}
+                        disabled={markAsUnpaidMutation.isPending} // Disable while mutating
+                      >
+                        <XCircle size={16} strokeWidth="1.5" />
+                        <span className="ml-2">Označit jako nezaplacené</span>
+                      </DropdownMenuItem>
+                    )}
 
                     <RemoveDialogUncontrolled
                       title={
@@ -122,11 +171,11 @@ export function InvoiceList() {
               </TableCell>
             </TableRow>
           ))}
-          {q.isInitialLoading && <p>Načítám faktury...</p>}
+          {q.isLoading && <p>Načítám faktury...</p>}
 
           {invoices.length > 0 && (
             <TableRow className="bg-gray-200">
-              <TableCell colSpan={5}>
+              <TableCell colSpan={6}>
                 Celkem {q.data?.length}{' '}
                 {q.data?.length === 1 ? 'faktura' : 'faktury'}
               </TableCell>
@@ -147,6 +196,22 @@ export function InvoiceList() {
           )}
         </TableBody>
       </Table>
+
+      {/* Render the dialog outside the table/dropdown structure */}
+      {markAsPaidInvoice && (
+        <MarkAsPaidDialog
+          open={!!markAsPaidInvoice}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) setMarkAsPaidInvoice(null) // Close dialog by resetting state
+          }}
+          invoiceId={markAsPaidInvoice.id}
+          invoiceNumber={markAsPaidInvoice.number}
+          onSuccess={() => {
+            q.refetch() // Refetch data on success
+            setMarkAsPaidInvoice(null) // Ensure dialog closes on success too
+          }}
+        />
+      )}
     </>
   )
 }
