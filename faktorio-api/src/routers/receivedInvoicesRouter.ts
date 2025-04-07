@@ -321,6 +321,7 @@ export const receivedInvoicesRouter = trpcContext.router({
         // Get the model
 
         // Create parts for the content
+        // TODO use https://googleapis.github.io/js-genai/main/classes/files.Files.html
         const imagePart = {
           inlineData: {
             mimeType: 'image/jpeg',
