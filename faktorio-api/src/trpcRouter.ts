@@ -7,10 +7,13 @@ import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
 import { eq } from 'drizzle-orm'
 import { upsertInvoicingDetailsSchema } from '../../faktorio-fe/src/pages/MyInvoicingDetails'
 import { authRouter } from './routers/authRouter'
+import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
+
 export const appRouter = trpcContext.router({
   auth: authRouter,
   invoices: invoiceRouter,
   contacts: contactRouter,
+  receivedInvoices: receivedInvoicesRouter,
   invoicingDetails: protectedProc.query(async ({ ctx }) => {
     const res = await ctx.db.query.userInvoicingDetailsTb
       .findFirst({
