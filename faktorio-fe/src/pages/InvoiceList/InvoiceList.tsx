@@ -16,7 +16,13 @@ import {
   Table
 } from '@/components/ui/table'
 import { trpcClient } from '@/lib/trpcClient'
-import { LucideEllipsisVertical, Pencil, Trash2, CheckCircle, XCircle } from 'lucide-react' // Import XCircle
+import {
+  LucideEllipsisVertical,
+  Pencil,
+  Trash2,
+  CheckCircle,
+  XCircle
+} from 'lucide-react' // Import XCircle
 
 import { useState } from 'react' // Import useState
 import { Link } from 'wouter'
@@ -37,7 +43,10 @@ export function InvoiceList() {
   const [search, setSearch] = useQueryParamState('search')
   const q = useFilteredInvoicesQuery(search)
   // State to manage which invoice's "Mark as Paid" dialog is open
-  const [markAsPaidInvoice, setMarkAsPaidInvoice] = useState<{ id: string; number: string } | null>(null)
+  const [markAsPaidInvoice, setMarkAsPaidInvoice] = useState<{
+    id: string
+    number: string
+  } | null>(null)
 
   const deleteInvoice = trpcClient.invoices.delete.useMutation()
   // Mutation hook for marking as unpaid directly from the menu
@@ -45,10 +54,14 @@ export function InvoiceList() {
     onSuccess: () => {
       q.refetch() // Refetch data after marking as unpaid
     },
-    onError: (error) => console.error("Failed to mark invoice as unpaid:", error)
+    onError: (error) =>
+      console.error('Failed to mark invoice as unpaid:', error)
   })
 
-  const handleOpenMarkAsPaidDialog = (invoiceId: string, invoiceNumber: string) => {
+  const handleOpenMarkAsPaidDialog = (
+    invoiceId: string,
+    invoiceNumber: string
+  ) => {
     setMarkAsPaidInvoice({ id: invoiceId, number: invoiceNumber })
   }
 
@@ -100,7 +113,9 @@ export function InvoiceList() {
                 {invoice.subtotal} {invoice.currency}
               </TableCell>
               <TableCell>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${invoice.paid_on ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${invoice.paid_on ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}
+                >
                   {invoice.paid_on ? invoice.paid_on : 'Nezaplaceno'}
                 </span>
               </TableCell>
@@ -115,7 +130,7 @@ export function InvoiceList() {
                     <DropdownMenuItem>
                       <Link
                         href={`/invoices/${invoice.id}/edit`}
-                        className={'flex'}
+                        className="flex w-full"
                       >
                         <Pencil size={16} strokeWidth="1.5" />
                         <span className="ml-2">Editovat</span>
@@ -124,11 +139,18 @@ export function InvoiceList() {
 
                     {!invoice.paid_on && (
                       <DropdownMenuItem
+                        className="cursor-pointer"
                         // Prevent default closing and trigger dialog open
                         onSelect={(e) => e.preventDefault()} // Use onSelect for DropdownMenuItem to prevent closing
-                        onClick={() => handleOpenMarkAsPaidDialog(invoice.id, invoice.number)}
+                        onClick={() =>
+                          handleOpenMarkAsPaidDialog(invoice.id, invoice.number)
+                        }
                       >
-                        <CheckCircle size={16} strokeWidth="1.5" className="text-green-600" />
+                        <CheckCircle
+                          size={16}
+                          strokeWidth="1.5"
+                          className="text-green-600"
+                        />
                         <span className="ml-2">Označit jako zaplacené</span>
                       </DropdownMenuItem>
                     )}
@@ -140,7 +162,10 @@ export function InvoiceList() {
                         onSelect={(e) => e.preventDefault()} // Prevent closing
                         onClick={async () => {
                           // Call mutation to mark as unpaid (paidOn: null)
-                          await markAsUnpaidMutation.mutateAsync({ id: invoice.id, paidOn: null })
+                          await markAsUnpaidMutation.mutateAsync({
+                            id: invoice.id,
+                            paidOn: null
+                          })
                         }}
                         disabled={markAsUnpaidMutation.isPending} // Disable while mutating
                       >
