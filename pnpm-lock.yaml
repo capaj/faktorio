@@ -55,14 +55,14 @@ importers:
         specifier: '5'
         version: 5.66.0(react@19.0.0)
       '@trpc/client':
-        specifier: ^11.0.2
-        version: 11.0.2(@trpc/server@11.0.2(typescript@5.8.3))(typescript@5.8.3)
+        specifier: ^11.0.3
+        version: 11.0.3(@trpc/server@11.0.3(typescript@5.8.3))(typescript@5.8.3)
       '@trpc/react-query':
-        specifier: ^11.0.2
-        version: 11.0.2(@tanstack/react-query@5.66.0(react@19.0.0))(@trpc/client@11.0.2(@trpc/server@11.0.2(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.0.2(typescript@5.8.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.3)
+        specifier: ^11.0.3
+        version: 11.0.3(@tanstack/react-query@5.66.0(react@19.0.0))(@trpc/client@11.0.3(@trpc/server@11.0.3(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.0.3(typescript@5.8.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.3)
       '@trpc/server':
-        specifier: ^11.0.2
-        version: 11.0.2(typescript@5.8.3)
+        specifier: ^11.0.3
+        version: 11.0.3(typescript@5.8.3)
       '@tsndr/cloudflare-worker-jwt':
         specifier: ^3.1.4
         version: 3.1.4
@@ -173,14 +173,14 @@ importers:
         specifier: '5'
         version: 5.66.0(react@18.3.1)
       '@trpc/client':
-        specifier: ^11.0.2
-        version: 11.0.2(@trpc/server@11.0.2(typescript@5.8.3))(typescript@5.8.3)
+        specifier: ^11.0.3
+        version: 11.0.3(@trpc/server@11.0.3(typescript@5.8.3))(typescript@5.8.3)
       '@trpc/react-query':
-        specifier: ^11.0.2
-        version: 11.0.2(@tanstack/react-query@5.66.0(react@18.3.1))(@trpc/client@11.0.2(@trpc/server@11.0.2(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.0.2(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
+        specifier: ^11.0.3
+        version: 11.0.3(@tanstack/react-query@5.66.0(react@18.3.1))(@trpc/client@11.0.3(@trpc/server@11.0.3(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.0.3(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       '@trpc/server':
-        specifier: ^11.0.2
-        version: 11.0.2(typescript@5.8.3)
+        specifier: ^11.0.3
+        version: 11.0.3(typescript@5.8.3)
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
@@ -2678,24 +2678,24 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@trpc/client@11.0.2':
-    resolution: {integrity: sha512-GlPEedbMTerkUfAJBsrwU6dg8N65lt3LBwrCoqR3MTZ64lRU/DQqyLjzpz5nRkEN0x4S2JmX0hASV9vc2KlSHA==}
+  '@trpc/client@11.0.3':
+    resolution: {integrity: sha512-nUhRo/Ml3LQzs2USs5pfquNqETEQOMS6o9IR30cwn32oj4NuXXSqe9UqUc3hIBALtVzcfg6mLK43hGQA9O3X/Q==}
     peerDependencies:
-      '@trpc/server': 11.0.2
+      '@trpc/server': 11.0.3
       typescript: '>=5.7.2'
 
-  '@trpc/react-query@11.0.2':
-    resolution: {integrity: sha512-i/u6cbZspGekRAHhEk/jdG1J/XR0ccF+UGFTCEozwPBMBX6eBOe3LTVJ6FLXL2n8IHbSaJEP9h76rzIMXv44lg==}
+  '@trpc/react-query@11.0.3':
+    resolution: {integrity: sha512-rVasvdh8T6oRB1KXesbJNifoEA99Cc8cW+VsZZqvsrKQxFzvAL4Dz1B0ygdwupZZR2hN8m5HaT2fYXDkhslY9Q==}
     peerDependencies:
       '@tanstack/react-query': ^5.67.1
-      '@trpc/client': 11.0.2
-      '@trpc/server': 11.0.2
+      '@trpc/client': 11.0.3
+      '@trpc/server': 11.0.3
       react: '>=18.2.0'
       react-dom: '>=18.2.0'
       typescript: '>=5.7.2'
 
-  '@trpc/server@11.0.2':
-    resolution: {integrity: sha512-PIcm8UWFyE0AnIYjxsyc1zfVa6X10m9Opm1SJ2ou9Vu8dlXO6rMtmafLUXJsMeQk/3ecxObFtEiZIX8TvB3eCg==}
+  '@trpc/server@11.0.3':
+    resolution: {integrity: sha512-/qlaFITZ5a9OCI5mZiW94C8q9mr/wxCmb8GfP3k7VF9RuY4ql+M1UWrzS7xAj8bHekqG9PcR8qEWlOJ6NnXbQg==}
     peerDependencies:
       typescript: '>=5.7.2'
 
@@ -7675,30 +7675,30 @@ snapshots:
       '@tanstack/query-core': 5.66.0
       react: 19.0.0
 
-  '@trpc/client@11.0.2(@trpc/server@11.0.2(typescript@5.8.3))(typescript@5.8.3)':
+  '@trpc/client@11.0.3(@trpc/server@11.0.3(typescript@5.8.3))(typescript@5.8.3)':
     dependencies:
-      '@trpc/server': 11.0.2(typescript@5.8.3)
+      '@trpc/server': 11.0.3(typescript@5.8.3)
       typescript: 5.8.3
 
-  '@trpc/react-query@11.0.2(@tanstack/react-query@5.66.0(react@18.3.1))(@trpc/client@11.0.2(@trpc/server@11.0.2(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.0.2(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
+  '@trpc/react-query@11.0.3(@tanstack/react-query@5.66.0(react@18.3.1))(@trpc/client@11.0.3(@trpc/server@11.0.3(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.0.3(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
     dependencies:
       '@tanstack/react-query': 5.66.0(react@18.3.1)
-      '@trpc/client': 11.0.2(@trpc/server@11.0.2(typescript@5.8.3))(typescript@5.8.3)
-      '@trpc/server': 11.0.2(typescript@5.8.3)
+      '@trpc/client': 11.0.3(@trpc/server@11.0.3(typescript@5.8.3))(typescript@5.8.3)
+      '@trpc/server': 11.0.3(typescript@5.8.3)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       typescript: 5.8.3
 
-  '@trpc/react-query@11.0.2(@tanstack/react-query@5.66.0(react@19.0.0))(@trpc/client@11.0.2(@trpc/server@11.0.2(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.0.2(typescript@5.8.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.3)':
+  '@trpc/react-query@11.0.3(@tanstack/react-query@5.66.0(react@19.0.0))(@trpc/client@11.0.3(@trpc/server@11.0.3(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.0.3(typescript@5.8.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.3)':
     dependencies:
       '@tanstack/react-query': 5.66.0(react@19.0.0)
-      '@trpc/client': 11.0.2(@trpc/server@11.0.2(typescript@5.8.3))(typescript@5.8.3)
-      '@trpc/server': 11.0.2(typescript@5.8.3)
+      '@trpc/client': 11.0.3(@trpc/server@11.0.3(typescript@5.8.3))(typescript@5.8.3)
+      '@trpc/server': 11.0.3(typescript@5.8.3)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
       typescript: 5.8.3
 
-  '@trpc/server@11.0.2(typescript@5.8.3)':
+  '@trpc/server@11.0.3(typescript@5.8.3)':
     dependencies:
       typescript: 5.8.3
 
