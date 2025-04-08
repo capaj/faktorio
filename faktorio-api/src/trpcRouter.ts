@@ -1,4 +1,4 @@
-import { tc } from './trpcContext'
+import { trpcContext } from './trpcContext'
 import { invoiceRouter } from './routers/invoices/invoiceRouter'
 import { contactRouter } from './routers/contactRouter'
 import { protectedProc } from './isAuthorizedMiddleware'
@@ -9,8 +9,8 @@ import { upsertInvoicingDetailsSchema } from '../../faktorio-fe/src/pages/MyInvo
 import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
 import { authRouter } from './routers/authRouter'
 
-export const appRouter = tc.router({
-  test: tc.procedure.query(async ({ ctx }) => {
+export const appRouter = trpcContext.router({
+  test: trpcContext.procedure.query(async ({ ctx }) => {
     return 'test ' + new Date()
   }),
   auth: authRouter,

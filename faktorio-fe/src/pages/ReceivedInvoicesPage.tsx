@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Textarea } from '@/components/ui/textarea'
+
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -266,7 +266,6 @@ export function ReceivedInvoicesPage() {
                         </h3>
 
                         <FormField
-                          control={form.control}
                           name="supplier_name"
                           render={({ field }) => (
                             <FormItem>
@@ -280,7 +279,6 @@ export function ReceivedInvoicesPage() {
                         />
 
                         <FormField
-                          control={form.control}
                           name="supplier_registration_no"
                           render={({ field }) => (
                             <FormItem>
@@ -294,7 +292,6 @@ export function ReceivedInvoicesPage() {
                         />
 
                         <FormField
-                          control={form.control}
                           name="supplier_vat_no"
                           render={({ field }) => (
                             <FormItem>
@@ -308,7 +305,6 @@ export function ReceivedInvoicesPage() {
                         />
 
                         <FormField
-                          control={form.control}
                           name="supplier_street"
                           render={({ field }) => (
                             <FormItem>
@@ -323,7 +319,6 @@ export function ReceivedInvoicesPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={form.control}
                             name="supplier_city"
                             render={({ field }) => (
                               <FormItem>
@@ -337,7 +332,6 @@ export function ReceivedInvoicesPage() {
                           />
 
                           <FormField
-                            control={form.control}
                             name="supplier_zip"
                             render={({ field }) => (
                               <FormItem>
@@ -352,7 +346,6 @@ export function ReceivedInvoicesPage() {
                         </div>
 
                         <FormField
-                          control={form.control}
                           name="supplier_country"
                           render={({ field }) => (
                             <FormItem>
@@ -371,7 +364,6 @@ export function ReceivedInvoicesPage() {
                         <h3 className="text-lg font-medium">Detaily faktury</h3>
 
                         <FormField
-                          control={form.control}
                           name="invoice_number"
                           render={({ field }) => (
                             <FormItem>
@@ -385,7 +377,6 @@ export function ReceivedInvoicesPage() {
                         />
 
                         <FormField
-                          control={form.control}
                           name="variable_symbol"
                           render={({ field }) => (
                             <FormItem>
@@ -399,7 +390,6 @@ export function ReceivedInvoicesPage() {
                         />
 
                         <FormField
-                          control={form.control}
                           name="expense_category"
                           render={({ field }) => (
                             <FormItem>
@@ -413,7 +403,6 @@ export function ReceivedInvoicesPage() {
                         />
 
                         <FormField
-                          control={form.control}
                           name="issue_date"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
@@ -428,7 +417,6 @@ export function ReceivedInvoicesPage() {
                         />
 
                         <FormField
-                          control={form.control}
                           name="due_date"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
@@ -443,7 +431,6 @@ export function ReceivedInvoicesPage() {
                         />
 
                         <FormField
-                          control={form.control}
                           name="taxable_supply_date"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
@@ -459,7 +446,6 @@ export function ReceivedInvoicesPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={form.control}
                             name="total_with_vat"
                             render={({ field }) => (
                               <FormItem>
@@ -482,7 +468,6 @@ export function ReceivedInvoicesPage() {
                           />
 
                           <FormField
-                            control={form.control}
                             name="total_without_vat"
                             render={({ field }) => (
                               <FormItem>
@@ -511,7 +496,6 @@ export function ReceivedInvoicesPage() {
                         </div>
 
                         <FormField
-                          control={form.control}
                           name="currency"
                           render={({ field }) => (
                             <FormItem>

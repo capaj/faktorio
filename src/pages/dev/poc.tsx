@@ -1,3 +1,6 @@
+import initSqlJs from 'sql.js'
+import { Database } from 'sql.js'
+
 async function loadDatabaseFromOPFS(filename: string) {
   try {
     const root = await navigator.storage.getDirectory()
@@ -55,6 +58,6 @@ async function runExample() {
   console.log('Data after modification', newResult)
 
   // Save (or overwrite) the database to OPFS
-  await saveDatabaseToOPFS(db, filename)
+  // await saveDatabaseToOPFS(db, filename)
   db.close()
 }
