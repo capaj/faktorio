@@ -15,14 +15,6 @@ import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
 import { useInvoiceQueryByUrlParam } from '../InvoiceDetail/InvoiceDetailPage'
 
-const defaultInvoiceItem = {
-  description: '',
-  unit: 'manday',
-  quantity: 1,
-  unit_price: 0,
-  vat_rate: 21
-}
-
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const contactsQuery = trpcClient.contacts.all.useQuery()
@@ -64,6 +56,14 @@ export const EditInvoicePage = () => {
 
   if (contactsQuery.data?.length === 0) {
     return null
+  }
+
+  const defaultInvoiceItem = {
+    description: '',
+    unit: 'manday',
+    quantity: 1,
+    unit_price: 0,
+    vat_rate: formValues.currency === 'CZK' ? 21 : 0
   }
 
   return (

@@ -139,7 +139,8 @@ export const contactTb = sqliteTable(
     email_copy: text('email_copy'),
     private_note: text('private_note'),
     type: text('type'),
-    due: integer('due'), // in days how long the invoice is due
+    default_invoice_due_in_days: integer('default_invoice_due_in_days'), // in days how long the invoice is due
+    default_invoice_item_unit: text('default_invoice_item_unit'),
     currency: text('currency'),
     language: text('language'),
     created_at: text('created_at')
