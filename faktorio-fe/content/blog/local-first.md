@@ -1,6 +1,6 @@
 ---
 title: Local-first fakturační platforma
-date: 2024-12-20
+date: 2025-04-18
 ---
 
 ![Local-first databáze ve Faktoriu](../../../images/cfdeaa7e66634251023815c5ddd3920444fb9cce31cb925474f03a417f79e206.png)
