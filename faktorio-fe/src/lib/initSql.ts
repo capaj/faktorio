@@ -8,7 +8,6 @@ import migration0005 from '@api/drizzle/0005_funny_abomination.sql?raw'
 import migration0006 from '@api/drizzle/0006_fuzzy_epoch.sql?raw'
 import migration0007 from '@api/drizzle/0007_past_prism.sql?raw'
 
-const SQL_JS_WASM_URL = 'https://sql.js.org/dist/sql-wasm.wasm'
 const LOCAL_DB_LIST_KEY = 'faktorio_local_db_files'
 
 async function getSqlJs() {
@@ -159,14 +158,7 @@ export async function createNewDatabase(
   }
 }
 
-// --- Original initSqlDb (modified slightly) ---
-// This might still be useful for a default/single DB scenario
-// Or could be deprecated/removed if only named DBs are used.
-const DEFAULT_DB_FILENAME = 'my_opfs_database.sqlite'
-
-export const initSqlDb = async (
-  filename: string = DEFAULT_DB_FILENAME
-): Promise<Database | null> => {
+export const initSqlDb = async (filename: string): Promise<Database | null> => {
   let db: Database | null = null
 
   // Try to load the database from OPFS
