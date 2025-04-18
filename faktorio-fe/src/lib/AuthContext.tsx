@@ -44,7 +44,7 @@ interface AuthContextType {
   ) => Promise<void>
   signup: (email: string, fullName: string, password: string) => Promise<void>
   googleSignup: (googleToken: string) => Promise<void>
-  logout: () => void
+  logout: (path?: string) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -128,17 +128,20 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     [googleSignupMutation]
   )
 
-  const logout = useCallback(() => {
-    setUser(null)
-    setToken(null)
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
+  const logout = useCallback(
+    (path?: string) => {
+      setUser(null)
+      setToken(null)
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('auth_user')
 
-    utils.invalidate()
+      utils.invalidate()
 
-    logoutMutation.mutate()
-    navigate('/')
-  }, [logoutMutation])
+      logoutMutation.mutate()
+      path && navigate('/')
+    },
+    [logoutMutation]
+  )
 
   const value = {
     user,

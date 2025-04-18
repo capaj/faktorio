@@ -3,7 +3,7 @@ title: Local-first fakturační platforma
 date: 2024-12-20
 ---
 
-# Local-first přístup ve Faktoriu
+![Local-first databáze ve Faktoriu](../../../images/cfdeaa7e66634251023815c5ddd3920444fb9cce31cb925474f03a417f79e206.png)
 
 Jsme rádi, že můžeme představit novou funkcionalitu, která posouvá Faktorio na další úroveň - **režim local-first**. Tato inovace vám umožní používat Faktorio plně lokálně, přímo ve vašem prohlížeči, bez nutnosti připojení k internetu nebo vytváření účtu.
 
@@ -81,5 +81,3 @@ V budoucnu plánujeme local-first režim dále rozvíjet:
 - Offline přístup s možností synchronizace po připojení k internetu
 
 Věříme, že local-first přístup představuje významný krok vpřed v oblasti fakturačních platforem a jsme rádi, že můžeme tuto technologii přinést našim uživatelům.
-
-![Local-first databáze ve Faktoriu](../../../images/cfdeaa7e66634251023815c5ddd3920444fb9cce31cb925474f03a417f79e206.png)

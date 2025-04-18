@@ -91,7 +91,7 @@ export const Header = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer"
-                        onClick={logout}
+                        onClick={() => logout('/')}
                       >
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Odhlásit se</span>
@@ -171,7 +171,7 @@ export const Header = () => {
 
                 <Button
                   className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-                  onClick={logout}
+                  onClick={() => logout('/')}
                   variant="ghost"
                 >
                   Odhlásit se
