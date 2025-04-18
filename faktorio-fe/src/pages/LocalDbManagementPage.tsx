@@ -1,12 +1,18 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useLocation } from 'wouter'
 import {
   getTrackedDbFiles,
   createNewDatabase,
-  deleteDatabase
+  deleteDatabase,
+  exportDatabaseFile,
+  importDatabaseFile
 } from '../lib/initSql'
 import { useDb } from '../lib/DbContext'
 import { useAuth } from '../lib/AuthContext'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Button } from '../components/ui/button'
+import { Download, Upload, Database } from 'lucide-react'
 
 export function LocalDbManagementPage() {
   const [dbFiles, setDbFiles] = useState<string[]>([])
@@ -16,6 +22,9 @@ export function LocalDbManagementPage() {
   const [success, setSuccess] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState<string | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [, navigate] = useLocation()
 
   // User form state
@@ -30,7 +39,8 @@ export function LocalDbManagementPage() {
     localUser,
     setLocalUser
   } = useDb()
-  const { isSignedIn } = useAuth()
+  const { token } = useAuth()
+  const isLocalUser = token?.startsWith('local_')
 
   // Initialize form with existing user data
   useEffect(() => {
@@ -247,13 +257,61 @@ export function LocalDbManagementPage() {
     }
   }
 
+  const handleExportDb = async (filename: string) => {
+    setError(null)
+    setSuccess(null)
+    setIsExporting(filename)
+    try {
+      const result = await exportDatabaseFile(filename)
+      if (result) {
+        setSuccess(`Databáze '${filename}' byla úspěšně exportována.`)
+      } else {
+        setError(`Nepodařilo se exportovat databázi '${filename}'.`)
+      }
+    } catch (err: any) {
+      console.error('Error exporting database:', err)
+      setError(`Chyba při exportu databáze: ${err.message || 'Neznámá chyba'}`)
+    } finally {
+      setIsExporting(null)
+    }
+  }
+
+  const handleImportDb = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    const file = files[0]
+    setError(null)
+    setSuccess(null)
+    setIsImporting(true)
+
+    try {
+      const result = await importDatabaseFile(file)
+      if (result) {
+        await loadFiles() // Refresh the list
+        setSuccess(`Databáze '${file.name}' byla úspěšně importována.`)
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+      } else {
+        setError(`Nepodařilo se importovat databázi '${file.name}'.`)
+      }
+    } catch (err: any) {
+      console.error('Error importing database:', err)
+      setError(`Chyba při importu databáze: ${err.message || 'Neznámá chyba'}`)
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
   const renderUserForm = () => {
-    if (isSignedIn) {
+    if (!isLocalUser) {
       return (
         <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
           <p>
-            Jste přihlášeni pomocí standardního účtu. Nastavení údajů pro
-            lokální databázi není potřeba.
+            Jste přihlášeni pomocí standardního účtu. Pro nastavení údajů pro
+            lokální databázi se odhlašte.
           </p>
         </div>
       )
@@ -269,42 +327,42 @@ export function LocalDbManagementPage() {
 
         <div className="space-y-3">
           <div>
-            <label htmlFor="fullName" className="block text-sm font-medium">
+            <Label htmlFor="fullName" className="text-sm font-medium">
               Celé jméno
-            </label>
-            <input
+            </Label>
+            <Input
               id="fullName"
               type="text"
               value={userFullName}
               onChange={(e) => setUserFullName(e.target.value)}
               placeholder="Jan Novák"
-              className="mt-1 block w-full border p-2 rounded"
+              className="mt-1"
               disabled={isSavingUser}
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium">
+            <Label htmlFor="email" className="text-sm font-medium">
               E-mail
-            </label>
-            <input
+            </Label>
+            <Input
               id="email"
               type="email"
               value={userEmail}
               onChange={(e) => setUserEmail(e.target.value)}
               placeholder="jan.novak@example.com"
-              className="mt-1 block w-full border p-2 rounded"
+              className="mt-1"
               disabled={isSavingUser}
             />
           </div>
 
-          <button
+          <Button
             onClick={handleSaveUser}
             disabled={isSavingUser || !userFullName.trim() || !userEmail.trim()}
-            className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded disabled:opacity-50 transition-colors w-full"
+            className="w-full"
           >
             {isSavingUser ? 'Ukládám...' : 'Uložit údaje'}
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -320,6 +378,12 @@ export function LocalDbManagementPage() {
         </div>
       )}
 
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+
       {activeDbName && (
         <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
           <span className="font-bold">Aktivní databáze:</span>{' '}
@@ -332,23 +396,46 @@ export function LocalDbManagementPage() {
       <div className="space-y-2">
         <h2 className="text-xl">Vytvořit novou databázi</h2>
         <div className="flex space-x-2">
-          <input
+          <Input
             type="text"
             value={newDbName}
             onChange={(e) => setNewDbName(e.target.value)}
             placeholder="Zadejte název databáze (např. muj_projekt)"
-            className="border p-2 flex-grow rounded"
+            className="flex-grow"
             disabled={isCreating}
           />
-          <button
+          <Button
             onClick={handleCreateDb}
             disabled={isCreating || !newDbName.trim()}
-            className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded disabled:opacity-50 transition-colors"
+            variant="default"
           >
             {isCreating ? 'Vytvářím...' : 'Vytvořit .sqlite'}
-          </button>
+          </Button>
         </div>
-        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="text-xl">Importovat databázi</h2>
+        <div className="flex space-x-2 items-center">
+          <Input
+            type="file"
+            ref={fileInputRef}
+            accept=".sqlite"
+            onChange={handleImportDb}
+            disabled={isImporting}
+            className="flex-grow"
+          />
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isImporting}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            {isImporting ? 'Importuji...' : 'Importovat'}
+          </Button>
+        </div>
+        <p className="text-sm text-gray-500">
+          Vyberte soubor .sqlite pro import do aplikace.
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -365,6 +452,7 @@ export function LocalDbManagementPage() {
                 className="py-2 flex items-center justify-between group"
               >
                 <span className="font-mono flex items-center">
+                  <Database className="h-4 w-4 mr-2" />
                   {file}
                   {activeDbName === file && (
                     <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
@@ -373,26 +461,40 @@ export function LocalDbManagementPage() {
                   )}
                 </span>
                 <div className="space-x-2">
-                  <button
+                  <Button
                     onClick={() => handleLoadDb(file)}
                     disabled={
                       isDbLoading ||
                       isDeleting === file ||
-                      activeDbName === file
+                      activeDbName === file ||
+                      isExporting === file
                     }
-                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50 transition-colors"
+                    variant="default"
+                    size="sm"
                   >
                     {isDbLoading && activeDbName !== file
                       ? 'Načítám...'
                       : 'Načíst'}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    onClick={() => handleExportDb(file)}
+                    disabled={isExporting === file}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    {isExporting === file ? 'Exportuji...' : 'Export'}
+                  </Button>
+                  <Button
                     onClick={() => handleDeleteDb(file)}
-                    disabled={isDbLoading || isDeleting === file}
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50 transition-colors"
+                    disabled={
+                      isDbLoading || isDeleting === file || isExporting === file
+                    }
+                    variant="destructive"
+                    size="sm"
                   >
                     {isDeleting === file ? 'Mažu...' : 'Smazat'}
-                  </button>
+                  </Button>
                 </div>
               </li>
             ))}

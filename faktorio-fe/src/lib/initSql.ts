@@ -205,3 +205,65 @@ export async function deleteDatabase(filename: string): Promise<boolean> {
     return false
   }
 }
+
+// Function to export database from OPFS to a downloadable file
+export async function exportDatabaseFile(filename: string): Promise<boolean> {
+  // Load the database from OPFS
+  const db = await loadDatabaseFromOPFS(filename)
+  if (!db) {
+    console.error(`Failed to load database ${filename} for export`)
+    return false
+  }
+
+  // Export the database as a binary blob
+  const binaryArray = db.export()
+  const blob = new Blob([binaryArray], { type: 'application/octet-stream' })
+
+  // Create a download link and trigger the download
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+
+  // Clean up
+  setTimeout(() => {
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, 100)
+
+  return true
+}
+
+// Function to import a database file to OPFS
+export async function importDatabaseFile(file: File): Promise<boolean> {
+  if (!file.name.endsWith('.sqlite')) {
+    console.error('Invalid file format. Please select a .sqlite file.')
+    return false
+  }
+
+  const filename = file.name
+  const arrayBuffer = await file.arrayBuffer()
+  const uint8Array = new Uint8Array(arrayBuffer)
+
+  // Load the database from the file
+  const SQL = await getSqlJs()
+  let db: Database
+
+  try {
+    db = new SQL.Database(uint8Array)
+  } catch (error) {
+    console.error('Invalid SQLite database file:', error)
+    return false
+  }
+
+  // Save the database to OPFS
+  await saveDatabaseToOPFS(db, filename)
+
+  // Add to tracked files
+  addTrackedDbFile(filename)
+
+  console.log(`Database ${filename} imported successfully`)
+  return true
+}
