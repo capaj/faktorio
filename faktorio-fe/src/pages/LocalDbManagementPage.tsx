@@ -12,7 +12,7 @@ import { useAuth } from '../lib/AuthContext'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Button } from '../components/ui/button'
-import { Download, Upload, Database } from 'lucide-react'
+import { Download, Upload, Database, LogOut } from 'lucide-react'
 
 export function LocalDbManagementPage() {
   const [dbFiles, setDbFiles] = useState<string[]>([])
@@ -24,6 +24,7 @@ export function LocalDbManagementPage() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState<string | null>(null)
   const [isImporting, setIsImporting] = useState(false)
+  const [isDeactivating, setIsDeactivating] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [, navigate] = useLocation()
 
@@ -35,11 +36,12 @@ export function LocalDbManagementPage() {
   const {
     activeDbName,
     setActiveDatabase,
+    clearActiveDatabase,
     isLoading: isDbLoading,
     localUser,
     setLocalUser
   } = useDb()
-  const { token } = useAuth()
+  const { token, logout } = useAuth()
   const isLocalUser = token?.startsWith('local_')
 
   // Initialize form with existing user data
@@ -206,6 +208,30 @@ export function LocalDbManagementPage() {
       setError(`Chyba při mazání databáze: ${err.message || 'Neznámá chyba'}`)
     } finally {
       setIsDeleting(null)
+    }
+  }
+
+  const handleDeactivateDb = async () => {
+    if (!activeDbName) return
+
+    setError(null)
+    setSuccess(null)
+    setIsDeactivating(true)
+
+    try {
+      // Clear the active database in DbContext
+      clearActiveDatabase()
+
+      logout()
+
+      setSuccess(`Databáze '${activeDbName}' byla deaktivována.`)
+    } catch (err: any) {
+      console.error('Error deactivating database:', err)
+      setError(
+        `Chyba při deaktivaci databáze: ${err.message || 'Neznámá chyba'}`
+      )
+    } finally {
+      setIsDeactivating(false)
     }
   }
 
@@ -385,58 +411,25 @@ export function LocalDbManagementPage() {
       )}
 
       {activeDbName && (
-        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
-          <span className="font-bold">Aktivní databáze:</span>{' '}
-          <span className="font-mono">{activeDbName}</span>
+        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded flex justify-between items-center">
+          <div>
+            <span className="font-bold">Aktivní databáze:</span>{' '}
+            <span className="font-mono">{activeDbName}</span>
+          </div>
+
+          {renderUserForm()}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDeactivateDb}
+            disabled={isDeactivating}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            {isDeactivating ? 'Deaktivuji...' : 'Deaktivovat'}
+          </Button>
         </div>
       )}
-
-      {renderUserForm()}
-
-      <div className="space-y-2">
-        <h2 className="text-xl">Vytvořit novou databázi</h2>
-        <div className="flex space-x-2">
-          <Input
-            type="text"
-            value={newDbName}
-            onChange={(e) => setNewDbName(e.target.value)}
-            placeholder="Zadejte název databáze (např. muj_projekt)"
-            className="flex-grow"
-            disabled={isCreating}
-          />
-          <Button
-            onClick={handleCreateDb}
-            disabled={isCreating || !newDbName.trim()}
-            variant="default"
-          >
-            {isCreating ? 'Vytvářím...' : 'Vytvořit .sqlite'}
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="text-xl">Importovat databázi</h2>
-        <div className="flex space-x-2 items-center">
-          <Input
-            type="file"
-            ref={fileInputRef}
-            accept=".sqlite"
-            onChange={handleImportDb}
-            disabled={isImporting}
-            className="flex-grow"
-          />
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isImporting}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            {isImporting ? 'Importuji...' : 'Importovat'}
-          </Button>
-        </div>
-        <p className="text-sm text-gray-500">
-          Vyberte soubor .sqlite pro import do aplikace.
-        </p>
-      </div>
 
       <div className="space-y-2">
         <h2 className="text-xl">Existující databáze</h2>
@@ -500,6 +493,50 @@ export function LocalDbManagementPage() {
             ))}
           </ul>
         )}
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-xl">Vytvořit novou databázi</h2>
+        <div className="flex space-x-2">
+          <Input
+            type="text"
+            value={newDbName}
+            onChange={(e) => setNewDbName(e.target.value)}
+            placeholder="Zadejte název databáze (např. muj_projekt)"
+            className="flex-grow"
+            disabled={isCreating}
+          />
+          <Button
+            onClick={handleCreateDb}
+            disabled={isCreating || !newDbName.trim()}
+            variant="default"
+          >
+            {isCreating ? 'Vytvářím...' : 'Vytvořit .sqlite'}
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="text-xl">Importovat databázi</h2>
+        <div className="flex space-x-2 items-center">
+          <Input
+            type="file"
+            ref={fileInputRef}
+            accept=".sqlite"
+            onChange={handleImportDb}
+            disabled={isImporting}
+            className="flex-grow"
+          />
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isImporting}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            {isImporting ? 'Importuji...' : 'Importovat'}
+          </Button>
+        </div>
+        <p className="text-sm text-gray-500">
+          Vyberte soubor .sqlite pro import do aplikace.
+        </p>
       </div>
     </div>
   )
