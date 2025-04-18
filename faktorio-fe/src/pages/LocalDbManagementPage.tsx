@@ -436,7 +436,7 @@ export function LocalDbManagementPage() {
         {loading ? (
           <p>Načítám seznam...</p>
         ) : dbFiles.length === 0 ? (
-          <p>Nebyly nalezeny žádné lokální databáze. Vytvořte nějakou výše.</p>
+          <p>Nebyly nalezeny žádné lokální databáze. Vytvořte nějakou níže.</p>
         ) : (
           <ul className="divide-y">
             {dbFiles.map((file) => (
