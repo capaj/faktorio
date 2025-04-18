@@ -2,21 +2,18 @@
 
 ## TODO
 
-- umet bezet lokalne offline z sql.js
-- allow to add expense invoices by drag and drop(parse PDF with google gemini)
+- allow to add expense invoices by drag and drop PDF file(parse PDF with google gemini)
 - add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
 - add feature to import expense invoices by OCRing them with google gemini 2.0
 - DPH priznani at the end of the year
 - automated DPH and Kontrolni hlaseni submission to ADIS every month/quarter for you with automated puppeteer script
 - integrate with Fio bank API to be able to mark invoices as paid when you receive money
 - ability to import contact and invoice data from fakturoid
-- dovolit oznacit faktury jako zaplacenou
 - zaznamenavat zmeny na fakturach pri kazde editaci v UI
 - onboarding with recurring invoices question
 - enable editing of invoice my details
 - allow to send invoice as email
 - be able to share invoice link
-- add english invoice rendering
 - be able to export as excel
 - hack integration with gemini:
 
@@ -33,3 +30,6 @@
 - fix TSC
 - add TSC check on github'
 - migrate from clerk
+- local-first mode
+- mark invoices as paid
+- add english invoice rendering
