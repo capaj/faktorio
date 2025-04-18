@@ -16,7 +16,7 @@ async function getSqlJs() {
   })
 }
 
-async function getOpfsRoot() {
+export async function getOpfsRoot() {
   return navigator.storage.getDirectory()
 }
 

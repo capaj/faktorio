@@ -44,13 +44,21 @@ export function LocalDbManagementPage() {
   const { token, logout } = useAuth()
   const isLocalUser = token?.startsWith('local_')
 
-  // Initialize form with existing user data
+  // Initialize default user if none exists
   useEffect(() => {
-    if (localUser) {
+    if (!localUser) {
+      const defaultUser = {
+        fullName: 'uzivatel',
+        email: ''
+      }
+      setLocalUser(defaultUser)
+      setUserFullName(defaultUser.fullName)
+      setUserEmail(defaultUser.email)
+    } else {
       setUserFullName(localUser.fullName)
       setUserEmail(localUser.email)
     }
-  }, [localUser])
+  }, [localUser, setLocalUser])
 
   const loadFiles = useCallback(async () => {
     setLoading(true)
@@ -152,22 +160,22 @@ export function LocalDbManagementPage() {
     setError(null)
     setSuccess(null)
 
+    // Check if user details are set before allowing database activation
+    if (!localUser) {
+      setError('Před načtením databáze musíte nastavit uživatelské údaje.')
+      return
+    }
+
     try {
       const result = await setActiveDatabase(filename)
       if (result) {
+        // If we have local user info, set up auth token
+
+        storeLocalAuthToken(localUser)
+
         setSuccess(
           `Databáze '${filename}' byla úspěšně načtena a nastavena jako aktivní.`
         )
-
-        // If we have local user info, set up auth token
-        if (localUser) {
-          storeLocalAuthToken(localUser)
-
-          // Reload page after short delay to refresh auth state
-          setTimeout(() => {
-            window.location.reload()
-          }, 1000)
-        }
       } else {
         setError(`Nepodařilo se načíst databázi '${filename}'.`)
       }
@@ -186,6 +194,11 @@ export function LocalDbManagementPage() {
     setSuccess(null)
     setIsDeleting(filename)
     try {
+      // If we're deleting the active database, deactivate it first
+      if (filename === activeDbName) {
+        clearActiveDatabase()
+      }
+
       const success = await deleteDatabase(filename)
       if (success) {
         await loadFiles() // Refresh the list
@@ -236,13 +249,8 @@ export function LocalDbManagementPage() {
   }
 
   const handleSaveUser = () => {
-    if (!userFullName.trim() || !userEmail.trim()) {
-      setError('Jméno a e-mail jsou povinné údaje.')
-      return
-    }
-
-    if (!userEmail.includes('@')) {
-      setError('Zadejte platnou e-mailovou adresu.')
+    if (!userFullName.trim()) {
+      setError('Jméno je povinný údaj.')
       return
     }
 
@@ -255,25 +263,8 @@ export function LocalDbManagementPage() {
         email: userEmail.trim()
       }
       setLocalUser(userData)
-
-      // Wait for next render when localUser will be updated
-      setTimeout(() => {
-        // If we have an active database, set up auth token
-        if (activeDbName && localUser) {
-          storeLocalAuthToken(localUser)
-          setSuccess(
-            'Uživatelské údaje byly úspěšně uloženy. Přesměrování na hlavní stránku...'
-          )
-
-          // Navigate to home page after short delay
-          setTimeout(() => {
-            navigate('/')
-          }, 1500)
-        } else {
-          setSuccess('Uživatelské údaje byly úspěšně uloženy.')
-        }
-        setIsSavingUser(false)
-      }, 100)
+      setSuccess('Uživatelské údaje byly úspěšně uloženy.')
+      setIsSavingUser(false)
     } catch (err: any) {
       console.error('Error saving user:', err)
       setError(
@@ -332,7 +323,7 @@ export function LocalDbManagementPage() {
   }
 
   const renderUserForm = () => {
-    if (!isLocalUser) {
+    if (token && !isLocalUser) {
       return (
         <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
           <p>
@@ -345,7 +336,7 @@ export function LocalDbManagementPage() {
 
     return (
       <div className="space-y-2 p-4 bg-gray-50 rounded-lg border">
-        <h2 className="text-xl">Nastavení uživatelských údajů</h2>
+        <h3 className="text-xl">Nastavení uživatelských údajů</h3>
         <p className="text-sm text-gray-600">
           Pro používání lokální databáze potřebujete nastavit vaše údaje. Tyto
           údaje budou použity pouze lokálně.
@@ -384,7 +375,7 @@ export function LocalDbManagementPage() {
 
           <Button
             onClick={handleSaveUser}
-            disabled={isSavingUser || !userFullName.trim() || !userEmail.trim()}
+            disabled={isSavingUser || !userFullName.trim()}
             className="w-full"
           >
             {isSavingUser ? 'Ukládám...' : 'Uložit údaje'}
@@ -396,7 +387,7 @@ export function LocalDbManagementPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Správa lokálních databází</h1>
+      <h3 className="text-2xl font-bold">Správa lokálních databází</h3>
 
       {success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
@@ -410,14 +401,15 @@ export function LocalDbManagementPage() {
         </div>
       )}
 
+      {/* User form always visible when not authenticated or when in local mode */}
+      {(!token || isLocalUser) && !activeDbName && renderUserForm()}
+
       {activeDbName && (
         <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded flex justify-between items-center">
           <div>
             <span className="font-bold">Aktivní databáze:</span>{' '}
             <span className="font-mono">{activeDbName}</span>
           </div>
-
-          {renderUserForm()}
 
           <Button
             variant="outline"
@@ -432,7 +424,7 @@ export function LocalDbManagementPage() {
       )}
 
       <div className="space-y-2">
-        <h2 className="text-xl">Existující databáze</h2>
+        <h3 className="text-xl">Existující databáze</h3>
         {loading ? (
           <p>Načítám seznam...</p>
         ) : dbFiles.length === 0 ? (
@@ -495,7 +487,7 @@ export function LocalDbManagementPage() {
         )}
       </div>
       <div className="space-y-2">
-        <h2 className="text-xl">Vytvořit novou databázi</h2>
+        <h3 className="text-xl">Vytvořit novou databázi</h3>
         <div className="flex space-x-2">
           <Input
             type="text"
@@ -516,7 +508,7 @@ export function LocalDbManagementPage() {
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-xl">Importovat databázi</h2>
+        <h3 className="text-xl">Importovat databázi</h3>
         <div className="flex space-x-2 items-center">
           <Input
             type="file"

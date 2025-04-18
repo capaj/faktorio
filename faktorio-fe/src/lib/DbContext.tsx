@@ -5,7 +5,7 @@ import React, {
   useEffect,
   ReactNode
 } from 'react'
-import { initSqlDb, saveDatabaseToOPFS } from './initSql'
+import { getOpfsRoot, initSqlDb, saveDatabaseToOPFS } from './initSql'
 import type { Database } from 'sql.js'
 import { createId } from '@paralleldrive/cuid2'
 import { drizzle } from 'drizzle-orm/sql-js'
@@ -116,7 +116,9 @@ export function DbProvider({ children }: DbProviderProps) {
   }
 
   // Clear active database
-  const clearActiveDatabase = () => {
+  const clearActiveDatabase = async () => {
+    if (!activeDbName) return
+
     setActiveDb(null)
     setDrizzleDb(null)
     setActiveDbName(null)
