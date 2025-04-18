@@ -3,11 +3,12 @@ import { SheetTrigger, SheetContent, Sheet } from '@/components/ui/sheet'
 import { MountainIcon } from '../components/MountainIcon'
 import { ButtonLink } from '../components/ui/link'
 import { Button } from '../components/ui/button'
-import { LucideMenu, LogOut } from 'lucide-react'
+import { LucideMenu, LogOut, Database } from 'lucide-react'
 import { User } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { useState } from 'react'
 import { useLocation } from 'wouter'
+import { useDb } from '../lib/DbContext'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,8 +18,12 @@ import {
 
 export const Header = () => {
   const { isSignedIn, user, logout } = useAuth()
+  const { activeDbName } = useDb()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [location, navigate] = useLocation()
+
+  // Check if this is a local user (from auth token in localStorage)
+  const isLocalUser = localStorage.getItem('auth_token')?.startsWith('local_')
 
   return (
     <header className="px-4 lg:px-6 h-14 flex items-center">
@@ -33,7 +38,11 @@ export const Header = () => {
             <div className="hidden sm:flex lg:flex justify-center items-center">
               <ButtonLink href="/contacts">Kontakty</ButtonLink>
               <ButtonLink href="/invoices">Faktury</ButtonLink>
-              <ButtonLink href="/received-invoices">Přijaté faktury</ButtonLink>
+              {!isLocalUser && (
+                <ButtonLink href="/received-invoices">
+                  Přijaté faktury
+                </ButtonLink>
+              )}
               <ButtonLink href="/new-invoice">Vystavit fakturu</ButtonLink>
               <ButtonLink href="/my-details">Moje údaje</ButtonLink>
 
@@ -54,17 +63,40 @@ export const Header = () => {
                   )}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => navigate('/manage-login-details')}
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Přihlašovací údaje</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer" onClick={logout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Odhlásit se</span>
-                  </DropdownMenuItem>
+                  {isLocalUser && activeDbName ? (
+                    <>
+                      <DropdownMenuItem className="cursor-default">
+                        <Database className="mr-2 h-4 w-4" />
+                        <span className="font-mono text-sm">
+                          {activeDbName}
+                        </span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => navigate('/local-dbs')}
+                      >
+                        <Database className="mr-2 h-4 w-4" />
+                        <span>Správa lokálních databází</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => navigate('/manage-login-details')}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Přihlašovací údaje</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={logout}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Odhlásit se</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -99,12 +131,14 @@ export const Header = () => {
                   Faktury
                 </ButtonLink>
 
-                <ButtonLink
-                  className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-                  href="/received-invoices"
-                >
-                  Přijaté faktury
-                </ButtonLink>
+                {!isLocalUser && (
+                  <ButtonLink
+                    className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                    href="/received-invoices"
+                  >
+                    Přijaté faktury
+                  </ButtonLink>
+                )}
 
                 <ButtonLink
                   className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
@@ -119,6 +153,20 @@ export const Header = () => {
                 >
                   Moje údaje
                 </ButtonLink>
+
+                <ButtonLink
+                  className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                  href="/local-dbs"
+                >
+                  Lokální databáze
+                </ButtonLink>
+
+                {isLocalUser && activeDbName && (
+                  <div className="inline-flex h-9 items-center justify-start rounded-md bg-blue-50 px-4 text-sm font-medium text-blue-800">
+                    <Database className="mr-2 h-4 w-4" />
+                    <span className="font-mono">{activeDbName}</span>
+                  </div>
+                )}
 
                 <Button
                   className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
@@ -145,6 +193,13 @@ export const Header = () => {
               className="text-sm font-medium"
             >
               Registrovat
+            </ButtonLink>
+            <ButtonLink
+              href="/local-dbs"
+              variant="link"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
+              Lokální databáze
             </ButtonLink>
           </>
         )}

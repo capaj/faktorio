@@ -15,9 +15,9 @@ export type TrpcContext = {
   req: Request
   generateToken: (user: typeof userT.$inferSelect) => Promise<string>
 }
-
+const isBrowser = typeof window !== 'undefined'
 export const trpcContext = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
-  allowOutsideOfServer: true,
-  isServer: false
+  allowOutsideOfServer: isBrowser,
+  isServer: !isBrowser
 })

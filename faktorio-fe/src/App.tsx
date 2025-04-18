@@ -14,21 +14,18 @@ import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { RequestPasswordResetPage } from './pages/RequestPasswordResetPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
-import { AuthProvider, useAuth, useUser } from './lib/AuthContext'
+import { useUser } from './lib/AuthContext'
+import { AuthProvider, useAuth } from './lib/AuthContext'
+import { DbProvider, useDb } from './lib/DbContext'
+import * as schema from '../../faktorio-api/src/schema'
 
 import { ErrorBoundary } from './ErrorBoundary'
-import { PocPage } from './pages/dev/poc'
 import { appRouter } from '../../faktorio-api/src/trpcRouter'
-import { RUN_LOCAL_FIRST } from './RUN_LOCAL_FIRST'
 import { trpcContext } from '../../faktorio-api/src/trpcContext'
-import { initSqlDb } from './lib/initSql'
 import { Header } from './components/Header'
 import { SignedInRoutes } from './SignedInRoutes'
-import { trpcClient } from './lib/trpcClient'
-import SuperJSON from 'superjson'
-import { QueryClient } from '@tanstack/react-query'
-import { httpBatchLink } from '@trpc/client'
-import { trpcLinks } from './lib/errorToastLink'
+import { LocalDbManagementPage } from './pages'
+import { LibSQLDatabase } from 'drizzle-orm/libsql'
 const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
 interface BlogPost {
@@ -45,7 +42,7 @@ function AppContent() {
   const { isLoaded } = useUser()
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
   const [location] = useLocation()
-  const { token } = useAuth()
+  const { token, isSignedIn } = useAuth()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -74,9 +71,10 @@ function AppContent() {
                 <Switch>
                   <Route
                     path="/"
-                    component={token ? InvoiceList : LandingPage}
+                    component={isSignedIn ? InvoiceList : LandingPage}
                   />
                   <Route path="/login" component={LoginPage} />
+                  <Route path="/local-dbs" component={LocalDbManagementPage} />
                   <Route path="/signup" component={SignupPage} />
                   <Route
                     path="/request-password-reset"
@@ -95,7 +93,7 @@ function AppContent() {
                     {() => <TermsOfServicePage />}
                   </Route>
 
-                  {token && <SignedInRoutes />}
+                  {isSignedIn && <SignedInRoutes />}
 
                   {/* Default route in a switch */}
                   <Route>404: Bohužel neexistuje!</Route>
@@ -111,11 +109,38 @@ function AppContent() {
   )
 }
 
-function App() {
+function AppWithLocalDb() {
+  const { drizzleDb, localUser, isLoading } = useDb()
+
+  // Only set up local configuration when we have both a database and user
+  const localRunConfig =
+    drizzleDb && localUser
+      ? {
+          user: {
+            id: localUser.id,
+            email: localUser.email,
+            fullName: localUser.fullName
+          },
+          db: drizzleDb
+        }
+      : undefined
+
+  if (isLoading) {
+    return <SpinnerContainer loading={true} />
+  }
   return (
-    <AuthProvider>
+    // @ts-expect-error
+    <AuthProvider localRun={localRunConfig} key={localRunConfig?.user?.id}>
       <AppContent />
     </AuthProvider>
+  )
+}
+
+function App() {
+  return (
+    <DbProvider>
+      <AppWithLocalDb />
+    </DbProvider>
   )
 }
 

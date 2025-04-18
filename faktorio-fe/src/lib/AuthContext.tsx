@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 import { trpcClient } from './trpcClient'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { httpBatchLink, TRPCLink } from '@trpc/client'
+import { httpBatchLink, Operation, TRPCLink } from '@trpc/client'
 import { SuperJSON } from 'superjson'
 import { trpcLinks } from './errorToastLink'
 import { userT } from '../../../faktorio-api/src/schema'
@@ -22,6 +22,8 @@ import initSqlJs, { Database, SqlValue } from 'sql.js'
 import { drizzle } from 'drizzle-orm/sql-js'
 import { initSqlDb } from './initSql'
 import * as schema from '../../../faktorio-api/src/schema'
+import { LibSQLDatabase } from 'drizzle-orm/libsql'
+import { useDb } from './DbContext'
 const VITE_API_URL = import.meta.env.VITE_API_URL
 
 if (!VITE_API_URL) {
@@ -156,6 +158,7 @@ const createCaller = trpcContext.createCallerFactory(appRouter)
 
 interface LocalCallerLinkOptions<TRouter extends AnyRouter> {
   router: TRouter
+  onMutation: (mutation: Operation) => void
   createContext: () =>
     | Promise<inferRouterContext<TRouter>>
     | inferRouterContext<TRouter>
@@ -168,6 +171,7 @@ export function createLocalCallerLink<TRouter extends AnyRouter>(
   opts: LocalCallerLinkOptions<TRouter>
 ): TRPCLink<TRouter> {
   return () => {
+    // @ts-expect-error
     const caller = createCaller(opts.createContext())
     // This function is called for each operation
     return ({ op }) => {
@@ -206,7 +210,11 @@ export function createLocalCallerLink<TRouter extends AnyRouter>(
                 data
               }
             }
-            console.log(response)
+
+            if (type === 'mutation') {
+              opts.onMutation(op)
+            }
+            console.debug(response)
             observer.next(response)
             observer.complete()
           })
@@ -228,6 +236,7 @@ export function createLocalCallerLink<TRouter extends AnyRouter>(
                 }
               }
             }
+            // @ts-expect-error
             observer.next(response)
             observer.complete()
           })
@@ -239,27 +248,39 @@ export function createLocalCallerLink<TRouter extends AnyRouter>(
   }
 }
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children
-}) => {
+export const AuthProvider: React.FC<{
+  children: React.ReactNode
+  localRun?: {
+    user: {
+      id: string
+      email: string
+      fullName: string
+    }
+    db: LibSQLDatabase<typeof schema>
+  }
+}> = ({ children, localRun }) => {
   const [queryClient] = useState(() => new QueryClient())
+  const { saveDatabase } = useDb()
 
   const [trpc] = useState<any>(() => {
-    if (RUN_LOCAL_FIRST) {
+    if (localRun) {
       return trpcClient.createClient({
         links: [
           createLocalCallerLink({
+            onMutation: (mutation) => {
+              saveDatabase()
+            },
             router: appRouter,
+            // @ts-expect-error
             createContext: () => {
               return {
-                sessionId: '123',
-                userId: '123',
-                user: {
-                  id: '123',
-                  email: 'test@test.com',
-                  fullName: 'Test User'
-                },
-                db: drizzle(window.sqldb, { schema })
+                env: {},
+                req: {},
+                generateToken: () => Promise.resolve(''),
+                sessionId: 'local_session',
+                userId: localRun.user.id,
+                user: localRun.user,
+                db: localRun.db
               }
             }
           })

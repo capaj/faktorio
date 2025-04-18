@@ -9,8 +9,8 @@ import { FkButton } from '@/components/FkButton'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { omit } from 'lodash-es'
-import diff from "microdiff";
-
+import diff from 'microdiff'
+import { toast } from 'sonner'
 export const upsertInvoicingDetailsSchema =
   userInvoicingDetailsInsertSchema.omit({
     created_at: true,
@@ -25,7 +25,7 @@ export const MyInvoicingDetails = () => {
 
   const [values, setValues] = useState(data)
   useEffect(() => {
-    ; (async () => {
+    ;(async () => {
       if (values?.registration_no?.length === 8 && !values?.name) {
         // seems like a user is trying to add new contact, let's fetch data from ares
         const aresResponse = await fetch(
@@ -56,11 +56,14 @@ export const MyInvoicingDetails = () => {
   }, [values?.registration_no])
   const [isDirty, setIsDirty] = useState(false)
   useEffect(() => {
-
     if (!values) {
       return
     }
-    const dataForDirtyCheck = omit(data, ['user_id', 'created_at', 'updated_at'])
+    const dataForDirtyCheck = omit(data, [
+      'user_id',
+      'created_at',
+      'updated_at'
+    ])
     const valDiff = diff(dataForDirtyCheck, values)
 
     if (valDiff.length > 0) {
@@ -117,6 +120,8 @@ export const MyInvoicingDetails = () => {
           }}
           onSubmit={async (values) => {
             await upsert.mutateAsync(values)
+            toast.success('Údaje byly úspěšně uloženy')
+            setIsDirty(false)
           }}
         >
           {/* <div className="flex items-center space-x-2">

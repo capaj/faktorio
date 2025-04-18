@@ -10,8 +10,11 @@ import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
 import { ManageLoginDetails } from './pages/ManageLoginDetails'
 import { ReceivedInvoicesPage } from './pages/ReceivedInvoicesPage'
 import { SpinnerContainer } from './components/SpinnerContainer'
+import { useAuth } from './lib/AuthContext'
 
 export const SignedInRoutes = () => {
+  const { token } = useAuth()
+  const isLocalUser = token?.startsWith('local_')
   return (
     <>
       <Suspense fallback={<SpinnerContainer loading={true} />}>
@@ -19,10 +22,12 @@ export const SignedInRoutes = () => {
         <Route path="/contacts" component={ContactList}></Route>
         <Route path="/contacts/:contactId" component={ContactList}></Route>
         <Route path="/new-invoice" component={NewInvoice}></Route>
-        <Route
-          path="/received-invoices"
-          component={ReceivedInvoicesPage}
-        ></Route>
+        {!isLocalUser && (
+          <Route
+            path="/received-invoices"
+            component={ReceivedInvoicesPage}
+          ></Route>
+        )}
         <Route path="/my-details" component={MyInvoicingDetails}></Route>
         <Route
           path="/manage-login-details"
