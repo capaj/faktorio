@@ -306,12 +306,12 @@ export const receivedInvoicesRouter = trpcContext.router({
         
         Return ONLY the JSON object, nothing else. If you cannot extract some fields, leave them as null.
         For dates, use the format YYYY-MM-DD. If you can't determine the exact date, make your best guess.
+        Most invoices are in CZK currency, but on the invoice it is often represented as Kč. The format we want is CZK
         `
 
         // Get the model
 
-        // Create parts for the content
-        // TODO use https://googleapis.github.io/js-genai/main/classes/files.Files.html
+        // TODO use https://googleapis.github.io/js-genai/main/classes/files.Files.html to allow uploading files bigger than 7MB
 
         // Generate content with the vision model
         const result = await ctx.googleGenAI.models.generateContent({
@@ -330,8 +330,7 @@ export const receivedInvoicesRouter = trpcContext.router({
             }
           ],
           config: {
-            systemInstruction: `
-            You are a data extraction assistant. Your main objective is to extract invoice data from images of czech invoices.
+            systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from images of czech invoices.
             `,
             // @ts-expect-error types are not correct
             responseSchema: schema as Schema,
