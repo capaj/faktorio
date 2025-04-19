@@ -2,7 +2,6 @@
 
 ## TODO
 
-- allow to add expense invoices by drag and drop PDF file(parse PDF with google gemini)
 - add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
 - add feature to import expense invoices by OCRing them with google gemini 2.0
 - DPH priznani at the end of the year
@@ -25,6 +24,7 @@
 
 ## Done
 
+- allow to add expense invoices by drag and drop PDF file(parse PDF with google gemini)
 - be able to export as CSV/excel
 - enable editing of invoices
 - fix TSC

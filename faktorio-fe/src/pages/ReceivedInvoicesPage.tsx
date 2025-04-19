@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, DragEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -41,6 +41,7 @@ import {
 } from 'lucide-react'
 import { SpinnerContainer } from '@/components/SpinnerContainer'
 import { trpcClient } from '@/lib/trpcClient'
+import { cn } from '@/lib/utils'
 
 // Define validation schema for the form
 const receivedInvoiceFormSchema = z.object({
@@ -79,6 +80,7 @@ export function ReceivedInvoicesPage() {
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(
     null
   )
+  const [isDraggingOver, setIsDraggingOver] = useState(false)
 
   // tRPC hooks
   const utils = trpcClient.useUtils()
@@ -96,8 +98,8 @@ export function ReceivedInvoicesPage() {
       toast.error(`Chyba při ukládání faktury: ${error.message}`)
     }
   })
-  const processImageMutation = trpcClient.receivedInvoices.orcImage.useMutation(
-    {
+  const processImageMutation =
+    trpcClient.receivedInvoices.orcInvoice.useMutation({
       onSuccess: (data, variables) => {
         setIsProcessingImage(false)
         setProcessedImageUrl(variables.imageData)
@@ -162,8 +164,7 @@ export function ReceivedInvoicesPage() {
         setIsProcessingImage(false)
         toast.error(`Chyba při zpracování obrázku: ${error.message}`)
       }
-    }
-  )
+    })
 
   const deleteMutation = trpcClient.receivedInvoices.delete.useMutation({
     onSuccess: () => {
@@ -216,29 +217,86 @@ export function ReceivedInvoicesPage() {
     }
   }
 
-  // File upload handler
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0]
+  // File processing logic (extracted for reuse)
+  const processFile = (file: File) => {
     if (file) {
+      // Check file size (max 7MB)
+      const maxSize = 7 * 1024 * 1024 // 7MB in bytes
+      if (file.size > maxSize) {
+        toast.error(
+          'Soubor je příliš velký. Maximální povolená velikost je 7 MB.'
+        )
+        return
+      }
+
       setIsUploading(true)
-      setProcessedImageUrl(null)
+      setProcessedImageUrl(null) // Clear previous preview
 
       try {
         // Read the file as a base64 string
         const reader = new FileReader()
         reader.onloadend = async () => {
-          const base64String = reader.result as string
+          const fullDataUrl = reader.result as string
+          // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
+          const base64String = fullDataUrl.split(',')[1]
+
+          if (!base64String) {
+            toast.error('Chyba při čtení souboru.')
+            setIsProcessingImage(false)
+            setIsUploading(false)
+            return
+          }
+
           setIsProcessingImage(true)
-          processImageMutation.mutate({ imageData: base64String })
+          // Update preview immediately for images, handle PDF differently if needed for preview
+          if (file.type.startsWith('image/')) {
+            setProcessedImageUrl(fullDataUrl) // Keep full URL for preview
+          } else {
+            // For PDF, we might not show a preview, or show a generic icon
+            setProcessedImageUrl(null) // Or a placeholder PDF icon URL
+          }
+          processImageMutation.mutate({
+            mimeType: file.type,
+            imageData: base64String
+          })
         }
         reader.readAsDataURL(file)
       } catch (error) {
         toast.error(`Chyba při načítání souboru: ${(error as Error).message}`)
       } finally {
-        setIsUploading(false)
+        setIsUploading(false) // Keep this potentially? Or handle in mutation?
       }
+    }
+  }
+
+  // File input change handler
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      processFile(file)
+    }
+    // Reset input value to allow uploading the same file again
+    event.target.value = ''
+  }
+
+  // Drag and Drop Handlers
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault() // Necessary to allow dropping
+    setIsDraggingOver(true)
+  }
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsDraggingOver(false)
+  }
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsDraggingOver(false)
+    const files = event.dataTransfer.files
+    if (files.length > 0) {
+      const file = files[0]
+      processFile(file)
     }
   }
 
@@ -302,9 +360,34 @@ export function ReceivedInvoicesPage() {
             <CardTitle>Nová přijatá faktura</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Upload Section */}
-            <div className="mb-8 flex flex-col items-center p-8 border-2 border-dashed rounded-lg">
-              {processedImageUrl ? (
+            {/* Upload Section - Added Drag and Drop Handlers */}
+            <div
+              className={cn(
+                'mb-8 flex flex-col items-center p-8 border-2 border-dashed rounded-lg transition-colors',
+                isDraggingOver ? 'border-primary bg-primary/10' : '',
+                isProcessingImage
+                  ? 'cursor-not-allowed opacity-70'
+                  : 'cursor-pointer'
+              )}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() =>
+                !isProcessingImage &&
+                document.getElementById('invoice-file-input')?.click()
+              }
+            >
+              {isProcessingImage ? (
+                <div className="flex flex-col items-center text-center">
+                  <Loader2 className="h-12 w-12 text-primary mb-4 animate-spin" />
+                  <p className="text-lg font-medium mb-2">
+                    Zpracovávám fakturu...
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Prosím počkejte, systém analyzuje data.
+                  </p>
+                </div>
+              ) : processedImageUrl ? (
                 <div className="flex flex-col items-center">
                   <img
                     src={processedImageUrl}
@@ -313,62 +396,34 @@ export function ReceivedInvoicesPage() {
                   />
                   <Button
                     variant="outline"
-                    onClick={() =>
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation() // Prevent triggering the div's onClick
                       document.getElementById('invoice-file-input')?.click()
-                    }
+                    }}
                     disabled={isProcessingImage}
+                    className="mt-4" // Added margin
                   >
-                    {isProcessingImage ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Zpracovávám...
-                      </>
-                    ) : (
-                      <>
-                        <UploadIcon className="mr-2 h-4 w-4" />
-                        Nahradit obrázek
-                      </>
-                    )}
+                    <UploadIcon className="mr-2 h-4 w-4" />
+                    Nahradit obrázek
                   </Button>
                 </div>
               ) : (
                 <>
                   <ReceiptIcon className="h-12 w-12 text-gray-400 mb-4" />
                   <p className="text-lg font-medium mb-4">
-                    Nahrajte obrázek přijaté faktury (Volitelné)
+                    Přetáhněte sem soubor nebo klikněte pro výběr
                   </p>
                   <p className="text-sm text-muted-foreground mb-6 text-center max-w-md">
-                    Systém se pokusí automaticky rozpoznat údaje z faktury
-                    pomocí OCR. Pokud nahrání přeskočíte, můžete údaje zadat
-                    ručně níže.
+                    Podporované formáty: JPG, PNG, PDF. Systém se pokusí
+                    automaticky rozpoznat údaje z faktury pomocí OCR.
                   </p>
-                  <div className="flex gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        document.getElementById('invoice-file-input')?.click()
-                      }
-                      disabled={isProcessingImage}
-                    >
-                      {isProcessingImage ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Zpracovávám...
-                        </>
-                      ) : (
-                        <>
-                          <UploadIcon className="mr-2 h-4 w-4" />
-                          Vybrat soubor
-                        </>
-                      )}
-                    </Button>
-                  </div>
                 </>
               )}
               <input
                 id="invoice-file-input"
                 type="file"
-                accept="image/jpeg,image/png,image/jpg"
+                accept="image/jpeg,image/png,image/jpg,application/pdf"
                 className="hidden"
                 onChange={handleFileChange}
                 disabled={isProcessingImage}

@@ -18,7 +18,10 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 
 - Node.js 22+
 - pnpm
-- turso DB on your turso cloud account
+- Optionally
+  - turso DB on your turso cloud account
+  - google client ID for google login
+  - mailjet API key for sending emails
 
 You need to have turso DB setup. You only need google client ID for google login.
 Mailjet you only need if you want to send emails.

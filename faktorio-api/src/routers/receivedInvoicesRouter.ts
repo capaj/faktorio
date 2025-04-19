@@ -276,10 +276,11 @@ export const receivedInvoicesRouter = trpcContext.router({
       return { success: true }
     }),
 
-  // OCR Image processing with Gemini API
-  orcImage: protectedProc
+  // OCR an invoice with Gemini API
+  orcInvoice: protectedProc
     .input(
       z.object({
+        mimeType: z.string(),
         imageData: z.string() // Base64 encoded image data
       })
     )
@@ -311,19 +312,21 @@ export const receivedInvoicesRouter = trpcContext.router({
 
         // Create parts for the content
         // TODO use https://googleapis.github.io/js-genai/main/classes/files.Files.html
-        const imagePart = {
-          inlineData: {
-            mimeType: 'image/jpeg',
-            data: base64Data
-          }
-        }
 
         // Generate content with the vision model
         const result = await ctx.googleGenAI.models.generateContent({
           model: 'gemini-2.5-flash-preview-04-17',
           contents: [
             {
-              parts: [{ text: prompt }, imagePart]
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: input.mimeType,
+                    data: base64Data
+                  }
+                }
+              ]
             }
           ],
           config: {
