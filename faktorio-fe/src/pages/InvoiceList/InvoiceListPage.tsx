@@ -41,7 +41,7 @@ import { MarkAsPaidDialog } from './MarkAsPaidDialog'
 
 export function useFilteredInvoicesQuery(
   search: string = '',
-  year: number | null // Add year parameter
+  year?: number | null // Add year parameter
 ) {
   return trpcClient.invoices.listInvoices.useQuery({
     filter: search,
@@ -260,7 +260,7 @@ export function InvoiceListPage() {
                 CZK
               </TableCell>
               <TableCell>
-                <InvoicesDownloadButton />
+                <InvoicesDownloadButton year={selectedYear} search={search} />
               </TableCell>
             </TableRow>
           )}

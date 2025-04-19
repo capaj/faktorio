@@ -13,8 +13,14 @@ import {
 import { useFilteredInvoicesQuery } from './InvoiceListPage'
 import Papa from 'papaparse'
 
-export function InvoicesDownloadButton() {
-  const q = useFilteredInvoicesQuery()
+export function InvoicesDownloadButton({
+  year,
+  search
+}: {
+  year?: number | null
+  search?: string
+}) {
+  const q = useFilteredInvoicesQuery(search, year)
   const invoices = q.data ?? []
   return (
     <div className="flex items-center space-x-2">

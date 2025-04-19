@@ -19,7 +19,7 @@ export type TrpcContext = {
   googleGenAIFileManager: GoogleAIFileManager
   googleGenAI: GoogleGenAI
 }
-// @ts-expect-error
+// @ts-ignore
 const isBrowser = typeof window !== 'undefined'
 
 export const trpcContext = initTRPC.context<TrpcContext>().create({
