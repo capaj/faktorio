@@ -129,7 +129,7 @@ export function ReceivedInvoicesPage() {
     }
   })
 
-  const onSubmit = (values: ReceivedInvoiceFormValues) => {
+  const onSubmit = async (values: ReceivedInvoiceFormValues) => {
     const formattedValues = {
       ...values,
       issue_date: values.issue_date.toISOString().split('T')[0],
@@ -142,7 +142,9 @@ export function ReceivedInvoicesPage() {
         : undefined
     }
 
-    createMutation.mutate(formattedValues as any)
+    await createMutation.mutateAsync(formattedValues)
+    toast.success('Faktura byla úspěšně přidána')
+    form.reset()
   }
 
   // File upload handler
@@ -437,7 +439,9 @@ export function ReceivedInvoicesPage() {
                           name="taxable_supply_date"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
-                              <FormLabel>DUZP</FormLabel>
+                              <FormLabel>
+                                Datum uskutečnění zdanitelného plnění
+                              </FormLabel>
                               <DatePicker
                                 date={field.value}
                                 setDate={field.onChange}
