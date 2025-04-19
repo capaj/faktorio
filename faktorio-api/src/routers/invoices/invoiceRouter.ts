@@ -8,17 +8,16 @@ import {
 import { trpcContext } from '../../trpcContext'
 import { SQL, and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm'
 import { protectedProc } from '../../isAuthorizedMiddleware'
-import { getInvoiceCreateSchema } from '../../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
+import {
+  dateSchema,
+  getInvoiceCreateSchema
+} from '../../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
 import { djs } from '../../../../src/djs'
 import { invoiceItemFormSchema } from '../../zodDbSchemas'
 import { getInvoiceSums } from './getInvoiceSums'
 import { getCNBExchangeRate } from './getCNBExchangeRate'
 
 const invoiceSchema = getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001')
-const dateSchema = z
-  .string()
-  .nullish()
-  .refine((v) => !v || djs(v).isValid(), 'Invalid date')
 
 export const invoiceRouter = trpcContext.router({
   create: protectedProc
@@ -99,9 +98,8 @@ export const invoiceRouter = trpcContext.router({
             id: invoicesTb.id
           })
           .execute()
-        console.log('invoice:', invoice)
 
-        const items = await tx
+        await tx
           .insert(invoiceItemsTb)
           .values(
             input.items.map((item) => ({
@@ -305,7 +303,13 @@ export const invoiceRouter = trpcContext.router({
       z.object({
         id: z.string(),
         // Allow string date (YYYY-MM-DD) or null to mark as unpaid
-        paidOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format, expected YYYY-MM-DD').nullable()
+        paidOn: z
+          .string()
+          .regex(
+            /^\d{4}-\d{2}-\d{2}$/,
+            'Invalid date format, expected YYYY-MM-DD'
+          )
+          .nullable()
           .describe(
             'Payment date in YYYY-MM-DD format, or null to mark as unpaid'
           )
@@ -327,7 +331,10 @@ export const invoiceRouter = trpcContext.router({
       }
 
       // If input.paidOn is explicitly null, use null. Otherwise, use the provided date or default to today.
-      const paidOnValue = input.paidOn === null ? null : (input.paidOn || djs().format('YYYY-MM-DD'))
+      const paidOnValue =
+        input.paidOn === null
+          ? null
+          : input.paidOn || djs().format('YYYY-MM-DD')
 
       const result = await ctx.db
         .update(invoicesTb)

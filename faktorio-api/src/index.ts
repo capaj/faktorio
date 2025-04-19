@@ -9,6 +9,8 @@ import * as schema from './schema'
 import colorize from '@pinojs/json-colorizer'
 import { TrpcContext } from './trpcContext'
 import { extractUserFromAuthHeader, generateToken } from './jwtUtils'
+import { GoogleAIFileManager } from '@google/generative-ai/server'
+import { GoogleGenAI } from '@google/genai'
 
 // Add ExecutionContext type from Cloudflare Workers
 type ExecutionContext = {
@@ -20,6 +22,7 @@ export interface Env {
   TURSO_DATABASE_URL: string
   TURSO_AUTH_TOKEN: string
   JWT_SECRET: string
+  GEMINI_API_KEY: string
 }
 
 const corsHeaders = {
@@ -67,15 +70,26 @@ export default {
       authToken: env.TURSO_AUTH_TOKEN
     })
 
+    const apiKey = env.GEMINI_API_KEY
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is not configured')
+    }
+
+    // Initialize the Gemini client
+    const genAI = new GoogleGenAI({ apiKey })
+
     const createTrpcContext = async (): Promise<TrpcContext> => {
       const authHeader = request.headers.get('authorization')
       const user = await extractUserFromAuthHeader(authHeader, env.JWT_SECRET)
+      const fileManager = new GoogleAIFileManager(env.GEMINI_API_KEY)
 
       return {
         db: drizzle(turso, { schema }),
         env,
         user,
         req: request,
+        googleGenAIFileManager: fileManager,
+        googleGenAI: genAI,
         generateToken: (user) => generateToken(user, env.JWT_SECRET)
       }
     }
@@ -100,11 +114,27 @@ export default {
         }
         console.error(errCtx.error)
         console.error(`${type} ${path} failed for:`)
-        console.error(
-          colorize(JSON.stringify({ errCtx: input, userId: ctx.user?.id }), {
-            pretty: true
-          })
-        )
+
+        const inputLength = JSON.stringify(input).length
+        if (inputLength < 1000) {
+          console.error(
+            colorize(JSON.stringify({ errCtx: input, userId: ctx.user?.id }), {
+              pretty: true
+            })
+          )
+        } else {
+          console.error(
+            colorize(
+              JSON.stringify({
+                errCtx: 'Input too long',
+                userId: ctx.user?.id
+              }),
+              {
+                pretty: true
+              }
+            )
+          )
+        }
 
         return errCtx
       },

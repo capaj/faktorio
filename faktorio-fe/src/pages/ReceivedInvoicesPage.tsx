@@ -44,7 +44,7 @@ const receivedInvoiceFormSchema = z.object({
   receipt_date: z.date().optional().nullable(),
   total_without_vat: z.number().optional().nullable(),
   total_with_vat: z.number().min(0.01, 'Celková částka musí být větší než 0'),
-  currency: z.string().default('CZK')
+  currency: z.string().max(3).min(3).default('CZK')
 })
 
 type ReceivedInvoiceFormValues = z.infer<typeof receivedInvoiceFormSchema>
@@ -208,8 +208,8 @@ export function ReceivedInvoicesPage() {
               }
             >
               <TabsList className="mb-4">
-                <TabsTrigger value="manual">Ruční zadání</TabsTrigger>
                 <TabsTrigger value="upload">Nahrát obrázek (OCR)</TabsTrigger>
+                <TabsTrigger value="manual">Ruční zadání</TabsTrigger>
               </TabsList>
 
               <TabsContent value="upload">

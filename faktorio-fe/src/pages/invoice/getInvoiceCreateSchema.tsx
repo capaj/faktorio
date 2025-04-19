@@ -3,6 +3,13 @@ import { z } from 'zod'
 import cc from 'currency-codes'
 import { djs } from '../../../../src/djs'
 
+export const dateSchema = z
+  .string()
+  .nullish()
+  .refine((v) => !v || djs(v).isValid(), 'Invalid date')
+
+export const stringDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+
 export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
   return invoiceInsertSchema
     .pick({
@@ -30,12 +37,9 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
       payment_method: z
         .enum(['bank', 'cash', 'card', 'cod', 'crypto', 'other'])
         .default('bank'),
-      taxable_fulfillment_due: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/)
-        .default(
-          djs().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')
-        ),
+      taxable_fulfillment_due: stringDateSchema.default(
+        djs().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')
+      ),
       exchange_rate: z.number().nullable().default(1),
       bank_account: z.string().optional().default(''),
       iban: z.string().optional().default(''),

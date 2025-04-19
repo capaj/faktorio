@@ -38,12 +38,11 @@ export const Header = () => {
             <div className="hidden sm:flex lg:flex justify-center items-center">
               <ButtonLink href="/contacts">Kontakty</ButtonLink>
               <ButtonLink href="/invoices">Faktury</ButtonLink>
-              {false &&
-                !isLocalUser && ( // TODO unhide when it is implemented
-                  <ButtonLink href="/received-invoices">
-                    Přijaté faktury
-                  </ButtonLink>
-                )}
+              {!isLocalUser && ( // TODO unhide when it is implemented
+                <ButtonLink href="/received-invoices">
+                  Přijaté faktury
+                </ButtonLink>
+              )}
               <ButtonLink href="/new-invoice">Vystavit fakturu</ButtonLink>
               <ButtonLink href="/my-details">Moje údaje</ButtonLink>
 
@@ -132,7 +131,7 @@ export const Header = () => {
                   Faktury
                 </ButtonLink>
 
-                {false && !isLocalUser && (
+                {!isLocalUser && (
                   <ButtonLink
                     className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                     href="/received-invoices"

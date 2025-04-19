@@ -76,29 +76,29 @@
     },
     "issue_date": {
       "type": "string",
-      "format": "date",
+      "format": "date-time",
       "description": "Date when invoice was issued (YYYY-MM-DD)"
     },
     "taxable_supply_date": {
       "type": "string",
-      "format": "date",
+      "format": "date-time",
       "nullable": true,
       "description": "DUZP - Datum uskutečnění zdanitelného plnění (YYYY-MM-DD)"
     },
     "due_date": {
       "type": "string",
-      "format": "date",
+      "format": "date-time",
       "description": "Payment due date (YYYY-MM-DD)"
     },
     "receipt_date": {
       "type": "string",
-      "format": "date",
+      "format": "date-time",
       "nullable": true,
       "description": "Date when invoice was received (YYYY-MM-DD)"
     },
     "payment_date": {
       "type": "string",
-      "format": "date",
+      "format": "date-time",
       "nullable": true,
       "description": "Date when invoice was paid (YYYY-MM-DD)"
     },
@@ -113,8 +113,9 @@
     },
     "currency": {
       "type": "string",
-      "default": "CZK",
-      "description": "Currency code (ISO)"
+      "maxLength": 3,
+      "minLength": 3,
+      "description": "Currency code (ISO 4217)"
     },
     "exchange_rate": {
       "type": "number",
@@ -228,8 +229,7 @@
     },
     "status": {
       "type": "string",
-      "enum": ["received", "verified", "disputed", "paid"],
-      "default": "received"
+      "enum": ["received", "verified", "disputed", "paid"]
     }
   }
 }

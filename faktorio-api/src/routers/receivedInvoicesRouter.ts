@@ -6,9 +6,9 @@ import { trpcContext } from '../trpcContext'
 import { eq, desc, and } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
-import fs from 'fs'
-import path from 'path'
-import { GoogleGenAI } from '@google/genai'
+import schema from '../json-schema/receivedInvoicesSchema.json'
+import { GoogleGenAI, Schema } from '@google/genai'
+import { stringDateSchema } from '../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
 
 // Define Zod schema based on Drizzle schema, making fields optional/required as needed for creation
 // We will refine this based on the frontend form later
@@ -41,10 +41,10 @@ const receivedInvoiceCreateSchema = createInsertSchema(receivedInvoicesTb, {
   // Make non-null fields explicitly required if not defaulted
   supplier_name: z.string().min(1),
   invoice_number: z.string().min(1),
-  issue_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD
-  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD
+  issue_date: stringDateSchema,
+  due_date: stringDateSchema,
   total_with_vat: z.number(),
-  currency: z.string().default('CZK')
+  currency: z.string().max(3).min(3).default('CZK')
 })
   .omit({
     // Fields to be excluded or handled differently
@@ -72,11 +72,11 @@ const ocrResponseSchema = z.object({
   internal_number: z.string().optional().nullable(),
   variable_symbol: z.string().optional().nullable(),
   expense_category: z.string().optional().nullable(),
-  issue_date: z.string().optional(),
-  taxable_supply_date: z.string().optional().nullable(),
-  due_date: z.string().optional(),
-  receipt_date: z.string().optional().nullable(),
-  payment_date: z.string().optional().nullable(),
+  issue_date: stringDateSchema,
+  taxable_supply_date: stringDateSchema.optional().nullable(),
+  due_date: stringDateSchema,
+  receipt_date: stringDateSchema.optional().nullable(),
+  payment_date: stringDateSchema.optional().nullable(),
   total_without_vat: z.number().optional().nullable(),
   total_with_vat: z.number().optional(),
   currency: z.string().optional(),
@@ -111,21 +111,6 @@ const ocrResponseSchema = z.object({
     .nullable(),
   status: z.enum(['received', 'verified', 'disputed', 'paid']).optional()
 })
-
-// Helper to load the receivedInvoicesSchema.json
-const loadReceivedInvoicesSchema = () => {
-  try {
-    const schemaPath = path.join(
-      __dirname,
-      '../json-schema/receivedInvoicesSchema.json'
-    )
-    const schemaContent = fs.readFileSync(schemaPath, 'utf-8')
-    return JSON.parse(schemaContent)
-  } catch (error) {
-    console.error('Error loading receivedInvoicesSchema.json:', error)
-    return null
-  }
-}
 
 export const receivedInvoicesRouter = trpcContext.router({
   list: protectedProc.query(async ({ ctx }) => {
@@ -284,8 +269,6 @@ export const receivedInvoicesRouter = trpcContext.router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // Get the schema for the Gemini model
-        const schema = loadReceivedInvoicesSchema()
         if (!schema) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
@@ -293,17 +276,6 @@ export const receivedInvoicesRouter = trpcContext.router({
           })
         }
 
-        // Check if GEMINI_API_KEY is set
-        const apiKey = process.env.GEMINI_API_KEY
-        if (!apiKey) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Gemini API key is not configured'
-          })
-        }
-
-        // Initialize the Gemini client
-        const genAI = new GoogleGenAI({ apiKey })
 
         // Clean the image data (remove data:image/jpeg;base64, prefix if present)
         const base64Data = input.imageData.replace(
@@ -332,17 +304,24 @@ export const receivedInvoicesRouter = trpcContext.router({
         }
 
         // Generate content with the vision model
-        const result = await genAI.models.generateContent({
-          model: 'gemini-2.0-flash',
+        const result = await ctx.googleGenAI.models.generateContent({
+          model: 'gemini-2.5-flash-preview-04-17',
           contents: [
             {
               parts: [{ text: prompt }, imagePart]
             }
           ],
           config: {
+            systemInstruction: `
+            You are a data extraction assistant. Your main objective is to extract invoice data from images of czech invoices.
+            `,
+            // @ts-expect-error types are not correct
+            responseSchema: schema as Schema,
             temperature: 0.2,
-            topP: 0.8,
-            topK: 40
+            thinkingConfig: {
+              includeThoughts: false,
+              thinkingBudget: 0
+            }
           }
         })
 
@@ -365,6 +344,7 @@ export const receivedInvoicesRouter = trpcContext.router({
           })
         }
 
+        console.log('extractedData for invoice:', extractedData)
         // Validate data against our schema
         try {
           const validatedData = ocrResponseSchema.parse(extractedData)
