@@ -276,7 +276,6 @@ export const receivedInvoicesRouter = trpcContext.router({
           })
         }
 
-
         // Clean the image data (remove data:image/jpeg;base64, prefix if present)
         const base64Data = input.imageData.replace(
           /^data:image\/\w+;base64,/,

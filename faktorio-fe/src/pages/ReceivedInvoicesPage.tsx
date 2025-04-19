@@ -10,7 +10,6 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DatePicker } from '@/components/ui/date-picker'
 
 import { toast } from 'sonner'
@@ -18,7 +17,13 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
-import { UploadIcon, PlusIcon, ReceiptIcon, Loader2 } from 'lucide-react'
+import {
+  UploadIcon,
+  PlusIcon,
+  ReceiptIcon,
+  Loader2,
+  Trash2Icon
+} from 'lucide-react'
 import { SpinnerContainer } from '@/components/SpinnerContainer'
 import { trpcClient } from '@/lib/trpcClient'
 
@@ -50,11 +55,13 @@ const receivedInvoiceFormSchema = z.object({
 type ReceivedInvoiceFormValues = z.infer<typeof receivedInvoiceFormSchema>
 
 export function ReceivedInvoicesPage() {
-  const [activeTab, setActiveTab] = useState<'list' | 'add'>('list')
-  const [entryMethod, setEntryMethod] = useState<'manual' | 'upload'>('manual')
+  const [showAddForm, setShowAddForm] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [ocrResult, setOcrResult] = useState<any>(null)
   const [isProcessingImage, setIsProcessingImage] = useState(false)
+  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(
+    null
+  )
 
   // tRPC hooks
   const utils = trpcClient.useUtils()
@@ -64,7 +71,7 @@ export function ReceivedInvoicesPage() {
       utils.receivedInvoices.list.invalidate()
       toast.success('Faktura byla úspěšně přidána')
       form.reset()
-      setActiveTab('list')
+      setShowAddForm(false)
     },
     onError: (error) => {
       toast.error(`Chyba při ukládání faktury: ${error.message}`)
@@ -72,8 +79,10 @@ export function ReceivedInvoicesPage() {
   })
   const processImageMutation = trpcClient.receivedInvoices.orcImage.useMutation(
     {
-      onSuccess: (data) => {
+      onSuccess: (data, variables) => {
         setIsProcessingImage(false)
+        setProcessedImageUrl(variables.imageData)
+
         if (data) {
           setOcrResult(data)
 
@@ -99,14 +108,15 @@ export function ReceivedInvoicesPage() {
           ) {
             form.reset(formData as ReceivedInvoiceFormValues)
             toast.success('Data byla úspěšně extrahována z faktury')
-            setEntryMethod('manual') // Switch to manual mode to show the form with pre-filled data
+            // Ensure the form is visible if data is extracted
+            if (!showAddForm) setShowAddForm(true)
           } else {
             toast.warning(
               'Z obrázku se nepodařilo rozpoznat všechna povinná data. Doplňte je prosím ručně.'
             )
-            // Set whatever data was extracted
+            // Set whatever data was extracted and show the form
             form.reset(formData as any)
-            setEntryMethod('manual')
+            if (!showAddForm) setShowAddForm(true)
           }
         }
       },
@@ -116,6 +126,13 @@ export function ReceivedInvoicesPage() {
       }
     }
   )
+
+  const deleteMutation = trpcClient.receivedInvoices.delete.useMutation({
+    onSuccess: () => {
+      utils.receivedInvoices.list.invalidate()
+      toast.success('Faktura byla úspěšně smazána')
+    }
+  })
 
   // Setup react-hook-form
   const form = useForm<ReceivedInvoiceFormValues>({
@@ -147,6 +164,20 @@ export function ReceivedInvoicesPage() {
     form.reset()
   }
 
+  const handleDeleteInvoice = async (id: string) => {
+    if (
+      window.confirm(
+        'Opravdu chcete smazat tuto fakturu? Tato akce je nevratná.'
+      )
+    ) {
+      try {
+        await deleteMutation.mutateAsync({ id })
+      } catch (error) {
+        // Error is handled by the onError callback in useMutation
+      }
+    }
+  }
+
   // File upload handler
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -154,6 +185,7 @@ export function ReceivedInvoicesPage() {
     const file = event.target.files?.[0]
     if (file) {
       setIsUploading(true)
+      setProcessedImageUrl(null)
 
       try {
         // Read the file as a base64 string
@@ -183,46 +215,62 @@ export function ReceivedInvoicesPage() {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Přijaté faktury</h1>
-        <Button
-          onClick={() => setActiveTab(activeTab === 'list' ? 'add' : 'list')}
-        >
-          {activeTab === 'list' ? (
+        <Button onClick={() => setShowAddForm(!showAddForm)}>
+          {showAddForm ? (
+            <>Zpět na seznam</>
+          ) : (
             <>
               <PlusIcon className="mr-2 h-4 w-4" /> Přidat fakturu
             </>
-          ) : (
-            <>Zpět na seznam</>
           )}
         </Button>
       </div>
 
-      {activeTab === 'add' ? (
+      {showAddForm ? (
         <Card>
           <CardHeader>
             <CardTitle>Nová přijatá faktura</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs
-              defaultValue="manual"
-              value={entryMethod}
-              onValueChange={(value) =>
-                setEntryMethod(value as 'manual' | 'upload')
-              }
-            >
-              <TabsList className="mb-4">
-                <TabsTrigger value="upload">Nahrát obrázek (OCR)</TabsTrigger>
-                <TabsTrigger value="manual">Ruční zadání</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="upload">
-                <div className="flex flex-col items-center p-8 border-2 border-dashed rounded-lg">
+            {/* Upload Section */}
+            <div className="mb-8 flex flex-col items-center p-8 border-2 border-dashed rounded-lg">
+              {processedImageUrl ? (
+                <div className="flex flex-col items-center">
+                  <img
+                    src={processedImageUrl}
+                    alt="Invoice Preview"
+                    className="max-h-48 w-auto object-contain mb-4 rounded"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      document.getElementById('invoice-file-input')?.click()
+                    }
+                    disabled={isProcessingImage}
+                  >
+                    {isProcessingImage ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Zpracovávám...
+                      </>
+                    ) : (
+                      <>
+                        <UploadIcon className="mr-2 h-4 w-4" />
+                        Nahradit obrázek
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                <>
                   <ReceiptIcon className="h-12 w-12 text-gray-400 mb-4" />
                   <p className="text-lg font-medium mb-4">
-                    Nahrajte obrázek přijaté faktury
+                    Nahrajte obrázek přijaté faktury (Volitelné)
                   </p>
                   <p className="text-sm text-muted-foreground mb-6 text-center max-w-md">
-                    Nahrávání podporuje obrázky (JPG, PNG) faktur. Systém se
-                    pokusí automaticky rozpoznat údaje z faktury pomocí OCR.
+                    Systém se pokusí automaticky rozpoznat údaje z faktury
+                    pomocí OCR. Pokud nahrání přeskočíte, můžete údaje zadat
+                    ručně níže.
                   </p>
                   <div className="flex gap-4">
                     <Button
@@ -244,295 +292,292 @@ export function ReceivedInvoicesPage() {
                         </>
                       )}
                     </Button>
-                    <input
-                      id="invoice-file-input"
-                      type="file"
-                      accept="image/jpeg,image/png,image/jpg"
-                      className="hidden"
-                      onChange={handleFileChange}
-                      disabled={isProcessingImage}
+                  </div>
+                </>
+              )}
+              <input
+                id="invoice-file-input"
+                type="file"
+                accept="image/jpeg,image/png,image/jpg"
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={isProcessingImage}
+              />
+            </div>
+
+            {/* Manual Form Section */}
+            <Form {...form}>
+              <form
+                // @ts-expect-error - TODO fix this
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Supplier Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">
+                      Informace o dodavateli
+                    </h3>
+
+                    <FormField
+                      name="supplier_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Název dodavatele *</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      name="supplier_registration_no"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>IČ</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      name="supplier_vat_no"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>DIČ</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      name="supplier_street"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ulice</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        name="supplier_city"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Město</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        name="supplier_zip"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>PSČ</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      name="supplier_country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Země</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Invoice Details */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Detaily faktury</h3>
+
+                    <FormField
+                      name="invoice_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Číslo faktury *</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      name="variable_symbol"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Variabilní symbol</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      name="expense_category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Kategorie výdaje</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      name="issue_date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Datum vystavení *</FormLabel>
+                          <DatePicker
+                            date={field.value}
+                            setDate={field.onChange}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      name="due_date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Datum splatnosti *</FormLabel>
+                          <DatePicker
+                            date={field.value}
+                            setDate={field.onChange}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      name="taxable_supply_date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>
+                            Datum uskutečnění zdanitelného plnění
+                          </FormLabel>
+                          <DatePicker
+                            date={field.value}
+                            setDate={field.onChange}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        name="total_with_vat"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Celkem s DPH *</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    parseFloat(e.target.value) || 0
+                                  )
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        name="total_without_vat"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Celkem bez DPH</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                {...field}
+                                onChange={(e) => {
+                                  const value =
+                                    e.target.value !== ''
+                                      ? parseFloat(e.target.value)
+                                      : null
+                                  field.onChange(value)
+                                }}
+                                value={field.value === null ? '' : field.value}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      name="currency"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Měna</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
                 </div>
-              </TabsContent>
 
-              <TabsContent value="manual">
-                <Form {...form}>
-                  <form
-                    // @ts-expect-error - TODO fix this
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Supplier Information */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-medium">
-                          Informace o dodavateli
-                        </h3>
-
-                        <FormField
-                          name="supplier_name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Název dodavatele *</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          name="supplier_registration_no"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>IČ</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          name="supplier_vat_no"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>DIČ</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          name="supplier_street"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Ulice</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            name="supplier_city"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Město</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            name="supplier_zip"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>PSČ</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <FormField
-                          name="supplier_country"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Země</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      {/* Invoice Details */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Detaily faktury</h3>
-
-                        <FormField
-                          name="invoice_number"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Číslo faktury *</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          name="variable_symbol"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Variabilní symbol</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          name="expense_category"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Kategorie výdaje</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          name="issue_date"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormLabel>Datum vystavení *</FormLabel>
-                              <DatePicker
-                                date={field.value}
-                                setDate={field.onChange}
-                              />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          name="due_date"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormLabel>Datum splatnosti *</FormLabel>
-                              <DatePicker
-                                date={field.value}
-                                setDate={field.onChange}
-                              />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          name="taxable_supply_date"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormLabel>
-                                Datum uskutečnění zdanitelného plnění
-                              </FormLabel>
-                              <DatePicker
-                                date={field.value}
-                                setDate={field.onChange}
-                              />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            name="total_with_vat"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Celkem s DPH *</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    {...field}
-                                    onChange={(e) =>
-                                      field.onChange(
-                                        parseFloat(e.target.value) || 0
-                                      )
-                                    }
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            name="total_without_vat"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Celkem bez DPH</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    {...field}
-                                    onChange={(e) => {
-                                      const value =
-                                        e.target.value !== ''
-                                          ? parseFloat(e.target.value)
-                                          : null
-                                      field.onChange(value)
-                                    }}
-                                    value={
-                                      field.value === null ? '' : field.value
-                                    }
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <FormField
-                          name="currency"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Měna</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <Button type="submit" disabled={createMutation.isPending}>
-                        {createMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Ukládám...
-                          </>
-                        ) : (
-                          'Uložit fakturu'
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </TabsContent>
-            </Tabs>
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={createMutation.isPending}>
+                    {createMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Ukládám...
+                      </>
+                    ) : (
+                      'Uložit fakturu'
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       ) : (
@@ -559,6 +604,7 @@ export function ReceivedInvoicesPage() {
                         Částka
                       </th>
                       <th className="px-4 py-3 text-left font-medium">Stav</th>
+                      <th className="px-4 py-3 text-right font-medium">Akce</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -593,6 +639,23 @@ export function ReceivedInvoicesPage() {
                             {invoice.status === 'paid' && 'Zaplaceno'}
                           </span>
                         </td>
+                        <td className="px-4 py-3 text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteInvoice(invoice.id)}
+                            disabled={deleteMutation.isPending}
+                            className="text-red-600 hover:text-red-800 disabled:text-gray-400"
+                            aria-label="Smazat fakturu"
+                          >
+                            {deleteMutation.isPending &&
+                            deleteMutation.variables?.id === invoice.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2Icon className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -608,7 +671,7 @@ export function ReceivedInvoicesPage() {
               <p className="text-muted-foreground mb-6">
                 Zatím jste nepřidali žádné přijaté faktury.
               </p>
-              <Button onClick={() => setActiveTab('add')}>
+              <Button onClick={() => setShowAddForm(true)}>
                 <PlusIcon className="mr-2 h-4 w-4" /> Přidat fakturu
               </Button>
             </div>
