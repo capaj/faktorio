@@ -77,9 +77,7 @@ export function ReceivedInvoicesPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [ocrResult, setOcrResult] = useState<any>(null)
   const [isProcessingImage, setIsProcessingImage] = useState(false)
-  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(
-    null
-  )
+  const [processedFileUrl, setProcessedFileUrl] = useState<string | null>(null)
   const [isDraggingOver, setIsDraggingOver] = useState(false)
 
   // tRPC hooks
@@ -102,7 +100,9 @@ export function ReceivedInvoicesPage() {
     trpcClient.receivedInvoices.orcInvoice.useMutation({
       onSuccess: (data, variables) => {
         setIsProcessingImage(false)
-        setProcessedImageUrl(variables.imageData)
+        if (variables.mimeType.startsWith('image/')) {
+          setProcessedFileUrl(variables.imageData)
+        }
 
         if (data) {
           setOcrResult(data)
@@ -230,7 +230,7 @@ export function ReceivedInvoicesPage() {
       }
 
       setIsUploading(true)
-      setProcessedImageUrl(null) // Clear previous preview
+      setProcessedFileUrl(null) // Clear previous preview
 
       try {
         // Read the file as a base64 string
@@ -250,10 +250,10 @@ export function ReceivedInvoicesPage() {
           setIsProcessingImage(true)
           // Update preview immediately for images, handle PDF differently if needed for preview
           if (file.type.startsWith('image/')) {
-            setProcessedImageUrl(fullDataUrl) // Keep full URL for preview
+            setProcessedFileUrl(fullDataUrl) // Keep full URL for preview
           } else {
             // For PDF, we might not show a preview, or show a generic icon
-            setProcessedImageUrl(null) // Or a placeholder PDF icon URL
+            setProcessedFileUrl(null) // Explicitly set to null for non-images
           }
           processImageMutation.mutate({
             mimeType: file.type,
@@ -387,10 +387,10 @@ export function ReceivedInvoicesPage() {
                     Prosím počkejte, systém analyzuje data.
                   </p>
                 </div>
-              ) : processedImageUrl ? (
+              ) : processedFileUrl ? (
                 <div className="flex flex-col items-center">
                   <img
-                    src={processedImageUrl}
+                    src={processedFileUrl}
                     alt="Invoice Preview"
                     className="max-h-48 w-auto object-contain mb-4 rounded"
                   />
