@@ -4,23 +4,24 @@ import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { Input, type InputProps } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { proxy, useSnapshot } from 'valtio'
+const state = proxy({
+  show: false
+})
 
 const PasswordInput = ({
   ref,
   className,
   ...props
 }: InputProps & {
-  ref?: React.RefObject<HTMLInputElement>
+  ref?: React.RefCallback<HTMLInputElement>
 }) => {
-  const [showPassword, setShowPassword] = React.useState(false)
-  const disabled =
-    props.value === '' || props.value === undefined || props.disabled
-
+  const snap = useSnapshot(state)
   return (
     <div className="relative">
       <Input
         {...props}
-        type={showPassword ? 'text' : 'password'}
+        type={state.show ? 'text' : 'password'}
         name="password_fake"
         className={cn('hide-password-toggle pr-10', className)}
         ref={ref}
@@ -30,16 +31,18 @@ const PasswordInput = ({
         variant="ghost"
         size="sm"
         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-        onClick={() => setShowPassword((prev) => !prev)}
-        disabled={disabled}
+        onClick={() => {
+          state.show = !state.show
+        }}
+        disabled={props.disabled}
       >
-        {showPassword && !disabled ? (
+        {snap.show ? (
           <EyeIcon className="h-4 w-4" aria-hidden="true" />
         ) : (
           <EyeOffIcon className="h-4 w-4" aria-hidden="true" />
         )}
         <span className="sr-only">
-          {showPassword ? 'Hide password' : 'Show password'}
+          {snap.show ? 'Hide password' : 'Show password'}
         </span>
       </Button>
 

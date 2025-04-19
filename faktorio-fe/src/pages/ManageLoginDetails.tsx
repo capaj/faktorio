@@ -30,6 +30,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
+import { PasswordInput } from '@/components/ui/password-input'
 
 const changePasswordSchema = z
   .object({
@@ -213,7 +214,7 @@ export const ManageLoginDetails = () => {
                     <FormItem>
                       <FormLabel>Aktuální heslo</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} />
+                        <PasswordInput type="password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -227,7 +228,7 @@ export const ManageLoginDetails = () => {
                     <FormItem>
                       <FormLabel>Nové heslo</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} />
+                        <PasswordInput type="password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -241,7 +242,7 @@ export const ManageLoginDetails = () => {
                     <FormItem>
                       <FormLabel>Potvrzení nového hesla</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} />
+                        <PasswordInput type="password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
