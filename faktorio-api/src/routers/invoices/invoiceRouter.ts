@@ -112,50 +112,59 @@ export const invoiceRouter = trpcContext.router({
         return invoice.id
       })
     }),
-  all: protectedProc
+  listInvoices: protectedProc
     .input(
       z.object({
         limit: z.number().nullable().default(30),
         offset: z.number().nullish().default(0),
         filter: z.string().nullish(),
         from_date: dateSchema, // YYYY-MM-DD
-        to_date: dateSchema
+        to_date: dateSchema,
+        year: z.number().nullish() // Add year filter
       })
     )
     .query(async ({ ctx, input }) => {
-      let whereCondition = eq(invoicesTb.user_id, ctx.user.id)
+      const conditions: SQL[] = [eq(invoicesTb.user_id, ctx.user.id)]
 
       if (input.filter) {
-        whereCondition = and(
-          whereCondition,
+        conditions.push(
           or(
             like(invoicesTb.client_name, `%${input.filter}%`),
             like(invoicesTb.number, `%${input.filter}%`),
             like(invoicesTb.client_registration_no, `%${input.filter}%`),
             like(invoicesTb.client_vat_no, `%${input.filter}%`)
+          )!
+        )
+      }
+
+      // Year filter (preferred over from/to date if provided)
+      if (input.year !== null && input.year !== undefined) {
+        const year = input.year
+        const startDate = `${year}-01-01`
+        const endDate = `${year + 1}-01-01`
+
+        conditions.push(gte(invoicesTb.taxable_fulfillment_due, startDate))
+        conditions.push(lte(invoicesTb.taxable_fulfillment_due, endDate))
+      } else {
+        // Original date range filter (only apply if year is not set)
+        if (input.from_date) {
+          conditions.push(
+            gte(invoicesTb.taxable_fulfillment_due, input.from_date)
           )
-        ) as SQL<unknown>
-      }
+        }
 
-      if (input.from_date) {
-        whereCondition = and(
-          whereCondition,
-          gte(invoicesTb.taxable_fulfillment_due, input.from_date)
-        ) as SQL<unknown>
-      }
-
-      if (input.to_date) {
-        whereCondition = and(
-          whereCondition,
-          lte(invoicesTb.taxable_fulfillment_due, input.to_date)
-        ) as SQL<unknown>
+        if (input.to_date) {
+          conditions.push(
+            lte(invoicesTb.taxable_fulfillment_due, input.to_date)
+          )
+        }
       }
 
       const invoicesForUser = await ctx.db.query.invoicesTb.findMany({
-        where: whereCondition,
+        where: and(...conditions),
         limit: input.limit ?? undefined,
         offset: input.offset ?? undefined,
-        orderBy: desc(invoicesTb.created_at)
+        orderBy: desc(invoicesTb.taxable_fulfillment_due) // Order by taxable date
       })
 
       return invoicesForUser

@@ -15,6 +15,13 @@ import {
   TableCell,
   Table
 } from '@/components/ui/table'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import { trpcClient } from '@/lib/trpcClient'
 import {
   LucideEllipsisVertical,
@@ -32,16 +39,22 @@ import { Input } from '@/components/ui/input'
 import { useQueryParamState } from './useQueryParamState'
 import { MarkAsPaidDialog } from './MarkAsPaidDialog'
 
-export function useFilteredInvoicesQuery(search: string = '') {
-  return trpcClient.invoices.all.useQuery({
+export function useFilteredInvoicesQuery(
+  search: string = '',
+  year: number | null // Add year parameter
+) {
+  return trpcClient.invoices.listInvoices.useQuery({
     filter: search,
-    limit: 100
+    limit: 100,
+    year: year // Pass year to the query
   })
 }
 
-export function InvoiceList() {
+export function InvoiceListPage() {
+  const currentYear = new Date().getFullYear()
+  const [selectedYear, setSelectedYear] = useState<number | null>(currentYear)
   const [search, setSearch] = useQueryParamState('search')
-  const q = useFilteredInvoicesQuery(search)
+  const q = useFilteredInvoicesQuery(search, selectedYear) // Pass selectedYear
   // State to manage which invoice's "Mark as Paid" dialog is open
   const [markAsPaidInvoice, setMarkAsPaidInvoice] = useState<{
     id: string
@@ -69,14 +82,42 @@ export function InvoiceList() {
   const total = invoices.reduce((acc, invoice) => acc + invoice.total, 0)
   return (
     <>
-      <Input
-        value={search}
-        className="m-4 max-w-[50%]"
-        onChange={(e) => {
-          return setSearch(e.target.value)
-        }}
-        placeholder="Hledat faktury podle jména klienta, IČO, DIČ nebo čísla faktury"
-      ></Input>
+      <div className="flex items-center justify-between m-4">
+        <Input
+          value={search}
+          className="max-w-[50%]"
+          onChange={(e) => {
+            return setSearch(e.target.value)
+          }}
+          placeholder="Hledat faktury podle jména klienta, IČO, DIČ nebo čísla faktury"
+        ></Input>
+
+        <Select
+          value={selectedYear === null ? 'null' : selectedYear.toString()}
+          onValueChange={(value) => {
+            if (value === 'null') {
+              setSelectedYear(null)
+            } else {
+              setSelectedYear(parseInt(value))
+            }
+          }}
+        >
+          <SelectTrigger className="w-[120px]">
+            <SelectValue placeholder="Rok" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="null">Všechny</SelectItem>
+            {[...Array(6)].map((_, i) => {
+              const year = currentYear - i
+              return (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              )
+            })}
+          </SelectContent>
+        </Select>
+      </div>
       <Table>
         <TableHeader className="bg-gray-50">
           <TableRow>
@@ -201,8 +242,12 @@ export function InvoiceList() {
           {invoices.length > 0 && (
             <TableRow className="bg-gray-200">
               <TableCell colSpan={6}>
-                Celkem {q.data?.length}{' '}
-                {q.data?.length === 1 ? 'faktura' : 'faktury'}
+                Celkem {invoices.length}{' '}
+                {invoices.length === 1
+                  ? 'faktura'
+                  : invoices.length > 4
+                    ? 'faktur'
+                    : 'faktury'}
               </TableCell>
               <TableCell>{formatNumberWithSpaces(total)} CZK</TableCell>
               <TableCell>

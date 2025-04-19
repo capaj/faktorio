@@ -2,7 +2,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { Route, Switch, useLocation } from 'wouter'
 // Create Document Component
 import { LandingPage } from './pages/LandingPage'
-import { InvoiceList } from './pages/InvoiceList/InvoiceList'
+import { InvoiceListPage } from './pages/InvoiceList/InvoiceListPage'
 import { SpinnerContainer } from './components/SpinnerContainer'
 import { ManifestPage } from './pages/ManifestPage'
 import { Toaster } from '@/components/ui/sonner'
@@ -71,7 +71,7 @@ function AppContent() {
                 <Switch>
                   <Route
                     path="/"
-                    component={isSignedIn ? InvoiceList : LandingPage}
+                    component={isSignedIn ? InvoiceListPage : LandingPage}
                   />
                   <Route path="/login" component={LoginPage} />
                   <Route path="/local-dbs" component={LocalDbManagementPage} />

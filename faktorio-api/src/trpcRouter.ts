@@ -24,7 +24,6 @@ export const appRouter = trpcContext.router({
       })
       .execute()
 
-    console.log('invoicing details', res)
     return res ?? null // Drizzle ORM returns undefined if no record is found which is not allowed by trpc
   }),
   upsertInvoicingDetails: protectedProc

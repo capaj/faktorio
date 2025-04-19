@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { receivedInvoicesTb, contactTb } from '../schema'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { trpcContext } from '../trpcContext'
-import { eq, desc, and } from 'drizzle-orm'
+import { eq, desc, and, gte, lt, SQL } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
 import schema from '../json-schema/receivedInvoicesSchema.json'
@@ -113,14 +113,30 @@ const ocrResponseSchema = z.object({
 })
 
 export const receivedInvoicesRouter = trpcContext.router({
-  list: protectedProc.query(async ({ ctx }) => {
-    const invoices = await ctx.db
-      .select()
-      .from(receivedInvoicesTb)
-      .where(eq(receivedInvoicesTb.user_id, ctx.user.id))
-      .orderBy(desc(receivedInvoicesTb.issue_date))
-    return invoices
-  }),
+  list: protectedProc
+    .input(
+      z.object({
+        year: z.number().nullish() // Allow null for 'All'
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const conditions: SQL[] = [eq(receivedInvoicesTb.user_id, ctx.user.id)]
+
+      if (input.year) {
+        const year = input.year
+        const startDate = `${year}-01-01`
+        const endDate = `${year + 1}-01-01`
+        conditions.push(gte(receivedInvoicesTb.taxable_supply_date, startDate))
+        conditions.push(lt(receivedInvoicesTb.taxable_supply_date, endDate))
+      }
+
+      const invoices = await ctx.db
+        .select()
+        .from(receivedInvoicesTb)
+        .where(and(...conditions))
+        .orderBy(desc(receivedInvoicesTb.taxable_supply_date))
+      return invoices
+    }),
 
   getById: protectedProc
     .input(z.object({ id: z.string() }))

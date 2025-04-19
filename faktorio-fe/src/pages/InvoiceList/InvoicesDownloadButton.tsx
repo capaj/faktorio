@@ -10,7 +10,7 @@ import {
   FileSpreadsheetIcon,
   DownloadIcon
 } from 'lucide-react'
-import { useFilteredInvoicesQuery } from './InvoiceList'
+import { useFilteredInvoicesQuery } from './InvoiceListPage'
 import Papa from 'papaparse'
 
 export function InvoicesDownloadButton() {
@@ -24,7 +24,7 @@ export function InvoicesDownloadButton() {
             <DownloadIcon className="mr-2 h-4 w-4" />
             Stáhnout
           </Button>
-        </DropdownMenuTrigger> 
+        </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             onClick={async () => {

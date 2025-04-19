@@ -11,6 +11,21 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { DatePicker } from '@/components/ui/date-picker'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell
+} from '@/components/ui/table'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -30,15 +45,15 @@ import { trpcClient } from '@/lib/trpcClient'
 // Define validation schema for the form
 const receivedInvoiceFormSchema = z.object({
   supplier_name: z.string().min(1, 'Jméno dodavatele je povinné'),
-  supplier_registration_no: z.string().optional(),
-  supplier_vat_no: z.string().optional(),
-  supplier_street: z.string().optional(),
-  supplier_city: z.string().optional(),
-  supplier_zip: z.string().optional(),
-  supplier_country: z.string().default('Česká republika'),
+  supplier_registration_no: z.string().nullish(),
+  supplier_vat_no: z.string().nullish(),
+  supplier_street: z.string().nullish(),
+  supplier_city: z.string().nullish(),
+  supplier_zip: z.string().nullish(),
+  supplier_country: z.string().default('Česká republika').nullable(),
   invoice_number: z.string().min(1, 'Číslo faktury je povinné'),
-  variable_symbol: z.string().optional(),
-  expense_category: z.string().optional(),
+  variable_symbol: z.string().nullish(),
+  expense_category: z.string().nullish(),
   issue_date: z.date({
     required_error: 'Datum vystavení je povinné'
   }),
@@ -55,6 +70,8 @@ const receivedInvoiceFormSchema = z.object({
 type ReceivedInvoiceFormValues = z.infer<typeof receivedInvoiceFormSchema>
 
 export function ReceivedInvoicesPage() {
+  const currentYear = new Date().getFullYear()
+  const [selectedYear, setSelectedYear] = useState<number | null>(currentYear)
   const [showAddForm, setShowAddForm] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [ocrResult, setOcrResult] = useState<any>(null)
@@ -65,7 +82,9 @@ export function ReceivedInvoicesPage() {
 
   // tRPC hooks
   const utils = trpcClient.useUtils()
-  const receivedInvoicesQuery = trpcClient.receivedInvoices.list.useQuery()
+  const receivedInvoicesQuery = trpcClient.receivedInvoices.list.useQuery({
+    year: selectedYear
+  })
   const createMutation = trpcClient.receivedInvoices.create.useMutation({
     onSuccess: () => {
       utils.receivedInvoices.list.invalidate()
@@ -86,16 +105,35 @@ export function ReceivedInvoicesPage() {
         if (data) {
           setOcrResult(data)
 
-          // Format dates correctly
-          // @ts-expect-error - TODO fix this
-          const formData: Partial<ReceivedInvoiceFormValues> = {
+          // Calculate total_without_vat from vat_base_xx fields
+          const calculatedTotalWithoutVat = [
+            data.vat_base_21,
+            data.vat_base_15,
+            data.vat_base_10,
+            data.vat_base_0
+          ]
+            .filter((v): v is number => typeof v === 'number') // Ensure they are numbers
+            .reduce((sum, current) => sum + current, 0)
+
+          // Format dates correctly and include calculated total
+
+          const formData = {
+            currency: 'CZK',
+            supplier_country: 'Česká republika',
             ...data,
             issue_date: data.issue_date ? new Date(data.issue_date) : undefined,
             due_date: data.due_date ? new Date(data.due_date) : undefined,
             taxable_supply_date: data.taxable_supply_date
               ? new Date(data.taxable_supply_date)
               : null,
-            receipt_date: data.receipt_date ? new Date(data.receipt_date) : null
+            receipt_date: data.receipt_date
+              ? new Date(data.receipt_date)
+              : null,
+            // Use calculated value if > 0, otherwise keep potential OCR value or null
+            total_without_vat:
+              calculatedTotalWithoutVat > 0
+                ? calculatedTotalWithoutVat
+                : (data.total_without_vat ?? null)
           }
 
           // Reset the form with the extracted data
@@ -115,7 +153,7 @@ export function ReceivedInvoicesPage() {
               'Z obrázku se nepodařilo rozpoznat všechna povinná data. Doplňte je prosím ručně.'
             )
             // Set whatever data was extracted and show the form
-            form.reset(formData as any)
+            form.reset(formData)
             if (!showAddForm) setShowAddForm(true)
           }
         }
@@ -214,16 +252,48 @@ export function ReceivedInvoicesPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Přijaté faktury</h1>
-        <Button onClick={() => setShowAddForm(!showAddForm)}>
-          {showAddForm ? (
-            <>Zpět na seznam</>
-          ) : (
-            <>
-              <PlusIcon className="mr-2 h-4 w-4" /> Přidat fakturu
-            </>
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-bold">Přijaté faktury</h1>
+          {!showAddForm && (
+            <Select
+              value={selectedYear === null ? 'null' : selectedYear.toString()}
+              onValueChange={(value) => {
+                if (value === 'null') {
+                  setSelectedYear(null)
+                } else {
+                  setSelectedYear(parseInt(value))
+                }
+              }}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Rok" />
+              </SelectTrigger>
+              <SelectContent>
+                {[...Array(6)].map((_, i) => {
+                  const year = currentYear - i
+                  return (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  )
+                })}
+                <SelectItem value="null">Všechny</SelectItem>
+              </SelectContent>
+            </Select>
           )}
-        </Button>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button onClick={() => setShowAddForm(!showAddForm)}>
+            {showAddForm ? (
+              <>Zpět na seznam</>
+            ) : (
+              <>
+                <PlusIcon className="mr-2 h-4 w-4" /> Přidat fakturu
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {showAddForm ? (
@@ -585,45 +655,41 @@ export function ReceivedInvoicesPage() {
           {invoices.length > 0 ? (
             <div className="grid gap-4">
               <div className="rounded-md border">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="px-4 py-3 text-left font-medium">
-                        Dodavatel
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium">
-                        Číslo faktury
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium">
-                        Datum vystavení
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium">
-                        Datum splatnosti
-                      </th>
-                      <th className="px-4 py-3 text-right font-medium">
-                        Částka
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium">Stav</th>
-                      <th className="px-4 py-3 text-right font-medium">Akce</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Dodavatel</TableHead>
+                      <TableHead>Číslo faktury</TableHead>
+                      <TableHead>Datum vystavení</TableHead>
+                      <TableHead>Datum splatnosti</TableHead>
+                      <TableHead className="text-right">
+                        Celkem bez DPH
+                      </TableHead>
+                      <TableHead className="text-right">Celkem s DPH</TableHead>
+                      <TableHead>Stav</TableHead>
+                      <TableHead className="text-right">Akce</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {invoices.map((invoice) => (
-                      <tr
-                        key={invoice.id}
-                        className="border-b transition-colors hover:bg-muted/50"
-                      >
-                        <td className="px-4 py-3 font-medium">
+                      <TableRow key={invoice.id}>
+                        <TableCell className="font-medium">
                           {invoice.supplier_name}
-                        </td>
-                        <td className="px-4 py-3">{invoice.invoice_number}</td>
-                        <td className="px-4 py-3">{invoice.issue_date}</td>
-                        <td className="px-4 py-3">{invoice.due_date}</td>
-                        <td className="px-4 py-3 text-right">
+                        </TableCell>
+                        <TableCell>{invoice.invoice_number}</TableCell>
+                        <TableCell>{invoice.issue_date}</TableCell>
+                        <TableCell>{invoice.due_date}</TableCell>
+                        <TableCell className="text-right">
+                          {invoice.total_without_vat !== null &&
+                          invoice.total_without_vat !== undefined
+                            ? `${invoice.total_without_vat.toLocaleString()} ${invoice.currency}`
+                            : '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
                           {invoice.total_with_vat.toLocaleString()}{' '}
                           {invoice.currency}
-                        </td>
-                        <td className="px-4 py-3">
+                        </TableCell>
+                        <TableCell>
                           <span
                             className={`inline-block px-2 py-1 text-xs rounded-full ${
                               invoice.status === 'paid'
@@ -638,8 +704,8 @@ export function ReceivedInvoicesPage() {
                             {invoice.status === 'disputed' && 'Rozporováno'}
                             {invoice.status === 'paid' && 'Zaplaceno'}
                           </span>
-                        </td>
-                        <td className="px-4 py-3 text-right">
+                        </TableCell>
+                        <TableCell className="text-right">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -655,11 +721,11 @@ export function ReceivedInvoicesPage() {
                               <Trash2Icon className="h-4 w-4" />
                             )}
                           </Button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </div>
           ) : (
@@ -669,7 +735,8 @@ export function ReceivedInvoicesPage() {
                 Žádné přijaté faktury
               </h3>
               <p className="text-muted-foreground mb-6">
-                Zatím jste nepřidali žádné přijaté faktury.
+                Zatím jste nepřidali žádné přijaté faktury pro rok{' '}
+                {selectedYear}
               </p>
               <Button onClick={() => setShowAddForm(true)}>
                 <PlusIcon className="mr-2 h-4 w-4" /> Přidat fakturu

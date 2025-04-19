@@ -36,14 +36,13 @@ export const Header = () => {
         {isSignedIn ? (
           <>
             <div className="hidden sm:flex lg:flex justify-center items-center">
-              <ButtonLink href="/contacts">Kontakty</ButtonLink>
-              <ButtonLink href="/invoices">Faktury</ButtonLink>
-              {!isLocalUser && ( // TODO unhide when it is implemented
-                <ButtonLink href="/received-invoices">
-                  Přijaté faktury
-                </ButtonLink>
-              )}
               <ButtonLink href="/new-invoice">Vystavit fakturu</ButtonLink>
+              <ButtonLink href="/contacts">Kontakty</ButtonLink>
+              <ButtonLink href="/invoices">Vystavené</ButtonLink>
+              {!isLocalUser && ( // TODO unhide when it is implemented
+                <ButtonLink href="/received-invoices">Přijaté</ButtonLink>
+              )}
+
               <ButtonLink href="/my-details">Moje údaje</ButtonLink>
 
               <DropdownMenu>
