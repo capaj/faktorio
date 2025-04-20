@@ -227,9 +227,10 @@ export const NewInvoice = () => {
             Bankovní údaje
           </AccordionTrigger>
           <AccordionContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
+            <div>
               <AutoForm
                 formSchema={bankAccountSchema}
+                containerClassName="grid grid-cols-2 md:grid-cols-3 gap-4"
                 values={{
                   bank_account: formValues.bank_account,
                   iban: formValues.iban,
