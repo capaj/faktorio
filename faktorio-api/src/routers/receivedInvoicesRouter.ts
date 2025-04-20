@@ -277,7 +277,7 @@ export const receivedInvoicesRouter = trpcContext.router({
     }),
 
   // OCR an invoice with Gemini API
-  orcInvoice: protectedProc
+  extractInvoiceData: protectedProc
     .input(
       z.object({
         mimeType: z.string(),

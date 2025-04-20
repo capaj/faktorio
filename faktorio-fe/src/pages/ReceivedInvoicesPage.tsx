@@ -97,11 +97,14 @@ export function ReceivedInvoicesPage() {
     }
   })
   const processImageMutation =
-    trpcClient.receivedInvoices.orcInvoice.useMutation({
+    trpcClient.receivedInvoices.extractInvoiceData.useMutation({
       onSuccess: (data, variables) => {
         setIsProcessingImage(false)
-        if (variables.mimeType.startsWith('image/')) {
-          setProcessedFileUrl(variables.imageData)
+        if (variables.mimeType?.startsWith('image/')) {
+          const fullDataUrl = `data:${variables.mimeType};base64,${variables.imageData}`
+          setProcessedFileUrl(fullDataUrl)
+        } else {
+          setProcessedFileUrl(null)
         }
 
         if (data) {
@@ -392,7 +395,7 @@ export function ReceivedInvoicesPage() {
                   <img
                     src={processedFileUrl}
                     alt="Invoice Preview"
-                    className="max-h-48 w-auto object-contain mb-4 rounded"
+                    className="h-128 w-auto object-contain mb-4 rounded"
                   />
                   <Button
                     variant="outline"
