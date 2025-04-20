@@ -14,7 +14,7 @@ function AutoFormLabel({
     <>
       <FormLabel className={cn(className)}>
         {label}
-        {isRequired && <span className="text-destructive"> *</span>}
+        {isRequired && <span className="text-destructive">{`\u00A0*`}</span>}
       </FormLabel>
     </>
   )

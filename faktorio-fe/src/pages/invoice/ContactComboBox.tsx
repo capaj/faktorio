@@ -51,21 +51,25 @@ export function ContactComboBox(props: {
         opacity: props.disabled ? 0.7 : 1
       }}
     >
-      <h4 className="mr-6">Odběratel</h4>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[300px] justify-between"
+            className="w-full justify-between overflow-hidden text-ellipsis whitespace-nowrap"
             disabled={props.disabled}
+            style={{
+              opacity: props.disabled ? 0.7 : 1
+            }}
           >
-            {selectedContact ? selectedContact.name : 'Vyberte kontakt...'}
+            <span className="overflow-hidden text-ellipsis">
+              {selectedContact ? selectedContact.name : 'Vyberte kontakt...'}
+            </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0">
+        <PopoverContent className="p-0 w-[--radix-popover-trigger-width]">
           <Command>
             <CommandInput placeholder="Hledat ..." />
             <CommandEmpty>Takový kontakt nenalezen</CommandEmpty>

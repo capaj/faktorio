@@ -19,6 +19,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
+import { FormItem, FormLabel, FormControl } from '@/components/ui/form'
 
 const defaultInvoiceItem = {
   description: '',
@@ -179,9 +180,19 @@ export const NewInvoice = () => {
           },
           client_contact_id: {
             label: 'Odběratel',
-            fieldType: ({ field }) => {
-              return <ContactComboBox {...field} />
-            }
+            fieldType: ({ label, isRequired, field, fieldConfigItem }) => (
+              <FormItem className="flex flex-col flew-grow col-span-2">
+                <FormLabel>
+                  {label}
+                  {isRequired && (
+                    <span className="text-destructive">{`\u00A0*`}</span>
+                  )}
+                </FormLabel>
+                <FormControl>
+                  <ContactComboBox {...field} />
+                </FormControl>
+              </FormItem>
+            )
           },
           due_in_days: {
             label: 'Splatnost (v dnech)'
