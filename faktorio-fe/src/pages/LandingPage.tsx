@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LucidePiggyBank, LucideTwitter } from 'lucide-react'
 import { MountainIcon } from '@/components/MountainIcon'
 import { Footer, PageShell } from './PageShell'
+import { ButtonLink } from '@/components/ui/link'
+import { Separator } from '@/components/ui/separator'
 
 export const LandingPage = () => {
   return (
@@ -29,6 +31,19 @@ export const LandingPage = () => {
               <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
                 Zkuste to. Zabere to minutu a je to zdarma. Navždy.
               </p>
+              <Separator className="my-4" />
+              <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
+                Nechcete svoje data posílat na cloud? Je pro vás soukromí na
+                prvním místě a rád si zálohujete data sám?
+              </p>
+
+              <ButtonLink
+                href="/local-dbs"
+                variant="secondary"
+                className="text-sm font-medium hover:underline underline-offset-4"
+              >
+                Spustit s lokální databází
+              </ButtonLink>
             </div>
           </div>
         </section>

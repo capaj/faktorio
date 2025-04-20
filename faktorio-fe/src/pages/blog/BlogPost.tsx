@@ -31,7 +31,7 @@ export function BlogPost({ initialPost, slug }: BlogPostProps) {
 
   return (
     <article className="prose lg:prose-xl mx-auto prose-p:mb-6 prose-headings:mt-8 prose-headings:mb-4">
-      <h1 className="mb-2">{post.title}</h1>
+      <h2 className="mb-2">{post.title}</h2>
       <time dateTime={post.date} className="text-gray-500 block mb-8">
         {new Date(post.date).toLocaleDateString()}
       </time>

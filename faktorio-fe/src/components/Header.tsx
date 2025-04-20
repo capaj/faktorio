@@ -202,13 +202,6 @@ export const Header = () => {
             >
               Registrovat
             </ButtonLink>
-            <ButtonLink
-              href="/local-dbs"
-              variant="link"
-              className="text-sm font-medium hover:underline underline-offset-4"
-            >
-              Lokální databáze
-            </ButtonLink>
           </>
         )}
       </nav>

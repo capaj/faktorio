@@ -329,7 +329,7 @@ export function ReceivedInvoicesPage() {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold">Přijaté faktury</h1>
+          <h3 className="text-2xl font-bold">Přijaté faktury</h3>
           {!showAddForm && (
             <Select
               value={selectedYear === null ? 'null' : selectedYear.toString()}
