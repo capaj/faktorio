@@ -38,6 +38,7 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
           MAILJET_API_SECRET: ${{ secrets.MAILJET_API_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         with:
           packageManager: pnpm
           secrets: |
@@ -46,6 +47,7 @@ jobs:
             JWT_SECRET
             MAILJET_API_KEY
             MAILJET_API_SECRET
+            GEMINI_API_KEY
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: './faktorio-api'
