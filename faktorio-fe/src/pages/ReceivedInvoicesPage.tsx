@@ -17,7 +17,8 @@ import {
   TableBody,
   TableRow,
   TableHead,
-  TableCell
+  TableCell,
+  TableFooter
 } from '@/components/ui/table'
 import {
   Select,
@@ -37,11 +38,13 @@ import {
   PlusIcon,
   ReceiptIcon,
   Loader2,
-  Trash2Icon
+  Trash2Icon,
+  DownloadIcon
 } from 'lucide-react'
 import { SpinnerContainer } from '@/components/SpinnerContainer'
 import { trpcClient } from '@/lib/trpcClient'
 import { cn } from '@/lib/utils'
+import Papa from 'papaparse'
 
 // Define validation schema for the form
 const receivedInvoiceFormSchema = z.object({
@@ -309,6 +312,18 @@ export function ReceivedInvoicesPage() {
   }
 
   const invoices = receivedInvoicesQuery.data || []
+
+  // Calculate totals
+  const totalWithoutVatSum = invoices.reduce(
+    (sum, invoice) => sum + (invoice.total_without_vat ?? 0),
+    0
+  )
+  const totalWithVatSum = invoices.reduce(
+    (sum, invoice) => sum + invoice.total_with_vat,
+    0
+  )
+  // Assuming all invoices have the same currency for the sum display
+  const currency = invoices[0]?.currency || 'CZK'
 
   return (
     <div className="container mx-auto py-8">
@@ -783,6 +798,49 @@ export function ReceivedInvoicesPage() {
                       </TableRow>
                     ))}
                   </TableBody>
+                  <TableFooter>
+                    <TableRow>
+                      <TableCell colSpan={4} className="font-medium">
+                        Celkem
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {totalWithoutVatSum.toLocaleString()} {currency}
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {totalWithVatSum.toLocaleString()} {currency}
+                      </TableCell>
+                      <TableCell colSpan={1}></TableCell>
+                      <TableCell className="text-right">
+                        {invoices.length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const csv = Papa.unparse(invoices)
+                              const blob = new Blob([csv], {
+                                type: 'text/csv'
+                              })
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              const yearSuffix =
+                                selectedYear === null
+                                  ? '_all'
+                                  : `_${selectedYear}`
+                              a.download = `received_invoices${yearSuffix}.csv`
+                              document.body.appendChild(a) // Append link to body
+                              a.click()
+                              document.body.removeChild(a) // Clean up
+                              URL.revokeObjectURL(url) // Free up memory
+                            }}
+                          >
+                            <DownloadIcon className="mr-2 h-4 w-4" />
+                            Stáhnout CSV
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  </TableFooter>
                 </Table>
               </div>
             </div>
