@@ -38,7 +38,7 @@ jobs:
         run: pnpm install
 
       - name: Check Environment Variables
-        run: tsx scripts/check-env.ts
+        run: pnpm check-env
 
       - name: Deploy API
         uses: cloudflare/wrangler-action@v3
