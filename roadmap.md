@@ -2,6 +2,8 @@
 
 ## TODO
 
+- add multiple invoicing details for one account
+  - filter by them in the invoice list
 - add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
 - add public API with complete CRUD for invoices
 - DPH priznani at the end of the year
