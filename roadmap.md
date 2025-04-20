@@ -3,7 +3,7 @@
 ## TODO
 
 - add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
-- add feature to import expense invoices by OCRing them with google gemini 2.0
+- add public API with complete CRUD for invoices
 - DPH priznani at the end of the year
 - automated DPH and Kontrolni hlaseni submission to ADIS every month/quarter for you with automated puppeteer script
 - integrate with Fio bank API to be able to mark invoices as paid when you receive money
@@ -15,6 +15,7 @@
 - be able to share invoice link
 - be able to export as excel
 - hack integration with gemini:
+- ability to create an organization and add users to it. Users can see all the invoices for the organization.
 
   - zeptat se treba na veci jako:
     - kolik dlužím na dani z prijmu tento rok?
