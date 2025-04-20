@@ -153,7 +153,7 @@ export const NewInvoice = () => {
       <AutoForm
         formSchema={formSchema}
         values={formValues}
-        containerClassName="grid grid-cols-2 gap-4"
+        containerClassName="grid grid-cols-2 md:grid-cols-3 gap-4"
         onParsedValuesChange={(values) => {
           setFormValues(values as z.infer<typeof formSchema>)
         }}
@@ -197,14 +197,17 @@ export const NewInvoice = () => {
           due_in_days: {
             label: 'Splatnost (v dnech)'
           },
-          exchange_rate: {
-            inputProps: {
-              type: 'number',
-              min: 0,
-              disabled: !isCzkInvoice
-            },
-            label: 'Kurz'
-          },
+          exchange_rate:
+            formValues.currency === 'CZK'
+              ? { fieldType: () => null }
+              : {
+                  inputProps: {
+                    type: 'number',
+                    min: 0,
+                    disabled: !isCzkInvoice
+                  },
+                  label: 'Kurz'
+                },
           // Hide bank account fields from the main form
           bank_account: {
             fieldType: () => null
@@ -224,7 +227,7 @@ export const NewInvoice = () => {
             Bankovní údaje
           </AccordionTrigger>
           <AccordionContent>
-            <div className="grid grid-cols-2 gap-4 pt-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
               <AutoForm
                 formSchema={bankAccountSchema}
                 values={{
@@ -367,47 +370,61 @@ const InvoiceItemForm = ({
   }, [zodForm.formState])
 
   return (
-    <div className="flex justify-between">
-      <div className="flex gap-4">
+    <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0">
+      <div className="flex flex-col sm:flex-row gap-4 flex-grow sm:items-end">
         <Input
-          className="w-[190px]"
+          className="w-full sm:w-24"
           type="number"
           min={0}
+          placeholder="Množství"
           {...zodForm.inputProps('quantity')}
         />
         <Input
-          placeholder="jednotka"
+          placeholder="Jednotka"
           type="text"
-          className="w-[190px]"
+          className="w-full sm:w-32"
           {...zodForm.inputProps('unit')}
         />
         <Input
-          className="w-full"
-          placeholder="popis položky"
+          className="w-full flex-grow"
+          placeholder="Popis položky"
           type="text"
           {...zodForm.inputProps('description')}
         />
       </div>
-      <div className="flex gap-4">
-        <Input
-          className="w-32"
-          placeholder="cena"
-          type="text"
-          {...zodForm.inputProps('unit_price')}
-        />
-        <Input
-          className="w-20"
-          placeholder="DPH"
-          type="number"
-          min={0}
-          {...zodForm.inputProps('vat_rate')}
-        />
-        <button
-          className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300"
-          onClick={onDelete}
-        >
-          <LucideTrash2 className="text-gray-600" />
-        </button>
+      <div className="flex gap-4 items-end">
+        <div className="flex-grow sm:flex-grow-0">
+          <label className="text-xs text-gray-500 mb-1 block sm:hidden md:block">
+            Cena/jedn.
+          </label>
+          <Input
+            className="w-full sm:w-32"
+            placeholder="Cena/jedn."
+            type="text"
+            {...zodForm.inputProps('unit_price')}
+          />
+        </div>
+        <div className="flex-grow sm:flex-grow-0">
+          <label className="text-xs text-gray-500 mb-1 block sm:hidden md:block">
+            DPH %
+          </label>
+          <Input
+            className="w-full sm:w-20"
+            placeholder="DPH %"
+            type="number"
+            min={0}
+            {...zodForm.inputProps('vat_rate')}
+          />
+        </div>
+        <div>
+          <button
+            type="button"
+            className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300 flex-shrink-0"
+            onClick={onDelete}
+          >
+            <LucideTrash2 className="text-gray-600" />
+          </button>
+        </div>
       </div>
     </div>
   )
