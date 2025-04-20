@@ -5,7 +5,7 @@ import superjson from 'superjson'
 import { GoogleAIFileManager } from '@google/generative-ai/server'
 
 import { userT } from './schema'
-import { Env } from '.'
+import { Env } from './envSchema'
 import { GoogleGenAI } from '@google/genai'
 
 // JWT secret should be the same as in authRouter

@@ -1,6 +1,5 @@
 import jwt, { type JwtPayload } from '@tsndr/cloudflare-worker-jwt'
 import { userT } from './schema'
-import { Env } from '.'
 
 // Token expiration time in seconds (1 year)
 export const JWT_EXPIRATION = 60 * 60 * 24 * 365
