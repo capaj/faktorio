@@ -11,18 +11,12 @@ import { TrpcContext } from './trpcContext'
 import { extractUserFromAuthHeader, generateToken } from './jwtUtils'
 import { GoogleAIFileManager } from '@google/generative-ai/server'
 import { GoogleGenAI } from '@google/genai'
+import { Env } from './envSchema'
 
 // Add ExecutionContext type from Cloudflare Workers
 type ExecutionContext = {
   waitUntil(promise: Promise<any>): void
   passThroughOnException(): void
-}
-
-export interface Env {
-  TURSO_DATABASE_URL: string
-  TURSO_AUTH_TOKEN: string
-  JWT_SECRET: string
-  GEMINI_API_KEY: string
 }
 
 const corsHeaders = {
