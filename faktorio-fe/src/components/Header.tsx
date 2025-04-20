@@ -115,7 +115,16 @@ export const Header = () => {
                   <span className="sr-only">Toggle navigation menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex flex-col">
+              <SheetContent
+                side="left"
+                className="flex flex-col"
+                onClick={(event) => {
+                  if (event.target instanceof HTMLButtonElement) {
+                    event.stopPropagation()
+                    setIsMenuOpen(false)
+                  }
+                }}
+              >
                 <ButtonLink
                   className="inline-flex h-9 items-center justify-start rounded-md px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900  focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                   href="/contacts"
