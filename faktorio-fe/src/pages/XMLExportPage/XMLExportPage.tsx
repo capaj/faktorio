@@ -8,7 +8,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { trpcClient } from '@/lib/trpcClient'
-import { DownloadIcon } from 'lucide-react'
+import { AlertCircleIcon, DownloadIcon, Terminal } from 'lucide-react'
 import { IssuedInvoiceTable } from '@/components/IssuedInvoiceTable'
 import { ReceivedInvoiceTable } from '@/components/ReceivedInvoiceTable'
 import { type Invoice } from '@/components/IssuedInvoiceTable'
@@ -18,6 +18,9 @@ import {
   type SubmitterData
 } from '@/lib/generateKontrolniHlaseniXML'
 import { useAuth } from '@/lib/AuthContext'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 // Helper function to determine the last ended quarter
 const getLastEndedQuarter = () => {
@@ -96,6 +99,8 @@ export function XMLExportPage() {
   const { year: initialYear, quarter: initialQuarter } = getLastEndedQuarter()
   const [selectedYear, setSelectedYear] = useState<number>(initialYear)
   const [selectedQuarter, setSelectedQuarter] = useState<number>(initialQuarter)
+  const [isAcknowledgementChecked, setIsAcknowledgementChecked] =
+    useState(false)
 
   const { startDate, endDate } = getQuarterDateRange(
     selectedYear,
@@ -241,16 +246,40 @@ export function XMLExportPage() {
 
       <ReceivedInvoiceTable invoices={receivedInvoices} />
 
-      <div className="flex m-2 mt-5 justify-end">
-        <Button
-          disabled={
-            receivedInvoices.length === 0 && issuedInvoices.length === 0
-          }
-          onClick={handleDownloadXML}
-        >
-          <DownloadIcon className="mr-2 h-4 w-4" />
-          XML Kontrolní hlášení
-        </Button>
+      {/* XML Download Section with Alert and Checkbox */}
+      <div className="m-4 mt-6 space-y-4">
+        <Alert>
+          <AlertCircleIcon className="h-4 w-4" />
+          <AlertTitle>Upozornění!</AlertTitle>
+          <AlertDescription>
+            Tato funkce je experimentální. Vygenerované XML může obsahovat chyby
+            a nemusí být kompletní. Vždy si jej před odesláním zkontrolujte.
+          </AlertDescription>
+        </Alert>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="acknowledgement"
+            checked={isAcknowledgementChecked}
+            onCheckedChange={(checked) =>
+              setIsAcknowledgementChecked(checked === true)
+            }
+          />
+          <Label htmlFor="acknowledgement" className="text-sm font-medium">
+            Beru na vědomí, že tato funkce je experimentální
+          </Label>
+        </div>
+        <div className="flex justify-end">
+          <Button
+            disabled={
+              (receivedInvoices.length === 0 && issuedInvoices.length === 0) ||
+              !isAcknowledgementChecked
+            }
+            onClick={handleDownloadXML}
+          >
+            <DownloadIcon className="mr-2 h-4 w-4" />
+            XML Kontrolní hlášení
+          </Button>
+        </div>
       </div>
     </>
   )
