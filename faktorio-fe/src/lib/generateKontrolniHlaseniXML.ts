@@ -1,4 +1,4 @@
-import { Invoice } from '@/components/InvoiceTable'
+import { Invoice } from '@/components/IssuedInvoiceTable'
 import { ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
 
 export interface SubmitterData {

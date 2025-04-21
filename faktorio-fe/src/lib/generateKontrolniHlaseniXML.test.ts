@@ -3,10 +3,9 @@ import {
   generateKontrolniHlaseniXML,
   type SubmitterData
 } from './generateKontrolniHlaseniXML'
-import { invoicesTb } from '../../../faktorio-api/src/schema'
-import { ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
-import { Invoice } from '@/components/InvoiceTable'
 
+import { ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
+import { Invoice } from '@/components/IssuedInvoiceTable'
 
 describe('generateKontrolniHlaseniXML', () => {
   it('should generate correct XML for a simple happy path', () => {
@@ -23,6 +22,7 @@ describe('generateKontrolniHlaseniXML', () => {
         total: 12100,
         subtotal: 10000,
         currency: 'CZK',
+        exchange_rate: 1,
         paid_on: '2024-07-20'
       }
     ]

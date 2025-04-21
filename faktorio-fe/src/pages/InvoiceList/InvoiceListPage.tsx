@@ -11,7 +11,7 @@ import { useState } from 'react' // Import useState
 import { Input } from '@/components/ui/input'
 import { useQueryParamState } from './useQueryParamState'
 import { MarkAsPaidDialog } from './MarkAsPaidDialog'
-import { InvoiceTable } from '@/components/InvoiceTable'
+import { IssuedInvoiceTable } from '@/components/IssuedInvoiceTable'
 
 export function useFilteredInvoicesQuery(
   search: string = '',
@@ -103,7 +103,7 @@ export function InvoiceListPage() {
           </SelectContent>
         </Select>
       </div>
-      <InvoiceTable
+      <IssuedInvoiceTable
         invoices={invoices}
         isLoading={q.isLoading}
         onDelete={handleDeleteInvoice}

@@ -69,7 +69,7 @@ interface InvoiceTableProps {
   // Add any other props needed, e.g., specific mutation status if needed inside the table
 }
 
-export function InvoiceTable({
+export function IssuedInvoiceTable({
   invoices,
   isLoading,
   onDelete,

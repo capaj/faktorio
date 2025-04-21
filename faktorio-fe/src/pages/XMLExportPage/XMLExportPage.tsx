@@ -9,9 +9,9 @@ import {
 } from '@/components/ui/select'
 import { trpcClient } from '@/lib/trpcClient'
 import { DownloadIcon } from 'lucide-react'
-import { InvoiceTable } from '@/components/InvoiceTable'
+import { IssuedInvoiceTable } from '@/components/IssuedInvoiceTable'
 import { ReceivedInvoiceTable } from '@/components/ReceivedInvoiceTable'
-import { type Invoice } from '@/components/InvoiceTable'
+import { type Invoice } from '@/components/IssuedInvoiceTable'
 import { type ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
 import {
   generateKontrolniHlaseniXML,
@@ -222,7 +222,7 @@ export function XMLExportPage() {
 
       {/* Display Issued Invoices */}
       <h4 className="text-lg font-semibold mt-4 mb-2">Vydané faktury</h4>
-      <InvoiceTable
+      <IssuedInvoiceTable
         invoices={issuedInvoices}
         isLoading={false}
         onDelete={async () => {
