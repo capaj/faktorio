@@ -86,7 +86,8 @@ export function ReceivedInvoicesPage() {
   // tRPC hooks
   const utils = trpcClient.useUtils()
   const receivedInvoicesQuery = trpcClient.receivedInvoices.list.useQuery({
-    year: selectedYear
+    from: selectedYear ? `${selectedYear}-01-01` : undefined,
+    to: selectedYear ? `${selectedYear + 1}-01-01` : undefined
   })
   const createMutation = trpcClient.receivedInvoices.create.useMutation({
     onSuccess: () => {

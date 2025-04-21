@@ -302,10 +302,9 @@ export const receivedInvoicesTb = sqliteTable(
     // VAT breakdown - required for Czech VAT reporting
     vat_base_21: real('vat_base_21'), // Základ daně 21%
     vat_21: real('vat_21'), // VAT amount at 21%
-    vat_base_15: real('vat_base_15'), // Základ daně 15%
-    vat_15: real('vat_15'), // VAT amount at 15%
-    vat_base_10: real('vat_base_10'), // Základ daně 10%
-    vat_10: real('vat_10'), // VAT amount at 10%
+    vat_base_12: real('vat_base_12'), // snížená sazba daně 12%
+    vat_12: real('vat_12'), // VAT amount at 12%
+
     vat_base_0: real('vat_base_0'), // Non-taxable amount (0%)
 
     // Special VAT handling

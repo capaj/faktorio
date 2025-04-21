@@ -3,7 +3,7 @@ import { SheetTrigger, SheetContent, Sheet } from '@/components/ui/sheet'
 import { MountainIcon } from '../components/MountainIcon'
 import { ButtonLink } from '../components/ui/link'
 import { Button } from '../components/ui/button'
-import { LucideMenu, LogOut, Database } from 'lucide-react'
+import { LucideMenu, LogOut, Database, ScrollIcon } from 'lucide-react'
 import { User } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { useState } from 'react'
@@ -43,8 +43,7 @@ export const Header = () => {
                 <ButtonLink href="/received-invoices">Přijaté</ButtonLink>
               )}
 
-              <ButtonLink href="/my-details">Moje údaje</ButtonLink>
-
+              <ButtonLink href="/xml-export">Export XML</ButtonLink>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   {user?.pictureUrl ? (
@@ -72,6 +71,13 @@ export const Header = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer"
+                        onClick={() => navigate('/my-details')}
+                      >
+                        <ScrollIcon className="mr-2 h-4 w-4" />
+                        Moje údaje
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
                         onClick={() => navigate('/local-dbs')}
                       >
                         <Database className="mr-2 h-4 w-4" />
@@ -86,6 +92,13 @@ export const Header = () => {
                       >
                         <User className="mr-2 h-4 w-4" />
                         <span>Přihlašovací údaje</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => navigate('/my-details')}
+                      >
+                        <ScrollIcon className="mr-2 h-4 w-4" />
+                        Moje údaje
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer"
@@ -157,9 +170,9 @@ export const Header = () => {
 
                 <ButtonLink
                   className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-                  href="/my-details"
+                  href="/xml-export"
                 >
-                  Moje údaje
+                  Export XML
                 </ButtonLink>
 
                 <ButtonLink

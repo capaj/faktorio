@@ -116,18 +116,19 @@ export const receivedInvoicesRouter = trpcContext.router({
   list: protectedProc
     .input(
       z.object({
-        year: z.number().nullish() // Allow null for 'All'
+        from: stringDateSchema.optional().nullable(),
+        to: stringDateSchema.optional().nullable(),
+
       })
     )
     .query(async ({ ctx, input }) => {
       const conditions: SQL[] = [eq(receivedInvoicesTb.user_id, ctx.user.id)]
 
-      if (input.year) {
-        const year = input.year
-        const startDate = `${year}-01-01`
-        const endDate = `${year + 1}-01-01`
-        conditions.push(gte(receivedInvoicesTb.taxable_supply_date, startDate))
-        conditions.push(lt(receivedInvoicesTb.taxable_supply_date, endDate))
+      if (input.from) {
+        conditions.push(gte(receivedInvoicesTb.taxable_supply_date, input.from))
+      }
+      if (input.to) {
+        conditions.push(lt(receivedInvoicesTb.taxable_supply_date, input.to))
       }
 
       const invoices = await ctx.db
