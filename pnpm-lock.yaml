@@ -81,6 +81,9 @@ importers:
       drizzle-zod:
         specifier: ^0.7.1
         version: 0.7.1(drizzle-orm@0.42.0(@cloudflare/workers-types@4.20250419.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.24.3)
+      faktorio-shared:
+        specifier: workspace:*
+        version: link:../faktorio-shared
       node-mailjet:
         specifier: ^6.0.8
         version: 6.0.8(debug@4.4.0)
@@ -223,6 +226,12 @@ importers:
       drizzle-orm:
         specifier: ^0.42.0
         version: 0.42.0(@cloudflare/workers-types@4.20250419.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+      faktorio-api:
+        specifier: workspace:*
+        version: link:../faktorio-api
+      faktorio-shared:
+        specifier: workspace:*
+        version: link:../faktorio-shared
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -350,6 +359,12 @@ importers:
       wrangler:
         specifier: ^4.12.0
         version: 4.12.0(@cloudflare/workers-types@4.20250419.0)
+
+  faktorio-shared:
+    dependencies:
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
 
 packages:
 
@@ -4097,7 +4112,6 @@ packages:
 
   libsql@0.5.6:
     resolution: {integrity: sha512-k0qHpyU47iWBplT4IJKEcMgUbms8jl9cNGE6aqsdOYmSJjtZIaYkn8f4ku5DzxRHpk1+o4FK7ZwGVCExYboZqQ==}
-    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lightningcss-darwin-arm64@1.29.2:

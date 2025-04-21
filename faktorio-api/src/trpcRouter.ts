@@ -5,9 +5,17 @@ import { protectedProc } from './isAuthorizedMiddleware'
 import { userInvoicingDetailsTb } from './schema'
 import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
 import { eq } from 'drizzle-orm'
-import { upsertInvoicingDetailsSchema } from '../../faktorio-fe/src/pages/MyInvoicingDetails'
+
 import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
 import { authRouter } from './routers/authRouter'
+import { userInvoicingDetailsInsertSchema } from './zodDbSchemas'
+
+export const upsertInvoicingDetailsSchema =
+  userInvoicingDetailsInsertSchema.omit({
+    created_at: true,
+    updated_at: true,
+    user_id: true
+  })
 
 export const appRouter = trpcContext.router({
   test: trpcContext.procedure.query(async ({ ctx }) => {

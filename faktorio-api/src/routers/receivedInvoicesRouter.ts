@@ -8,7 +8,7 @@ import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
 import schema from '../json-schema/receivedInvoicesSchema.json'
 import { GoogleGenAI, Schema } from '@google/genai'
-import { stringDateSchema } from '../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
+import { stringDateSchema } from './zodSchemas'
 
 // Define Zod schema based on Drizzle schema, making fields optional/required as needed for creation
 // We will refine this based on the frontend form later

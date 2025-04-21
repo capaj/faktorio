@@ -1,7 +1,9 @@
-import { invoiceInsertSchema } from '../../../../faktorio-api/src/zodDbSchemas'
 import { z } from 'zod'
+
+import { invoiceInsertSchema } from '../zodDbSchemas'
+
 import cc from 'currency-codes'
-import { djs } from '../../../../src/djs'
+import { djs } from 'faktorio-shared/src/djs'
 
 export const dateSchema = z
   .string()

@@ -1,4 +1,4 @@
-import { djs } from '../../../../src/djs'
+import { djs } from 'faktorio-shared/src/djs'
 
 export async function getCNBExchangeRate(params: {
   currency: string

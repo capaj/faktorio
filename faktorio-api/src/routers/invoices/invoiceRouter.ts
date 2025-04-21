@@ -20,12 +20,8 @@ import {
   or
 } from 'drizzle-orm'
 import { protectedProc } from '../../isAuthorizedMiddleware'
-import {
-  dateSchema,
-  getInvoiceCreateSchema,
-  stringDateSchema
-} from '../../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
-import { djs } from '../../../../src/djs'
+import { getInvoiceCreateSchema, stringDateSchema } from '../zodSchemas'
+import { djs } from 'faktorio-shared/src/djs'
 import { invoiceItemFormSchema } from '../../zodDbSchemas'
 import { getInvoiceSums } from './getInvoiceSums'
 import { getCNBExchangeRate } from './getCNBExchangeRate'

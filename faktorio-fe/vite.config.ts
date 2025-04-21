@@ -7,7 +7,7 @@ import fs from 'fs'
 import matter from 'gray-matter'
 import { marked } from 'marked'
 // @ts-ignore
-import { getGitHash } from '../src/getGitHash'
+import { getGitHash } from '../scripts/getGitHash'
 
 const gitHash = getGitHash()
 

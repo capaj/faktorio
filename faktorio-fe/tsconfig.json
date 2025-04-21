@@ -24,6 +24,10 @@
     // "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../src/**/*.ts", "../src/**/*.tsx"],
+  "include": [
+    "src",
+    "../faktorio-shared/src/**/*.ts",
+    "../faktorio-shared/src/**/*.tsx"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

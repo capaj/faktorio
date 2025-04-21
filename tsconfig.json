@@ -20,5 +20,7 @@
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
-  }
+  },
+
+  "references": [{ "path": "faktorio-api" }, { "path": "faktorio-fe" }]
 }

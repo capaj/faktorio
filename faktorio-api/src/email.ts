@@ -15,7 +15,7 @@ if (
 ) {
   client = {
     post: () => ({
-      request: (attrs) => {
+      request: (attrs: { Messages: any[] }) => {
         console.log(
           `would have sent emails to ${attrs.Messages.map(
             (m: any) => m.To[0].Email

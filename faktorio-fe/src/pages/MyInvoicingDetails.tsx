@@ -11,12 +11,7 @@ import { useState } from 'react'
 import { omit } from 'lodash-es'
 import diff from 'microdiff'
 import { toast } from 'sonner'
-export const upsertInvoicingDetailsSchema =
-  userInvoicingDetailsInsertSchema.omit({
-    created_at: true,
-    updated_at: true,
-    user_id: true
-  })
+import { upsertInvoicingDetailsSchema } from 'faktorio-api/src/trpcRouter'
 
 export const MyInvoicingDetails = () => {
   const [data] = trpcClient.invoicingDetails.useSuspenseQuery()

@@ -11,6 +11,7 @@
     "dup": "drizzle-kit up",
     "kill": "kill -9 $(lsof -t -i:9189)",
     "test": "vitest",
+    "tsc": "tsc --noEmit",
     "check-env": "tsx scripts/check-env.ts"
   },
   "devDependencies": {
@@ -23,6 +24,7 @@
     "wrangler": "^4.12.0"
   },
   "dependencies": {
+    "faktorio-shared": "workspace:*",
     "@google/genai": "^0.9.0",
     "@google/generative-ai": "^0.24.0",
     "@libsql/client": "^0.15.4",
