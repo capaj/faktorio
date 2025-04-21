@@ -6,11 +6,24 @@ import {
   userInvoicingDetailsTb
 } from '../../schema'
 import { trpcContext } from '../../trpcContext'
-import { SQL, and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm'
+import {
+  SQL,
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  like,
+  lte,
+  ne,
+  or
+} from 'drizzle-orm'
 import { protectedProc } from '../../isAuthorizedMiddleware'
 import {
   dateSchema,
-  getInvoiceCreateSchema
+  getInvoiceCreateSchema,
+  stringDateSchema
 } from '../../../../faktorio-fe/src/pages/invoice/getInvoiceCreateSchema'
 import { djs } from '../../../../src/djs'
 import { invoiceItemFormSchema } from '../../zodDbSchemas'
@@ -118,9 +131,10 @@ export const invoiceRouter = trpcContext.router({
         limit: z.number().nullable().default(30),
         offset: z.number().nullish().default(0),
         filter: z.string().nullish(),
-        from_date: dateSchema, // YYYY-MM-DD
-        to_date: dateSchema,
-        year: z.number().nullish() // Add year filter
+        from: stringDateSchema.nullish(), // YYYY-MM-DD
+        to: stringDateSchema.nullish(),
+        year: z.number().nullish(), // Add year filter
+        vatMinimum: z.number().nullish()
       })
     )
     .query(async ({ ctx, input }) => {
@@ -147,17 +161,23 @@ export const invoiceRouter = trpcContext.router({
         conditions.push(lte(invoicesTb.taxable_fulfillment_due, endDate))
       } else {
         // Original date range filter (only apply if year is not set)
-        if (input.from_date) {
-          conditions.push(
-            gte(invoicesTb.taxable_fulfillment_due, input.from_date)
-          )
+        if (input.from) {
+          conditions.push(gte(invoicesTb.taxable_fulfillment_due, input.from))
         }
 
-        if (input.to_date) {
-          conditions.push(
-            lte(invoicesTb.taxable_fulfillment_due, input.to_date)
-          )
+        if (input.to) {
+          conditions.push(lte(invoicesTb.taxable_fulfillment_due, input.to))
         }
+      }
+
+      if (input.vatMinimum !== null && input.vatMinimum !== undefined) {
+        conditions.push(
+          // @ts-expect-error
+          or(
+            gte(invoicesTb.vat_21, input.vatMinimum),
+            gte(invoicesTb.vat_12, input.vatMinimum)
+          )
+        )
       }
 
       const invoicesForUser = await ctx.db.query.invoicesTb.findMany({
