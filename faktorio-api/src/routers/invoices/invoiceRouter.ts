@@ -170,17 +170,15 @@ export const invoiceRouter = trpcContext.router({
         }
       }
 
-      // if (input.vatMinimum !== null && input.vatMinimum !== undefined) {
-      //   conditions.push(
-      //     // at least one vat base is not 0
-      //     or(
-      //       gte(invoicesTb.vat_base_21, input.vatMinimum),
-      //       gte(invoicesTb.vat_base_15, input.vatMinimum),
-      //       gte(invoicesTb.vat_base_12, input.vatMinimum),
-      //       gte(invoicesTb.vat_base_10, input.vatMinimum)
-      //     )
-      //   )
-      // }
+      if (input.vatMinimum !== null && input.vatMinimum !== undefined) {
+        conditions.push(
+          // @ts-expect-error
+          or(
+            gte(invoicesTb.vat_21, input.vatMinimum),
+            gte(invoicesTb.vat_12, input.vatMinimum)
+          )
+        )
+      }
 
       const invoicesForUser = await ctx.db.query.invoicesTb.findMany({
         where: and(...conditions),
