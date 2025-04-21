@@ -1,0 +1,48 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateKontrolniHlaseniXML > should generate correct XML for a simple happy path 1`] = `
+"<?xml version="1.0" encoding="UTF-8"?>
+<Pisemnost nazevSW="EPO MF ČR" verzeSW="41.16.3">
+<DPHKH1 verzePis="03.01">
+  <VetaD k_uladis="DPH" dokument="KH1"
+    rok="2024" ctvrt="3"
+    d_poddp="21.04.2025"
+    khdph_forma="B"
+  />
+  <VetaP
+    c_ufo="461" c_pracufo="3005" dic="CZ12345678" typ_ds="F" jmeno="Test" prijmeni="Submitter" ulice="Test Street 123" psc="12345" stat="ČESKÁ REPUBLIKA" email="test@submitter.com" sest_jmeno="Test" sest_prijmeni="Submitter"
+  />
+  
+    <VetaA4
+      c_radku="1"
+      dic_odb="CZ11111111"
+      c_evid_dd="2024-001"
+      dppd="15.07.2024"
+      zakl_dane1="10000"
+      dan1="2100"
+      kod_rezim_pl="0"
+      zdph_44="N"
+    />
+  
+    <VetaB2
+      c_radku="1"
+      dic_dod="CZ33333333"
+      c_evid_dd="INV-C-200"
+      dppd="05.08.2024"
+      zakl_dane1="15000"
+      dan1="3150"
+      dat_odp="A"
+      pomer="N"
+    />
+  
+    <VetaB3
+      zakl_dane1="5100"
+      dan1="1071"
+    />
+  <VetaC
+    obrat23="10000"
+    pln23="20100"
+  />
+</DPHKH1>
+</Pisemnost>"
+`;

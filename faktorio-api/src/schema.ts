@@ -254,7 +254,7 @@ export const passwordResetTokenT = sqliteTable('password_reset_tokens', {
   usedAt: integer('used_at', { mode: 'timestamp' })
 })
 
-export const receivedInvoicesTb = sqliteTable(
+export const receivedInvoiceTb = sqliteTable(
   'received_invoice',
   {
     id: text('id')

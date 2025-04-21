@@ -29,17 +29,32 @@ import { InvoicesDownloadButton } from '@/pages/InvoiceList/InvoicesDownloadButt
 
 // Define the shape of an invoice - adjust based on your actual data structure
 // This might need refinement based on the exact structure from your tRPC query
-interface Invoice {
-  id: string
-  number: string
-  client_name: string | null
-  taxable_fulfillment_due: string | null // Assuming dates are strings
-  issued_on: string | null
-  sent_at: string | null
-  total: number
-  subtotal: number | null
-  currency: string
-  paid_on: string | null
+import { invoicesTb } from '../../../faktorio-api/src/schema'
+import { InferSelectModel } from 'drizzle-orm'
+
+export type Invoice = Pick<
+  InferSelectModel<typeof invoicesTb>,
+  | 'id'
+  | 'number'
+  | 'client_name'
+  | 'taxable_fulfillment_due'
+  | 'issued_on'
+  | 'sent_at'
+  | 'total'
+  | 'subtotal'
+  | 'currency'
+  | 'paid_on'
+  | 'client_vat_no'
+  | 'exchange_rate'
+>
+
+// Helper type for currency totals
+type CurrencyTotals = {
+  [currency: string]: {
+    total: number
+    subtotal: number
+    count: number
+  }
 }
 
 interface InvoiceTableProps {
@@ -64,11 +79,34 @@ export function InvoiceTable({
   year,
   search
 }: InvoiceTableProps) {
-  const total = invoices.reduce((acc, invoice) => acc + invoice.total, 0)
-  const subtotalSum = invoices.reduce(
-    (acc, invoice) => acc + (invoice.subtotal ?? 0),
-    0
-  )
+  const currencyTotals = invoices.reduce<CurrencyTotals>((acc, invoice) => {
+    const currency = invoice.currency || 'N/A' // Handle potential null/undefined currency
+    if (!acc[currency]) {
+      acc[currency] = { total: 0, subtotal: 0, count: 0 }
+    }
+    acc[currency].total += invoice.total
+    acc[currency].subtotal += invoice.subtotal ?? 0
+    acc[currency].count += 1
+    return acc
+  }, {})
+
+  // Calculate total sum converted to CZK
+  const totalSumCZK = invoices.reduce((acc, invoice) => {
+    let amountInCZK = invoice.total
+    if (invoice.currency !== 'CZK' && invoice.exchange_rate) {
+      amountInCZK = invoice.total * invoice.exchange_rate
+    } else if (invoice.currency !== 'CZK') {
+      // Handle cases where exchange rate might be missing for non-CZK invoices
+      // For now, we'll skip them in the total sum, but you might want a different handling
+      console.warn(
+        `Missing exchange rate for non-CZK invoice ${invoice.number}`
+      )
+      return acc
+    }
+    return acc + amountInCZK
+  }, 0)
+
+  const sortedCurrencies = Object.keys(currencyTotals).sort()
 
   return (
     <Table>
@@ -199,24 +237,59 @@ export function InvoiceTable({
         )}
 
         {showTotals && !isLoading && invoices.length > 0 && (
-          <TableRow className="bg-gray-200">
-            <TableCell colSpan={6}>
-              Celkem {invoices.length}{' '}
-              {invoices.length === 1
-                ? 'faktura'
-                : invoices.length > 4
-                  ? 'faktur'
-                  : 'faktury'}
-            </TableCell>
-            <TableCell>{formatNumberWithSpaces(total)} CZK</TableCell>
-            <TableCell>{formatNumberWithSpaces(subtotalSum)} CZK</TableCell>
-            <TableCell>
-              {/* Conditionally render download button based on props */}
-              {year !== undefined && search !== undefined && (
-                <InvoicesDownloadButton year={year} search={search} />
-              )}
-            </TableCell>
-          </TableRow>
+          <>
+            {/* Dynamically render rows for each currency */}
+            {sortedCurrencies.map((currency) => (
+              <TableRow key={currency} className="bg-gray-100 font-medium">
+                <TableCell colSpan={5}>
+                  Celkem {currencyTotals[currency].count}{' '}
+                  {currencyTotals[currency].count === 1
+                    ? 'faktura'
+                    : currencyTotals[currency].count > 1 &&
+                        currencyTotals[currency].count < 5
+                      ? 'faktury'
+                      : 'faktur'}{' '}
+                  v {currency}
+                </TableCell>
+                <TableCell></TableCell> {/* Empty cell for alignment */}
+                <TableCell>
+                  {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
+                  {currency}
+                </TableCell>
+                <TableCell>
+                  {formatNumberWithSpaces(currencyTotals[currency].subtotal)}{' '}
+                  {currency}
+                </TableCell>
+                <TableCell className="text-right"></TableCell>{' '}
+                {/* Empty action cell */}
+              </TableRow>
+            ))}
+
+            {/* Overall Total Count, Sum, and Download Row - Only show if multiple currencies */}
+            {Object.keys(currencyTotals).length > 1 && (
+              <TableRow className="bg-gray-200 font-semibold">
+                <TableCell colSpan={7}>
+                  {' '}
+                  {/* Adjusted colspan to push sum next to button */}
+                  Ve všech měnách {invoices.length}{' '}
+                  {invoices.length === 1
+                    ? 'faktura'
+                    : invoices.length > 1 && invoices.length < 5
+                      ? 'faktury'
+                      : 'faktur'}
+                </TableCell>
+                {/* Display the total sum in CZK */}
+                <TableCell colSpan={1} className="text-left">
+                  {formatNumberWithSpaces(totalSumCZK)} CZK
+                </TableCell>
+                <TableCell className="text-right">
+                  {year !== undefined && search !== undefined && (
+                    <InvoicesDownloadButton year={year} search={search} />
+                  )}
+                </TableCell>
+              </TableRow>
+            )}
+          </>
         )}
       </TableBody>
     </Table>

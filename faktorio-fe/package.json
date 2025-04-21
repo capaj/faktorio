@@ -12,7 +12,8 @@
     "build": "vite build",
     "deploy": "bunx wrangler pages deploy dist",
     "kill": "kill-port 5174",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "test": "vitest"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -94,6 +95,7 @@
     "typescript": "^5.8.3",
     "vite": "^6.3.2",
     "vite-plugin-pwa": "^1.0.0",
+    "vitest": "^3.1.1",
     "wrangler": "^4.12.0"
   }
 }

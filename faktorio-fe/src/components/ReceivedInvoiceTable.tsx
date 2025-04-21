@@ -12,17 +12,22 @@ import { Button } from '@/components/ui/button'
 import { Trash2Icon, Loader2 } from 'lucide-react' // Keep used icons
 
 // Define the shape of a received invoice
-interface ReceivedInvoice {
-  id: string
-  supplier_name: string | null
-  invoice_number: string | null
-  issue_date: string | null
-  due_date: string | null
-  total_without_vat: number | null
-  total_with_vat: number
-  currency: string
-  status: 'received' | 'verified' | 'disputed' | 'paid' | string // Use known statuses or allow string
-}
+import { receivedInvoiceTb } from '../../../faktorio-api/src/schema'
+import { InferSelectModel } from 'drizzle-orm'
+
+export type ReceivedInvoice = Pick<
+  InferSelectModel<typeof receivedInvoiceTb>,
+  | 'id'
+  | 'supplier_name'
+  | 'supplier_vat_no'
+  | 'invoice_number'
+  | 'issue_date'
+  | 'due_date'
+  | 'total_without_vat'
+  | 'total_with_vat'
+  | 'currency'
+  | 'status'
+>
 
 interface ReceivedInvoiceTableProps {
   invoices: ReceivedInvoice[]

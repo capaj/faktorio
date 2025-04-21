@@ -11,6 +11,13 @@ import { trpcClient } from '@/lib/trpcClient'
 import { DownloadIcon } from 'lucide-react'
 import { InvoiceTable } from '@/components/InvoiceTable'
 import { ReceivedInvoiceTable } from '@/components/ReceivedInvoiceTable'
+import { type Invoice } from '@/components/InvoiceTable'
+import { type ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
+import {
+  generateKontrolniHlaseniXML,
+  type SubmitterData
+} from '@/lib/generateKontrolniHlaseniXML'
+import { useAuth } from '@/lib/AuthContext'
 
 // Helper function to determine the last ended quarter
 const getLastEndedQuarter = () => {
@@ -60,6 +67,31 @@ function getQuarterDateRange(
   return result
 }
 
+// Helper function to format date as DD.MM.YYYY
+function formatCzechDate(dateString: string | null | Date): string {
+  if (!dateString) return ''
+  try {
+    const date =
+      typeof dateString === 'string' ? new Date(dateString) : dateString
+    // Check if date is valid before formatting
+    if (isNaN(date.getTime())) return ''
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0') // Month is 0-indexed
+    const year = date.getFullYear()
+    return `${day}.${month}.${year}`
+  } catch (e) {
+    console.error('Error formatting date:', dateString, e)
+    return '' // Return empty string on error
+  }
+}
+
+// Helper function to format numbers for XML (integer)
+function formatXmlNumber(num: number | null | undefined): string {
+  if (num === null || num === undefined) return '0'
+  // Round to nearest integer and convert to string
+  return Math.round(num).toString()
+}
+
 export function XMLExportPage() {
   const { year: initialYear, quarter: initialQuarter } = getLastEndedQuarter()
   const [selectedYear, setSelectedYear] = useState<number>(initialYear)
@@ -86,9 +118,53 @@ export function XMLExportPage() {
     to: endDate
   })
 
+  // Fetch submitter data
+  const [submitterDataResult] = trpcClient.invoicingDetails.useSuspenseQuery()
+
+  const [firstName, lastName] = (submitterDataResult?.name ?? '').split(' ')
+
+  if (!submitterDataResult?.registration_no) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-2xl font-bold">
+          Není nastaveno žádné daňové identifikační číslo.
+        </div>
+      </div>
+    )
+  }
+
+  const submitterData: SubmitterData = {
+    dic: submitterDataResult.registration_no,
+    typ_ds: 'F',
+    jmeno: firstName,
+    prijmeni: lastName,
+    ulice: submitterDataResult.street ?? '',
+    psc: submitterDataResult?.zip ?? '',
+    stat: submitterDataResult?.country ?? 'ČESKÁ REPUBLIKA',
+    email: submitterDataResult?.main_email ?? ''
+  }
+
   const handleDownloadXML = () => {
-    // TODO: Implement XML generation and download logic
-    alert('XML Download functionality not yet implemented.')
+    // Call the generator function
+    const xmlString = generateKontrolniHlaseniXML({
+      issuedInvoices,
+      receivedInvoices,
+      submitterData,
+      year: selectedYear,
+      quarter: selectedQuarter
+    })
+
+    // Trigger Download
+    const blob = new Blob([xmlString], { type: 'application/xml' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    // Use submitterData.dic for filename
+    a.download = `KH_${selectedYear}_Q${selectedQuarter}_${submitterData.dic}.xml`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   const currentDisplayYear = new Date().getFullYear()
