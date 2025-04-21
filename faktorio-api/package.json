@@ -24,7 +24,6 @@
     "wrangler": "^4.12.0"
   },
   "dependencies": {
-    "faktorio-shared": "workspace:*",
     "@google/genai": "^0.9.0",
     "@google/generative-ai": "^0.24.0",
     "@libsql/client": "^0.15.4",
@@ -35,10 +34,12 @@
     "@trpc/react-query": "^11.1.0",
     "@trpc/server": "^11.1.0",
     "@tsndr/cloudflare-worker-jwt": "^3.1.4",
+    "currency-codes": "^2.2.0",
     "debug": "^4.4.0",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.42.0",
     "drizzle-zod": "^0.7.1",
+    "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.8",
     "zod": "^3.24.3"
   }
