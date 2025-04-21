@@ -12,10 +12,8 @@ describe('getInvoiceSums', () => {
       native_total: 0,
       vat_base_21: 0,
       vat_21: 0,
-      vat_base_15: 0,
-      vat_15: 0,
-      vat_base_10: 0,
-      vat_10: 0,
+      vat_base_12: 0,
+      vat_12: 0,
       vat_base_0: 0
     })
   })
@@ -38,7 +36,7 @@ describe('getInvoiceSums', () => {
 
     // Expected calculations:
     // Subtotal: (2*100) + (1*50) = 250
-    // VAT: (250 * 21/100) = 52.5
+    // VAT 21%: (250 * 0.21) = 52.5
     // Total: 250 + 52.5 = 302.5
 
     expect(result.subtotal).toBeCloseTo(250)
@@ -47,9 +45,11 @@ describe('getInvoiceSums', () => {
     expect(result.native_total).toBeCloseTo(302.5)
     expect(result.vat_base_21).toBeCloseTo(250)
     expect(result.vat_21).toBeCloseTo(52.5)
+    expect(result.vat_base_12).toBeCloseTo(0)
+    expect(result.vat_12).toBeCloseTo(0)
   })
 
-  it('should calculate correct sums for mixed VAT rates', () => {
+  it('should calculate correct sums for mixed VAT rates (21%, 12%, 0%)', () => {
     const invoiceItems = [
       {
         quantity: 2,
@@ -59,12 +59,12 @@ describe('getInvoiceSums', () => {
       {
         quantity: 3,
         unit_price: 50,
-        vat_rate: 15
+        vat_rate: 12
       },
       {
         quantity: 1,
         unit_price: 80,
-        vat_rate: 10
+        vat_rate: 12
       },
       {
         quantity: 5,
@@ -76,22 +76,22 @@ describe('getInvoiceSums', () => {
     const result = getInvoiceSums(invoiceItems)
 
     // Expected calculations:
-    // Subtotal: (2*100) + (3*50) + (1*80) + (5*20) = 200 + 150 + 80 + 100 = 530
-    // VAT for 21%: (200 * 0.21) = 42
-    // VAT for 15%: (150 * 0.15) = 22.5
-    // VAT for 10%: (80 * 0.10) = 8
-    // VAT for 0%: (100 * 0) = 0
-    // Total VAT: 42 + 22.5 + 8 + 0 = 72.5
-    // Total: 530 + 72.5 = 602.5
+    // Base 21%: 200
+    // Base 12%: 150 + 80 = 230
+    // Base 0%: 100
+    // Subtotal: 200 + 230 + 100 = 530
+    // VAT 21%: 200 * 0.21 = 42
+    // VAT 12%: 230 * 0.12 = 27.6
+    // VAT 0%: 100 * 0 = 0
+    // Total VAT: 42 + 27.6 + 0 = 69.6
+    // Total: 530 + 69.6 = 599.6
 
     expect(result.subtotal).toBeCloseTo(530)
-    expect(result.total).toBeCloseTo(602.5)
+    expect(result.total).toBeCloseTo(599.6)
     expect(result.vat_base_21).toBeCloseTo(200)
     expect(result.vat_21).toBeCloseTo(42)
-    expect(result.vat_base_15).toBeCloseTo(150)
-    expect(result.vat_15).toBeCloseTo(22.5)
-    expect(result.vat_base_10).toBeCloseTo(80)
-    expect(result.vat_10).toBeCloseTo(8)
+    expect(result.vat_base_12).toBeCloseTo(230)
+    expect(result.vat_12).toBeCloseTo(27.6)
     expect(result.vat_base_0).toBeCloseTo(100)
   })
 
@@ -105,7 +105,7 @@ describe('getInvoiceSums', () => {
       {
         quantity: 3,
         unit_price: null,
-        vat_rate: 15
+        vat_rate: 12
       },
       {
         quantity: 1,
@@ -116,18 +116,16 @@ describe('getInvoiceSums', () => {
 
     const result = getInvoiceSums(invoiceItems)
 
-    // The third item has quantity=1, unit_price=80, and null vat_rate
-    // This should be included in the subtotal, making it 80
+    // Subtotal should only include the item with null vat_rate but valid quantity/price
     expect(result.subtotal).toBeCloseTo(80)
+    // Total = subtotal + vat21 + vat12 + vat0 = 80 + 0 + 0 + 0 = 80
+    expect(result.total).toBeCloseTo(80)
 
-    // The vat_base calculations depend on the vat_rate filter
-    // Items with vat_rate 21 but null quantity -> 0
+    // VAT bases depend on vat_rate filter
     expect(result.vat_base_21).toBeCloseTo(0)
-
-    // Items with vat_rate 15 but null unit_price -> 0
-    expect(result.vat_base_15).toBeCloseTo(0)
-
-    // Items with null vat_rate are not included in any specific category
+    expect(result.vat_21).toBeCloseTo(0)
+    expect(result.vat_base_12).toBeCloseTo(0)
+    expect(result.vat_12).toBeCloseTo(0)
     expect(result.vat_base_0).toBeCloseTo(0)
   })
 })
