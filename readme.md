@@ -59,19 +59,24 @@ are all listed in [roadmap.md](roadmap.md)
 ## Features
 
 - generate invoice PDF
+- extract entire invoice from any JPG/PNG or PDF
 - search through invoices
 - contact management(integrated with ARES)
 - support for foreign currencies ![nová faktura](images/cdc8dd7ed308322d42c6d5af6b481be7f7dff3cca6de0dcb16921f0e6f44ccbb.png)
 - export invoices to Excel, CSV
+- export invoices to XML for Czech tax authorities
 
-## Free Alternatives
+## Feature Comparison
 
-### https://www.fakturovac.cz/
+| Feature                                    | Faktorio.cz | Fakturovac.cz | Fakturoid.cz | iDoklad.cz |
+| ------------------------------------------ | :---------: | :-----------: | :----------: | :--------: |
+| Generate invoice PDF                       |     ✅      |      ✅       |      ✅      |     ✅     |
+| Extract invoice from JPG/PNG/PDF           |     ✅      |      ❌       |      ❌      |     ❌     |
+| Search through invoices                    |     ✅      |      ✅       |      ✅      |     ✅     |
+| Contact management (integrated with ARES)  |     ✅      |      ✅       |      ✅      |     ✅     |
+| Support for foreign currencies             |     ✅      |      ❌       |      ✅      |     ✅     |
+| Export invoices to Excel, CSV              |     ✅      |      ✅       |      ✅      |     ✅     |
+| Export invoices to XML for tax authorities |     ✅      |      ✅       |      ✅      |     ✅     |
+| Send invoices to an email from the app     |     ❌      |      ✅       |      ✅      |     ✅     |
 
-- has most features same as faktorio, but it does not have any other currencies than CZK, so you cannot invoice in EUR for example
-
-## Commercial Alternatives
-
-### https://www.fakturoid.cz/
-
-### https://www.idoklad.cz/
+_Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
