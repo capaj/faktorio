@@ -45,8 +45,8 @@ const AddressSchema = z.object({
   nazevOkresu: z.string().optional(),
   kodObce: z.number(),
   nazevObce: z.string(),
-  kodUlice: z.number(),
-  nazevUlice: z.string(),
+  kodUlice: z.number().optional(),
+  nazevUlice: z.string().optional(),
   cisloDomovni: z.number(),
   kodCastiObce: z.number(),
   nazevCastiObce: z.string(),
@@ -138,6 +138,15 @@ export const fieldConfigForContactForm = {
     ...acFieldConfig
   }
 }
+
+
+export const formatStreetAddress = (aresData: z.infer<typeof AresBusinessInformationSchema>) => {
+  const streetName = aresData.sidlo.nazevUlice ?? aresData.sidlo.nazevCastiObce;
+  const houseNumber = aresData.sidlo.cisloDomovni;
+  const orientationNumber = aresData.sidlo.cisloOrientacni ? `/${aresData.sidlo.cisloOrientacni}` : '';
+  
+  return `${streetName} ${houseNumber}${orientationNumber}`;
+};
 
 export const ContactList = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
@@ -275,7 +284,7 @@ export const ContactList = () => {
           setValues({
             ...values,
             name: aresData.obchodniJmeno,
-            street: aresData.sidlo.nazevUlice,
+            street: formatStreetAddress(aresData),
             street2: aresData.sidlo.nazevCastiObce,
             city: aresData.sidlo.nazevObce,
             zip: String(aresData.sidlo.psc),

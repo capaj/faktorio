@@ -2,7 +2,8 @@ import AutoForm from '@/components/ui/auto-form'
 import { userInvoicingDetailsInsertSchema } from '../../../faktorio-api/src/zodDbSchemas'
 import {
   AresBusinessInformationSchema,
-  fieldConfigForContactForm
+  fieldConfigForContactForm,
+  formatStreetAddress
 } from './ContactList/ContactList'
 import { trpcClient } from '@/lib/trpcClient'
 import { FkButton } from '@/components/FkButton'
@@ -36,7 +37,7 @@ export const MyInvoicingDetails = () => {
           setValues({
             ...values,
             name: aresData.obchodniJmeno,
-            street: aresData.sidlo.nazevUlice,
+            street: formatStreetAddress(aresData),
             street2: aresData.sidlo.nazevCastiObce,
             city: aresData.sidlo.nazevObce,
             zip: String(aresData.sidlo.psc),
