@@ -20,6 +20,7 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion'
 import { FormItem, FormLabel, FormControl } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 
 const defaultInvoiceItem = {
   description: '',
@@ -260,7 +261,7 @@ export const NewInvoice = () => {
       </Accordion>
 
       <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
-        <h3 className="flex items-center gap-2">Položky</h3>
+        <h4 className="flex items-center gap-2">Položky</h4>
         {invoiceItems.map((item, index) => {
           return (
             <InvoiceItemForm
@@ -371,23 +372,40 @@ const InvoiceItemForm = ({
   }, [zodForm.formState])
 
   return (
-    <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0">
-      <div className="flex flex-col sm:flex-row gap-4 flex-grow sm:items-end">
+    <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 align-baseline items-end">
+      <div className="sm:flex sm:flex-row gap-4 flex-grow grid grid-cols-2 flex-wrap items-end">
+        <div>
+          <Label
+            className="text-xs text-gray-500 mb-1 block md:block"
+            htmlFor="quantity"
+          >
+            Množství
+          </Label>
+          <Input
+            className="w-full sm:w-24"
+            type="number"
+            min={0}
+            placeholder="Množství"
+            {...zodForm.inputProps('quantity')}
+          />
+        </div>
+
+        <div>
+          <Label
+            className="text-xs text-gray-500 mb-1 block md:block"
+            htmlFor="unit"
+          >
+            Jednotka
+          </Label>
+          <Input
+            placeholder="Jednotka"
+            type="text"
+            className="w-full sm:w-32"
+            {...zodForm.inputProps('unit')}
+          />
+        </div>
         <Input
-          className="w-full sm:w-24"
-          type="number"
-          min={0}
-          placeholder="Množství"
-          {...zodForm.inputProps('quantity')}
-        />
-        <Input
-          placeholder="Jednotka"
-          type="text"
-          className="w-full sm:w-32"
-          {...zodForm.inputProps('unit')}
-        />
-        <Input
-          className="w-full flex-grow"
+          className="w-full sm:w-96 md:flex-grow col-span-2"
           placeholder="Popis položky"
           type="text"
           {...zodForm.inputProps('description')}
@@ -395,9 +413,12 @@ const InvoiceItemForm = ({
       </div>
       <div className="flex gap-4 items-end">
         <div className="flex-grow sm:flex-grow-0">
-          <label className="text-xs text-gray-500 mb-1 block sm:hidden md:block">
+          <Label
+            className="text-xs text-gray-500 mb-1 block md:block"
+            htmlFor="unit_price"
+          >
             Cena/jedn.
-          </label>
+          </Label>
           <Input
             className="w-full sm:w-32"
             placeholder="Cena/jedn."
@@ -406,9 +427,12 @@ const InvoiceItemForm = ({
           />
         </div>
         <div className="flex-grow sm:flex-grow-0">
-          <label className="text-xs text-gray-500 mb-1 block sm:hidden md:block">
+          <Label
+            className="text-xs text-gray-500 mb-1 block md:block"
+            htmlFor="vat_rate"
+          >
             DPH %
-          </label>
+          </Label>
           <Input
             className="w-full sm:w-20"
             placeholder="DPH %"

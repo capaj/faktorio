@@ -80,10 +80,10 @@ importers:
         version: 16.5.0
       drizzle-orm:
         specifier: ^0.42.0
-        version: 0.42.0(@cloudflare/workers-types@4.20250421.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.42.0(@cloudflare/workers-types@4.20250422.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       drizzle-zod:
         specifier: ^0.7.1
-        version: 0.7.1(drizzle-orm@0.42.0(@cloudflare/workers-types@4.20250421.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.24.3)
+        version: 0.7.1(drizzle-orm@0.42.0(@cloudflare/workers-types@4.20250422.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.24.3)
       faktorio-shared:
         specifier: workspace:*
         version: link:../faktorio-shared
@@ -95,8 +95,8 @@ importers:
         version: 3.24.3
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20250421.0
-        version: 4.20250421.0
+        specifier: ^4.20250422.0
+        version: 4.20250422.0
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
@@ -114,7 +114,7 @@ importers:
         version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.3)
       wrangler:
         specifier: ^4.12.0
-        version: 4.12.0(@cloudflare/workers-types@4.20250421.0)
+        version: 4.12.0(@cloudflare/workers-types@4.20250422.0)
 
   faktorio-fe:
     dependencies:
@@ -225,7 +225,7 @@ importers:
         version: 16.5.0
       drizzle-orm:
         specifier: ^0.42.0
-        version: 0.42.0(@cloudflare/workers-types@4.20250421.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.42.0(@cloudflare/workers-types@4.20250422.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       faktorio-api:
         specifier: workspace:*
         version: link:../faktorio-api
@@ -327,14 +327,14 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0(eslint@9.25.1(jiti@2.4.2))
       eslint-plugin-react-refresh:
-        specifier: ^0.4.19
-        version: 0.4.19(eslint@9.25.1(jiti@2.4.2))
+        specifier: ^0.4.20
+        version: 0.4.20(eslint@9.25.1(jiti@2.4.2))
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
       marked:
-        specifier: ^15.0.8
-        version: 15.0.8
+        specifier: ^15.0.9
+        version: 15.0.9
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -358,7 +358,7 @@ importers:
         version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.3)
       wrangler:
         specifier: ^4.12.0
-        version: 4.12.0(@cloudflare/workers-types@4.20250421.0)
+        version: 4.12.0(@cloudflare/workers-types@4.20250422.0)
 
   faktorio-shared:
     dependencies:
@@ -934,8 +934,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20250421.0':
-    resolution: {integrity: sha512-GYSmQxF9ZE2kkmjCSiYTFdcXUHPeBrz9XvKhqGLTKT8ITYxN5kXy9OYlpkhtVWWUE+XNq7qm5uSKwluaOBKoAw==}
+  '@cloudflare/workers-types@4.20250422.0':
+    resolution: {integrity: sha512-rCeGeyYkIfZXKUNt8x5BOqMYm7W3X8Xj5yBMENR/OzPa9RDWtgHg3B77chPVHVYafSNbVEWc52XdtZTst/DZbA==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -3396,8 +3396,8 @@ packages:
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
 
-  eslint-plugin-react-refresh@0.4.19:
-    resolution: {integrity: sha512-eyy8pcr/YxSYjBoqIFSrlbn9i/xvxUFa8CjzAYo9cFjgGXqq1hyjihcpZvxRLalpaWmueWR81xn7vuKmAFijDQ==}
+  eslint-plugin-react-refresh@0.4.20:
+    resolution: {integrity: sha512-XpbHQ2q5gUF8BGOX4dHe+71qoirYMhApEPZ7sfhF/dNnOF1UXnCMGZf79SFTBO7Bz5YEIT4TMieSlJBWhP9WBA==}
     peerDependencies:
       eslint: '>=8.40'
 
@@ -4142,8 +4142,8 @@ packages:
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
 
-  marked@15.0.8:
-    resolution: {integrity: sha512-rli4l2LyZqpQuRve5C0rkn6pj3hT8EWPC+zkAxFTAJLxRbENfTAhEQq9itrmf1Y81QtAX5D/MYlGlIomNgj9lA==}
+  marked@15.0.9:
+    resolution: {integrity: sha512-9AW/bn9DxQeZVjR52l5jsc0W2pwuhP04QaQewPvylil12Cfr2GBfWmgp6mu8i9Jy8UlBjqDZ9uMTDuJ8QOGZJA==}
     engines: {node: '>= 18'}
     hasBin: true
 
@@ -6125,7 +6125,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20250416.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20250421.0': {}
+  '@cloudflare/workers-types@4.20250422.0': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -8233,17 +8233,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.42.0(@cloudflare/workers-types@4.20250421.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0):
+  drizzle-orm@0.42.0(@cloudflare/workers-types@4.20250422.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0):
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20250421.0
+      '@cloudflare/workers-types': 4.20250422.0
       '@libsql/client': 0.15.4
       '@types/sql.js': 1.4.9
       gel: 2.0.0
       sql.js: 1.13.0
 
-  drizzle-zod@0.7.1(drizzle-orm@0.42.0(@cloudflare/workers-types@4.20250421.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.24.3):
+  drizzle-zod@0.7.1(drizzle-orm@0.42.0(@cloudflare/workers-types@4.20250422.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.24.3):
     dependencies:
-      drizzle-orm: 0.42.0(@cloudflare/workers-types@4.20250421.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+      drizzle-orm: 0.42.0(@cloudflare/workers-types@4.20250422.0)(@libsql/client@0.15.4)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       zod: 3.24.3
 
   dunder-proto@1.0.1:
@@ -8453,7 +8453,7 @@ snapshots:
     dependencies:
       eslint: 9.25.1(jiti@2.4.2)
 
-  eslint-plugin-react-refresh@0.4.19(eslint@9.25.1(jiti@2.4.2)):
+  eslint-plugin-react-refresh@0.4.20(eslint@9.25.1(jiti@2.4.2)):
     dependencies:
       eslint: 9.25.1(jiti@2.4.2)
 
@@ -9213,7 +9213,7 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  marked@15.0.8: {}
+  marked@15.0.9: {}
 
   math-intrinsics@1.1.0: {}
 
@@ -10509,7 +10509,7 @@ snapshots:
       regexparam: 3.0.0
       use-sync-external-store: 1.4.0(react@18.3.1)
 
-  wrangler@4.12.0(@cloudflare/workers-types@4.20250421.0):
+  wrangler@4.12.0(@cloudflare/workers-types@4.20250422.0):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.0
       '@cloudflare/unenv-preset': 2.3.1(unenv@2.0.0-rc.15)(workerd@1.20250416.0)
@@ -10520,7 +10520,7 @@ snapshots:
       unenv: 2.0.0-rc.15
       workerd: 1.20250416.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20250421.0
+      '@cloudflare/workers-types': 4.20250422.0
       fsevents: 2.3.3
       sharp: 0.33.5
     transitivePeerDependencies:

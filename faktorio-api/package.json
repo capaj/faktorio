@@ -16,7 +16,7 @@
     "check-env": "tsx scripts/check-env.ts"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250421.0",
+    "@cloudflare/workers-types": "^4.20250422.0",
     "@types/debug": "^4.1.12",
     "drizzle-kit": "^0.31.0",
     "tsx": "^4.19.3",

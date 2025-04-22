@@ -46,7 +46,7 @@ export function ContactComboBox(props: {
 
   return (
     <div
-      className="flex m-4 center justify-center items-center place-items-center place-content-center"
+      className="flex center justify-center items-center place-items-center place-content-center"
       style={{
         opacity: props.disabled ? 0.7 : 1
       }}
