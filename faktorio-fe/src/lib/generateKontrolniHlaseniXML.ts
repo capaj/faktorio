@@ -108,6 +108,7 @@ export function generateKontrolniHlaseniXML({
       dppd="${taxableDate}"
       zakl_dane1="${formatXmlNumber(subtotal)}"
       dan1="${formatXmlNumber(vatAmount)}"
+      zdph_44="N" 
       pomer="N"
     />`
     } else {

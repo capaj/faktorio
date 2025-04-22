@@ -31,6 +31,7 @@ exports[`generateKontrolniHlaseniXML > should generate correct XML for a simple 
       dppd="05.08.2024"
       zakl_dane1="15000"
       dan1="3150"
+      zdph_44="N" 
       pomer="N"
     />
   
