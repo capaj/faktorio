@@ -1,5 +1,6 @@
 import { Invoice } from '@/components/IssuedInvoiceTable'
 import { ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
+import { formatCzechDate, formatXmlNumber } from './utils'
 
 export interface SubmitterData {
   dic: string
@@ -11,29 +12,6 @@ export interface SubmitterData {
   stat: string
   email: string
   // Add other fields if needed from the query
-}
-
-// Helper function to format date as DD.MM.YYYY
-function formatCzechDate(dateString: string | null | Date): string {
-  if (!dateString) return ''
-  try {
-    const date =
-      typeof dateString === 'string' ? new Date(dateString) : dateString
-    if (isNaN(date.getTime())) return ''
-    const day = date.getDate().toString().padStart(2, '0')
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const year = date.getFullYear()
-    return `${day}.${month}.${year}`
-  } catch (e) {
-    console.error('Error formatting date:', dateString, e)
-    return ''
-  }
-}
-
-// Helper function to format numbers for XML (integer)
-function formatXmlNumber(num: number | null | undefined): string {
-  if (num === null || num === undefined) return '0'
-  return Math.round(num).toString()
 }
 
 interface GenerateXmlParams {

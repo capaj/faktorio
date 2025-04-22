@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -8,16 +8,14 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { trpcClient } from '@/lib/trpcClient'
-import { AlertCircleIcon, DownloadIcon, Terminal } from 'lucide-react'
+import { AlertCircleIcon, DownloadIcon } from 'lucide-react'
 import { IssuedInvoiceTable } from '@/components/IssuedInvoiceTable'
 import { ReceivedInvoiceTable } from '@/components/ReceivedInvoiceTable'
-import { type Invoice } from '@/components/IssuedInvoiceTable'
-import { type ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
 import {
   generateKontrolniHlaseniXML,
   type SubmitterData
 } from '@/lib/generateKontrolniHlaseniXML'
-import { useAuth } from '@/lib/AuthContext'
+import { generateDanovePriznaniXML } from '@/lib/generateDanovePriznaniXML'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -68,31 +66,6 @@ function getQuarterDateRange(
   }
 
   return result
-}
-
-// Helper function to format date as DD.MM.YYYY
-function formatCzechDate(dateString: string | null | Date): string {
-  if (!dateString) return ''
-  try {
-    const date =
-      typeof dateString === 'string' ? new Date(dateString) : dateString
-    // Check if date is valid before formatting
-    if (isNaN(date.getTime())) return ''
-    const day = date.getDate().toString().padStart(2, '0')
-    const month = (date.getMonth() + 1).toString().padStart(2, '0') // Month is 0-indexed
-    const year = date.getFullYear()
-    return `${day}.${month}.${year}`
-  } catch (e) {
-    console.error('Error formatting date:', dateString, e)
-    return '' // Return empty string on error
-  }
-}
-
-// Helper function to format numbers for XML (integer)
-function formatXmlNumber(num: number | null | undefined): string {
-  if (num === null || num === undefined) return '0'
-  // Round to nearest integer and convert to string
-  return Math.round(num).toString()
 }
 
 export function XMLExportPage() {
@@ -166,6 +139,29 @@ export function XMLExportPage() {
     a.href = url
     // Use submitterData.dic for filename
     a.download = `KH_${selectedYear}_Q${selectedQuarter}_${submitterData.dic}.xml`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleDownloadDanovePriznaniXML = () => {
+    // Call the new generator function
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices,
+      receivedInvoices,
+      submitterData,
+      year: selectedYear,
+      quarter: selectedQuarter
+    })
+
+    // Trigger Download
+    const blob = new Blob([xmlString], { type: 'application/xml' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    // Use submitterData.dic for filename
+    a.download = `DPHDP3_${selectedYear}_Q${selectedQuarter}_${submitterData.dic}.xml`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -268,7 +264,7 @@ export function XMLExportPage() {
             Beru na vědomí, že tato funkce je experimentální
           </Label>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end space-x-2">
           <Button
             disabled={
               (receivedInvoices.length === 0 && issuedInvoices.length === 0) ||
@@ -278,6 +274,16 @@ export function XMLExportPage() {
           >
             <DownloadIcon className="mr-2 h-4 w-4" />
             XML Kontrolní hlášení
+          </Button>
+          <Button
+            disabled={
+              (receivedInvoices.length === 0 && issuedInvoices.length === 0) ||
+              !isAcknowledgementChecked
+            }
+            onClick={handleDownloadDanovePriznaniXML}
+          >
+            <DownloadIcon className="mr-2 h-4 w-4" />
+            XML Daňové přiznání
           </Button>
         </div>
       </div>

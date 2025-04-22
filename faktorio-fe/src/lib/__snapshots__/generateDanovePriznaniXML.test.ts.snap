@@ -1,0 +1,31 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateDanovePriznaniXML > should generate correct XML for a simple happy path scenario 1`] = `
+"<?xml version="1.0" encoding="UTF-8"?>
+<Pisemnost nazevSW="EPO MF ČR" verzeSW="41.6.1">
+<DPHDP3 verzePis="01.02">
+  <VetaD
+    k_uladis="DPH"
+    dokument="DP3"
+    rok="2024" ctvrt="3"
+    d_poddp="21.10.2024"
+    dapdph_forma="B"
+    trans="A"
+    typ_platce="P"
+  />
+  <VetaP
+    c_ufo="461" c_pracufo="3005" dic="CZ12345678" typ_ds="F" jmeno="Test" prijmeni="Submitter" ulice="Test Street 1" psc="12345" stat="ČESKÁ REPUBLIKA" email="test@example.com" sest_jmeno="Test" sest_prijmeni="Submitter"
+  />
+  <Veta1
+    obrat23="15000" dan23="3150"
+  />
+  <Veta4
+    pln23="2000" odp_tuz23_nar="420"
+    odp_sum_nar="420"
+  />
+  <Veta6
+    dan_zocelk="3150" odp_zocelk="420" dano_da="2730"
+  />
+</DPHDP3>
+</Pisemnost>"
+`;

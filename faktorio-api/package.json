@@ -10,7 +10,8 @@
     "generate": "drizzle-kit generate",
     "dup": "drizzle-kit up",
     "kill": "kill -9 $(lsof -t -i:9189)",
-    "test": "vitest",
+    "test": "vitest run",
+    "w": "vitest",
     "tsc": "tsc --noEmit",
     "check-env": "tsx scripts/check-env.ts"
   },

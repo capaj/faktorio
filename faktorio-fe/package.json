@@ -13,7 +13,8 @@
     "deploy": "bunx wrangler pages deploy dist",
     "kill": "kill-port 5174",
     "tsc": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest run",
+    "w": "vitest"
   },
   "dependencies": {
     "faktorio-shared": "workspace:*",

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
   generateKontrolniHlaseniXML,
   type SubmitterData
@@ -8,8 +8,14 @@ import { ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
 import { Invoice } from '@/components/IssuedInvoiceTable'
 
 describe('generateKontrolniHlaseniXML', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('should generate correct XML for a simple happy path', () => {
-    // --- Mock Data ---
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-04-21'))
+
     const mockIssuedInvoices: Invoice[] = [
       {
         id: 'iss1',
@@ -89,8 +95,6 @@ describe('generateKontrolniHlaseniXML', () => {
       quarter
     })
 
-    // --- Assertions ---
-    // Replace individual checks with a snapshot test
     expect(xmlString).toMatchSnapshot()
   })
 })
