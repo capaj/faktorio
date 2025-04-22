@@ -10,7 +10,7 @@ exports[`generateKontrolniHlaseniXML > should generate correct XML for a simple 
     khdph_forma="B"
   />
   <VetaP
-    c_ufo="461" c_pracufo="3005" dic="12345678" typ_ds="F" jmeno="Test" prijmeni="Submitter" ulice="Test Street 123" psc="12345" stat="ČESKÁ REPUBLIKA" email="test@submitter.com" sest_jmeno="Test" sest_prijmeni="Submitter"
+    dic="12345678" typ_ds="F" jmeno="Test" prijmeni="Submitter" ulice="Test Street 123" psc="12345" stat="ČESKÁ REPUBLIKA" email="test@submitter.com" sest_jmeno="Test" sest_prijmeni="Submitter"
   />
   
     <VetaA4

@@ -14,7 +14,7 @@ exports[`generateDanovePriznaniXML > should generate correct XML for a simple ha
     typ_platce="P"
   />
   <VetaP
-    c_ufo="461" c_pracufo="3005" dic="12345678" typ_ds="F" jmeno="Test" prijmeni="Submitter" ulice="Test Street 1" psc="12345" stat="ČESKÁ REPUBLIKA" email="test@example.com" sest_jmeno="Test" sest_prijmeni="Submitter"
+    dic="12345678" typ_ds="F" jmeno="Test" prijmeni="Submitter" ulice="Test Street 1" psc="12345" stat="ČESKÁ REPUBLIKA" email="test@example.com" sest_jmeno="Test" sest_prijmeni="Submitter"
   />
   <Veta1
     obrat23="15000" dan23="3150"
