@@ -261,11 +261,11 @@ export function IssuedInvoiceTable({
                 </TableCell>
                 <TableCell></TableCell> {/* Empty cell for alignment */}
                 <TableCell>
-                  {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
+                  {formatNumberWithSpaces(currencyTotals[currency].subtotal)}{' '}
                   {currency}
                 </TableCell>
                 <TableCell>
-                  {formatNumberWithSpaces(currencyTotals[currency].subtotal)}{' '}
+                  {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
                   {currency}
                 </TableCell>
                 <TableCell className="text-right"></TableCell>{' '}
