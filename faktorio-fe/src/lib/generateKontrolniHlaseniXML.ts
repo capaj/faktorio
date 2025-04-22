@@ -19,7 +19,8 @@ interface GenerateXmlParams {
   receivedInvoices: ReceivedInvoice[]
   submitterData: SubmitterData
   year: number
-  quarter: number
+  quarter?: number
+  month?: number
 }
 
 export function generateKontrolniHlaseniXML({
@@ -27,7 +28,8 @@ export function generateKontrolniHlaseniXML({
   receivedInvoices,
   submitterData,
   year,
-  quarter
+  quarter,
+  month
 }: GenerateXmlParams): string {
   const VAT_THRESHOLD = 10000 // CZK threshold for B2/B3 split
   const todayCzech = formatCzechDate(new Date())
@@ -122,11 +124,23 @@ export function generateKontrolniHlaseniXML({
     />`
 
   // Construct Final XML
+  let periodAttribute = ''
+  if (quarter !== undefined) {
+    periodAttribute = `ctvrt="${quarter}"`
+  } else if (month !== undefined) {
+    const formattedMonth = month.toString()
+    periodAttribute = `mesic="${formattedMonth}"`
+  } else {
+    throw new Error(
+      'Either month or quarter must be provided for XML generation.'
+    )
+  }
+
   const xmlString = `<?xml version="1.0" encoding="UTF-8"?>
 <Pisemnost nazevSW="EPO MF ČR" verzeSW="41.16.3">
 <DPHKH1 verzePis="03.01">
   <VetaD k_uladis="DPH" dokument="KH1"
-    rok="${year}" ctvrt="${quarter}"
+    rok="${year}" ${periodAttribute}
     d_poddp="${todayCzech}"
     khdph_forma="B"
   />

@@ -19,6 +19,15 @@ import { generateDanovePriznaniXML } from '@/lib/generateDanovePriznaniXML'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import { formatCzechDate } from '@/lib/utils'
+
+// Helper function to format date as YYYY-MM-DD
+const formatDate = (date: Date) => {
+  const y = date.getFullYear()
+  const m = (date.getMonth() + 1).toString().padStart(2, '0') // Month is 0-indexed
+  const d = date.getDate().toString().padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
 
 // Helper function to determine the last ended quarter
 const getLastEndedQuarter = () => {
@@ -52,46 +61,61 @@ function getQuarterDateRange(
   const startDate = new Date(year, startMonth, 1)
   const endDate = new Date(year, endMonth + 1, 0) // Day 0 of next month is last day of current month
 
-  // Format as YYYY-MM-DD using local date components to avoid timezone issues
-  const formatDate = (date: Date) => {
-    const y = date.getFullYear()
-    const m = (date.getMonth() + 1).toString().padStart(2, '0') // Month is 0-indexed
-    const d = date.getDate().toString().padStart(2, '0')
-    return `${y}-${m}-${d}`
-  }
-
-  const result = {
+  return {
     startDate: formatDate(startDate),
     endDate: formatDate(endDate)
   }
-
-  return result
 }
+
+// Helper function to get date range for a month
+function getMonthlyDateRange(
+  year: number,
+  month: number // 1-12
+): { startDate: string; endDate: string } {
+  const startDate = new Date(year, month - 1, 1) // Month is 0-indexed
+  const endDate = new Date(year, month, 0) // Day 0 of next month is last day of current month
+
+  return {
+    startDate: formatDate(startDate),
+    endDate: formatDate(endDate)
+  }
+}
+
+// Helper to get month names for the selector
+const getMonthNames = (locale = 'cs-CZ') => {
+  return [...Array(12)].map((_, i) => {
+    const date = new Date(2000, i, 1) // Use a fixed year/day
+    return date.toLocaleString(locale, { month: 'long' })
+  })
+}
+const czechMonthNames = getMonthNames()
 
 export function XMLExportPage() {
   const { year: initialYear, quarter: initialQuarter } = getLastEndedQuarter()
   const [selectedYear, setSelectedYear] = useState<number>(initialYear)
   const [selectedQuarter, setSelectedQuarter] = useState<number>(initialQuarter)
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    () => new Date().getMonth() + 1 // Default to current month
+  )
+  const [cadence, setCadence] = useState<'quarterly' | 'monthly'>('quarterly')
   const [isAcknowledgementChecked, setIsAcknowledgementChecked] =
     useState(false)
 
-  const { startDate, endDate } = getQuarterDateRange(
-    selectedYear,
-    selectedQuarter
-  )
+  const { startDate, endDate } =
+    cadence === 'quarterly'
+      ? getQuarterDateRange(selectedYear, selectedQuarter)
+      : getMonthlyDateRange(selectedYear, selectedMonth)
 
-  // Fetch issued invoices for the selected quarter
+  // Fetch issued invoices for the selected period
   const [issuedInvoices] = trpcClient.invoices.listInvoices.useSuspenseQuery({
     filter: '', // Keep empty search filter if needed
-    from: startDate, // Use date range filtering based on backend schema
+    from: startDate,
     to: endDate,
     vatMinimum: 1
   })
 
-  // Fetch received invoices for the selected quarter
-  // TODO: Verify the actual procedure name and input structure
+  // Fetch received invoices for the selected period
   const [receivedInvoices] = trpcClient.receivedInvoices.list.useSuspenseQuery({
-    // Use 'from' and 'to' as indicated by the previous linter error
     from: startDate,
     to: endDate
   })
@@ -123,22 +147,24 @@ export function XMLExportPage() {
   }
 
   const handleDownloadXML = () => {
-    // Call the generator function
     const xmlString = generateKontrolniHlaseniXML({
       issuedInvoices,
       receivedInvoices,
       submitterData,
       year: selectedYear,
-      quarter: selectedQuarter
+      // TODO: Update generator function to handle cadence and month/quarter
+      quarter: cadence === 'quarterly' ? selectedQuarter : undefined,
+      month: cadence === 'monthly' ? selectedMonth : undefined
     })
 
     // Trigger Download
+    const periodString =
+      cadence === 'quarterly' ? `Q${selectedQuarter}` : `M${selectedMonth}`
     const blob = new Blob([xmlString], { type: 'application/xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    // Use submitterData.dic for filename
-    a.download = `KH_${selectedYear}_Q${selectedQuarter}_${submitterData.dic}.xml`
+    a.download = `KH_${selectedYear}_${periodString}_${submitterData.dic}.xml`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -146,22 +172,24 @@ export function XMLExportPage() {
   }
 
   const handleDownloadDanovePriznaniXML = () => {
-    // Call the new generator function
     const xmlString = generateDanovePriznaniXML({
       issuedInvoices,
       receivedInvoices,
       submitterData,
       year: selectedYear,
-      quarter: selectedQuarter
+      // TODO: Update generator function to handle cadence and month/quarter
+      quarter: cadence === 'quarterly' ? selectedQuarter : undefined,
+      month: cadence === 'monthly' ? selectedMonth : undefined
     })
 
     // Trigger Download
+    const periodString =
+      cadence === 'quarterly' ? `Q${selectedQuarter}` : `M${selectedMonth}`
     const blob = new Blob([xmlString], { type: 'application/xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    // Use submitterData.dic for filename
-    a.download = `DPHDP3_${selectedYear}_Q${selectedQuarter}_${submitterData.dic}.xml`
+    a.download = `DPHDP3_${selectedYear}_${periodString}_${submitterData.dic}.xml`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -172,15 +200,34 @@ export function XMLExportPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between m-4">
-        <h3 className="text-xl font-semibold">Export XML pro finanční úřad</h3>
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-between m-4 flex-wrap gap-2">
+        <h3 className="font-semibold md:block">Export XML pro finanční úřad</h3>
+        <div className="flex items-center space-x-2 flex-wrap">
+          <Select
+            value={cadence}
+            onValueChange={(value: 'quarterly' | 'monthly') => {
+              setCadence(value)
+              // Optional: Reset month/quarter when cadence changes?
+              // if (value === 'quarterly') {
+              //   setSelectedQuarter(initialQuarter); // Or keep last selected?
+              // } else {
+              //   setSelectedMonth(new Date().getMonth() + 1); // Or keep last selected?
+              // }
+            }}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Periodicita" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="quarterly">Čtvrtletně</SelectItem>
+              <SelectItem value="monthly">Měsíčně</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Select
             value={selectedYear.toString()}
             onValueChange={(value) => {
               setSelectedYear(parseInt(value))
-              // Reset quarter to 1 if year changes? Or keep the current quarter? Let's reset for simplicity for now.
-              // setSelectedQuarter(1);
             }}
           >
             <SelectTrigger className="w-[120px]">
@@ -198,25 +245,49 @@ export function XMLExportPage() {
             </SelectContent>
           </Select>
 
-          <Select
-            value={selectedQuarter.toString()}
-            onValueChange={(value) => {
-              setSelectedQuarter(parseInt(value))
-            }}
-          >
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Kvartál" />
-            </SelectTrigger>
-            <SelectContent>
-              {[1, 2, 3, 4].map((q) => (
-                <SelectItem key={q} value={q.toString()}>
-                  Q{q}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {cadence === 'quarterly' ? (
+            <Select
+              value={selectedQuarter.toString()}
+              onValueChange={(value) => {
+                setSelectedQuarter(parseInt(value))
+              }}
+            >
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Kvartál" />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4].map((q) => (
+                  <SelectItem key={q} value={q.toString()}>
+                    Q{q}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Select
+              value={selectedMonth.toString()}
+              onValueChange={(value) => {
+                setSelectedMonth(parseInt(value))
+              }}
+            >
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Měsíc" />
+              </SelectTrigger>
+              <SelectContent>
+                {czechMonthNames.map((monthName, index) => {
+                  const monthValue = index + 1
+                  return (
+                    <SelectItem key={monthValue} value={monthValue.toString()}>
+                      {monthName}
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+          )}
+
           <span className="text-md text-muted-foreground">
-            {startDate} - {endDate}
+            {formatCzechDate(startDate)} - {formatCzechDate(endDate)}
           </span>
         </div>
       </div>

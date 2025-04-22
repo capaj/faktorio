@@ -8,7 +8,8 @@ interface GenerateDanovePriznaniParams {
   receivedInvoices: ReceivedInvoice[]
   submitterData: SubmitterData
   year: number
-  quarter: number
+  quarter?: number
+  month?: number
 }
 
 export function generateDanovePriznaniXML({
@@ -16,7 +17,8 @@ export function generateDanovePriznaniXML({
   receivedInvoices,
   submitterData,
   year,
-  quarter
+  quarter,
+  month
 }: GenerateDanovePriznaniParams): string {
   const todayCzech = formatCzechDate(new Date())
 
@@ -49,13 +51,30 @@ export function generateDanovePriznaniXML({
   const dano_da = Math.max(0, dan_zocelk - odp_zocelk)
 
   // Construct Final XML
+
+  // Determine period attribute based on provided month or quarter
+  let periodAttribute = ''
+  if (quarter !== undefined) {
+    periodAttribute = `ctvrt="${quarter}"`
+  } else if (month !== undefined) {
+    // Ensure month is formatted correctly if needed (e.g., leading zero)
+    // Assuming month is 1-12, the XML spec might require 01-12
+    const formattedMonth = month.toString() // Adjust if specific formatting is needed
+    periodAttribute = `mesic="${formattedMonth}"`
+  } else {
+    // Handle error: Neither month nor quarter provided
+    throw new Error(
+      'Either month or quarter must be provided for XML generation.'
+    )
+  }
+
   const xmlString = `<?xml version="1.0" encoding="UTF-8"?>
 <Pisemnost nazevSW="EPO MF ČR" verzeSW="41.6.1">
 <DPHDP3 verzePis="01.02">
   <VetaD
     k_uladis="DPH"
     dokument="DP3"
-    rok="${year}" ctvrt="${quarter}"
+    rok="${year}" ${periodAttribute}
     d_poddp="${todayCzech}"
     dapdph_forma="B"
     trans="A"
