@@ -117,9 +117,9 @@ export function IssuedInvoiceTable({
           <TableHead>Zdanitelné plnění datum</TableHead>
           <TableHead>Vystaveno dne</TableHead>
           <TableHead>Odesláno</TableHead>
-          <TableHead>s DPH</TableHead>
-          <TableHead>bez DPH</TableHead>
           <TableHead>Datum platby</TableHead>
+          <TableHead>bez DPH</TableHead>
+          <TableHead>s DPH</TableHead>
           <TableHead className="text-right">Akce</TableHead>
         </TableRow>
       </TableHeader>
@@ -136,12 +136,6 @@ export function IssuedInvoiceTable({
             <TableCell>{invoice.issued_on}</TableCell>
             <TableCell>{invoice.sent_at}</TableCell>
             <TableCell>
-              {invoice.total} {invoice.currency}
-            </TableCell>
-            <TableCell>
-              {invoice.subtotal} {invoice.currency}
-            </TableCell>
-            <TableCell>
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
                   invoice.paid_on
@@ -152,6 +146,20 @@ export function IssuedInvoiceTable({
                 {invoice.paid_on ? invoice.paid_on : 'Nezaplaceno'}
               </span>
             </TableCell>
+            <TableCell>
+              {invoice.subtotal} {invoice.currency}
+              {invoice.currency !== 'CZK' &&
+                invoice.exchange_rate &&
+                invoice.subtotal && (
+                  <div className="text-xs text-gray-500">
+                    ({invoice.exchange_rate * invoice.subtotal} CZK)
+                  </div>
+                )}
+            </TableCell>
+            <TableCell>
+              {invoice.total} {invoice.currency}
+            </TableCell>
+
             <TableCell className="text-right">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
