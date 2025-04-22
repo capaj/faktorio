@@ -12,6 +12,7 @@ describe('generateDanovePriznaniXML', () => {
   it('should generate correct XML for a simple happy path scenario', () => {
     const submitterData: SubmitterData = {
       dic: 'CZ12345678',
+      naz_obce: 'Brno',
       typ_ds: 'F',
       jmeno: 'Test',
       prijmeni: 'Submitter',

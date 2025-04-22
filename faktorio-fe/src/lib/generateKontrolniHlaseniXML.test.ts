@@ -74,6 +74,7 @@ describe('generateKontrolniHlaseniXML', () => {
 
     const mockSubmitterData: SubmitterData = {
       dic: 'CZ12345678',
+      naz_obce: 'Brno',
       typ_ds: 'F',
       jmeno: 'Test',
       prijmeni: 'Submitter',
