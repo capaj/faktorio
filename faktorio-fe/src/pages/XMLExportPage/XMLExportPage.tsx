@@ -307,9 +307,24 @@ export function XMLExportPage() {
       </div>
 
       {/* Display Issued Invoices */}
-      <h4 className="text-lg font-semibold mt-4 mb-2">Vydané faktury</h4>
+      <h4 className="text-lg font-semibold mt-4 mb-2">Tuzemské faktury</h4>
       <IssuedInvoiceTable
         invoices={issuedInvoicesWithVat}
+        isLoading={false}
+        onDelete={async () => {
+          /* No delete action here */
+        }}
+        onMarkAsPaid={() => {
+          /* No mark as paid action here */
+        }}
+        onMarkAsUnpaid={async () => {
+          /* No mark as unpaid action here */
+        }}
+      />
+
+      <h4 className="text-lg font-semibold mt-4 mb-2">EU faktury</h4>
+      <IssuedInvoiceTable
+        invoices={eurInvoices}
         isLoading={false}
         onDelete={async () => {
           /* No delete action here */
