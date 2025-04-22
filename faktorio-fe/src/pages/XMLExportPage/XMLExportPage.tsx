@@ -121,11 +121,11 @@ export function XMLExportPage() {
   })
 
   // Fetch submitter data
-  const [submitterDataResult] = trpcClient.invoicingDetails.useSuspenseQuery()
+  const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
 
-  const [firstName, lastName] = (submitterDataResult?.name ?? '').split(' ')
+  const [firstName, lastName] = (invoicingDetails?.name ?? '').split(' ')
 
-  if (!submitterDataResult?.registration_no) {
+  if (!invoicingDetails?.vat_no) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-2xl font-bold">
@@ -136,14 +136,14 @@ export function XMLExportPage() {
   }
 
   const submitterData: SubmitterData = {
-    dic: submitterDataResult.registration_no,
+    dic: invoicingDetails.vat_no,
     typ_ds: 'F',
     jmeno: firstName,
     prijmeni: lastName,
-    ulice: submitterDataResult.street ?? '',
-    psc: submitterDataResult?.zip ?? '',
-    stat: submitterDataResult?.country ?? 'ČESKÁ REPUBLIKA',
-    email: submitterDataResult?.main_email ?? ''
+    ulice: invoicingDetails.street ?? '',
+    psc: invoicingDetails?.zip ?? '',
+    stat: invoicingDetails?.country ?? 'ČESKÁ REPUBLIKA',
+    email: invoicingDetails?.main_email ?? ''
   }
 
   const handleDownloadXML = () => {
