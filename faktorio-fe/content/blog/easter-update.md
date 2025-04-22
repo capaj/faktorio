@@ -1,9 +1,9 @@
 ---
-title: Easter update
+title: Velikonoční nadílka faktorio
 date: 2025-04-22
 ---
 
-# Velikonoční nadílka
+# Velikonoční nadílka dvou nových rozsáhlých funkcionalit
 
 Pokud jste na velikonoce nedostali žádnou nadílku, nezoufejte-faktorio naděluje tento rok všem bez rozdílu pohlaví.
 V repozitáři bylo hodně rušno, takže máme několik nových funkcionalit:
@@ -34,4 +34,4 @@ Všechny tři exportujete odsud:
 ![picture 0](../../../images/c3fcbabcb0597bbbf9754f0c851881e20057c041322407276aa2e6941dba39dd.png)
 
 Stačí jen potvrdit, že jste srozuměni s tím, že tato funkcionalita je experimentální a může obsahovat chyby.
-Tímto se stává faktorio velmi konkurenceschopným nástrojem pro potřeby menších firem a živnostníků, protože vím obstará kompletní agendu fakturace. Jediné co vy musíte udělat je nahrát XMLka do [mojedane.cz](https://mojedane.cz/), a my se postaráme o to, že se vám to správně přepíše.
+Tímto se stává faktorio velmi konkurenceschopným nástrojem pro potřeby menších firem a živnostníků, protože vám obstará kompletní agendu fakturace. Jediné co vy musíte udělat je nahrát XMLka do [mojedane.cz](https://mojedane.cz/), a my se postaráme o to, že se vám to správně přepíše.
