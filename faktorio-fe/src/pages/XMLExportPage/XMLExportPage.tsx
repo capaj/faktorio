@@ -107,11 +107,22 @@ export function XMLExportPage() {
       : getMonthlyDateRange(selectedYear, selectedMonth)
 
   // Fetch issued invoices for the selected period
-  const [issuedInvoices] = trpcClient.invoices.listInvoices.useSuspenseQuery({
-    filter: '', // Keep empty search filter if needed
+  const [issuedInvoicesWithVat] =
+    trpcClient.invoices.listInvoices.useSuspenseQuery({
+      from: startDate,
+      to: endDate,
+      vat: {
+        minimum: 1
+      }
+    })
+
+  const [eurInvoices] = trpcClient.invoices.listInvoices.useSuspenseQuery({
     from: startDate,
     to: endDate,
-    vatMinimum: 1
+    currency: 'EUR',
+    vat: {
+      maximum: 0 // only include reverse charge invoices for now
+    }
   })
 
   // Fetch received invoices for the selected period
@@ -148,11 +159,11 @@ export function XMLExportPage() {
 
   const handleDownloadXML = () => {
     const xmlString = generateKontrolniHlaseniXML({
-      issuedInvoices,
+      issuedInvoices: issuedInvoicesWithVat,
       receivedInvoices,
       submitterData,
       year: selectedYear,
-      // TODO: Update generator function to handle cadence and month/quarter
+
       quarter: cadence === 'quarterly' ? selectedQuarter : undefined,
       month: cadence === 'monthly' ? selectedMonth : undefined
     })
@@ -173,11 +184,14 @@ export function XMLExportPage() {
 
   const handleDownloadDanovePriznaniXML = () => {
     const xmlString = generateDanovePriznaniXML({
-      issuedInvoices,
+      issuedInvoices: issuedInvoicesWithVat,
       receivedInvoices,
       submitterData,
       year: selectedYear,
-      // TODO: Update generator function to handle cadence and month/quarter
+      eurInvoiceSum: eurInvoices.reduce(
+        (sum, inv) => sum + (inv.native_total ?? 0),
+        0
+      ),
       quarter: cadence === 'quarterly' ? selectedQuarter : undefined,
       month: cadence === 'monthly' ? selectedMonth : undefined
     })
@@ -295,7 +309,7 @@ export function XMLExportPage() {
       {/* Display Issued Invoices */}
       <h4 className="text-lg font-semibold mt-4 mb-2">Vydané faktury</h4>
       <IssuedInvoiceTable
-        invoices={issuedInvoices}
+        invoices={issuedInvoicesWithVat}
         isLoading={false}
         onDelete={async () => {
           /* No delete action here */
@@ -338,7 +352,8 @@ export function XMLExportPage() {
         <div className="flex justify-end space-x-2">
           <Button
             disabled={
-              (receivedInvoices.length === 0 && issuedInvoices.length === 0) ||
+              (receivedInvoices.length === 0 &&
+                issuedInvoicesWithVat.length === 0) ||
               !isAcknowledgementChecked
             }
             onClick={handleDownloadXML}
@@ -348,7 +363,8 @@ export function XMLExportPage() {
           </Button>
           <Button
             disabled={
-              (receivedInvoices.length === 0 && issuedInvoices.length === 0) ||
+              (receivedInvoices.length === 0 &&
+                issuedInvoicesWithVat.length === 0) ||
               !isAcknowledgementChecked
             }
             onClick={handleDownloadDanovePriznaniXML}

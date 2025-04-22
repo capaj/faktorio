@@ -38,7 +38,10 @@ export const invoiceRouter = trpcContext.router({
     )
     .mutation(async ({ input, ctx }) => {
       const invoiceItems = input.items
-      const invoiceSums = getInvoiceSums(invoiceItems)
+      const invoiceSums = getInvoiceSums(
+        invoiceItems,
+        input.invoice.exchange_rate ?? 1
+      )
 
       const client = await ctx.db.query.contactTb
         .findFirst({
@@ -127,10 +130,16 @@ export const invoiceRouter = trpcContext.router({
         limit: z.number().nullable().default(30),
         offset: z.number().nullish().default(0),
         filter: z.string().nullish(),
+        currency: z.string().min(3).max(3).nullish(),
         from: stringDateSchema.nullish(), // YYYY-MM-DD
         to: stringDateSchema.nullish(),
         year: z.number().nullish(), // Add year filter
-        vatMinimum: z.number().nullish()
+        vat: z
+          .object({
+            minimum: z.number().nullish(),
+            maximum: z.number().nullish()
+          })
+          .nullish()
       })
     )
     .query(async ({ ctx, input }) => {
@@ -166,14 +175,29 @@ export const invoiceRouter = trpcContext.router({
         }
       }
 
-      if (input.vatMinimum !== null && input.vatMinimum !== undefined) {
+      if (input.vat?.minimum !== null && input.vat?.minimum !== undefined) {
         conditions.push(
           // @ts-expect-error
           or(
-            gte(invoicesTb.vat_21, input.vatMinimum),
-            gte(invoicesTb.vat_12, input.vatMinimum)
+            gte(invoicesTb.vat_21, input.vat.minimum),
+            gte(invoicesTb.vat_12, input.vat.minimum)
           )
         )
+      } else if (
+        input.vat?.maximum !== null &&
+        input.vat?.maximum !== undefined
+      ) {
+        conditions.push(
+          // @ts-expect-error
+          or(
+            lte(invoicesTb.vat_21, input.vat.maximum),
+            lte(invoicesTb.vat_12, input.vat.maximum)
+          )
+        )
+      }
+
+      if (input.currency) {
+        conditions.push(eq(invoicesTb.currency, input.currency))
       }
 
       const invoicesForUser = await ctx.db.query.invoicesTb.findMany({
@@ -267,7 +291,10 @@ export const invoiceRouter = trpcContext.router({
       }
 
       await ctx.db.transaction(async (tx) => {
-        const invoiceSums = getInvoiceSums(input.items)
+        const invoiceSums = getInvoiceSums(
+          input.items,
+          input.invoice.exchange_rate ?? 1
+        )
         console.log(
           'Update invoice input - taxable_fulfillment_due:',
           input.invoice.taxable_fulfillment_due

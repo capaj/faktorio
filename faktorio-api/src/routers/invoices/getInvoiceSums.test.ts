@@ -3,7 +3,7 @@ import { getInvoiceSums } from './getInvoiceSums'
 
 describe('getInvoiceSums', () => {
   it('should calculate correct sums for empty array', () => {
-    const result = getInvoiceSums([])
+    const result = getInvoiceSums([], 1)
 
     expect(result).toEqual({
       subtotal: 0,
@@ -32,7 +32,7 @@ describe('getInvoiceSums', () => {
       }
     ]
 
-    const result = getInvoiceSums(invoiceItems)
+    const result = getInvoiceSums(invoiceItems, 1)
 
     // Expected calculations:
     // Subtotal: (2*100) + (1*50) = 250
@@ -47,6 +47,21 @@ describe('getInvoiceSums', () => {
     expect(result.vat_21).toBeCloseTo(52.5)
     expect(result.vat_base_12).toBeCloseTo(0)
     expect(result.vat_12).toBeCloseTo(0)
+  })
+
+  it('should calculate correct sums with exchange rate', () => {
+    const invoiceItems = [
+      {
+        quantity: 2,
+        unit_price: 100,
+        vat_rate: 21
+      }
+    ]
+
+    const result = getInvoiceSums(invoiceItems, 25)
+
+    expect(result.native_subtotal).toBe(5000)
+    expect(result.native_total).toBe(6050)
   })
 
   it('should calculate correct sums for mixed VAT rates (21%, 12%, 0%)', () => {
@@ -73,7 +88,7 @@ describe('getInvoiceSums', () => {
       }
     ]
 
-    const result = getInvoiceSums(invoiceItems)
+    const result = getInvoiceSums(invoiceItems, 1)
 
     // Expected calculations:
     // Base 21%: 200
@@ -114,7 +129,7 @@ describe('getInvoiceSums', () => {
       }
     ]
 
-    const result = getInvoiceSums(invoiceItems)
+    const result = getInvoiceSums(invoiceItems, 1)
 
     // Subtotal should only include the item with null vat_rate but valid quantity/price
     expect(result.subtotal).toBeCloseTo(80)

@@ -1,6 +1,6 @@
 import { Invoice } from '@/components/IssuedInvoiceTable'
 import { ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
-import { formatCzechDate, formatXmlNumber } from './utils'
+import { formatCzechDate, toInt } from './utils'
 
 export interface SubmitterData {
   dic: string
@@ -63,8 +63,8 @@ export function generateKontrolniHlaseniXML({
       dic_odb="${clientVatId.replace('CZ', '')}"
       c_evid_dd="${inv.number}"
       dppd="${taxableDate}"
-      zakl_dane1="${formatXmlNumber(subtotal)}"
-      dan1="${formatXmlNumber(vatAmount)}"
+      zakl_dane1="${toInt(subtotal)}"
+      dan1="${toInt(vatAmount)}"
       kod_rezim_pl="0"
       zdph_44="N"
     />`
@@ -106,8 +106,8 @@ export function generateKontrolniHlaseniXML({
       dic_dod="${supplierVatId.replace('CZ', '')}"
       c_evid_dd="${inv.invoice_number}"
       dppd="${taxableDate}"
-      zakl_dane1="${formatXmlNumber(subtotal)}"
-      dan1="${formatXmlNumber(vatAmount)}"
+      zakl_dane1="${toInt(subtotal)}"
+      dan1="${toInt(vatAmount)}"
       zdph_44="N" 
       pomer="N"
     />`
@@ -119,8 +119,8 @@ export function generateKontrolniHlaseniXML({
 
   const vetaB3Xml = `
     <VetaB3
-      zakl_dane1="${formatXmlNumber(b3TotalSubtotal)}"
-      dan1="${formatXmlNumber(b3TotalVat)}"
+      zakl_dane1="${toInt(b3TotalSubtotal)}"
+      dan1="${toInt(b3TotalVat)}"
     />`
 
   // Construct Final XML
@@ -151,8 +151,8 @@ export function generateKontrolniHlaseniXML({
   ${vetaB2Xml}
   ${vetaB3Xml}
   <VetaC
-    obrat23="${formatXmlNumber(issuedInvoiceSubtotalSum)}"
-    pln23="${formatXmlNumber(receivedInvoiceSubtotalSum)}"
+    obrat23="${toInt(issuedInvoiceSubtotalSum)}"
+    pln23="${toInt(receivedInvoiceSubtotalSum)}"
   />
 </DPHKH1>
 </Pisemnost>`

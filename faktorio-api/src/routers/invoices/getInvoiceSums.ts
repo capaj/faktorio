@@ -9,7 +9,8 @@ export function getInvoiceSums(
     unit_price?: number | null | undefined
     unit?: string | null | undefined
     vat_rate?: number | null | undefined
-  }[]
+  }[],
+  exchangeRate: number
 ) {
   const subtotal = invoiceItems.reduce(
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
@@ -49,8 +50,8 @@ export function getInvoiceSums(
   return {
     subtotal: subtotal,
     total: total,
-    native_subtotal: subtotal,
-    native_total: total,
+    native_subtotal: subtotal * exchangeRate,
+    native_total: total * exchangeRate,
     vat_base_21: vatBase21,
     vat_21: vat21,
     vat_base_12: vatBase12,

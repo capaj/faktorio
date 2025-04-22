@@ -24,7 +24,7 @@ export function formatCzechDate(dateString: string | null | Date): string {
 }
 
 // Helper function to format numbers for XML (integer)
-export function formatXmlNumber(num: number | null | undefined): string {
+export function toInt(num: number | null | undefined): string {
   if (num === null || num === undefined) return '0'
   // Round to nearest integer and convert to string
   return Math.round(num).toString()

@@ -1,11 +1,12 @@
 import { Invoice } from '@/components/IssuedInvoiceTable'
 import { ReceivedInvoice } from '@/components/ReceivedInvoiceTable'
 import { SubmitterData } from './generateKontrolniHlaseniXML'
-import { formatCzechDate, formatXmlNumber } from './utils'
+import { formatCzechDate, toInt } from './utils'
 
 interface GenerateDanovePriznaniParams {
   issuedInvoices: Invoice[]
   receivedInvoices: ReceivedInvoice[]
+  eurInvoiceSum: number
   submitterData: SubmitterData
   year: number
   quarter?: number
@@ -15,6 +16,7 @@ interface GenerateDanovePriznaniParams {
 export function generateDanovePriznaniXML({
   issuedInvoices,
   receivedInvoices,
+  eurInvoiceSum,
   submitterData,
   year,
   quarter,
@@ -84,14 +86,15 @@ export function generateDanovePriznaniXML({
     dic="${submitterData.dic.replace('CZ', '')}" typ_ds="${submitterData.typ_ds}" jmeno="${submitterData.jmeno}" prijmeni="${submitterData.prijmeni}" ulice="${submitterData.ulice}" psc="${submitterData.psc}" stat="${submitterData.stat}" email="${submitterData.email}" sest_jmeno="${submitterData.jmeno}" sest_prijmeni="${submitterData.prijmeni}"
   />
   <Veta1
-    obrat23="${formatXmlNumber(obrat23)}" dan23="${formatXmlNumber(dan23)}"
+    obrat23="${toInt(obrat23)}" dan23="${toInt(dan23)}"
   />
+  ${eurInvoiceSum ? `<Veta2 pln_rez_pren="${toInt(eurInvoiceSum)}" />` : ''}
   <Veta4
-    pln23="${formatXmlNumber(pln23)}" odp_tuz23_nar="${formatXmlNumber(odp_tuz23_nar)}"
-    odp_sum_nar="${formatXmlNumber(odp_sum_nar)}"
+    pln23="${toInt(pln23)}" odp_tuz23_nar="${toInt(odp_tuz23_nar)}"
+    odp_sum_nar="${toInt(odp_sum_nar)}"
   />
   <Veta6
-    dan_zocelk="${formatXmlNumber(dan_zocelk)}" odp_zocelk="${formatXmlNumber(odp_zocelk)}" dano_da="${formatXmlNumber(dano_da)}"
+    dan_zocelk="${toInt(dan_zocelk)}" odp_zocelk="${toInt(odp_zocelk)}" dano_da="${toInt(dano_da)}"
   />
 </DPHDP3>
 </Pisemnost>`

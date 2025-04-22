@@ -19,6 +19,7 @@ exports[`generateDanovePriznaniXML > should generate correct XML for a simple ha
   <Veta1
     obrat23="15000" dan23="3150"
   />
+  <Veta2 pln_rez_pren="13000" />
   <Veta4
     pln23="2000" odp_tuz23_nar="420"
     odp_sum_nar="420"

@@ -63,9 +63,21 @@ export const invoicesTb = sqliteTable(
       mode: 'boolean'
     }),
     supply_code: text('supply_code'),
+    /**
+     * total amount of the invoice excluding VAT in the currency of the invoice
+     */
     subtotal: real('subtotal'),
+    /**
+     * total amount of the invoice including VAT in the currency of the invoice
+     */
     total: real('total').notNull(),
+    /**
+     * total amount of the invoice excluding VAT in CZK
+     */
     native_subtotal: real('native_subtotal').notNull(),
+    /**
+     * total amount of the invoice including VAT in CZK
+     */
     native_total: real('native_total'),
     remaining_amount: real('remaining_amount'),
     remaining_native_amount: real('remaining_native_amount'),
