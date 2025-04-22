@@ -78,5 +78,6 @@ are all listed in [roadmap.md](roadmap.md)
 | Export invoices to Excel, CSV              |     ✅      |      ✅       |      ✅      |     ✅     |
 | Export invoices to XML for tax authorities |     ✅      |      ✅       |      ✅      |     ✅     |
 | Send invoices to an email from the app     |     ❌      |      ✅       |      ✅      |     ✅     |
+| API for integrations                       |     ❌      |      ❌       |      ✅      |     ✅     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
