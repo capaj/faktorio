@@ -1,5 +1,5 @@
 import AutoForm from '@/components/ui/auto-form'
-import { userInvoicingDetailsInsertSchema } from '../../../faktorio-api/src/zodDbSchemas'
+
 import {
   AresBusinessInformationSchema,
   fieldConfigForContactForm,

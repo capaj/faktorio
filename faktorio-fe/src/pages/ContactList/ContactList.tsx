@@ -139,14 +139,18 @@ export const fieldConfigForContactForm = {
   }
 }
 
+export const formatStreetAddress = (
+  aresData: z.infer<typeof AresBusinessInformationSchema>
+) => {
+  const streetName =
+    aresData.sidlo.nazevUlice ?? aresData.sidlo.nazevCastiObce ?? ''
+  const houseNumber = aresData.sidlo.cisloDomovni
+  const orientationNumber = aresData.sidlo.cisloOrientacni
+    ? `/${aresData.sidlo.cisloOrientacni}`
+    : ''
 
-export const formatStreetAddress = (aresData: z.infer<typeof AresBusinessInformationSchema>) => {
-  const streetName = aresData.sidlo.nazevUlice ?? aresData.sidlo.nazevCastiObce;
-  const houseNumber = aresData.sidlo.cisloDomovni;
-  const orientationNumber = aresData.sidlo.cisloOrientacni ? `/${aresData.sidlo.cisloOrientacni}` : '';
-  
-  return `${streetName} ${houseNumber}${orientationNumber}`;
-};
+  return `${streetName} ${houseNumber}${orientationNumber}`
+}
 
 export const ContactList = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
