@@ -16,6 +16,7 @@ import {
   type SubmitterData
 } from '@/lib/generateKontrolniHlaseniXML'
 import { generateDanovePriznaniXML } from '@/lib/generateDanovePriznaniXML'
+import { generateSouhrnneHlaseniXML } from '@/lib/generateSouhrnneHlaseniXML'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -134,7 +135,10 @@ export function XMLExportPage() {
   // Fetch submitter data
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
 
-  const [firstName, lastName] = (invoicingDetails?.name ?? '').split(' ')
+  const [rawFirstName, ...rawLastNameParts] = (
+    invoicingDetails?.name ?? ''
+  ).split(' ')
+  const submitterLastName = rawLastNameParts.join(' ') || rawFirstName // Handle single names
 
   if (!invoicingDetails?.vat_no) {
     return (
@@ -148,16 +152,17 @@ export function XMLExportPage() {
 
   const submitterData: SubmitterData = {
     dic: invoicingDetails.vat_no,
-    typ_ds: 'F',
-    jmeno: firstName,
-    prijmeni: lastName,
+    typ_ds: 'F', // Assuming 'F' for Fyzická osoba, adjust if needed
+    jmeno: rawFirstName,
+    prijmeni: submitterLastName,
+    naz_obce: invoicingDetails.city ?? '',
     ulice: invoicingDetails.street ?? '',
     psc: invoicingDetails?.zip ?? '',
     stat: invoicingDetails?.country ?? 'ČESKÁ REPUBLIKA',
-    email: invoicingDetails?.main_email ?? ''
+    email: invoicingDetails?.main_email ?? '' // Not in SHV VetaP but part of type
   }
 
-  const handleDownloadXML = () => {
+  const handleDownloadKHXML = () => {
     const xmlString = generateKontrolniHlaseniXML({
       issuedInvoices: issuedInvoicesWithVat,
       receivedInvoices,
@@ -208,6 +213,51 @@ export function XMLExportPage() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  const handleDownloadSHVXML = () => {
+    if (cadence !== 'quarterly') {
+      alert('Souhrnné hlášení (SHV) lze generovat pouze pro čtvrtletní období.')
+      return
+    }
+
+    if (eurInvoices.length === 0) {
+      alert(
+        'Nebyly nalezeny žádné relevantní EUR faktury pro generování Souhrnného hlášení.'
+      )
+      return
+    }
+
+    try {
+      // Filter is simplified as generator now handles VAT ID parsing and validation
+      const relevantInvoices = eurInvoices.filter(
+        (inv) =>
+          inv.client_vat_no && // Just check if VAT no exists
+          inv.native_total != null
+      )
+
+      const xmlString = generateSouhrnneHlaseniXML({
+        issuedInvoices: relevantInvoices, // Pass the filtered list
+        submitterData,
+        year: selectedYear,
+        quarter: selectedQuarter
+      })
+
+      // Trigger Download
+      const periodString = `Q${selectedQuarter}`
+      const blob = new Blob([xmlString], { type: 'application/xml' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `SHV_${selectedYear}_${periodString}_${submitterData.dic}.xml`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error generating SHV XML:', error)
+      alert(`Chyba při generování SHV XML: ${(error as Error).message}`)
+    }
   }
 
   const currentDisplayYear = new Date().getFullYear()
@@ -364,14 +414,32 @@ export function XMLExportPage() {
             Beru na vědomí, že tato funkce je experimentální
           </Label>
         </div>
-        <div className="flex justify-end space-x-2">
+        <div className="flex justify-end space-x-2 flex-wrap gap-y-2">
+          <Button
+            disabled={
+              eurInvoices.length === 0 ||
+              cadence !== 'quarterly' ||
+              !isAcknowledgementChecked
+            }
+            onClick={handleDownloadSHVXML}
+            title={
+              cadence !== 'quarterly'
+                ? 'SHV je pouze čtvrtletní'
+                : eurInvoices.length === 0
+                  ? 'Nejsou žádné EUR faktury pro SHV'
+                  : undefined
+            }
+          >
+            <DownloadIcon className="mr-2 h-4 w-4" />
+            XML Souhrnné hlášení (SHV)
+          </Button>
           <Button
             disabled={
               (receivedInvoices.length === 0 &&
                 issuedInvoicesWithVat.length === 0) ||
               !isAcknowledgementChecked
             }
-            onClick={handleDownloadXML}
+            onClick={handleDownloadKHXML}
           >
             <DownloadIcon className="mr-2 h-4 w-4" />
             XML Kontrolní hlášení

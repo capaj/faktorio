@@ -4,13 +4,23 @@ import { formatCzechDate, toInt } from './utils'
 
 export interface SubmitterData {
   dic: string
-  typ_ds: string
+  typ_ds: string // 'F' for Fyzicka osoba, 'P' for Pravnicka osoba
   jmeno: string
   prijmeni: string
+  // Fields for Pravnicka osoba (optional)
+  nazev_prav_osoby?: string
+  // Address fields (common)
+  naz_obce: string // Required for SHV
   ulice: string
+  c_pop?: string // House number - Popisné (Optional, might be part of ulice)
+  c_orient?: string // House number - Orientační (Optional)
   psc: string
   stat: string
+  // Contact fields (common)
   email: string
+  telefon?: string // Optional
+  // Fields for EPO identification (required for SHV)
+
   // Add other fields if needed from the query
 }
 

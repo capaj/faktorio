@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateSouhrnneHlaseniXML > should generate correct XML using correct field names 1`] = `
+"<?xml version="1.0" encoding="UTF-8"?>
+<Pisemnost nazevSW="EPO MF ČR" verzeSW="45.5.1">
+<DPHSHV verzePis="02.01">
+<VetaD k_uladis="DPH" dokument="SHV" ctvrt="1" rok="2025" shvies_forma="R" d_poddp="22.04.2025" />
+<VetaP dic="8807204153" typ_ds="F" prijmeni="Špác" jmeno="Jiří" naz_obce="SOKOLNICE" ulice="Třešňová" c_pop="823"  psc="66452" stat="ČESKÁ REPUBLIKA" />
+<VetaR por_c_stran="1" c_rad="1" k_stat="DE" c_vat="360131145" k_pln_eu="3" pln_pocet="1" pln_hodnota="76388" />
+<VetaR por_c_stran="2" c_rad="2" k_stat="DE" c_vat="987654321" k_pln_eu="3" pln_pocet="1" pln_hodnota="25000" />
+<VetaR por_c_stran="3" c_rad="3" k_stat="FR" c_vat="12345678901" k_pln_eu="3" pln_pocet="1" pln_hodnota="50000" />
+</DPHSHV>
+</Pisemnost>"
+`;
