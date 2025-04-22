@@ -15,7 +15,7 @@ exports[`generateKontrolniHlaseniXML > should generate correct XML for a simple 
   
     <VetaA4
       c_radku="1"
-      dic_odb="CZ11111111"
+      dic_odb="11111111"
       c_evid_dd="2024-001"
       dppd="15.07.2024"
       zakl_dane1="10000"
@@ -26,12 +26,11 @@ exports[`generateKontrolniHlaseniXML > should generate correct XML for a simple 
   
     <VetaB2
       c_radku="1"
-      dic_dod="CZ33333333"
+      dic_dod="33333333"
       c_evid_dd="INV-C-200"
       dppd="05.08.2024"
       zakl_dane1="15000"
       dan1="3150"
-      dat_odp="A"
       pomer="N"
     />
   

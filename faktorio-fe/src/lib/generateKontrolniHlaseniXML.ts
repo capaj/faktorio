@@ -60,7 +60,7 @@ export function generateKontrolniHlaseniXML({
     vetaA4Xml += `
     <VetaA4
       c_radku="${index + 1}"
-      dic_odb="${clientVatId}"
+      dic_odb="${clientVatId.replace('CZ', '')}"
       c_evid_dd="${inv.number}"
       dppd="${taxableDate}"
       zakl_dane1="${formatXmlNumber(subtotal)}"
@@ -103,12 +103,11 @@ export function generateKontrolniHlaseniXML({
       vetaB2Xml += `
     <VetaB2
       c_radku="${b2Index}"
-      dic_dod="${supplierVatId}"
+      dic_dod="${supplierVatId.replace('CZ', '')}"
       c_evid_dd="${inv.invoice_number}"
       dppd="${taxableDate}"
       zakl_dane1="${formatXmlNumber(subtotal)}"
       dan1="${formatXmlNumber(vatAmount)}"
-      dat_odp="A"
       pomer="N"
     />`
     } else {
