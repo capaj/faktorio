@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { SubmitterData } from './generateKontrolniHlaseniXML'
 import { generateSouhrnneHlaseniXML } from './generateSouhrnneHlaseniXML'
 
@@ -13,6 +13,11 @@ type TestInvoice = {
 }
 
 describe('generateSouhrnneHlaseniXML', () => {
+  beforeAll(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-04-21'))
+  })
+
   it('should generate correct XML using correct field names', () => {
     const submitterData: SubmitterData = {
       dic: 'CZ8807204153',
