@@ -16,13 +16,13 @@
     "check-env": "tsx scripts/check-env.ts"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250422.0",
+    "@cloudflare/workers-types": "^4.20250423.0",
     "@types/debug": "^4.1.12",
     "drizzle-kit": "^0.31.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "vitest": "^3.1.2",
-    "wrangler": "^4.12.0"
+    "wrangler": "^4.12.1"
   },
   "dependencies": {
     "@google/genai": "^0.9.0",
@@ -31,9 +31,9 @@
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
     "@tanstack/react-query": "^5.74.4",
-    "@trpc/client": "^11.1.0",
-    "@trpc/react-query": "^11.1.0",
-    "@trpc/server": "^11.1.0",
+    "@trpc/client": "^11.1.1",
+    "@trpc/react-query": "^11.1.1",
+    "@trpc/server": "^11.1.1",
     "@tsndr/cloudflare-worker-jwt": "^3.1.4",
     "currency-codes": "^2.2.0",
     "debug": "^4.4.0",
