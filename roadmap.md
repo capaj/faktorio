@@ -4,7 +4,7 @@
 
 - add multiple invoicing details for one account
   - filter by them in the invoice list
-- add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
+- add ISDOC format export
 - add public API with complete CRUD for invoices
 - DPH priznani at the end of the year
 - automated DPH and Kontrolni hlaseni submission to ADIS every month/quarter for you with automated puppeteer script
@@ -27,6 +27,7 @@
 
 ## Done
 
+- add ability to export XMLs for DPH and Kontrolni hlaseni, support monthly and quarterly cadence
 - allow to add expense invoices by drag and drop PDF file(parse PDF with google gemini)
 - be able to export as CSV/excel
 - enable editing of invoices
