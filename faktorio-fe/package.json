@@ -90,14 +90,14 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "gray-matter": "^4.0.3",
-    "marked": "^15.0.9",
+    "marked": "^15.0.10",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.4",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",
-    "vite": "^6.3.2",
+    "vite": "^6.3.3",
     "vite-plugin-pwa": "^1.0.0",
     "vitest": "^3.1.2",
-    "wrangler": "^4.12.1"
+    "wrangler": "^4.13.0"
   }
 }

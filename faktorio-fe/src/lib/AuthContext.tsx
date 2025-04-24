@@ -19,7 +19,7 @@ import { AnyRouter, inferRouterContext } from '@trpc/server'
 import { Database } from 'sql.js'
 import * as schema from '../../../faktorio-api/src/schema'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
-import { useDb } from './DbContext'
+import { useDb } from './local-db/DbContext'
 import { createLocalCallerLink } from './createLocalCallerLink'
 const VITE_API_URL = import.meta.env.VITE_API_URL
 

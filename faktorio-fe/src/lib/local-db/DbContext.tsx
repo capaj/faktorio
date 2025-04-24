@@ -9,7 +9,7 @@ import { getOpfsRoot, initSqlDb, saveDatabaseToOPFS } from './initSql'
 import type { Database } from 'sql.js'
 import { createId } from '@paralleldrive/cuid2'
 import { drizzle } from 'drizzle-orm/sql-js'
-import * as schema from '../../../faktorio-api/src/schema'
+import * as schema from 'faktorio-api/src/schema'
 import { SQLJsDatabase } from 'drizzle-orm/sql-js'
 
 interface LocalUser {

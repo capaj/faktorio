@@ -6,8 +6,8 @@ import {
   deleteDatabase,
   exportDatabaseFile,
   importDatabaseFile
-} from '../lib/initSql'
-import { useDb } from '../lib/DbContext'
+} from '../lib/local-db/initSql'
+import { useDb } from '../lib/local-db/DbContext'
 import { useAuth } from '../lib/AuthContext'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'

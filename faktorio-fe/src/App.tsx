@@ -16,17 +16,12 @@ import { RequestPasswordResetPage } from './pages/RequestPasswordResetPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { useUser } from './lib/AuthContext'
 import { AuthProvider, useAuth } from './lib/AuthContext'
-import { DbProvider, useDb } from './lib/DbContext'
-import * as schema from '../../faktorio-api/src/schema'
+import { DbProvider, useDb } from './lib/local-db/DbContext'
 
 import { ErrorBoundary } from './ErrorBoundary'
-import { appRouter } from '../../faktorio-api/src/trpcRouter'
-import { trpcContext } from '../../faktorio-api/src/trpcContext'
 import { Header } from './components/Header'
 import { SignedInRoutes } from './SignedInRoutes'
 import { LocalDbManagementPage } from './pages'
-import { LibSQLDatabase } from 'drizzle-orm/libsql'
-const VITE_API_URL = import.meta.env.VITE_API_URL as string
 
 interface BlogPost {
   slug: string
@@ -35,10 +30,7 @@ interface BlogPost {
   excerpt: string
 }
 
-const createCaller = trpcContext.createCallerFactory(appRouter)
-
 function AppContent() {
-  const [count, setCount] = useState(0)
   const { isLoaded } = useUser()
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
   const [location] = useLocation()

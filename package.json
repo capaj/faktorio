@@ -9,7 +9,7 @@
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.14.1",
     "prettier": "^3.5.3",
-    "turbo": "^2.5.0",
+    "turbo": "^2.5.1",
     "typescript": "^5.8.3",
     "vitest": "^3.1.2"
   },

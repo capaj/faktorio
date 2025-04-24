@@ -1,12 +1,5 @@
-import initSqlJs, { Database } from 'sql.js'
-import migration0000 from '@api/drizzle/0000_dry_rick_jones.sql?raw'
-import migration0001 from '@api/drizzle/0001_glossy_siren.sql?raw'
-import migration0002 from '@api/drizzle/0002_groovy_cammi.sql?raw'
-import migration0003 from '@api/drizzle/0003_glorious_hiroim.sql?raw'
-import migration0004 from '@api/drizzle/0004_tense_network.sql?raw'
-import migration0005 from '@api/drizzle/0005_funny_abomination.sql?raw'
-import migration0006 from '@api/drizzle/0006_fuzzy_epoch.sql?raw'
-import migration0007 from '@api/drizzle/0007_past_prism.sql?raw'
+import initSqlJs, { Database, SqlValue } from 'sql.js'
+import { localDBMigrations } from './migrations'
 
 const LOCAL_DB_LIST_KEY = 'faktorio_local_db_files'
 
@@ -97,17 +90,18 @@ export async function listOpfsFiles(): Promise<string[]> {
 }
 
 async function runMigrations(db: Database): Promise<void> {
-  const migrations = [
-    migration0000,
-    migration0001,
-    migration0002,
-    migration0003,
-    migration0004,
-    migration0005,
-    migration0006,
-    migration0007
-  ]
-  for (const migration of migrations) {
+  db.run(
+    'CREATE TABLE IF NOT EXISTS __migrations (name TEXT PRIMARY KEY NOT NULL);'
+  )
+
+  const query = db.exec('SELECT name FROM __migrations;')
+
+  const appliedMigrations = query[0].values.map((row) => row[0])
+
+  for (const [migrationName, migration] of Object.entries(localDBMigrations)) {
+    if (appliedMigrations.includes(migrationName)) {
+      continue
+    }
     const statements = migration
       .split('--> statement-breakpoint')
       .filter((stmt) => stmt.trim())
@@ -120,20 +114,18 @@ async function runMigrations(db: Database): Promise<void> {
         throw new Error(`Migration failed for statement: ${statement}`) // Re-throw to signal failure
       }
     }
+    db.run('INSERT INTO __migrations (name) VALUES (?)', [migrationName])
+    console.log(`Applied: ${migrationName}`)
   }
-  console.log('Migrations applied successfully.')
+  console.log('All migrations applied successfully.')
 }
 
 // Creates a new, empty, migrated database and saves it to OPFS
-export async function createNewDatabase(
-  filename: string
-): Promise<Database | null> {
+export async function createNewDatabase(filename: string): Promise<Database> {
   try {
     console.log(`Creating new database: ${filename}...`)
     const SQL = await getSqlJs()
     const db = new SQL.Database()
-
-    await runMigrations(db)
 
     await saveDatabaseToOPFS(db, filename)
     addTrackedDbFile(filename) // Track the new file
@@ -154,11 +146,11 @@ export async function createNewDatabase(
         )
       }
     }
-    return null
+    throw error
   }
 }
 
-export const initSqlDb = async (filename: string): Promise<Database | null> => {
+export const initSqlDb = async (filename: string): Promise<Database> => {
   let db: Database | null = null
 
   // Try to load the database from OPFS
@@ -170,9 +162,9 @@ export const initSqlDb = async (filename: string): Promise<Database | null> => {
     db = await createNewDatabase(filename)
   } else {
     console.log(`Existing database ${filename} loaded.`)
-    // Optionally, run checks or migrations on existing DB if needed
-    // addTrackedDbFile(filename); // Ensure it's tracked if loaded successfully
   }
+
+  await runMigrations(db)
 
   return db
 }

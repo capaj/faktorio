@@ -8,7 +8,7 @@ import { User } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { useState } from 'react'
 import { useLocation } from 'wouter'
-import { useDb } from '../lib/DbContext'
+import { useDb } from '../lib/local-db/DbContext'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,19 +63,14 @@ export const Header = () => {
                 <DropdownMenuContent align="end">
                   {isLocalUser && activeDbName ? (
                     <>
-                      <DropdownMenuItem className="cursor-default">
-                        <Database className="mr-2 h-4 w-4" />
-                        <span className="font-mono text-sm">
-                          {activeDbName}
-                        </span>
-                      </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer"
                         onClick={() => navigate('/my-details')}
                       >
                         <ScrollIcon className="mr-2 h-4 w-4" />
-                        Moje údaje
+                        Moje fakturační údaje
                       </DropdownMenuItem>
+
                       <DropdownMenuItem
                         className="cursor-pointer"
                         onClick={() => navigate('/local-dbs')}
@@ -83,9 +78,25 @@ export const Header = () => {
                         <Database className="mr-2 h-4 w-4" />
                         <span>Správa lokálních databází</span>
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-default hover:bg-gray-50 !opacity-100"
+                        disabled
+                      >
+                        <Database className="mr-2 h-4 w-4" />
+                        <span className="font-mono text-sm">
+                          {activeDbName}
+                        </span>
+                      </DropdownMenuItem>
                     </>
                   ) : (
                     <>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => navigate('/my-details')}
+                      >
+                        <ScrollIcon className="mr-2 h-4 w-4" />
+                        Moje fakturační údaje
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer"
                         onClick={() => navigate('/manage-login-details')}
@@ -93,13 +104,7 @@ export const Header = () => {
                         <User className="mr-2 h-4 w-4" />
                         <span>Přihlašovací údaje</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => navigate('/my-details')}
-                      >
-                        <ScrollIcon className="mr-2 h-4 w-4" />
-                        Moje údaje
-                      </DropdownMenuItem>
+
                       <DropdownMenuItem
                         className="cursor-pointer"
                         onClick={() => logout('/')}
