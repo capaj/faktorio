@@ -54,7 +54,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.42.0",
+    "drizzle-orm": "^0.43.1",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.503.0",
     "microdiff": "^1.5.0",
@@ -90,7 +90,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "gray-matter": "^4.0.3",
-    "marked": "^15.0.10",
+    "marked": "^15.0.11",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.4",
     "tsx": "^4.19.3",
@@ -98,6 +98,6 @@
     "vite": "^6.3.3",
     "vite-plugin-pwa": "^1.0.0",
     "vitest": "^3.1.2",
-    "wrangler": "^4.13.0"
+    "wrangler": "^4.13.1"
   }
 }
