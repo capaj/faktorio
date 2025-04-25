@@ -113,10 +113,6 @@ export const TermsOfServicePage = () => {
           poskytovanou Aplikaci v souladu s právním řádem České republiky.
         </p>
         <p>
-          <strong>2.8.</strong> Uživatel se zavazuje platit řádně a včas
-          dohodnutou cenu za poskytované plnění dle platného ceníku.
-        </p>
-        <p>
           <strong>2.9.</strong> Uživatel má právo kdykoli zrušit Smlouvu
           zrušením svého účtu, pokud jeho účet není zablokovaný z důvodů
           porušení některé z obchodních podmínek. Všechna data uživatele budou
@@ -171,46 +167,6 @@ export const TermsOfServicePage = () => {
           obchodní sdělení nezasílat, pokud s jejich zasíláním uživatel
           nesouhlasí.
         </p>
-        <h2 className="mb-3">4. Poplatky a úhrady</h2>
-        <p>
-          <strong>4.1.</strong> Cena je stanovena dle aktuálního ceníku tarifů
-          publikovaného na adrese{' '}
-          <a href="https://www.faktorio.cz/cenik">www.faktorio.cz/cenik</a>.
-        </p>
-        <p>
-          <strong>4.2.</strong> Úhrady za využívání Aplikace se provádějí předem
-          na základě vystavené zálohové faktury a jsou nevratné.
-        </p>
-        <p>
-          <strong>4.3.</strong> Poskytovatel je oprávněn, po předchozím
-          upozornění uživatele, měnit podmínky a&nbsp;ceny nabízených služeb z
-          důvodů uvedení nových funkcí nebo inflace.
-        </p>
-        <p>
-          <strong>4.4.</strong> Poskytovatel vystavuje fakturu na používání
-          Aplikace jednou měsíčně. Uživatel může požádat o změnu fakturační
-          periody na 1 rok.
-        </p>
-        <p>
-          <strong>4.5.</strong> Uživatel může požádat o archivaci svého účtu.
-          Archivovaný účet se chová stejně jako účet zablokovaný.
-        </p>
-        <p>
-          <strong>4.6.</strong> Poskytovatel má právo zablokovat účet uživateli,
-          který je v prodlení s platbou za používání Aplikace déle než 5
-          pracovních dnů, a to do doby její úhrady.
-        </p>
-        <p>
-          <strong>4.7.</strong> Pokud je účet zablokovaný déle než měsíc, má
-          poskytovatel právo přerušit automatické procesy např. vystavování a
-          odesílání pravidelných faktur a upomínek daného účtu.
-        </p>
-        <p>
-          <strong>4.8.</strong> Poskytovatel má právo zrušit účet uživateli,
-          který je v prodlení s platbou za využívání Aplikace déle než 2 měsíce.
-          Před případným zrušením upozorní poskytovatel uživatele na email
-          majitele účtu.
-        </p>
         <h2 className="mb-3">5. Podpora, záruka, reklamace</h2>
         <p>
           <strong>5.1.</strong> Všechny služby jsou poskytovány pouze
@@ -255,7 +211,8 @@ export const TermsOfServicePage = () => {
         </p>
         <h2>8. Závěrečné ustanovení</h2>
         <p>
-          <strong>8.1.</strong> Tyto obchodní podmínky jsou účinné k 4. 4. 2024.
+          <strong>8.1.</strong> Tyto obchodní podmínky jsou účinné k 25. 4.
+          2025.
         </p>
       </div>
     </PageShell>
