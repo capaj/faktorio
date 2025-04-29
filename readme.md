@@ -46,11 +46,7 @@ Migration do not run on CI. They must be run manually for now.
 
 ## Project status
 
-Project is under active development. The aim is to make this a number one invoicing app in Czech republic for freelancers and small companies.
-
-## Common issues
-
-make sure to use `pk_test` clerk key. Clerk won't even load when you use production key on localhost
+Project is under active development. The aim is to keep this a number one open source invoicing app in Czech republic for freelancers and small companies.
 
 ## Planned features
 
