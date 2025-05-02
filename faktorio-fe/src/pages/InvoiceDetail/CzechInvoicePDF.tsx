@@ -222,6 +222,11 @@ export const CzechInvoicePDF = ({
       message: 'Faktura ' + invoiceData.number
     })
   )
+
+  if (!qrCodeBase64) {
+    return null
+  }
+
   return (
     <Document key={new Date().toISOString()}>
       <Page size="A4" style={styles.page}>
