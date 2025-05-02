@@ -90,7 +90,7 @@ export const LandingPage = () => {
                   idoklad.cz. Dokud to půjde, bude Faktorio.cz zdarma. Pokud by
                   se náklady na provoz razantně zvýšily nejspíš přidám do
                   aplikace reklamu a možnost reklamu odstranit za drobný
-                  poplatek-například 500 kč ročně.
+                  poplatek-například 300 kč ročně.
                   <p className="mt-3">
                     Přispět na provoz faktorio.cz můžete zasláním peněz na můj{' '}
                     <a
