@@ -13,7 +13,8 @@
     "test": "vitest run",
     "w": "vitest",
     "tsc": "tsc --noEmit",
-    "check-env": "tsx scripts/check-env.ts"
+    "check-env": "tsx scripts/check-env.ts",
+    "bump": "npm-check-updates -u"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250430.0",

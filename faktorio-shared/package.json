@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "bump": "npm-check-updates -u"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.7.0",
+  "packageManager": "pnpm@10.10.0",
   "dependencies": {
     "dayjs": "^1.11.13"
   }

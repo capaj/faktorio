@@ -8,6 +8,7 @@
   "devDependencies": {
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.15.3",
+    "npm-check-updates": "^18.0.1",
     "prettier": "^3.5.3",
     "turbo": "^2.5.2",
     "typescript": "^5.8.3",
@@ -24,8 +25,7 @@
     "dbm": "cd faktorio-api && pnpm migrate",
     "bumpDeps:api": "cd faktorio-api && ncu -u",
     "bumpDeps:fe": "cd faktorio-fe && ncu -u",
-    "bumpDeps:root": "ncu -u",
-    "bump": "npm-run-all --parallel bumpDeps:* && pnpm i",
+    "bump": "turbo bump && npm-check-updates -u && pnpm i",
     "typecheck": "turbo tsc",
     "test": "turbo test",
     "test:e2e": "pnpm exec playwright test"
