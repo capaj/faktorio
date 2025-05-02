@@ -62,9 +62,9 @@
     "papaparse": "^5.5.2",
     "qrcode": "^1.5.4",
     "query-string": "^9.1.1",
-    "react": "^18",
+    "react": "^19",
     "react-day-picker": "^9.6.7",
-    "react-dom": "^18",
+    "react-dom": "^19",
     "react-hook-form": "^7.56.1",
     "sonner": "^2.0.3",
     "sql.js": "^1.13.0",
@@ -74,8 +74,7 @@
     "valtio": "^2.1.4",
     "wouter": "^3.7.0",
     "zod": "^3.24.3",
-    "zod-to-json-schema": "^3.24.5",
-    "zustand": "^5.0.3"
+    "zod-to-json-schema": "^3.24.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.5",
@@ -98,6 +97,6 @@
     "vite": "^6.3.4",
     "vite-plugin-pwa": "^1.0.0",
     "vitest": "^3.1.2",
-    "wrangler": "^4.13.2"
+    "wrangler": "^4.14.1"
   }
 }

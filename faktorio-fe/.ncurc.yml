@@ -1,5 +1,4 @@
 upgrade: true
 reject:
-  - react ## cannot upgrade-breaks pdf rendering in react-pdf
-  - react-dom ## cannot upgrade-breaks pdf rendering in react-pdf
-
+  # - react ## cannot upgrade-breaks pdf rendering in react-pdf
+  # - react-dom ## cannot upgrade-breaks pdf rendering in react-pdf
