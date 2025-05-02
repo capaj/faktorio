@@ -8,6 +8,7 @@ import {
 } from 'drizzle-orm/sqlite-core'
 import { createId } from '@paralleldrive/cuid2'
 import { sql } from 'drizzle-orm'
+import { djs } from 'faktorio-shared/src/djs'
 // always add postfix Tb to table names
 
 export const invoicesTb = sqliteTable(
@@ -22,18 +23,18 @@ export const invoicesTb = sqliteTable(
     partial_proforma: integer('partial_proforma', { mode: 'boolean' }),
     number: text('number').notNull(),
     variable_symbol: text('variable_symbol'),
-    your_name: text('your_name'),
-    your_street: text('your_street'),
+    your_name: text('your_name').notNull(),
+    your_street: text('your_street').notNull(),
     your_street2: text('your_street2'),
-    your_city: text('your_city'),
-    your_zip: text('your_zip'),
-    your_country: text('your_country'),
-    your_registration_no: text('your_registration_no'),
-    your_vat_no: text('your_vat_no'),
-    client_name: text('client_name'),
-    client_street: text('client_street'),
+    your_city: text('your_city').notNull(),
+    your_zip: text('your_zip').notNull(),
+    your_country: text('your_country').notNull(),
+    your_registration_no: text('your_registration_no').notNull(),
+    your_vat_no: text('your_vat_no').notNull(),
+    client_name: text('client_name').notNull(),
+    client_street: text('client_street').notNull(),
     client_street2: text('client_street2'),
-    client_city: text('client_city'),
+    client_city: text('client_city').notNull(),
     client_zip: text('client_zip'),
     client_country: text('client_country'),
     client_registration_no: text('client_registration_no'),
@@ -44,8 +45,10 @@ export const invoicesTb = sqliteTable(
     token: text('token'),
     status: text('status'),
     order_number: text('order_number'),
-    issued_on: text('issued_on'), // Dates as text YYYY-MM-DD
-    taxable_fulfillment_due: text('taxable_fulfillment_due'), // Dates as text YYYY-MM-DD
+    issued_on: text('issued_on')
+      .notNull()
+      .$defaultFn(() => djs().format('YYYY-MM-DD')), // Dates as text YYYY-MM-DD
+    taxable_fulfillment_due: text('taxable_fulfillment_due').notNull(), // Dates as text YYYY-MM-DD
     due_in_days: integer('due_in_days').notNull(), // in days how long before the invoice is due
     due_on: text('due_on').notNull(), // Dates as text YYYY-MM-DD
     sent_at: text('sent_at'), // Dates as text YYYY-MM-DD
@@ -55,10 +58,12 @@ export const invoicesTb = sqliteTable(
     bank_account: text('bank_account'),
     iban: text('iban'),
     swift_bic: text('swift_bic'),
-    payment_method: text('payment_method'),
+    payment_method: text('payment_method')
+      .notNull()
+      .$type<'bank' | 'cash' | 'card' | 'cod' | 'crypto' | 'other'>(),
     currency: text('currency').notNull(),
-    exchange_rate: real('exchange_rate'),
-    language: text('language'),
+    exchange_rate: real('exchange_rate').notNull().default(1),
+    language: text('language').notNull().default('cs'),
     transferred_tax_liability: integer('transferred_tax_liability', {
       mode: 'boolean'
     }),
@@ -175,12 +180,12 @@ export const userInvoicingDetailsTb = sqliteTable(
   'user_invoicing_detail',
   {
     user_id: text('user_id').notNull().unique().primaryKey(),
-    name: text('name'),
-    street: text('street'),
+    name: text('name').notNull(),
+    street: text('street').notNull(),
     street2: text('street2'),
-    city: text('city'),
-    zip: text('zip'),
-    country: text('country'),
+    city: text('city').notNull(),
+    zip: text('zip').notNull(),
+    country: text('country').notNull(),
     main_email: text('main_email'),
     bank_account: text('bank_account'),
     iban: text('iban'),

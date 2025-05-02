@@ -80,6 +80,7 @@ export const invoiceRouter = trpcContext.router({
             taxable_fulfillment_due: input.invoice.taxable_fulfillment_due,
             issued_on: input.invoice.issued_on,
             client_contact_id: input.invoice.client_contact_id,
+            exchange_rate: input.invoice.exchange_rate ?? 1,
             ...invoiceSums,
 
             // user
@@ -89,17 +90,17 @@ export const invoiceRouter = trpcContext.router({
             your_city: user.city,
             your_zip: user.zip,
             your_country: user.country,
-            your_registration_no: user.registration_no,
-            your_vat_no: user.vat_no,
+            your_registration_no: user.registration_no ?? '',
+            your_vat_no: user.vat_no ?? '',
             bank_account: user.bank_account,
             iban: user.iban,
             swift_bic: user.swift_bic,
 
             // client
             client_name: client.name,
-            client_street: client.street,
+            client_street: client.street ?? '',
             client_street2: client.street2,
-            client_city: client.city,
+            client_city: client.city ?? '',
             client_zip: client.zip,
             client_country: client.country,
             client_registration_no: client.registration_no,
@@ -243,6 +244,10 @@ export const invoiceRouter = trpcContext.router({
         })
         .execute()
 
+      if (!res) {
+        throw new Error(`Invoice ${input.id} not found`)
+      }
+
       const items = await ctx.db.query.invoiceItemsTb.findMany({
         where: eq(invoiceItemsTb.invoice_id, input.id)
       })
@@ -312,7 +317,8 @@ export const invoiceRouter = trpcContext.router({
           .set({
             ...input.invoice,
             due_on,
-            ...invoiceSums
+            ...invoiceSums,
+            exchange_rate: input.invoice.exchange_rate ?? 1
           })
           .where(eq(invoicesTb.id, input.id))
           .execute()

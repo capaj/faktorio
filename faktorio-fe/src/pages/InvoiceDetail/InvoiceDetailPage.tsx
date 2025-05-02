@@ -15,6 +15,11 @@ import {
   SelectContent,
   SelectItem
 } from '@/components/ui/select'
+import { djs } from 'faktorio-shared/src/djs'
+import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
+import { z } from 'zod'
+import { invoiceItemFormSchema } from 'faktorio-api/src/zodDbSchemas'
+import { LucideEdit } from 'lucide-react'
 
 export function useInvoiceQueryByUrlParam() {
   const { invoiceId } = useParams()
@@ -30,6 +35,25 @@ export function useInvoiceQueryByUrlParam() {
 // TODO here we currently only show the invoice PDF, but we should also show the invoice details
 export const InvoiceDetailPage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
+
+  return <InvoiceDetail invoice={invoice} />
+}
+
+export const invoiceForRenderSchema = getInvoiceCreateSchema(
+  djs().format('YYYYMMDD') + '001'
+).extend({
+  your_name: z.string().optional(),
+  items: z.array(invoiceItemFormSchema),
+  bank_account: z.string().nullish(),
+  iban: z.string().nullish(),
+  swift_bic: z.string().nullish()
+})
+
+export const InvoiceDetail = ({
+  invoice
+}: {
+  invoice: z.infer<typeof invoiceForRenderSchema>
+}) => {
   const params = useParams()
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
   const [searchParams] = useSearchParams()
@@ -41,27 +65,38 @@ export const InvoiceDetailPage = () => {
   return (
     <>
       <div className="h-full place-content-center flex flex-col">
-        <div className="flex justify-between">
-          <h3 className="text-3xl font-bold mb-4 text-center w-full">Náhled</h3>
-          <Select
-            value={language}
-            onValueChange={(val) => {
-              navigate(`/invoices/${params.invoiceId}?language=${val}`)
+        <div className="flex justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <h3 className="text-3xl font-bold  text-center w-full">Náhled</h3>
+            <Select
+              value={language}
+              onValueChange={(val) => {
+                navigate(`/invoices/${params.invoiceId}?language=${val}`)
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Jazyk" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cs">Česky</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant={'outline'}
+            onClick={() => {
+              navigate(`/invoices/${params.invoiceId}/edit`)
             }}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Jazyk" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="cs">Česky</SelectItem>
-              <SelectItem value="en">English</SelectItem>
-            </SelectContent>
-          </Select>
+            <LucideEdit />
+            Upravit
+          </Button>
         </div>
 
         <div className="h-full place-content-center flex">
           <PDFViewer
-            key={`pdf-container-${language}-${invoice.id}`}
+            // key={JSON.stringify(invoice)}
             showToolbar={false}
             style={{
               width: '70vw',
@@ -69,7 +104,7 @@ export const InvoiceDetailPage = () => {
             }}
           >
             {/* @ts-expect-error */}
-            <PdfContent key={language} invoiceData={invoice} />
+            <PdfContent invoiceData={invoice} />
           </PDFViewer>
         </div>
 

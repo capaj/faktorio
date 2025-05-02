@@ -13,24 +13,34 @@ import { invoiceItemFormSchema } from '../../../../faktorio-api/src/zodDbSchemas
 import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
-import { useInvoiceQueryByUrlParam } from '../InvoiceDetail/InvoiceDetailPage'
+import {
+  InvoiceDetail,
+  invoiceForRenderSchema,
+  useInvoiceQueryByUrlParam
+} from '../InvoiceDetail/InvoiceDetailPage'
+import { getInvoiceSums } from 'faktorio-api/src/routers/invoices/getInvoiceSums'
+import { useDebounceValue } from 'usehooks-ts'
+import { FormControl } from '@/components/ui/form'
+import { FormItem } from '@/components/ui/form'
+import { FormLabel } from '@/components/ui/form'
+import { BankDetailsAccordion } from './BankDetailsAccordion'
 
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const contactsQuery = trpcClient.contacts.all.useQuery()
-
+  const [previewInvoice, setPreviewInvoice] = useDebounceValue<z.infer<
+    typeof invoiceForRenderSchema
+  > | null>(null, 3000)
   const formSchema = getInvoiceCreateSchema(
     invoice.number ?? djs().get('year').toString()
-  ).omit({
-    client_contact_id: true
-  })
+  )
 
   const [location, navigate] = useLocation()
   const updateInvoice = trpcClient.invoices.update.useMutation()
   const contact = contactsQuery.data?.find(
     (contact) => contact.id === invoice.client_contact_id
   )
-  console.log('contact', contact)
+
   const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(
     formSchema.parse({
       ...invoice,
@@ -66,14 +76,30 @@ export const EditInvoicePage = () => {
     vat_rate: formValues.currency === 'CZK' ? 21 : 0
   }
 
+  useEffect(() => {
+    const invoiceCompleteForPreview = {
+      ...formValues,
+      ...getInvoiceSums(invoiceItems, formValues.exchange_rate ?? 1),
+      items: invoiceItems,
+      due_on: djs(formValues.issued_on)
+        .add(formValues.due_in_days, 'day')
+        .format('YYYY-MM-DD'),
+      your_name: invoice.your_name ?? '',
+      client_contact_id: invoice.client_contact_id
+    }
+    setPreviewInvoice(invoiceCompleteForPreview)
+  }, [formValues, invoiceItems])
+
+  const isCzkInvoice = formValues.currency !== 'CZK'
+
   return (
     <div>
       <h2 className="mb-5">Upravit fakturu {invoice.number}</h2>
 
       <AutoForm
-        containerClassName="grid grid-cols-2 gap-4"
         formSchema={formSchema}
         values={formValues}
+        containerClassName="grid grid-cols-2 md:grid-cols-3 gap-4"
         onParsedValuesChange={(values) => {
           setFormValues(values as z.infer<typeof formSchema>)
         }}
@@ -86,10 +112,7 @@ export const EditInvoicePage = () => {
             fieldType: 'date'
           },
           number: {
-            label: 'Číslo faktury',
-            inputProps: {
-              disabled: true
-            }
+            label: 'Číslo faktury'
           },
           payment_method: {
             label: 'Způsob platby'
@@ -101,22 +124,54 @@ export const EditInvoicePage = () => {
           footer_note: {
             label: 'Poznámka'
           },
+          client_contact_id: {
+            label: 'Odběratel',
+            fieldType: ({ label, isRequired, field, fieldConfigItem }) => (
+              <FormItem className="flex flex-col flew-grow col-span-2">
+                <FormLabel>
+                  {label}
+                  {isRequired && (
+                    <span className="text-destructive">{`\u00A0*`}</span>
+                  )}
+                </FormLabel>
+                <FormControl>
+                  <ContactComboBox {...field} />
+                </FormControl>
+              </FormItem>
+            )
+          },
           due_in_days: {
             label: 'Splatnost (v dnech)'
           },
+          exchange_rate:
+            formValues.currency === 'CZK'
+              ? { fieldType: () => null }
+              : {
+                  inputProps: {
+                    type: 'number',
+                    min: 0,
+                    disabled: !isCzkInvoice
+                  },
+                  label: 'Kurz'
+                },
+          // Hide bank account fields from the main form
           bank_account: {
-            label: 'Číslo účtu'
+            fieldType: () => null
           },
           iban: {
-            label: 'IBAN'
+            fieldType: () => null
           },
           swift_bic: {
-            label: 'SWIFT/BIC'
+            fieldType: () => null
           }
         }}
       ></AutoForm>
 
-      {contact?.id && <ContactComboBox disabled={true} value={contact.id} />}
+      <BankDetailsAccordion
+        formValues={formValues}
+        setFormValues={setFormValues}
+      />
+
       <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
         <h3 className="flex items-center gap-2">Položky</h3>
         {invoiceItems.map((item, index) => {
@@ -155,7 +210,7 @@ export const EditInvoicePage = () => {
         <h3>DPH: {totalVat} </h3>
         <h3>Celkem s DPH: {(total + totalVat).toFixed(2)} </h3>
       </div>
-      <Center>
+      <Center className="mb-8">
         <ButtonWithLoader
           isLoading={updateInvoice.isPending}
           onClick={async () => {
@@ -194,6 +249,7 @@ export const EditInvoicePage = () => {
           Uložit změny na faktuře
         </ButtonWithLoader>
       </Center>
+      {/* {previewInvoice && <InvoiceDetail invoice={previewInvoice} />} */}
     </div>
   )
 }

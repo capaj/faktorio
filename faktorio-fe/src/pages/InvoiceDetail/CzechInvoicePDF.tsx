@@ -212,12 +212,7 @@ export const CzechInvoicePDF = ({
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
     0
   )
-  console.log('taxPaidByRate:', {
-    accountNumber: invoiceData.iban,
-    amount: invoiceTotal + taxTotal,
-    currency: invoiceData.currency,
-    variableSymbol: invoiceData.number.replace('-', '')
-  })
+
   const qrCodeBase64 = useQRCodeBase64(
     generateQrPaymentString({
       accountNumber: invoiceData.iban?.replace(/\s/g, '') ?? '',

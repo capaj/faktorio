@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { Spinner } from './spinner'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
   {
     variants: {
       variant: {
@@ -64,26 +64,26 @@ export interface ButtonPropsLoading
 export const ButtonWithLoader = React.forwardRef<
   HTMLButtonElement,
   ButtonPropsLoading
->(({ className, variant, size, asChild = false, ...props }, ref) => {
+>(({ className, variant, size, asChild = false, isLoading, ...props }, ref) => {
   const Comp = asChild ? Slot : 'button'
   return (
     <Comp
       className={cn(buttonVariants({ variant, size, className }))}
       ref={ref}
       {...props}
-      disabled={props.disabled || props.isLoading}
+      disabled={props.disabled || isLoading}
     >
       <div className="relative">
         <div
           className={cn('flex items-center gap-1 whitespace-nowrap', {
-            'text-white text-opacity-0': props.isLoading
+            'text-white text-opacity-0': isLoading
           })}
         >
           {props.children}
         </div>
         <div
           className={`absolute inset-0 z-10 flex items-center justify-center ${
-            props.isLoading ? 'opacity-100' : 'opacity-0'
+            isLoading ? 'opacity-100' : 'opacity-0'
           }`}
         >
           <Spinner />

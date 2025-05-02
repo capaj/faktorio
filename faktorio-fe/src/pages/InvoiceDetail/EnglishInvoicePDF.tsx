@@ -460,6 +460,11 @@ export const EnglishInvoicePDF = ({
             const unitPrice = item.unit_price ?? 0
             const quantity = item.quantity ?? 0
             const vatRate = item.vat_rate ?? 0
+            const hourPluralized = quantity === 1 ? 'hour' : 'hours'
+            const unit =
+              item.unit === 'hodina' || item.unit === 'hodin'
+                ? hourPluralized
+                : item.unit
             return (
               <Flex
                 key={index}
@@ -490,7 +495,7 @@ export const EnglishInvoicePDF = ({
                       fontSize: 9
                     }}
                   >
-                    {item.unit}
+                    {unit}
                   </ItemDescText>
                   <ItemDescText>{item.description}</ItemDescText>
                 </Flex>
