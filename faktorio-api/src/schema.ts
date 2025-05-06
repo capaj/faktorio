@@ -48,7 +48,7 @@ export const invoicesTb = sqliteTable(
     issued_on: text('issued_on')
       .notNull()
       .$defaultFn(() => djs().format('YYYY-MM-DD')), // Dates as text YYYY-MM-DD
-    taxable_fulfillment_due: text('taxable_fulfillment_due').notNull(), // Dates as text YYYY-MM-DD
+    taxable_fulfillment_due: text('taxable_fulfillment_due').notNull(), // DUZP Dates as text YYYY-MM-DD
     due_in_days: integer('due_in_days').notNull(), // in days how long before the invoice is due
     due_on: text('due_on').notNull(), // Dates as text YYYY-MM-DD
     sent_at: text('sent_at'), // Dates as text YYYY-MM-DD
@@ -123,7 +123,10 @@ export const invoicesTb = sqliteTable(
       userIndex: index('invoices_user_idx').on(invoices.user_id),
       clientContactIdIndex: index('invoices_client_contact_id_idx').on(
         invoices.client_contact_id
-      )
+      ),
+      taxableFulfillmentDueIndex: index(
+        'invoices_taxable_fulfillment_due_idx'
+      ).on(invoices.taxable_fulfillment_due)
     }
   }
 )
@@ -347,6 +350,7 @@ export const receivedInvoiceTb = sqliteTable(
         accounting_code?: string
       }>
     >(),
+    line_items_summary: text('line_items_summary'),
 
     // Administrative fields
     status: text('status').notNull().default('received'), // received, verified, disputed, paid, etc.
@@ -366,6 +370,9 @@ export const receivedInvoiceTb = sqliteTable(
       userIndex: index('received_invoices_user_idx').on(
         receivedInvoices.user_id
       ),
+      taxableSupplyDateIndex: index(
+        'received_invoices_taxable_supply_date_idx'
+      ).on(receivedInvoices.taxable_supply_date),
       supplierContactIdIndex: index(
         'received_invoices_supplier_contact_id_idx'
       ).on(receivedInvoices.supplier_contact_id),

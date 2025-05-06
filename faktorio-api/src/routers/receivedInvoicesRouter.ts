@@ -109,7 +109,8 @@ const ocrResponseSchema = z.object({
     )
     .optional()
     .nullable(),
-  status: z.enum(['received', 'verified', 'disputed', 'paid']).optional()
+  status: z.enum(['received', 'verified', 'disputed', 'paid']).optional(),
+  line_items_summary: z.string().optional().nullable()
 })
 
 export const receivedInvoicesRouter = trpcContext.router({
