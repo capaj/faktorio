@@ -37,13 +37,14 @@ export const Header = () => {
           <>
             <div className="hidden sm:flex lg:flex justify-center items-center">
               <ButtonLink href="/new-invoice">Vystavit fakturu</ButtonLink>
-              <ButtonLink href="/contacts">Kontakty</ButtonLink>
               <ButtonLink href="/invoices">Vystavené</ButtonLink>
               {!isLocalUser && ( // TODO unhide when it is implemented
                 <ButtonLink href="/received-invoices">Přijaté</ButtonLink>
               )}
 
               <ButtonLink href="/xml-export">Export XML</ButtonLink>
+              <ButtonLink href="/contacts">Kontakty</ButtonLink>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   {user?.pictureUrl ? (
@@ -144,12 +145,11 @@ export const Header = () => {
                 }}
               >
                 <ButtonLink
-                  className="inline-flex h-9 items-center justify-start rounded-md px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900  focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-                  href="/contacts"
+                  className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                  href="/new-invoice"
                 >
-                  Kontakty
+                  Vystavit fakturu
                 </ButtonLink>
-
                 <ButtonLink
                   className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                   href="/invoices"
@@ -168,16 +168,16 @@ export const Header = () => {
 
                 <ButtonLink
                   className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-                  href="/new-invoice"
-                >
-                  Vystavit fakturu
-                </ButtonLink>
-
-                <ButtonLink
-                  className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                   href="/xml-export"
                 >
                   Export XML
+                </ButtonLink>
+
+                <ButtonLink
+                  className="inline-flex h-9 items-center justify-start rounded-md px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900  focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                  href="/contacts"
+                >
+                  Kontakty
                 </ButtonLink>
 
                 <ButtonLink
