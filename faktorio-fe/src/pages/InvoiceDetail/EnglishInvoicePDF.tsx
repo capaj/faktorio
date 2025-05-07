@@ -15,7 +15,7 @@ import { formatMoneyEnglish } from '../../lib/formatMoney'
 import {
   InsertInvoiceItemType,
   SelectInvoiceType
-} from '../../../../faktorio-api/src/zodDbSchemas'
+} from 'faktorio-api/src/zodDbSchemas'
 import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
 import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 import { reactMainRender } from '@/main'

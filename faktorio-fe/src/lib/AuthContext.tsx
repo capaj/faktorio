@@ -10,14 +10,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink, Operation } from '@trpc/client'
 import { SuperJSON } from 'superjson'
 import { trpcLinks } from './errorToastLink'
-import { userT } from '../../../faktorio-api/src/schema'
+import { userT } from 'faktorio-api/src/schema'
 import { useLocation } from 'wouter'
 
-import { trpcContext } from '../../../faktorio-api/src/trpcContext'
-import { appRouter } from '../../../faktorio-api/src/trpcRouter'
+import { trpcContext, type TrpcContext } from 'faktorio-api/src/trpcContext'
+import { appRouter, type AppRouter } from 'faktorio-api/src/trpcRouter'
 import { AnyRouter, inferRouterContext } from '@trpc/server'
 import { Database } from 'sql.js'
-import * as schema from '../../../faktorio-api/src/schema'
+import * as schema from 'faktorio-api/src/schema'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
 import { useDb } from './local-db/DbContext'
 import { createLocalCallerLink } from './createLocalCallerLink'
@@ -154,7 +154,10 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export const createCaller = trpcContext.createCallerFactory(appRouter)
+export const createCaller: (
+  ctx: TrpcContext
+) => ReturnType<typeof appRouter.createCaller> =
+  trpcContext.createCallerFactory(appRouter)
 
 export interface LocalCallerLinkOptions<TRouter extends AnyRouter> {
   router: TRouter

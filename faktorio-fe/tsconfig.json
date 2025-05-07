@@ -15,19 +15,14 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
     "jsx": "react-jsx",
-
+    "composite": true,
     /* Linting */
     "strict": true,
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "src",
-    "../faktorio-shared/src/**/*.ts",
-    "../faktorio-shared/src/**/*.tsx"
-  ],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

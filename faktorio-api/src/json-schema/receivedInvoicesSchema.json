@@ -227,9 +227,10 @@
         }
       }
     },
-    "status": {
+    "line_items_summary": {
       "type": "string",
-      "enum": ["received", "verified", "disputed", "paid"]
+      "description": "Summary of line items in one or two sentences",
+      "nullable": true
     }
   }
 }

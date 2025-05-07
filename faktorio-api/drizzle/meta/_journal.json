@@ -71,6 +71,13 @@
       "when": 1746162451417,
       "tag": "0009_known_gauntlet",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1746542877246,
+      "tag": "0010_clever_bloodscream",
+      "breakpoints": true
     }
   ]
 }

@@ -555,6 +555,19 @@ export function ReceivedInvoicesPage() {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      name="line_items_summary"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>AI souhrn položek</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   {/* Invoice Details */}
@@ -603,8 +616,10 @@ export function ReceivedInvoicesPage() {
                     <FormField
                       name="issue_date"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Datum vystavení *</FormLabel>
+                        <FormItem className="flex flex-col gap-0">
+                          <FormLabel className="mt-0.5">
+                            Datum vystavení *
+                          </FormLabel>
                           <DatePicker
                             date={field.value}
                             setDate={field.onChange}
@@ -617,8 +632,10 @@ export function ReceivedInvoicesPage() {
                     <FormField
                       name="due_date"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Datum splatnosti *</FormLabel>
+                        <FormItem className="flex flex-col gap-0">
+                          <FormLabel className="mt-0.5">
+                            Datum splatnosti *
+                          </FormLabel>
                           <DatePicker
                             date={field.value}
                             setDate={field.onChange}
@@ -632,7 +649,7 @@ export function ReceivedInvoicesPage() {
                       name="taxable_supply_date"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>
+                          <FormLabel className="mt-0.5">
                             Datum uskutečnění zdanitelného plnění
                           </FormLabel>
                           <DatePicker
@@ -732,6 +749,7 @@ export function ReceivedInvoicesPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>AI souhrn položek</TableHead>
                       <TableHead>Dodavatel</TableHead>
                       <TableHead>Číslo faktury</TableHead>
                       <TableHead>Datum vystavení</TableHead>
@@ -747,6 +765,8 @@ export function ReceivedInvoicesPage() {
                   <TableBody>
                     {invoices.map((invoice) => (
                       <TableRow key={invoice.id}>
+                        <TableCell>{invoice.line_items_summary}</TableCell>
+
                         <TableCell className="font-medium">
                           {invoice.supplier_name}
                         </TableCell>

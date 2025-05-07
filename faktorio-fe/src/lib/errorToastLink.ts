@@ -2,7 +2,7 @@ import { TRPCLink, loggerLink } from '@trpc/client'
 import { observable } from '@trpc/server/observable'
 
 import { toast } from 'sonner'
-import { AppRouter } from '../../../faktorio-api/src/trpcRouter'
+import { AppRouter } from 'faktorio-api/src/trpcRouter'
 
 /**
  * this displays a toast every time a mutation/query fails
@@ -36,7 +36,7 @@ export const errorToastLink: TRPCLink<AppRouter> = () => {
           toast.error(
             err.name === 'TRPCClientError'
               ? err.message
-              : err.name ?? 'An error occurred.'
+              : (err.name ?? 'An error occurred.')
           )
 
           observer.error(err)
