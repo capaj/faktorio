@@ -94,9 +94,12 @@ async function runMigrations(db: Database): Promise<void> {
     'CREATE TABLE IF NOT EXISTS __migrations (name TEXT PRIMARY KEY NOT NULL);'
   )
 
-  const query = db.exec('SELECT name FROM __migrations;')
+  const queryResult = db.exec('SELECT name FROM __migrations;')
+  let appliedMigrations: SqlValue[] = []
 
-  const appliedMigrations = query[0].values.map((row) => row[0])
+  if (queryResult.length > 0 && queryResult[0] && queryResult[0].values) {
+    appliedMigrations = queryResult[0].values.map((row: SqlValue[]) => row[0])
+  }
 
   for (const [migrationName, migration] of Object.entries(localDBMigrations)) {
     if (appliedMigrations.includes(migrationName)) {
