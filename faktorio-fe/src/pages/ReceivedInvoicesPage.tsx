@@ -127,7 +127,6 @@ export function ReceivedInvoicesPage() {
           // Format dates correctly and include calculated total
 
           const formData = {
-            currency: 'CZK',
             supplier_country: 'Česká republika',
             ...data,
             issue_date: data.issue_date ? new Date(data.issue_date) : undefined,
