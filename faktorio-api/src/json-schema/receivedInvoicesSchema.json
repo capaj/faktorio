@@ -169,6 +169,7 @@
     },
     "payment_method": {
       "type": "string",
+      "enum": ["bank", "cash", "card", "cod", "crypto", "other"],
       "nullable": true,
       "description": "Bank transfer, cash, card, etc."
     },
@@ -229,7 +230,8 @@
     },
     "line_items_summary": {
       "type": "string",
-      "description": "Summary of line items in one or two sentences",
+      "description": "a succinct overview of line items in this invoice",
+      "maxLength": 90,
       "nullable": true
     }
   }

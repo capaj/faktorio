@@ -332,7 +332,9 @@ export const receivedInvoiceTb = sqliteTable(
     vat_regime: text('vat_regime'), // Standard, non-VAT payer, special regime
 
     // Payment details
-    payment_method: text('payment_method'), // Bank transfer, cash, card, etc.
+    payment_method: text('payment_method').$type<
+      'bank' | 'cash' | 'card' | 'cod' | 'crypto' | 'other'
+    >(),
     bank_account: text('bank_account'),
     iban: text('iban'),
     swift_bic: text('swift_bic'),

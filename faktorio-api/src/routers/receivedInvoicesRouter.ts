@@ -8,7 +8,7 @@ import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
 import schema from '../json-schema/receivedInvoicesSchema.json'
 import { GoogleGenAI, Schema } from '@google/genai'
-import { stringDateSchema } from './zodSchemas'
+import { stringDateSchema, paymentMethodEnum } from './zodSchemas'
 
 // Define Zod schema based on Drizzle schema, making fields optional/required as needed for creation
 // We will refine this based on the frontend form later
@@ -79,7 +79,11 @@ const ocrResponseSchema = z.object({
   payment_date: stringDateSchema.optional().nullable(),
   total_without_vat: z.number().optional().nullable(),
   total_with_vat: z.number().optional(),
-  currency: z.string().optional(),
+  currency: z
+    .string()
+    .optional()
+    .describe('ISO 4217 currency code')
+    .default('CZK'),
   exchange_rate: z.number().optional().nullable(),
   vat_base_21: z.number().optional().nullable(),
   vat_21: z.number().optional().nullable(),
@@ -90,7 +94,7 @@ const ocrResponseSchema = z.object({
   vat_base_0: z.number().optional().nullable(),
   reverse_charge: z.boolean().optional().nullable(),
   vat_regime: z.string().optional().nullable(),
-  payment_method: z.string().optional().nullable(),
+  payment_method: paymentMethodEnum,
   bank_account: z.string().optional().nullable(),
   iban: z.string().optional().nullable(),
   swift_bic: z.string().optional().nullable(),
@@ -299,16 +303,15 @@ export const receivedInvoicesRouter = trpcContext.router({
           /^data:image\/\w+;base64,/,
           ''
         )
+        // yes it's weird that we need to put the json schema in the prompt
+        const prompt = `Extract invoice data from this image. Respond with valid JSON according to the following schema:
+\`\`\`json
+${JSON.stringify(schema)}
+\`\`\`
 
-        // Prepare the prompt for Gemini
-        const prompt = `
-        Extract invoice data from this image. The response should be valid JSON according to the following schema:
-        ${JSON.stringify(schema)}
-        
-        Return ONLY the JSON object, nothing else. If you cannot extract some fields, leave them as null.
-        For dates, use the format YYYY-MM-DD. If you can't determine the exact date, make your best guess.
-        Most invoices are in CZK currency, but on the invoice it is often represented as Kč. The format we want is CZK
-        `
+Return ONLY the JSON object, nothing else. If you cannot extract some fields, leave them as null.
+For dates, use the format YYYY-MM-DD. If you can't determine the exact date, make your best guess.
+The text that is partially unreadable, leave the "?" for each unreadable character.`
 
         // Get the model
 
@@ -331,8 +334,7 @@ export const receivedInvoicesRouter = trpcContext.router({
             }
           ],
           config: {
-            systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from images of czech invoices.
-            `,
+            systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from images of czech invoices. Most invoices are in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency is ISO 4217.`,
             // @ts-expect-error types are not correct
             responseSchema: schema as Schema,
             temperature: 0.2,

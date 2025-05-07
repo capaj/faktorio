@@ -12,6 +12,10 @@ export const dateSchema = z
 
 export const stringDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 
+export const paymentMethodEnum = z
+  .enum(['bank', 'cash', 'card', 'cod', 'crypto', 'other'])
+  .default('bank')
+
 export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
   return invoiceInsertSchema
     .pick({
@@ -36,9 +40,7 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
         .regex(/^\d{4}-\d{2}-\d{2}$/)
         .default(djs().format('YYYY-MM-DD')),
       number: z.string().default(nextInvoiceNumber),
-      payment_method: z
-        .enum(['bank', 'cash', 'card', 'cod', 'crypto', 'other'])
-        .default('bank'),
+      payment_method: paymentMethodEnum,
       taxable_fulfillment_due: stringDateSchema.default(
         djs().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')
       ),
