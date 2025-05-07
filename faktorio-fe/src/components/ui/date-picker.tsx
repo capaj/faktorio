@@ -82,7 +82,6 @@ export const DatePicker = forwardRef<
             onSelect={(newDate) => {
               setDate(newDate)
             }}
-
           />
         </PopoverContent>
       </Popover>
