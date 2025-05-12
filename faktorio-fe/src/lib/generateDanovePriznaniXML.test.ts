@@ -77,7 +77,7 @@ describe('generateDanovePriznaniXML', () => {
       submitterData,
       year,
       quarter,
-      eurInvoiceSum: 13000
+      czkSumEurServices: 13000
     })
 
     // Replace specific assertions with snapshot matching

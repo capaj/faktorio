@@ -6,7 +6,7 @@ import { formatCzechDate, toInt } from './utils'
 interface GenerateDanovePriznaniParams {
   issuedInvoices: Invoice[]
   receivedInvoices: ReceivedInvoice[]
-  eurInvoiceSum: number
+  czkSumEurServices: number
   submitterData: SubmitterData
   year: number
   quarter?: number
@@ -16,7 +16,7 @@ interface GenerateDanovePriznaniParams {
 export function generateDanovePriznaniXML({
   issuedInvoices,
   receivedInvoices,
-  eurInvoiceSum,
+  czkSumEurServices,
   submitterData,
   year,
   quarter,
@@ -88,7 +88,7 @@ export function generateDanovePriznaniXML({
   <Veta1
     obrat23="${toInt(obrat23)}" dan23="${toInt(dan23)}"
   />
-  ${eurInvoiceSum ? `<Veta2 pln_rez_pren="${toInt(eurInvoiceSum)}" />` : ''}
+  ${czkSumEurServices > 0 ? `<Veta2 pln_sluzby="${toInt(czkSumEurServices)}" />` : ''}
   <Veta4
     pln23="${toInt(pln23)}" odp_tuz23_nar="${toInt(odp_tuz23_nar)}"
     odp_sum_nar="${toInt(odp_sum_nar)}"

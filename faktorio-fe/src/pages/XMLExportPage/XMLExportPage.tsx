@@ -193,8 +193,9 @@ export function XMLExportPage() {
       receivedInvoices,
       submitterData,
       year: selectedYear,
-      eurInvoiceSum: eurInvoices.reduce(
-        (sum, inv) => sum + (inv.native_total ?? 0),
+      czkSumEurServices: eurInvoices.reduce(
+        (sum: number, inv: { native_total?: number | null }) =>
+          sum + (inv.native_total ?? 0),
         0
       ),
       quarter: cadence === 'quarterly' ? selectedQuarter : undefined,
@@ -231,7 +232,10 @@ export function XMLExportPage() {
     try {
       // Filter is simplified as generator now handles VAT ID parsing and validation
       const relevantInvoices = eurInvoices.filter(
-        (inv) =>
+        (inv: {
+          client_vat_no?: string | null
+          native_total?: number | null
+        }) =>
           inv.client_vat_no && // Just check if VAT no exists
           inv.native_total != null
       )
