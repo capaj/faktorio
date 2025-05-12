@@ -376,20 +376,31 @@ export function XMLExportPage() {
         }}
       />
 
-      <h4 className="text-lg font-semibold mt-4 mb-2">EU faktury</h4>
-      <IssuedInvoiceTable
-        invoices={eurInvoices}
-        isLoading={false}
-        onDelete={async () => {
-          /* No delete action here */
-        }}
-        onMarkAsPaid={() => {
-          /* No mark as paid action here */
-        }}
-        onMarkAsUnpaid={async () => {
-          /* No mark as unpaid action here */
-        }}
-      />
+      {eurInvoices.length > 0 && (
+        <div className="my-4">
+          <h4 className="text-lg font-semibold mt-4 mb-2">EU faktury</h4>
+          <IssuedInvoiceTable
+            invoices={eurInvoices}
+            isLoading={false}
+            onDelete={async () => {
+              /* No delete action here */
+            }}
+            onMarkAsPaid={() => {
+              /* No mark as paid action here */
+            }}
+            onMarkAsUnpaid={async () => {
+              /* No mark as unpaid action here */
+            }}
+          />
+
+          <p className="text-sm text-muted-foreground mt-1">
+            Pro účely exportu předpokládáme, že faktury do zemí EU jsou:
+            "Poskytnutí služeb s místem plnění v jiném členském státě vymezených
+            v § 102 odst. 1 písm. d) a odst. 3 písm a)" tedy řádek 21 v daňovém
+            přiznání.
+          </p>
+        </div>
+      )}
 
       {/* Placeholder for Received Invoices Table */}
       <h4 className="text-lg font-semibold mt-6 mb-2">Přijaté faktury</h4>
@@ -404,9 +415,7 @@ export function XMLExportPage() {
           <AlertDescription>
             Tato funkce je prozatím experimentální. Vygenerované XML může
             obsahovat chyby a nemusí být kompletní. Vždy si jej před odesláním
-            zkontrolujte. Předpokládáme, že faktury do zemí EU jsou: "Poskytnutí
-            služeb s místem plnění v jiném členském státě vymezených v § 102
-            odst. 1 písm. d) a odst. 3 písm a)"
+            zkontrolujte.
           </AlertDescription>
         </Alert>
         <div className="flex items-center space-x-2">
