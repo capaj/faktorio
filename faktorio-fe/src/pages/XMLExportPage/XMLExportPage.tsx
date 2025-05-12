@@ -402,8 +402,11 @@ export function XMLExportPage() {
           <AlertCircleIcon className="h-4 w-4" />
           <AlertTitle>Upozornění!</AlertTitle>
           <AlertDescription>
-            Tato funkce je experimentální. Vygenerované XML může obsahovat chyby
-            a nemusí být kompletní. Vždy si jej před odesláním zkontrolujte.
+            Tato funkce je prozatím experimentální. Vygenerované XML může
+            obsahovat chyby a nemusí být kompletní. Vždy si jej před odesláním
+            zkontrolujte. Předpokládáme, že faktury do zemí EU jsou: "Poskytnutí
+            služeb s místem plnění v jiném členském státě vymezených v § 102
+            odst. 1 písm. d) a odst. 3 písm a)"
           </AlertDescription>
         </Alert>
         <div className="flex items-center space-x-2">
