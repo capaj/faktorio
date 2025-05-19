@@ -226,51 +226,108 @@ export function ReceivedInvoicesPage() {
   // File processing logic (extracted for reuse)
   const processFile = (file: File) => {
     if (file) {
-      // Check file size (max 7MB)
-      const maxSize = 7 * 1024 * 1024 // 7MB in bytes
-      if (file.size > maxSize) {
-        toast.error(
-          'Soubor je příliš velký. Maximální povolená velikost je 7 MB.'
-        )
-        return
-      }
-
       setIsUploading(true)
       setProcessedFileUrl(null) // Clear previous preview
 
-      try {
-        // Read the file as a base64 string
+      const handleProcessedFile = (processedFile: File) => {
+        // Check file size (max 7MB)
+        const maxSize = 7 * 1024 * 1024 // 7MB in bytes
+        if (processedFile.size > maxSize) {
+          toast.error(
+            'Soubor je příliš velký. Maximální povolená velikost je 7 MB.'
+          )
+          return
+        }
+
+        try {
+          // Read the file as a base64 string
+          const reader = new FileReader()
+          reader.onloadend = async () => {
+            const fullDataUrl = reader.result as string
+            // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
+            const base64String = fullDataUrl.split(',')[1]
+
+            if (!base64String) {
+              toast.error('Chyba při čtení souboru.')
+              setIsProcessingImage(false)
+              setIsUploading(false)
+              return
+            }
+
+            setIsProcessingImage(true)
+            // Update preview immediately for images, handle PDF differently if needed for preview
+            if (processedFile.type.startsWith('image/')) {
+              setProcessedFileUrl(fullDataUrl) // Keep full URL for preview
+            } else {
+              // For PDF, we might not show a preview, or show a generic icon
+              setProcessedFileUrl(null) // Explicitly set to null for non-images
+            }
+            processImageMutation.mutate({
+              mimeType: processedFile.type,
+              imageData: base64String
+            })
+          }
+          reader.readAsDataURL(processedFile)
+        } catch (error) {
+          toast.error(`Chyba při načítání souboru: ${(error as Error).message}`)
+          setIsProcessingImage(false) // Ensure state is reset on error
+          setIsUploading(false)
+        }
+        // Removed finally block from here to avoid setting setIsUploading(false) too early for BMP conversion
+      }
+
+      if (file.type === 'image/bmp') {
         const reader = new FileReader()
-        reader.onloadend = async () => {
-          const fullDataUrl = reader.result as string
-          // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
-          const base64String = fullDataUrl.split(',')[1]
-
-          if (!base64String) {
-            toast.error('Chyba při čtení souboru.')
-            setIsProcessingImage(false)
+        reader.onload = (e) => {
+          const img = new Image()
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+              ctx.drawImage(img, 0, 0)
+              canvas.toBlob(
+                (blob) => {
+                  if (blob) {
+                    const pngFile = new File(
+                      [blob],
+                      file.name.replace(/\.bmp$/, '.png'),
+                      {
+                        type: 'image/png'
+                      }
+                    )
+                    handleProcessedFile(pngFile)
+                  } else {
+                    toast.error('Chyba při konverzi BMP do PNG.')
+                    setIsUploading(false)
+                  }
+                },
+                'image/png',
+                1 // quality
+              )
+            } else {
+              toast.error(
+                'Chyba při vytváření canvas contextu pro konverzi BMP.'
+              )
+              setIsUploading(false)
+            }
+          }
+          img.onerror = () => {
+            toast.error('Chyba při načítání BMP obrázku pro konverzi.')
             setIsUploading(false)
-            return
           }
-
-          setIsProcessingImage(true)
-          // Update preview immediately for images, handle PDF differently if needed for preview
-          if (file.type.startsWith('image/')) {
-            setProcessedFileUrl(fullDataUrl) // Keep full URL for preview
-          } else {
-            // For PDF, we might not show a preview, or show a generic icon
-            setProcessedFileUrl(null) // Explicitly set to null for non-images
+          if (e.target?.result) {
+            img.src = e.target.result as string
           }
-          processImageMutation.mutate({
-            mimeType: file.type,
-            imageData: base64String
-          })
+        }
+        reader.onerror = () => {
+          toast.error('Chyba při čtení BMP souboru.')
+          setIsUploading(false)
         }
         reader.readAsDataURL(file)
-      } catch (error) {
-        toast.error(`Chyba při načítání souboru: ${(error as Error).message}`)
-      } finally {
-        setIsUploading(false) // Keep this potentially? Or handle in mutation?
+      } else {
+        handleProcessedFile(file)
       }
     }
   }
@@ -433,7 +490,7 @@ export function ReceivedInvoicesPage() {
                     Přetáhněte sem soubor nebo klikněte pro výběr
                   </p>
                   <p className="text-sm text-muted-foreground mb-6 text-center max-w-md">
-                    Podporované formáty: JPG, PNG, PDF. Systém se pokusí
+                    Podporované formáty: JPG, PNG, BMP, PDF. Systém se pokusí
                     automaticky rozpoznat údaje z faktury pomocí OCR.
                   </p>
                 </>
@@ -441,7 +498,7 @@ export function ReceivedInvoicesPage() {
               <input
                 id="invoice-file-input"
                 type="file"
-                accept="image/jpeg,image/png,image/jpg,application/pdf"
+                accept="image/jpeg,image/png,image/jpg,application/pdf,image/bmp"
                 className="hidden"
                 onChange={handleFileChange}
                 disabled={isProcessingImage}
