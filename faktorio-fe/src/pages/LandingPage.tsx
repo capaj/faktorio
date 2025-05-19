@@ -23,7 +23,12 @@ export const LandingPage = () => {
             </div>
             <div className="mx-auto max-w-[400px] space-y-2">
               <Link href="/signup">
-                <Button className="w-full" type="submit">
+                <Button
+                  className="w-full"
+                  type="submit"
+                  role="link"
+                  aria-label="Registrace"
+                >
                   Registrace
                 </Button>
               </Link>

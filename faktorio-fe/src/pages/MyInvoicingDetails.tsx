@@ -15,7 +15,7 @@ import { toast } from 'sonner'
 import { upsertInvoicingDetailsSchema } from 'faktorio-api/src/trpcRouter'
 
 export const MyInvoicingDetails = () => {
-  const [data] = trpcClient.invoicingDetails.useSuspenseQuery()
+  const [data, { refetch }] = trpcClient.invoicingDetails.useSuspenseQuery()
 
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()
 
@@ -60,7 +60,10 @@ export const MyInvoicingDetails = () => {
       'created_at',
       'updated_at'
     ])
-    const valDiff = diff(dataForDirtyCheck, values)
+    const valDiff = diff(
+      dataForDirtyCheck,
+      omit(values, ['user_id', 'created_at', 'updated_at'])
+    )
 
     if (valDiff.length > 0) {
       setIsDirty(true)
@@ -100,7 +103,7 @@ export const MyInvoicingDetails = () => {
               label: 'SWIFT/BIC'
             },
             bank_account: {
-              label: 'Číslo bankovního účtu'
+              label: 'Číslo bankovního účtu - včetně bankovního kódu'
             },
             phone_number: {
               label: 'Telefon'
@@ -109,13 +112,21 @@ export const MyInvoicingDetails = () => {
               label: 'Web'
             }
           }}
-          values={values ?? {}}
+          values={
+            values
+              ? {
+                  ...values,
+                  registration_no: values.registration_no ?? undefined
+                }
+              : undefined
+          }
           onParsedValuesChange={(values) => {
             // @ts-expect-error
             setValues(values)
           }}
           onSubmit={async (values) => {
             await upsert.mutateAsync(values)
+            refetch()
             toast.success('Údaje byly úspěšně uloženy')
             setIsDirty(false)
           }}

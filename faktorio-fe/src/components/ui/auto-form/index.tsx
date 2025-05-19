@@ -80,6 +80,8 @@ function AutoForm<SchemaType extends ZodObjectOrWrapped>({
     const parsedValues = formSchema.safeParse(values)
     if (parsedValues.success) {
       onParsedValuesChange?.(parsedValues.data)
+    } else {
+      // console.log('parsedValues', parsedValues)
     }
   }, [valuesString])
 

@@ -29,9 +29,12 @@ export default defineConfig({
     // baseURL: 'http://127.0.0.1:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry'
+    trace: 'on-first-retry',
+    headless: false,
+    screenshot: 'only-on-failure',
+    video: 'on-first-retry'
   },
-
+  timeout: 5000,
   // You can optionally use a global setup file instead of fixtures approach
   // globalSetup: './e2e/global-setup.ts',
 

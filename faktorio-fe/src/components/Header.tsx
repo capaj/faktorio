@@ -53,10 +53,14 @@ export const Header = () => {
                         backgroundImage: `url(${user.pictureUrl})`,
                         backgroundSize: 'cover'
                       }}
+                      aria-label="Uživatelský profil"
                       className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200"
                     ></div>
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200">
+                    <div
+                      aria-label="Uživatelský profil"
+                      className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200"
+                    >
                       <User className="h-4 w-4 text-gray-800" />
                     </div>
                   )}

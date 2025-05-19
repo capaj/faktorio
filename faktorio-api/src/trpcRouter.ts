@@ -9,13 +9,20 @@ import { eq } from 'drizzle-orm'
 import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
 import { authRouter } from './routers/authRouter'
 import { userInvoicingDetailsInsertSchema } from './zodDbSchemas'
+import { z } from 'zod'
 
-export const upsertInvoicingDetailsSchema =
-  userInvoicingDetailsInsertSchema.omit({
-    created_at: true,
-    updated_at: true,
-    user_id: true
+export const upsertInvoicingDetailsSchema = z
+  .object({
+    registration_no: z.string().min(8).max(8).optional() // this forces the input to be first in AutoForm
   })
+  .merge(
+    userInvoicingDetailsInsertSchema.omit({
+      created_at: true,
+      updated_at: true,
+      user_id: true,
+      registration_no: true
+    })
+  )
 
 export const appRouter = trpcContext.router({
   test: trpcContext.procedure.query(async ({ ctx }) => {

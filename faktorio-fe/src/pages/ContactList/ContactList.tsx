@@ -93,6 +93,13 @@ const acFieldConfig = {
 }
 
 export const fieldConfigForContactForm = {
+  registration_no: {
+    label: 'IČO - po vyplnění se automaticky doplní další údaje z ARESU',
+    inputProps: {
+      placeholder: '8 čísel',
+      autocomplete: 'off'
+    }
+  },
   name: {
     label: 'Jméno',
     className: 'col-span-2',
@@ -114,13 +121,7 @@ export const fieldConfigForContactForm = {
     label: 'Email',
     ...acFieldConfig
   },
-  registration_no: {
-    label: 'IČO - po vyplnění se automaticky doplní další údaje z ARESU',
-    inputProps: {
-      placeholder: '8 čísel',
-      autocomplete: 'off'
-    }
-  },
+
   vat_no: {
     label: 'DIČ',
     ...acFieldConfig

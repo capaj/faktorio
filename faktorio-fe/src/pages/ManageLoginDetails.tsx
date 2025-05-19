@@ -170,27 +170,23 @@ export const ManageLoginDetails = () => {
     values: DeleteAccountPasswordFormValues
   ) => {
     setIsDeleteDialogOpen(false)
-    try {
-      await deleteAccountMutation.mutateAsync({
-        password: values.password
-      })
-    } catch (error) {
-      // Error is handled by the mutation's onError
-    }
+
+    await deleteAccountMutation.mutateAsync({
+      password: values.password
+    })
   }
 
   const onDeleteAccountConfirmSubmit = async (
     values: DeleteAccountConfirmFormValues
   ) => {
     setIsDeleteDialogOpen(false)
-    try {
-      await deleteAccountMutation.mutateAsync({
-        confirmText: values.confirmText
-      })
-    } catch (error) {
-      // Error is handled by the mutation's onError
-    }
+
+    await deleteAccountMutation.mutateAsync({
+      confirmText: values.confirmText
+    })
   }
+
+  console.log('d', deleteAccountMutation.isPending)
 
   return (
     <>
@@ -373,7 +369,6 @@ export const ManageLoginDetails = () => {
                       isLoading={deleteAccountMutation.isPending}
                       variant="destructive"
                       disabled={
-                        !deleteAccountPasswordForm.formState.isDirty ||
                         !deleteAccountPasswordForm.formState.isValid ||
                         Object.keys(deleteAccountPasswordForm.formState.errors)
                           .length > 0
@@ -416,12 +411,6 @@ export const ManageLoginDetails = () => {
                       type="submit"
                       isLoading={deleteAccountMutation.isPending}
                       variant="destructive"
-                      disabled={
-                        !deleteAccountConfirmForm.formState.isDirty ||
-                        !deleteAccountConfirmForm.formState.isValid ||
-                        Object.keys(deleteAccountConfirmForm.formState.errors)
-                          .length > 0
-                      }
                     >
                       Smazat účet
                     </FkButton>
