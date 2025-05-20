@@ -135,7 +135,34 @@ export const MyInvoicingDetails = () => {
             <Checkbox id="terms" />
             <Label htmlFor="terms">Fakturuji většinou počet pracovních dní v měsíci</Label>
           </div> */}
-          <div className="flex justify-end">
+          <div className="flex justify-between space-x-2">
+            <FkButton
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const details = [
+                  `Jméno: ${values?.name || ''}`,
+                  `IČO: ${values?.registration_no || ''}`,
+                  `DIČ: ${values?.vat_no || ''}`,
+                  `Ulice: ${values?.street || ''}`,
+                  `Část obce: ${values?.street2 || ''}`,
+                  `Město: ${values?.city || ''}`,
+                  `PSČ: ${values?.zip || ''}`,
+                  `Země: ${values?.country || ''}`,
+                  `IBAN: ${values?.iban || ''}`,
+                  `SWIFT/BIC: ${values?.swift_bic || ''}`,
+                  `Číslo účtu: ${values?.bank_account || ''}`,
+                  `Telefon: ${values?.phone_number || ''}`,
+                  `Web: ${values?.web_url || ''}`
+                ]
+                  .filter((line) => line.split(': ')[1]) // Keep only lines with values
+                  .join('\n')
+                navigator.clipboard.writeText(details)
+                toast.success('Údaje zkopírovány do schránky')
+              }}
+            >
+              Kopírovat všechny údaje do schránky
+            </FkButton>
             <FkButton
               disabled={!isDirty} // Enable button only if form is dirty
               isLoading={upsert.isPending}

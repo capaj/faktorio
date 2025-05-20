@@ -14,6 +14,7 @@ export const FkButton = React.forwardRef<
       className={cn(buttonVariants({ variant, size, className }))}
       ref={ref}
       {...props}
+      type={props.type || 'button'}
       disabled={props.disabled || props.isLoading}
     >
       <div className="relative">
