@@ -81,7 +81,7 @@ export default defineConfig({
     command: 'pnpm run dev',
     port: 5173,
     reuseExistingServer: !process.env.CI,
-    timeout: 20000,
+    timeout: isCI ? 60000 : 30000, // Increased timeout for CI, and slightly for local
     stdout: 'ignore',
     stderr: 'pipe'
   }

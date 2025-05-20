@@ -127,6 +127,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = useCallback(
     (path?: string) => {
+      logoutMutation.mutate()
       setUser(null)
       setToken(null)
       localStorage.removeItem('auth_token')
@@ -134,7 +135,6 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 
       utils.invalidate()
 
-      logoutMutation.mutate()
       path && navigate('/')
     },
     [logoutMutation]
