@@ -82,7 +82,7 @@ export default defineConfig({
     port: 5173,
     reuseExistingServer: !process.env.CI,
     timeout: isCI ? 60000 : 30000, // Increased timeout for CI, and slightly for local
-    stdout: 'ignore',
+    stdout: 'pipe',
     stderr: 'pipe'
   }
 })
