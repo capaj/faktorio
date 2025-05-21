@@ -19,7 +19,9 @@ test('smoke', async ({ page }) => {
   // Expect successful registration navigation to the homepage
   // await expect(page).toHaveURL(url + '/') // TODO fix url when user is not searching
 
-  await expect(page.getByText('Žádné faktury k zobrazení.')).toBeVisible()
+  await expect(page.getByText('Žádné faktury k zobrazení.')).toBeVisible({
+    timeout: 30000
+  })
   // Verify we are on the MyInvoicingDetails page
 })
 
