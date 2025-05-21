@@ -1,5 +1,10 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import { fileURLToPath } from 'url'
+
+// Derive __dirname in ES module scope
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // This script assumes it's run from the root of the monorepo.
 // So, __dirname here would be faktorio-api/scripts if run with node faktorio-api/scripts/generate-dev-vars.ts
