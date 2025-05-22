@@ -41,7 +41,7 @@
     "debug": "^4.4.1",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",
-    "drizzle-zod": "0.7.1",
+    "drizzle-zod": "0.8.1",
     "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.8",
     "zod": "^3.25.21"

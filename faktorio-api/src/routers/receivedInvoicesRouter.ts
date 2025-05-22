@@ -192,7 +192,6 @@ export const receivedInvoicesRouter = trpcContext.router({
       // Save the invoice
       const [newInvoice] = await ctx.db
         .insert(receivedInvoiceTb)
-        // @ts-expect-error - TODO fix this
         .values({
           ...invoiceData,
           user_id: ctx.user.id,
@@ -235,7 +234,6 @@ export const receivedInvoicesRouter = trpcContext.router({
       // Update the invoice
       const [updatedInvoice] = await ctx.db
         .update(receivedInvoiceTb)
-        // @ts-expect-error - TODO fix this
         .set({
           ...updateData,
           updated_at: new Date().toISOString()
