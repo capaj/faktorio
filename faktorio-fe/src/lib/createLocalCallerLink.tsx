@@ -19,8 +19,6 @@ export function createLocalCallerLink<TRouter extends AnyRouter>(
       return observable((observer) => {
         const { path, input, type, id } = op
 
-        console.log(op)
-
         // Asynchronously create the context, then the caller
         Promise.resolve(opts.createContext())
           .then((ctx) => {

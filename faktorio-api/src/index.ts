@@ -57,8 +57,6 @@ export default {
       return handleOptions(request)
     }
 
-    console.log(request.body)
-
     const turso = createClient({
       url: env.TURSO_DATABASE_URL,
       authToken: env.TURSO_AUTH_TOKEN
