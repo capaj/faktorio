@@ -44,6 +44,6 @@
     "drizzle-zod": "0.8.1",
     "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.8",
-    "zod": "^3.25.21"
+    "zod": "^3.25.23"
   }
 }
