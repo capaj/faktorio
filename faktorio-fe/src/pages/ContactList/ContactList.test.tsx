@@ -3,7 +3,7 @@ import {
   formatStreetAddress,
   AresBusinessInformationSchema
 } from './ContactList'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // Helper to create minimal mock data satisfying the function's needs
 const createMockAresData = (

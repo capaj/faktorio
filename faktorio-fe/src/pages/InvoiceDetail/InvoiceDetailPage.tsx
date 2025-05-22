@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select'
 import { djs } from 'faktorio-shared/src/djs'
 import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { invoiceItemFormSchema } from 'faktorio-api/src/zodDbSchemas'
 import { LucideEdit } from 'lucide-react'
 

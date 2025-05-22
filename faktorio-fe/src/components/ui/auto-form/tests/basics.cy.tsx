@@ -1,6 +1,6 @@
 // @ts-nocheck
 import AutoForm from '../index'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 describe('<AutoForm />', () => {
   it('renders fields', () => {

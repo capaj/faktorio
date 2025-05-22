@@ -5,7 +5,7 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import * as z from 'zod'
+import * as z from 'zod/v4'
 import AutoFormLabel from '../common/label'
 import AutoFormTooltip from '../common/tooltip'
 import { AutoFormInputComponentProps } from '../types'
@@ -19,14 +19,28 @@ export default function AutoFormRadioGroup({
   fieldProps,
   fieldConfigItem
 }: AutoFormInputComponentProps) {
-  const baseValues = (getBaseSchema(zodItem) as unknown as z.ZodEnum<any>)._def
-    .values
+  const baseSchema = getBaseSchema(zodItem) as any
 
+  // In Zod v4, enums have a public 'options' property
   let values: string[] = []
-  if (!Array.isArray(baseValues)) {
-    values = Object.entries(baseValues).map((item) => item[0])
-  } else {
-    values = baseValues
+
+  if (baseSchema && baseSchema.options) {
+    // Standard ZodEnum with options array
+    values = baseSchema.options
+  } else if (baseSchema && baseSchema._def) {
+    // Fallback: check the internal structure
+    if (baseSchema._def.entries) {
+      // Zod v4 enum internal structure
+      values = Object.keys(baseSchema._def.entries)
+    } else if (baseSchema._def.values) {
+      // Legacy structure fallback
+      const baseValues = baseSchema._def.values
+      if (!Array.isArray(baseValues)) {
+        values = Object.keys(baseValues)
+      } else {
+        values = baseValues
+      }
+    }
   }
 
   return (

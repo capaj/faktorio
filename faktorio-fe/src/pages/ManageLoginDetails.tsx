@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { useState } from 'react'
 import { trpcClient } from '@/lib/trpcClient'
 import { FkButton } from '@/components/FkButton'
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@/lib/zodResolver'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/AuthContext'
 import {

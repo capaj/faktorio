@@ -1,5 +1,5 @@
 import { trpcContext } from '../trpcContext'
-import z from 'zod'
+import z from 'zod/v4'
 
 import { eq, and, isNull } from 'drizzle-orm'
 import { userT, passwordResetTokenT } from '../schema'

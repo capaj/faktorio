@@ -2,11 +2,11 @@
 import { Form } from '@/components/ui/form'
 import React from 'react'
 import { DefaultValues, useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@/lib/zodResolver'
 
 import AutoFormObject from './fields/object'
 import { Dependency, FieldConfig } from './types'
@@ -98,6 +98,7 @@ function AutoForm<SchemaType extends ZodObjectOrWrapped>({
             schema={objectFormSchema}
             form={form}
             containerClassName={containerClassName}
+            // @ts-expect-error
             dependencies={dependencies}
             fieldConfig={fieldConfig}
           />

@@ -1,5 +1,5 @@
 import { ControllerRenderProps, FieldValues } from 'react-hook-form'
-import * as z from 'zod'
+import * as z from 'zod/v4'
 import { INPUT_COMPONENTS } from './config'
 
 export type FieldConfigItem = {
@@ -17,10 +17,10 @@ export type FieldConfigItem = {
   }) => React.ReactElement | null
 }
 
-export type FieldConfig<SchemaType extends z.infer<z.ZodObject<any, any>>> = {
-  // If SchemaType.key is an object, create a nested FieldConfig, otherwise FieldConfigItem
+export type FieldConfig<SchemaType = any> = {
+  // Simplified type definition that works with Zod v4
   [Key in keyof SchemaType]?: SchemaType[Key] extends object
-    ? FieldConfig<z.infer<SchemaType[Key]>>
+    ? FieldConfig<SchemaType[Key]>
     : FieldConfigItem
 }
 
@@ -31,33 +31,27 @@ export enum DependencyType {
   SETS_OPTIONS
 }
 
-type BaseDependency<SchemaType extends z.infer<z.ZodObject<any, any>>> = {
+type BaseDependency<SchemaType = any> = {
   sourceField: keyof SchemaType
   type: DependencyType
   targetField: keyof SchemaType
   when: (sourceFieldValue: any, targetFieldValue: any) => boolean
 }
 
-export type ValueDependency<SchemaType extends z.infer<z.ZodObject<any, any>>> =
-  BaseDependency<SchemaType> & {
-    type:
-      | DependencyType.DISABLES
-      | DependencyType.REQUIRES
-      | DependencyType.HIDES
-  }
+export type ValueDependency<SchemaType = any> = BaseDependency<SchemaType> & {
+  type: DependencyType.DISABLES | DependencyType.REQUIRES | DependencyType.HIDES
+}
 
 export type EnumValues = readonly [string, ...string[]]
 
-export type OptionsDependency<
-  SchemaType extends z.infer<z.ZodObject<any, any>>
-> = BaseDependency<SchemaType> & {
+export type OptionsDependency<SchemaType = any> = BaseDependency<SchemaType> & {
   type: DependencyType.SETS_OPTIONS
 
   // Partial array of values from sourceField that will trigger the dependency
   options: EnumValues
 }
 
-export type Dependency<SchemaType extends z.infer<z.ZodObject<any, any>>> =
+export type Dependency<SchemaType = any> =
   | ValueDependency<SchemaType>
   | OptionsDependency<SchemaType>
 
@@ -71,6 +65,6 @@ export type AutoFormInputComponentProps = {
   label: string
   isRequired: boolean
   fieldProps: any
-  zodItem: z.ZodAny
+  zodItem: z.ZodType
   className?: string
 }
