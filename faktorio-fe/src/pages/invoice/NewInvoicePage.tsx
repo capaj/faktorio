@@ -13,12 +13,6 @@ import { invoiceItemFormSchema } from 'faktorio-api/src/zodDbSchemas'
 import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
-} from '@/components/ui/accordion'
 import { FormItem, FormLabel, FormControl } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { BankDetailsAccordion } from './BankDetailsAccordion'

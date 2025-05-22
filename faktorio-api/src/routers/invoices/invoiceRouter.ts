@@ -28,14 +28,20 @@ import { getCNBExchangeRate } from './getCNBExchangeRate'
 
 const invoiceSchema = getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001')
 
+const createInvoiceInput = z.object({
+  invoice: invoiceSchema,
+  items: z.array(invoiceItemFormSchema)
+})
+
+const updateInvoiceInput = z.object({
+  id: z.string(),
+  invoice: invoiceSchema,
+  items: z.array(invoiceItemFormSchema)
+})
+
 export const invoiceRouter = trpcContext.router({
   create: protectedProc
-    .input(
-      z.object({
-        invoice: invoiceSchema,
-        items: z.array(invoiceItemFormSchema)
-      })
-    )
+    .input(createInvoiceInput)
     .mutation(async ({ input, ctx }) => {
       const invoiceItems = input.items
       const invoiceSums = getInvoiceSums(
@@ -177,24 +183,24 @@ export const invoiceRouter = trpcContext.router({
       }
 
       if (input.vat?.minimum !== null && input.vat?.minimum !== undefined) {
-        conditions.push(
-          // @ts-expect-error
-          or(
-            gte(invoicesTb.vat_21, input.vat.minimum),
-            gte(invoicesTb.vat_12, input.vat.minimum)
-          )
+        const vatCondition = or(
+          gte(invoicesTb.vat_21, input.vat.minimum),
+          gte(invoicesTb.vat_12, input.vat.minimum)
         )
+        if (vatCondition) {
+          conditions.push(vatCondition)
+        }
       } else if (
         input.vat?.maximum !== null &&
         input.vat?.maximum !== undefined
       ) {
-        conditions.push(
-          // @ts-expect-error
-          or(
-            lte(invoicesTb.vat_21, input.vat.maximum),
-            lte(invoicesTb.vat_12, input.vat.maximum)
-          )
+        const vatCondition = or(
+          lte(invoicesTb.vat_21, input.vat.maximum),
+          lte(invoicesTb.vat_12, input.vat.maximum)
         )
+        if (vatCondition) {
+          conditions.push(vatCondition)
+        }
       }
 
       if (input.currency) {
@@ -271,14 +277,9 @@ export const invoiceRouter = trpcContext.router({
         )
         .execute()
     }),
+
   update: protectedProc
-    .input(
-      z.object({
-        id: z.string(),
-        invoice: invoiceSchema,
-        items: z.array(invoiceItemFormSchema)
-      })
-    )
+    .input(updateInvoiceInput)
     .mutation(async ({ input, ctx }) => {
       const invoice = await ctx.db.query.invoicesTb.findFirst({
         where: and(
