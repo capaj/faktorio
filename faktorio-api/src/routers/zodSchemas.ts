@@ -25,7 +25,7 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
       .regex(/^\d{4}-\d{2}-\d{2}$/)
       .default(djs().format('YYYY-MM-DD')),
     payment_method: paymentMethodEnum,
-    footer_note: z.string().optional(),
+    footer_note: z.string().nullish(),
     taxable_fulfillment_due: stringDateSchema.default(
       djs().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')
     ),

@@ -85,8 +85,8 @@ importers:
         specifier: ^0.43.1
         version: 0.43.1(@cloudflare/workers-types@4.20250522.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       drizzle-zod:
-        specifier: 0.8.1
-        version: 0.8.1(drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250522.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.21)
+        specifier: 0.7.1
+        version: 0.7.1(drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250522.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.21)
       faktorio-shared:
         specifier: workspace:*
         version: link:../faktorio-shared
@@ -3126,11 +3126,11 @@ packages:
       sqlite3:
         optional: true
 
-  drizzle-zod@0.8.1:
-    resolution: {integrity: sha512-k2/2cwBz3Vjb7CWPVCeMNajZpG43V7SqhNrZ8LsWJOz8TztQ5YtU2ifgnfnxqZXsxeHmdQnsl6eXm7GwDZnq/Q==}
+  drizzle-zod@0.7.1:
+    resolution: {integrity: sha512-nZzALOdz44/AL2U005UlmMqaQ1qe5JfanvLujiTHiiT8+vZJTBFhj3pY4Vk+L6UWyKFfNmLhk602Hn4kCTynKQ==}
     peerDependencies:
       drizzle-orm: '>=0.36.0'
-      zod: ^3.25.1
+      zod: '>=3.0.0'
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -8152,7 +8152,7 @@ snapshots:
       gel: 2.0.0
       sql.js: 1.13.0
 
-  drizzle-zod@0.8.1(drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250522.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.21):
+  drizzle-zod@0.7.1(drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250522.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.21):
     dependencies:
       drizzle-orm: 0.43.1(@cloudflare/workers-types@4.20250522.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       zod: 3.25.21

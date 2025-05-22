@@ -1,7 +1,5 @@
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 
-// Create Document Component
-
 import { CzechInvoicePDF } from './CzechInvoicePDF'
 import { Button } from '@/components/ui/button'
 import { snakeCase } from 'lodash-es'
