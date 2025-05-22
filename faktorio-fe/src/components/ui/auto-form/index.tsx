@@ -94,12 +94,13 @@ function AutoForm<SchemaType extends ZodObjectOrWrapped>({
           }}
           className={cn('space-y-5', className)}
         >
-          <AutoFormObject
+          <AutoFormObject<typeof objectFormSchema>
             schema={objectFormSchema}
             form={form}
             containerClassName={containerClassName}
-            // @ts-expect-error
-            dependencies={dependencies}
+            dependencies={
+              dependencies as Dependency<z.infer<typeof objectFormSchema>>[]
+            }
             fieldConfig={fieldConfig}
           />
 
