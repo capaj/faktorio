@@ -20,36 +20,47 @@ export const MyInvoicingDetails = () => {
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()
 
   const [values, setValues] = useState(data)
-  useEffect(() => {
-    ;(async () => {
-      if (values?.registration_no?.length === 8 && !values?.name) {
-        // seems like a user is trying to add new contact, let's fetch data from ares
-        const aresResponse = await fetch(
-          `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/${values.registration_no}`
-        )
-        const parse = AresBusinessInformationSchema.safeParse(
-          await aresResponse.json()
-        )
-        console.log('parse', parse)
-        if (parse.success) {
-          const aresData = parse.data
-          console.log('aresData', aresData)
-          setValues({
-            ...values,
-            name: aresData.obchodniJmeno,
-            street: formatStreetAddress(aresData),
-            street2: aresData.sidlo.nazevCastiObce,
-            city: aresData.sidlo.nazevObce,
-            zip: String(aresData.sidlo.psc),
-            vat_no: aresData.dic ?? null,
-            country: aresData.sidlo.nazevStatu
-          })
-        } else {
-          console.error(parse.error)
-        }
+  const [isLoadingAres, setIsLoadingAres] = useState(false)
+
+  const fetchAresData = async () => {
+    if (!values?.registration_no || values.registration_no.length !== 8) return
+
+    setIsLoadingAres(true)
+    try {
+      console.log('Fetching ARES data...', values.registration_no)
+      const aresResponse = await fetch(
+        `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/${values.registration_no}`
+      )
+      const parse = AresBusinessInformationSchema.safeParse(
+        await aresResponse.json()
+      )
+      console.log('parse', parse)
+      if (parse.success) {
+        const aresData = parse.data
+        console.log('aresData', aresData)
+        setValues({
+          ...values,
+          name: aresData.obchodniJmeno,
+          street: formatStreetAddress(aresData),
+          street2: aresData.sidlo.nazevCastiObce,
+          city: aresData.sidlo.nazevObce,
+          zip: String(aresData.sidlo.psc),
+          vat_no: aresData.dic ?? null,
+          country: aresData.sidlo.nazevStatu
+        })
+        toast.success('Údaje z ARESU byly úspěšně načteny')
+      } else {
+        console.error(parse.error)
+        toast.error('Nepodařilo se načíst údaje z ARESU')
       }
-    })()
-  }, [values?.registration_no])
+    } catch (error) {
+      console.error('ARES fetch error:', error)
+      toast.error('Chyba při načítání údajů z ARESU')
+    } finally {
+      setIsLoadingAres(false)
+    }
+  }
+
   const [isDirty, setIsDirty] = useState(false)
   useEffect(() => {
     if (!values) {
@@ -87,11 +98,25 @@ export const MyInvoicingDetails = () => {
           fieldConfig={{
             ...fieldConfigForContactForm,
             registration_no: {
-              label:
-                'IČO - po vyplnění se automaticky doplní další údaje z ARESU',
+              label: 'IČO',
               inputProps: {
                 placeholder: '8 čísel'
-              }
+              },
+              renderParent: ({ children }) => (
+                <div className="flex items-end space-x-2">
+                  <div className="flex-1">{children}</div>
+                  <FkButton
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={fetchAresData}
+                    disabled={!values?.registration_no || values.registration_no.length !== 8 || isLoadingAres}
+                    isLoading={isLoadingAres}
+                  >
+                    Načíst z ARESU
+                  </FkButton>
+                </div>
+              )
             },
             city: {
               label: 'Město'
@@ -115,9 +140,9 @@ export const MyInvoicingDetails = () => {
           values={
             values
               ? {
-                  ...values,
-                  registration_no: values.registration_no ?? undefined
-                }
+                ...values,
+                registration_no: values.registration_no ?? undefined
+              }
               : undefined
           }
           onParsedValuesChange={(values) => {
@@ -131,10 +156,6 @@ export const MyInvoicingDetails = () => {
             setIsDirty(false)
           }}
         >
-          {/* <div className="flex items-center space-x-2">
-            <Checkbox id="terms" />
-            <Label htmlFor="terms">Fakturuji většinou počet pracovních dní v měsíci</Label>
-          </div> */}
           <div className="flex justify-between space-x-2">
             <FkButton
               type="button"
