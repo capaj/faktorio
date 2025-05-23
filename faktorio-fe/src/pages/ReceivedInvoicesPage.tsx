@@ -29,9 +29,9 @@ import {
 } from '@/components/ui/select'
 
 import { toast } from 'sonner'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@/lib/zodResolver'
 
 import {
   UploadIcon,
@@ -59,11 +59,11 @@ const receivedInvoiceFormSchema = z.object({
   variable_symbol: z.string().nullish(),
   expense_category: z.string().nullish(),
   issue_date: z.date({
-    required_error: 'Datum vystavení je povinné'
+    error: 'Datum vystavení je povinné'
   }),
   taxable_supply_date: z.date().optional().nullable(),
   due_date: z.date({
-    required_error: 'Datum splatnosti je povinné'
+    error: 'Datum splatnosti je povinné'
   }),
   receipt_date: z.date().optional().nullable(),
   total_without_vat: z.number().optional().nullable(),
@@ -181,7 +181,6 @@ export function ReceivedInvoicesPage() {
 
   // Setup react-hook-form
   const form = useForm<ReceivedInvoiceFormValues>({
-    // @ts-expect-error - TODO fix this
     resolver: zodResolver(receivedInvoiceFormSchema),
     defaultValues: {
       supplier_name: '',
@@ -508,7 +507,6 @@ export function ReceivedInvoicesPage() {
             {/* Manual Form Section */}
             <Form {...form}>
               <form
-                // @ts-expect-error - TODO fix this
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >

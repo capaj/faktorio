@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { z, ZodSchema, type ZodObject, type ZodTypeAny } from 'zod'
+import { z, ZodSchema, type ZodObject, type ZodTypeAny } from 'zod/v4'
 
 export function useZodFormState<
   T extends ZodObject<{ [key: string]: ZodTypeAny }>
@@ -7,10 +7,11 @@ export function useZodFormState<
   // Use TypeScript's ReturnType utility to infer the shape of the default state
   type SchemaOutput = ReturnType<T['parse']>
 
-  // @ts-expect-error
-  const defaultState: SchemaOutput = zodSchema.safeParse(defaultValues ?? {})
+  const defaultState = zodSchema.safeParse(defaultValues ?? {})
 
-  const [state, setFormState] = useState<SchemaOutput>(defaultState.data)
+  const [state, setFormState] = useState<SchemaOutput>(
+    defaultState?.data ?? ({} as SchemaOutput)
+  )
   console.log('state:', state)
 
   const parseResult = zodSchema.safeParse(state)
@@ -60,7 +61,7 @@ export function useZodFormState<
     },
     handleChange,
     defaultState: defaultState.data,
-    resetState: () => setFormState(defaultState),
+    resetState: () => setFormState(defaultState.data ?? ({} as SchemaOutput)),
     inputProps: (name: keyof SchemaOutput) => {
       const value: any = state[name] ?? ''
       return {
@@ -96,13 +97,32 @@ const zodPrimitiveTypes = [
   'ZodVoid'
 ]
 
-function getPrimitiveType(schema: ZodSchema<any>) {
-  // @ts-expect-error
-  if (zodPrimitiveTypes.includes(schema._def.typeName)) {
-    // @ts-expect-error
-    return schema._def.typeName
+function getPrimitiveType(schema: ZodSchema<any>): string {
+  // In Zod v4, use constructor.name instead of _def.typeName
+  const typeName = schema.constructor.name
+
+  if (zodPrimitiveTypes.includes(typeName)) {
+    return typeName
   }
 
-  // @ts-expect-error
-  return getPrimitiveType(schema.unwrap())
+  // Manual unwrapping for Zod v4 - handle wrapped types
+  if (schema && '_def' in schema && schema._def) {
+    // Handle ZodOptional, ZodNullable, ZodDefault, etc.
+    if ('innerType' in schema._def && schema._def.innerType) {
+      return getPrimitiveType(schema._def.innerType as ZodSchema<any>)
+    }
+
+    // Handle ZodPipe (replacement for ZodEffects)
+    if ('out' in schema._def && schema._def.out) {
+      return getPrimitiveType(schema._def.out as ZodSchema<any>)
+    }
+
+    // Handle other wrapped schemas
+    if ('schema' in schema._def && schema._def.schema) {
+      return getPrimitiveType(schema._def.schema as ZodSchema<any>)
+    }
+  }
+
+  // Return the type name if we can't unwrap further
+  return typeName
 }

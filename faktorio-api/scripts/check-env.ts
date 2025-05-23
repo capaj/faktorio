@@ -1,4 +1,4 @@
-import { ZodError } from 'zod'
+import { ZodError } from 'zod/v4'
 import { envSchema } from '../src/envSchema'
 
 console.log('Checking environment variables...')
@@ -10,7 +10,8 @@ try {
 } catch (error) {
   if (error instanceof ZodError) {
     console.error('❌ Invalid environment variables:')
-    error.errors.forEach((err) => {
+
+    error.issues.forEach((err) => {
       console.error(`  - ${err.path?.join('.')}: ${err.message}`)
     })
   } else {

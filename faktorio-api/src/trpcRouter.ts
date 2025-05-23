@@ -9,7 +9,7 @@ import { eq } from 'drizzle-orm'
 import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
 import { authRouter } from './routers/authRouter'
 import { userInvoicingDetailsInsertSchema } from './zodDbSchemas'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 export const upsertInvoicingDetailsSchema = z
   .object({

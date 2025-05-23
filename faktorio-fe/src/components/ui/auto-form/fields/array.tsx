@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Plus, Trash } from 'lucide-react'
 import { useFieldArray, useForm } from 'react-hook-form'
-import * as z from 'zod'
+import * as z from 'zod/v4'
 import { beautifyObjectName } from '../utils'
 import AutoFormObject from './object'
 
@@ -28,7 +28,9 @@ export default function AutoFormArray({
     control: form.control,
     name
   })
-  const title = item._def.description ?? beautifyObjectName(name)
+
+  // In Zod v4, use beautifyObjectName as fallback since description might not be available
+  const title = beautifyObjectName(name)
 
   return (
     <AccordionItem value={name} className="border-none">
@@ -39,7 +41,7 @@ export default function AutoFormArray({
           return (
             <div className="mt-4 flex flex-col" key={`${key}`}>
               <AutoFormObject
-                schema={item._def.type as z.ZodObject<any, any>}
+                schema={item.element as z.ZodObject<any, any>}
                 form={form}
                 fieldConfig={fieldConfig}
                 path={[...path, index.toString()]}

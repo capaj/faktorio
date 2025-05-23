@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import * as z from 'zod'
+
 import AutoFormLabel from '../common/label'
 import AutoFormTooltip from '../common/tooltip'
 import { AutoFormInputComponentProps } from '../types'
@@ -20,14 +20,28 @@ export default function AutoFormEnum({
   zodItem,
   fieldProps
 }: AutoFormInputComponentProps) {
-  const baseValues = (getBaseSchema(zodItem) as unknown as z.ZodEnum<any>)._def
-    .values
+  const baseSchema = getBaseSchema(zodItem) as any
 
+  // In Zod v4, enums have a public 'options' property
   let values: [string, string][] = []
-  if (!Array.isArray(baseValues)) {
-    values = Object.entries(baseValues)
-  } else {
-    values = baseValues.map((value) => [value, value])
+
+  if (baseSchema && baseSchema.options) {
+    // Standard ZodEnum with options array
+    values = baseSchema.options.map((value: string) => [value, value])
+  } else if (baseSchema && baseSchema._def) {
+    // Fallback: check the internal structure
+    if (baseSchema._def.entries) {
+      // Zod v4 enum internal structure
+      values = Object.entries(baseSchema._def.entries)
+    } else if (baseSchema._def.values) {
+      // Legacy structure fallback
+      const baseValues = baseSchema._def.values
+      if (!Array.isArray(baseValues)) {
+        values = Object.entries(baseValues)
+      } else {
+        values = baseValues.map((value: string) => [value, value])
+      }
+    }
   }
 
   function findItem(value: any) {
