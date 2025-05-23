@@ -305,14 +305,16 @@ export const EnglishInvoicePDF = ({
             >
               <SectionHeading>Supplier</SectionHeading>
               <View style={styles.section}>
-                <Text
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500
-                  }}
-                >
-                  {invoiceData.your_name}
-                </Text>
+                <View style={{ maxWidth: '95%' }}>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 500
+                    }}
+                  >
+                    {invoiceData.your_name}
+                  </Text>
+                </View>
                 <Text>{invoiceData.your_street}</Text>
                 <Text>
                   {invoiceData.your_zip} {invoiceData.your_city}
