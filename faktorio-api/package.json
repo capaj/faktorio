@@ -18,7 +18,7 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250522.0",
+    "@cloudflare/workers-types": "^4.20250523.0",
     "@types/debug": "^4.1.12",
     "drizzle-kit": "^0.31.1",
     "tsx": "^4.19.4",

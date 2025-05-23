@@ -83,7 +83,7 @@
     "@types/sql.js": "^1.4.9",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
-    "@vitejs/plugin-react-swc": "^3.9.0",
+    "@vitejs/plugin-react-swc": "^3.10.0",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.1",
     "eslint": "^9.27.0",
