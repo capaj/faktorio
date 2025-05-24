@@ -171,44 +171,34 @@ export const ContactList = () => {
         street2: z.string().optional(),
         city: z.string().optional(),
         zip: z.string().optional(),
-        country: z.string().optional(),
+        country: z.string().optional().default('Česká Republika'),
         main_email: z.string().email().nullish(),
         phone_number: z.string().nullish()
       }),
     [contactsQuery.data, contactId]
   )
 
+  const defaults = {
+    name: '',
+    street: '',
+    street2: '',
+    city: '',
+    zip: '',
+    country: 'Česká Republika',
+    main_email: null,
+    phone_number: null,
+    registration_no: '',
+    vat_no: ''
+  }
   // Initialize forms with memoized resolvers
   const editForm = useForm<ContactFormSchema>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      name: '',
-      street: '',
-      street2: '',
-      city: '',
-      zip: '',
-      country: '',
-      main_email: null,
-      phone_number: null,
-      registration_no: '',
-      vat_no: ''
-    }
+    defaultValues: defaults
   })
 
   const newForm = useForm<ContactFormSchema>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      name: '',
-      street: '',
-      street2: '',
-      city: '',
-      zip: '',
-      country: '',
-      main_email: null,
-      phone_number: null,
-      registration_no: '',
-      vat_no: ''
-    }
+    defaultValues: defaults
   })
 
   const handleAresDataFetched = (
@@ -265,7 +255,7 @@ export const ContactList = () => {
           street2: '',
           city: '',
           zip: '',
-          country: '',
+          country: 'Česká Republika',
           main_email: null,
           phone_number: null,
           registration_no: '',

@@ -185,6 +185,7 @@ export const ContactForm = ({
         <FormField
           control={form.control}
           name="country"
+          defaultValue="Česká Republika"
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.country}</FormLabel>

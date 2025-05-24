@@ -31,8 +31,11 @@ test.afterEach(async ({ page }) => {
   // It's often better to ensure a clean state or handle errors gracefully.
   // For now, assume the user is still logged in from the 'smoke' test.
 
-  // Click on the user profile icon to open the dropdown menu
-  await page.getByLabel('Uživatelský profil').click()
+  // Click on the user profile icon to open the dropdown menu (desktop version)
+  await page
+    .locator('.hidden.sm\\:flex')
+    .getByLabel('Uživatelský profil')
+    .click()
 
   // Click on the "Přihlašovací údaje" menu item
   await page.getByRole('menuitem', { name: 'Přihlašovací údaje' }).click()

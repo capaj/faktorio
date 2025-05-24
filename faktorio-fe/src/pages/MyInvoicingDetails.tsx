@@ -147,7 +147,10 @@ export const MyInvoicingDetails = () => {
             },
             country: {
               label: fieldLabels.country,
-              inputProps: { autoComplete: 'off' }
+              inputProps: {
+                autoComplete: 'off',
+                defaultValue: 'Česká Republika'
+              }
             },
             main_email: {
               label: fieldLabels.main_email,
