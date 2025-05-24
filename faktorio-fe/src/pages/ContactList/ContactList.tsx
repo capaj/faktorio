@@ -680,6 +680,10 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
 
   // Handle opening the new contact dialog
   const handleAddClientClick = () => {
+    // Ensure edit dialog is closed first
+    setEditDialogOpen(false)
+    setShowDeleteDialog(false)
+
     newForm.reset({
       name: '',
       street: '',
@@ -743,70 +747,77 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
         </div>
       </div>
 
-      {/* Edit Contact Dialog - Always in DOM */}
-      <Dialog open={editDialogOpen} onOpenChange={handleEditModalClose}>
-        <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
-          <DialogHeader>
-            <DialogTitle>Editace kontaktu</DialogTitle>
-          </DialogHeader>
+      {/* Edit Contact Dialog - Conditionally rendered */}
+      {editDialogOpen && (
+        <Dialog open={editDialogOpen} onOpenChange={handleEditModalClose}>
+          <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
+            <DialogHeader>
+              <DialogTitle>Editace kontaktu</DialogTitle>
+            </DialogHeader>
 
-          <ContactForm
-            form={editForm}
-            onSubmit={handleUpdateSubmit}
-            isEdit={true}
-          />
-        </DialogContent>
-      </Dialog>
+            <ContactForm
+              form={editForm}
+              onSubmit={handleUpdateSubmit}
+              isEdit={true}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              Opravdu chcete smazat kontakt{' '}
-              <strong>{editForm.getValues('name')}</strong>?
-            </DialogTitle>
-            {hasInvoices && deleteInvoices && (
-              <DialogDescription className="pt-2 text-red-500">
-                Budou smazány také všechny faktury ({invoiceCount}) spojené s
-                tímto kontaktem!
-              </DialogDescription>
-            )}
-          </DialogHeader>
+      {/* Delete Dialog - Conditionally rendered */}
+      {showDeleteDialog && (
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>
+                Opravdu chcete smazat kontakt{' '}
+                <strong>{editForm.getValues('name')}</strong>?
+              </DialogTitle>
+              {hasInvoices && deleteInvoices && (
+                <DialogDescription className="pt-2 text-red-500">
+                  Budou smazány také všechny faktury ({invoiceCount}) spojené s
+                  tímto kontaktem!
+                </DialogDescription>
+              )}
+            </DialogHeader>
 
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteDialog(false)}
-            >
-              Zrušit
-            </Button>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteDialog(false)}
+              >
+                Zrušit
+              </Button>
 
-            <Button
-              className="flex items-center gap-2"
-              variant="destructive"
-              onClick={handleDeleteContact}
-            >
-              {deleteWithInvoices.isPending && <Spinner />}
-              Smazat
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <Button
+                className="flex items-center gap-2"
+                variant="destructive"
+                onClick={handleDeleteContact}
+              >
+                {deleteWithInvoices.isPending && <Spinner />}
+                Smazat
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
-      {/* New Contact Dialog - Always in DOM */}
-      <Dialog open={newDialogOpen} onOpenChange={handleNewModalClose}>
-        <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
-          <DialogHeader>
-            <DialogTitle>Nový kontakt</DialogTitle>
-          </DialogHeader>
+      {/* New Contact Dialog - Conditionally rendered */}
+      {newDialogOpen && (
+        <Dialog open={newDialogOpen} onOpenChange={handleNewModalClose}>
+          <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
+            <DialogHeader>
+              <DialogTitle>Nový kontakt</DialogTitle>
+            </DialogHeader>
 
-          <ContactForm
-            form={newForm}
-            onSubmit={handleCreateSubmit}
-            isEdit={false}
-          />
-        </DialogContent>
-      </Dialog>
+            <ContactForm
+              form={newForm}
+              onSubmit={handleCreateSubmit}
+              isEdit={false}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
       <SpinnerContainer loading={contactsQuery.isLoading}>
         <Table>
