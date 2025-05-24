@@ -123,6 +123,275 @@ export const formatStreetAddress = (
   return `${streetName} ${houseNumber}${orientationNumber}`
 }
 
+// Define base schema for reuse
+const baseContactSchema = z.object({
+  registration_no: z.string().max(16).optional(),
+  vat_no: z.string().optional(),
+  name: z.string(),
+  street: z.string().optional(),
+  street2: z.string().optional(),
+  city: z.string().optional(),
+  zip: z.string().optional(),
+  country: z.string().optional(),
+  main_email: z.string().email().nullish(),
+  phone_number: z.string().nullish()
+})
+
+type ContactFormSchema = z.infer<typeof baseContactSchema>
+
+// Component for rendering the contact form - moved outside to prevent recreation
+const ContactForm = ({
+  form,
+  onSubmit,
+  isEdit = false,
+  hasInvoices,
+  invoiceCount,
+  deleteInvoices,
+  setDeleteInvoices,
+  handleShowDeleteDialog,
+  isLoadingAres,
+  onFetchAres
+}: {
+  form: UseFormReturn<ContactFormSchema>
+  onSubmit: (values: ContactFormSchema) => Promise<void>
+  isEdit?: boolean
+  hasInvoices?: boolean
+  invoiceCount?: number
+  deleteInvoices?: boolean
+  setDeleteInvoices?: (value: boolean) => void
+  handleShowDeleteDialog?: (e: React.MouseEvent) => void
+  isLoadingAres?: boolean
+  onFetchAres?: () => void
+}) => {
+  const registrationNo = form.watch('registration_no')
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="grid grid-cols-2 gap-4"
+      >
+        <FormField
+          control={form.control}
+          name="registration_no"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.registration_no}</FormLabel>
+              <div className="flex items-end space-x-2">
+                <div className="flex-1">
+                  <FormControl>
+                    <Input
+                      placeholder="8 čísel"
+                      autoComplete="off"
+                      {...field}
+                    />
+                  </FormControl>
+                </div>
+                {onFetchAres && (
+                  <FkButton
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={onFetchAres}
+                    disabled={
+                      !registrationNo ||
+                      registrationNo.length !== 8 ||
+                      isLoadingAres
+                    }
+                    isLoading={isLoadingAres}
+                  >
+                    Načíst z ARESU
+                  </FkButton>
+                )}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="vat_no"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.vat_no}</FormLabel>
+              <FormControl>
+                <Input autoComplete="off" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="col-span-2">
+              <FormLabel>{fieldLabels.name}</FormLabel>
+              <FormControl>
+                <Input autoComplete="off" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="street"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.street}</FormLabel>
+              <FormControl>
+                <Input autoComplete="off" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="street2"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.street2}</FormLabel>
+              <FormControl>
+                <Input autoComplete="off" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.city}</FormLabel>
+              <FormControl>
+                <Input autoComplete="off" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="zip"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.zip}</FormLabel>
+              <FormControl>
+                <Input autoComplete="off" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.country}</FormLabel>
+              <FormControl>
+                <Input autoComplete="off" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="main_email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.main_email}</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  autoComplete="off"
+                  {...field}
+                  value={field.value || ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phone_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.phone_number}</FormLabel>
+              <FormControl>
+                <Input
+                  autoComplete="off"
+                  {...field}
+                  value={field.value || ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {isEdit && (
+          <DialogFooter className="col-span-2 flex justify-between">
+            <div className="w-full flex justify-between">
+              <div className="flex flex-col items-start gap-2">
+                {hasInvoices && setDeleteInvoices && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="delete-invoices"
+                      checked={deleteInvoices}
+                      onCheckedChange={(checked) =>
+                        setDeleteInvoices(checked === true)
+                      }
+                    />
+                    <label
+                      htmlFor="delete-invoices"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Smazat všechny faktury kontaktu ({invoiceCount})
+                    </label>
+                  </div>
+                )}
+                {handleShowDeleteDialog && (
+                  <Button
+                    className="align-left self-start justify-self-start"
+                    variant={'destructive'}
+                    onClick={handleShowDeleteDialog}
+                    disabled={hasInvoices && !deleteInvoices}
+                    type="button"
+                  >
+                    Smazat
+                  </Button>
+                )}
+              </div>
+              <Button type="submit">Uložit</Button>
+            </div>
+          </DialogFooter>
+        )}
+
+        {!isEdit && (
+          <DialogFooter className="col-span-2">
+            <Button type="submit">Přidat kontakt</Button>
+          </DialogFooter>
+        )}
+      </form>
+    </Form>
+  )
+}
+
 export const ContactList = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const create = trpcClient.contacts.create.useMutation()
@@ -183,7 +452,7 @@ export const ContactList = () => {
   )
 
   // Initialize forms with memoized resolvers
-  const editForm = useForm<z.infer<typeof schema>>({
+  const editForm = useForm<ContactFormSchema>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
@@ -199,7 +468,7 @@ export const ContactList = () => {
     }
   })
 
-  const newForm = useForm<z.infer<typeof schema>>({
+  const newForm = useForm<ContactFormSchema>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
@@ -217,7 +486,7 @@ export const ContactList = () => {
 
   const handleAresDataFetched = (
     aresData: z.infer<typeof AresBusinessInformationSchema>,
-    form: UseFormReturn<z.infer<typeof schema>>
+    form: UseFormReturn<ContactFormSchema>
   ) => {
     form.setValue('name', aresData.obchodniJmeno)
     form.setValue('street', formatStreetAddress(aresData))
@@ -228,7 +497,7 @@ export const ContactList = () => {
     form.setValue('country', aresData.sidlo.nazevStatu)
   }
 
-  const fetchAresData = async (form: UseFormReturn<z.infer<typeof schema>>) => {
+  const fetchAresData = async (form: UseFormReturn<ContactFormSchema>) => {
     const registrationNo = form.getValues('registration_no')
     if (!registrationNo || registrationNo.length !== 8) return
 
@@ -257,241 +526,6 @@ export const ContactList = () => {
     } finally {
       setIsLoadingAres(false)
     }
-  }
-
-  // Component for rendering the contact form
-  const ContactForm = ({
-    form,
-    onSubmit,
-    isEdit = false
-  }: {
-    form: UseFormReturn<z.infer<typeof schema>>
-    onSubmit: (values: z.infer<typeof schema>) => Promise<void>
-    isEdit?: boolean
-  }) => {
-    const registrationNo = form.watch('registration_no')
-
-    return (
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-4"
-        >
-          <FormField
-            control={form.control}
-            name="registration_no"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldLabels.registration_no}</FormLabel>
-                <div className="flex items-end space-x-2">
-                  <div className="flex-1">
-                    <FormControl>
-                      <Input
-                        placeholder="8 čísel"
-                        autoComplete="off"
-                        {...field}
-                      />
-                    </FormControl>
-                  </div>
-                  <FkButton
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => fetchAresData(form)}
-                    disabled={
-                      !registrationNo ||
-                      registrationNo.length !== 8 ||
-                      isLoadingAres
-                    }
-                    isLoading={isLoadingAres}
-                  >
-                    Načíst z ARESU
-                  </FkButton>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="vat_no"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldLabels.vat_no}</FormLabel>
-                <FormControl>
-                  <Input autoComplete="off" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>{fieldLabels.name}</FormLabel>
-                <FormControl>
-                  <Input autoComplete="off" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="street"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldLabels.street}</FormLabel>
-                <FormControl>
-                  <Input autoComplete="off" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="street2"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldLabels.street2}</FormLabel>
-                <FormControl>
-                  <Input autoComplete="off" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="city"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldLabels.city}</FormLabel>
-                <FormControl>
-                  <Input autoComplete="off" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="zip"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldLabels.zip}</FormLabel>
-                <FormControl>
-                  <Input autoComplete="off" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="country"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldLabels.country}</FormLabel>
-                <FormControl>
-                  <Input autoComplete="off" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="main_email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldLabels.main_email}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    autoComplete="off"
-                    {...field}
-                    value={field.value || ''}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="phone_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldLabels.phone_number}</FormLabel>
-                <FormControl>
-                  <Input
-                    autoComplete="off"
-                    {...field}
-                    value={field.value || ''}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {isEdit && (
-            <DialogFooter className="col-span-2 flex justify-between">
-              <div className="w-full flex justify-between">
-                <div className="flex flex-col items-start gap-2">
-                  {hasInvoices && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="delete-invoices"
-                        checked={deleteInvoices}
-                        onCheckedChange={(checked) =>
-                          setDeleteInvoices(checked === true)
-                        }
-                      />
-                      <label
-                        htmlFor="delete-invoices"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Smazat všechny faktury kontaktu ({invoiceCount})
-                      </label>
-                    </div>
-                  )}
-                  <Button
-                    className="align-left self-start justify-self-start"
-                    variant={'destructive'}
-                    onClick={handleShowDeleteDialog}
-                    disabled={hasInvoices && !deleteInvoices}
-                    type="button"
-                  >
-                    Smazat
-                  </Button>
-                </div>
-                <Button type="submit">Uložit</Button>
-              </div>
-            </DialogFooter>
-          )}
-
-          {!isEdit && (
-            <DialogFooter className="col-span-2">
-              <Button type="submit">Přidat kontakt</Button>
-            </DialogFooter>
-          )}
-        </form>
-      </Form>
-    )
   }
 
   useEffect(() => {
@@ -638,7 +672,7 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
   }
 
   // Handle form submission for updating a contact
-  const handleUpdateSubmit = async (values: z.infer<typeof schema>) => {
+  const handleUpdateSubmit = async (values: ContactFormSchema) => {
     await update.mutateAsync({
       ...values,
       name: values.name as string,
@@ -651,12 +685,16 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
   }
 
   // Handle form submission for creating a new contact
-  const handleCreateSubmit = async (values: z.infer<typeof schema>) => {
+  const handleCreateSubmit = async (values: ContactFormSchema) => {
     await create.mutateAsync(values)
     contactsQuery.refetch()
     setNewDialogOpen(false)
     navigate('/contacts')
   }
+
+  // Wrapper functions for ARES fetching
+  const handleFetchAresEdit = () => fetchAresData(editForm)
+  const handleFetchAresNew = () => fetchAresData(newForm)
 
   // Handle contact deletion
   const handleDeleteContact = async () => {
@@ -759,6 +797,13 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
               form={editForm}
               onSubmit={handleUpdateSubmit}
               isEdit={true}
+              hasInvoices={hasInvoices}
+              invoiceCount={invoiceCount}
+              deleteInvoices={deleteInvoices}
+              setDeleteInvoices={setDeleteInvoices}
+              handleShowDeleteDialog={handleShowDeleteDialog}
+              isLoadingAres={isLoadingAres}
+              onFetchAres={handleFetchAresEdit}
             />
           </DialogContent>
         </Dialog>
@@ -814,6 +859,8 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
               form={newForm}
               onSubmit={handleCreateSubmit}
               isEdit={false}
+              isLoadingAres={isLoadingAres}
+              onFetchAres={handleFetchAresNew}
             />
           </DialogContent>
         </Dialog>
