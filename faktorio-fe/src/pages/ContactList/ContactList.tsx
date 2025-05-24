@@ -19,6 +19,7 @@ import {
   Table
 } from '@/components/ui/table'
 import { trpcClient } from '@/lib/trpcClient'
+import { FkButton } from '@/components/FkButton'
 
 import { Link, useParams, useLocation } from 'wouter'
 import { useEffect, useState, useRef, useCallback } from 'react'
@@ -88,16 +89,16 @@ export const AresBusinessInformationSchema = z.object({
 
 const acFieldConfig = {
   inputProps: {
-    autocomplete: 'off'
+    autoComplete: 'off'
   }
 }
 
 export const fieldConfigForContactForm = {
   registration_no: {
-    label: 'IČO - po vyplnění se automaticky doplní další údaje z ARESU',
+    label: 'IČO',
     inputProps: {
       placeholder: '8 čísel',
-      autocomplete: 'off'
+      autoComplete: 'off'
     }
   },
   name: {
@@ -137,6 +138,71 @@ export const fieldConfigForContactForm = {
   country: {
     label: 'Země',
     ...acFieldConfig
+  }
+}
+
+export const createFieldConfigForContactForm = (
+  onAresDataFetched: (
+    aresData: z.infer<typeof AresBusinessInformationSchema>
+  ) => void,
+  isLoadingAres: boolean,
+  setIsLoadingAres: (loading: boolean) => void,
+  values: any
+) => {
+  const fetchAresData = async () => {
+    if (!values?.registration_no || values.registration_no.length !== 8) return
+
+    setIsLoadingAres(true)
+    try {
+      console.log('Fetching ARES data...', values.registration_no)
+      const aresResponse = await fetch(
+        `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/${values.registration_no}`
+      )
+      const parse = AresBusinessInformationSchema.safeParse(
+        await aresResponse.json()
+      )
+      console.log('parse', parse)
+      if (parse.success) {
+        const aresData = parse.data
+        console.log('aresData', aresData)
+        onAresDataFetched(aresData)
+        toast.success('Údaje z ARESU byly úspěšně načteny')
+      } else {
+        console.error(parse.error)
+        toast.error('Nepodařilo se načíst údaje z ARESU')
+      }
+    } catch (error) {
+      console.error('ARES fetch error:', error)
+      toast.error('Chyba při načítání údajů z ARESU')
+    } finally {
+      setIsLoadingAres(false)
+    }
+  }
+
+  return {
+    ...fieldConfigForContactForm,
+    registration_no: {
+      ...fieldConfigForContactForm.registration_no,
+      renderParent: ({ children }: any) => (
+        <div className="flex items-end space-x-2">
+          <div className="flex-1">{children}</div>
+          <FkButton
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={fetchAresData}
+            disabled={
+              !values?.registration_no ||
+              values.registration_no.length !== 8 ||
+              isLoadingAres
+            }
+            isLoading={isLoadingAres}
+          >
+            Načíst z ARESU
+          </FkButton>
+        </div>
+      )
+    }
   }
 }
 
@@ -182,6 +248,22 @@ export const ContactList = () => {
   const [isImporting, setIsImporting] = useState(false)
   const [deleteInvoices, setDeleteInvoices] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isLoadingAres, setIsLoadingAres] = useState(false)
+
+  const handleAresDataFetched = (
+    aresData: z.infer<typeof AresBusinessInformationSchema>
+  ) => {
+    setValues({
+      ...values,
+      name: aresData.obchodniJmeno,
+      street: formatStreetAddress(aresData),
+      street2: aresData.sidlo.nazevCastiObce,
+      city: aresData.sidlo.nazevObce,
+      zip: String(aresData.sidlo.psc),
+      vat_no: aresData.dic ?? undefined,
+      country: aresData.sidlo.nazevStatu
+    })
+  }
 
   const schema = z.object({
     registration_no: z.string().max(16).optional(), // 16 should be long enough for any registration number in the world
@@ -271,37 +353,6 @@ export const ContactList = () => {
     e.preventDefault()
     navigate(`/contacts/${contactId}`)
   }
-
-  useEffect(() => {
-    ;(async () => {
-      if (values.registration_no?.length === 8 && !values.name) {
-        // seems like a user is trying to add new contact, let's fetch data from ares
-        const aresResponse = await fetch(
-          `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/${values.registration_no}`
-        )
-        const parse = AresBusinessInformationSchema.safeParse(
-          await aresResponse.json()
-        )
-        console.log('parse', parse)
-        if (parse.success) {
-          const aresData = parse.data
-          console.log('aresData', aresData)
-          setValues({
-            ...values,
-            name: aresData.obchodniJmeno,
-            street: formatStreetAddress(aresData),
-            street2: aresData.sidlo.nazevCastiObce,
-            city: aresData.sidlo.nazevObce,
-            zip: String(aresData.sidlo.psc),
-            vat_no: aresData.dic,
-            country: aresData.sidlo.nazevStatu
-          })
-        } else {
-          console.error(parse.error)
-        }
-      }
-    })()
-  }, [values.registration_no])
 
   const csvFormatExample = `name,street,city,zip,country,registration_no,vat_no,email
 Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
@@ -500,8 +551,12 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
               setValues(values)
             }}
             onSubmit={handleUpdateSubmit}
-            // @ts-expect-error
-            fieldConfig={fieldConfigForContactForm}
+            fieldConfig={createFieldConfigForContactForm(
+              handleAresDataFetched,
+              isLoadingAres,
+              setIsLoadingAres,
+              values
+            )}
           >
             <DialogFooter className="flex justify-between">
               <div className="w-full flex justify-between">
@@ -589,8 +644,12 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
             }}
             containerClassName="grid grid-cols-2 gap-4"
             onSubmit={handleCreateSubmit}
-            // @ts-expect-error
-            fieldConfig={fieldConfigForContactForm}
+            fieldConfig={createFieldConfigForContactForm(
+              handleAresDataFetched,
+              isLoadingAres,
+              setIsLoadingAres,
+              values
+            )}
           >
             <DialogFooter>
               <Button type="submit">Přidat kontakt</Button>
