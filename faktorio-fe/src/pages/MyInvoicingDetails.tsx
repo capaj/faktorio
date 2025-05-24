@@ -2,7 +2,7 @@ import AutoForm from '@/components/ui/auto-form'
 
 import {
   AresBusinessInformationSchema,
-  fieldConfigForContactForm,
+  fieldLabels,
   formatStreetAddress
 } from './ContactList/ContactList'
 import { trpcClient } from '@/lib/trpcClient'
@@ -95,11 +95,11 @@ export const MyInvoicingDetails = () => {
           formSchema={upsertInvoicingDetailsSchema}
           containerClassName="grid grid-cols-2 gap-x-4"
           fieldConfig={{
-            ...fieldConfigForContactForm,
             registration_no: {
-              label: 'IČO',
+              label: fieldLabels.registration_no,
               inputProps: {
-                placeholder: '8 čísel'
+                placeholder: '8 čísel',
+                autoComplete: 'off'
               },
               renderParent: ({ children }) => (
                 <div className="flex sm:flex-row gap-2 flex-col sm:items-end">
@@ -121,23 +121,57 @@ export const MyInvoicingDetails = () => {
                 </div>
               )
             },
+            name: {
+              label: fieldLabels.name,
+              inputProps: { autoComplete: 'off' }
+            },
+            vat_no: {
+              label: fieldLabels.vat_no,
+              inputProps: { autoComplete: 'off' }
+            },
+            street: {
+              label: fieldLabels.street,
+              inputProps: { autoComplete: 'off' }
+            },
+            street2: {
+              label: fieldLabels.street2,
+              inputProps: { autoComplete: 'off' }
+            },
             city: {
-              label: 'Město'
+              label: fieldLabels.city,
+              inputProps: { autoComplete: 'off' }
             },
-            iban: {
-              label: 'IBAN'
+            zip: {
+              label: fieldLabels.zip,
+              inputProps: { autoComplete: 'off' }
             },
-            swift_bic: {
-              label: 'SWIFT/BIC'
+            country: {
+              label: fieldLabels.country,
+              inputProps: { autoComplete: 'off' }
             },
-            bank_account: {
-              label: 'Číslo bankovního účtu - včetně bankovního kódu'
+            main_email: {
+              label: fieldLabels.main_email,
+              inputProps: { autoComplete: 'off' }
             },
             phone_number: {
-              label: 'Telefon'
+              label: fieldLabels.phone_number,
+              inputProps: { autoComplete: 'off' }
+            },
+            iban: {
+              label: 'IBAN',
+              inputProps: { autoComplete: 'off' }
+            },
+            swift_bic: {
+              label: 'SWIFT/BIC',
+              inputProps: { autoComplete: 'off' }
+            },
+            bank_account: {
+              label: 'Číslo bankovního účtu - včetně bankovního kódu',
+              inputProps: { autoComplete: 'off' }
             },
             web_url: {
-              label: 'Web'
+              label: 'Web',
+              inputProps: { autoComplete: 'off' }
             }
           }}
           values={
