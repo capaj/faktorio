@@ -18,8 +18,8 @@ importers:
         specifier: ^2.2.2
         version: 2.2.2
       zod:
-        specifier: ^3.25.23
-        version: 3.25.23
+        specifier: ^3.25.28
+        version: 3.25.28
     devDependencies:
       '@playwright/test':
         specifier: ^1.52.0
@@ -86,10 +86,10 @@ importers:
         version: 16.5.0
       drizzle-orm:
         specifier: ^0.43.1
-        version: 0.43.1(@cloudflare/workers-types@4.20250523.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.43.1(@cloudflare/workers-types@4.20250524.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       drizzle-zod:
-        specifier: 0.8.1
-        version: 0.8.1(drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250523.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.23)
+        specifier: 0.8.2
+        version: 0.8.2(drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250524.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.28)
       faktorio-shared:
         specifier: workspace:*
         version: link:../faktorio-shared
@@ -97,12 +97,12 @@ importers:
         specifier: ^6.0.8
         version: 6.0.8(debug@4.4.1)
       zod:
-        specifier: ^3.25.23
-        version: 3.25.23
+        specifier: ^3.25.28
+        version: 3.25.28
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20250523.0
-        version: 4.20250523.0
+        specifier: ^4.20250524.0
+        version: 4.20250524.0
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
@@ -120,7 +120,7 @@ importers:
         version: 3.1.4(@types/debug@4.1.12)(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.19.4)
       wrangler:
         specifier: ^4.16.1
-        version: 4.16.1(@cloudflare/workers-types@4.20250523.0)
+        version: 4.16.1(@cloudflare/workers-types@4.20250524.0)
 
   faktorio-fe:
     dependencies:
@@ -231,7 +231,7 @@ importers:
         version: 16.5.0
       drizzle-orm:
         specifier: ^0.43.1
-        version: 0.43.1(@cloudflare/workers-types@4.20250523.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.43.1(@cloudflare/workers-types@4.20250524.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       faktorio-api:
         specifier: workspace:*
         version: link:../faktorio-api
@@ -293,11 +293,11 @@ importers:
         specifier: ^3.7.0
         version: 3.7.0(react@18.3.1)
       zod:
-        specifier: ^3.25.23
-        version: 3.25.23
+        specifier: ^3.25.28
+        version: 3.25.28
       zod-to-json-schema:
         specifier: ^3.24.5
-        version: 3.24.5(zod@3.25.23)
+        version: 3.24.5(zod@3.25.28)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.1.7
@@ -361,7 +361,7 @@ importers:
         version: 3.1.4(@types/debug@4.1.12)(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.19.4)
       wrangler:
         specifier: ^4.16.1
-        version: 4.16.1(@cloudflare/workers-types@4.20250523.0)
+        version: 4.16.1(@cloudflare/workers-types@4.20250524.0)
 
   faktorio-shared:
     dependencies:
@@ -913,8 +913,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20250523.0':
-    resolution: {integrity: sha512-0ghPbRDqjORo4qX8YkayNvJc7SSfK8cn5YhSkx1316vd+32cSlhqJTz8sRiavZiJw79glPq0rO1TNTJwvuuZOg==}
+  '@cloudflare/workers-types@4.20250524.0':
+    resolution: {integrity: sha512-Tc/N/5nn3Jq+w7s+QPEgiyBZ0F0ebH9XWQ6YiUZTue79E7nybYDGh4lBCr2y4bC+RYiOP8KZPYWr811Hd3Oh2A==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -3132,8 +3132,8 @@ packages:
       sqlite3:
         optional: true
 
-  drizzle-zod@0.8.1:
-    resolution: {integrity: sha512-k2/2cwBz3Vjb7CWPVCeMNajZpG43V7SqhNrZ8LsWJOz8TztQ5YtU2ifgnfnxqZXsxeHmdQnsl6eXm7GwDZnq/Q==}
+  drizzle-zod@0.8.2:
+    resolution: {integrity: sha512-9Do/16OjFFNrQDZgvMtxtDDwKWbFOxUAIwNPKX98SfxrP8H18vhN1BvNXbhelLcdgCE7GEaXDJqBjMExSkhpkA==}
     peerDependencies:
       drizzle-orm: '>=0.36.0'
       zod: ^3.25.1
@@ -5393,8 +5393,8 @@ packages:
   zod@3.22.3:
     resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
 
-  zod@3.25.23:
-    resolution: {integrity: sha512-Od2bdMosahjSrSgJtakrwjMDb1zM1A3VIHCPGveZt/3/wlrTWBya2lmEh2OYe4OIu8mPTmmr0gnLHIWQXdtWBg==}
+  zod@3.25.28:
+    resolution: {integrity: sha512-/nt/67WYKnr5by3YS7LroZJbtcCBurDKKPBPWWzaxvVCGuG/NOsiKkrjoOhI8mJ+SQUXEbUzeB3S+6XDUEEj7Q==}
 
 snapshots:
 
@@ -6076,7 +6076,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20250508.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20250523.0': {}
+  '@cloudflare/workers-types@4.20250524.0': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -6393,8 +6393,8 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.11.4
       google-auth-library: 9.15.1
       ws: 8.18.0
-      zod: 3.25.23
-      zod-to-json-schema: 3.24.5(zod@3.25.23)
+      zod: 3.25.28
+      zod-to-json-schema: 3.24.5(zod@3.25.28)
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -6600,8 +6600,8 @@ snapshots:
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
       raw-body: 3.0.0
-      zod: 3.25.23
-      zod-to-json-schema: 3.24.5(zod@3.25.23)
+      zod: 3.25.28
+      zod-to-json-schema: 3.24.5(zod@3.25.28)
     transitivePeerDependencies:
       - supports-color
 
@@ -8153,18 +8153,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250523.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0):
+  drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250524.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0):
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20250523.0
+      '@cloudflare/workers-types': 4.20250524.0
       '@libsql/client': 0.15.7
       '@types/sql.js': 1.4.9
       gel: 2.0.0
       sql.js: 1.13.0
 
-  drizzle-zod@0.8.1(drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250523.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.23):
+  drizzle-zod@0.8.2(drizzle-orm@0.43.1(@cloudflare/workers-types@4.20250524.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.28):
     dependencies:
-      drizzle-orm: 0.43.1(@cloudflare/workers-types@4.20250523.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
-      zod: 3.25.23
+      drizzle-orm: 0.43.1(@cloudflare/workers-types@4.20250524.0)(@libsql/client@0.15.7)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+      zod: 3.25.28
 
   dunder-proto@1.0.1:
     dependencies:
@@ -10583,7 +10583,7 @@ snapshots:
       regexparam: 3.0.0
       use-sync-external-store: 1.4.0(react@18.3.1)
 
-  wrangler@4.16.1(@cloudflare/workers-types@4.20250523.0):
+  wrangler@4.16.1(@cloudflare/workers-types@4.20250524.0):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.0
       '@cloudflare/unenv-preset': 2.3.2(unenv@2.0.0-rc.17)(workerd@1.20250508.0)
@@ -10594,7 +10594,7 @@ snapshots:
       unenv: 2.0.0-rc.17
       workerd: 1.20250508.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20250523.0
+      '@cloudflare/workers-types': 4.20250524.0
       fsevents: 2.3.3
       sharp: 0.33.5
     transitivePeerDependencies:
@@ -10648,10 +10648,10 @@ snapshots:
       mustache: 4.2.0
       stacktracey: 2.1.8
 
-  zod-to-json-schema@3.24.5(zod@3.25.23):
+  zod-to-json-schema@3.24.5(zod@3.25.28):
     dependencies:
-      zod: 3.25.23
+      zod: 3.25.28
 
   zod@3.22.3: {}
 
-  zod@3.25.23: {}
+  zod@3.25.28: {}
