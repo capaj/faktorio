@@ -197,11 +197,10 @@ export const CzechInvoicePDF = ({
       const tax = total * (vat / 100)
       return {
         ...acc,
-        // @ts-expect-error
         [vat]: ((acc[vat] ?? 0) as number) + tax
       }
     },
-    {}
+    {} as Record<number, number>
   )
 
   const taxTotal = Object.values(taxPaidByRate).reduce(

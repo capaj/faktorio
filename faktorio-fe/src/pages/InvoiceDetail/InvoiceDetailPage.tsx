@@ -16,7 +16,11 @@ import {
 import { djs } from 'faktorio-shared/src/djs'
 import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
 import { z } from 'zod/v4'
-import { invoiceItemFormSchema } from 'faktorio-api/src/zodDbSchemas'
+import {
+  invoiceItemFormSchema,
+  SelectInvoiceType,
+  InsertInvoiceItemType
+} from 'faktorio-api/src/zodDbSchemas'
 import { LucideEdit } from 'lucide-react'
 
 export function useInvoiceQueryByUrlParam() {
@@ -50,7 +54,7 @@ export const invoiceForRenderSchema = getInvoiceCreateSchema(
 export const InvoiceDetail = ({
   invoice
 }: {
-  invoice: z.infer<typeof invoiceForRenderSchema>
+  invoice: SelectInvoiceType & { items: InsertInvoiceItemType[] }
 }) => {
   const params = useParams()
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
@@ -101,14 +105,12 @@ export const InvoiceDetail = ({
               height: '1100px'
             }}
           >
-            {/* @ts-expect-error */}
             <PdfContent invoiceData={invoice} />
           </PDFViewer>
         </div>
 
         <div className="flex content-center justify-center m-4">
           <PDFDownloadLink
-            // @ts-expect-error
             document={<PdfContent invoiceData={invoice} />}
             fileName={pdfName}
           >
