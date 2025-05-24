@@ -102,7 +102,7 @@ export const MyInvoicingDetails = () => {
                 placeholder: '8 čísel'
               },
               renderParent: ({ children }) => (
-                <div className="flex items-end space-x-2">
+                <div className="flex sm:flex-row gap-2 flex-col sm:items-end">
                   <div className="flex-1">{children}</div>
                   <FkButton
                     type="button"
