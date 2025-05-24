@@ -32,3 +32,5 @@ export const invoiceItemFormSchema = invoiceItemInsertSchema.omit({
 
 export const invoiceSelectSchema = createSelectSchema(schemas.invoicesTb)
 export type SelectInvoiceType = z.infer<typeof invoiceSelectSchema>
+
+export const userSelectSchema = createSelectSchema(schemas.userT)

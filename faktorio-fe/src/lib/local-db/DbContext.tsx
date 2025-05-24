@@ -12,6 +12,8 @@ import { drizzle } from 'drizzle-orm/sql-js'
 import * as schema from 'faktorio-api/src/schema'
 import { SQLJsDatabase } from 'drizzle-orm/sql-js'
 import { UserSelectType } from 'faktorio-api/src/schema'
+import { userSelectSchema } from 'faktorio-api/src/zodDbSchemas'
+import z from 'zod/v4'
 
 interface DbContextType {
   activeDbName: string | null
@@ -33,6 +35,11 @@ interface DbProviderProps {
   children: ReactNode
 }
 
+const userLocalStorageSchema = userSelectSchema.extend({
+  createdAt: z.string(),
+  updatedAt: z.string()
+})
+
 const LOCAL_STORAGE_ACTIVE_DB_KEY = 'faktorio_active_db'
 const LOCAL_STORAGE_USER_KEY = 'faktorio_local_user'
 
@@ -50,10 +57,21 @@ export function DbProvider({ children }: DbProviderProps) {
   useEffect(() => {
     // Load local user info
     const storedUserJson = localStorage.getItem(LOCAL_STORAGE_USER_KEY)
+    console.log('storedUserJson', storedUserJson)
     if (storedUserJson) {
       try {
         const user = JSON.parse(storedUserJson)
-        setLocalUserState(user)
+        const parsedUser = userLocalStorageSchema.safeParse(user)
+        if (parsedUser.success) {
+          setLocalUserState({
+            ...parsedUser.data,
+            createdAt: new Date(parsedUser.data.createdAt),
+            updatedAt: new Date(parsedUser.data.updatedAt)
+          })
+        } else {
+          console.error('Failed to parse local user data:', parsedUser.error)
+          localStorage.removeItem(LOCAL_STORAGE_USER_KEY)
+        }
       } catch (err) {
         console.error('Failed to parse local user data:', err)
         localStorage.removeItem(LOCAL_STORAGE_USER_KEY)

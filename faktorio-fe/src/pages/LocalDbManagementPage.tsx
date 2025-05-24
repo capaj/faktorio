@@ -59,6 +59,7 @@ export function LocalDbManagementPage() {
 
   // Initialize default user if none exists
   useEffect(() => {
+    console.log('localUser', localUser)
     if (!localUser) {
       setLocalUser(defaultUser)
       setUserFullName(defaultUser.name)

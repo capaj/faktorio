@@ -11,8 +11,6 @@ export function createLocalCallerLink<TRouter extends AppRouter>(
   opts: LocalCallerLinkOptions<TRouter>
 ): TRPCLink<TRouter> {
   return () => {
-    // @ts-expect-error
-    const caller = createCaller(opts.createContext())
     // This function is called for each operation
     return ({ op }) => {
       // Returns an observable for the operation result
@@ -22,7 +20,8 @@ export function createLocalCallerLink<TRouter extends AppRouter>(
         // Asynchronously create the context, then the caller
         Promise.resolve(opts.createContext())
           .then((ctx) => {
-            // Use the official createCaller method from the router
+            // Create the caller with the resolved context
+            const caller = createCaller(ctx)
             // Dynamically access the procedure function on the caller
             const procedureFn = path
               .split('.')
@@ -58,24 +57,7 @@ export function createLocalCallerLink<TRouter extends AppRouter>(
           .catch((cause) => {
             // Handle errors
             console.error(cause)
-            const response: TRPCResponseMessage = {
-              id,
-              error: {
-                code: -32603, // Internal error code
-                message: cause instanceof Error ? cause.message : String(cause),
-                data: {
-                  code: 'INTERNAL_SERVER_ERROR',
-                  httpStatus: 500,
-                  stack: cause instanceof Error ? cause.stack : undefined,
-                  path,
-                  input,
-                  type
-                }
-              }
-            }
-            // @ts-expect-error
-            observer.next(response)
-            observer.complete()
+            observer.error(cause)
           })
 
         // No cleanup needed for simple caller execution

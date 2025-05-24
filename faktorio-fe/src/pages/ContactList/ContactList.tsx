@@ -183,7 +183,7 @@ export const createFieldConfigForContactForm = (
     ...fieldConfigForContactForm,
     registration_no: {
       ...fieldConfigForContactForm.registration_no,
-      renderParent: ({ children }: any) => (
+      renderParent: ({ children }: { children: React.ReactNode }) => (
         <div className="flex items-end space-x-2">
           <div className="flex-1">{children}</div>
           <FkButton

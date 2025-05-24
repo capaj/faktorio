@@ -107,7 +107,7 @@ export default {
         console.error(errCtx.error)
         console.error(`${type} ${path} failed for:`)
 
-        const inputLength = JSON.stringify(input).length
+        const inputLength = input ? JSON.stringify(input).length : 0
         if (inputLength < 1000) {
           console.error(
             colorize(JSON.stringify({ errCtx: input, userId: ctx.user?.id }), {
