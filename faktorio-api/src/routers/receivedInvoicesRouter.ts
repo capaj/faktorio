@@ -23,22 +23,21 @@ const receivedInvoiceCreateSchema = createInsertSchema(receivedInvoiceTb)
     status: z
       .enum(['received', 'verified', 'disputed', 'paid'])
       .default('received'),
-    tags: z.array(z.string()).optional().nullable().default([]),
+    tags: z.array(z.string()).optional().default([]),
     items: z
       .array(
         z.object({
-          description: z.string().optional().nullable(),
-          quantity: z.number().optional().nullable(),
-          unit_price: z.number().optional().nullable(),
-          unit: z.string().optional().nullable(),
-          vat_rate: z.number().optional().nullable(),
-          total_without_vat: z.number().optional().nullable(),
-          total_with_vat: z.number().optional().nullable(),
-          accounting_code: z.string().optional().nullable()
+          description: z.string().optional(),
+          quantity: z.number().optional(),
+          unit_price: z.number().optional(),
+          unit: z.string().optional(),
+          vat_rate: z.number().optional(),
+          total_without_vat: z.number().optional(),
+          total_with_vat: z.number().optional(),
+          accounting_code: z.string().optional()
         })
       )
       .optional()
-      .nullable()
       .default([]),
     // Make non-null fields explicitly required if not defaulted
     supplier_name: z.string().min(1),
@@ -47,8 +46,9 @@ const receivedInvoiceCreateSchema = createInsertSchema(receivedInvoiceTb)
     due_date: stringDateSchema,
     total_with_vat: z.number(),
     currency: z.string().max(3).min(3).default('CZK'),
+    payment_method: paymentMethodEnum.optional(),
     // Add fields not directly in DB schema but needed for UI/logic
-    supplier_contact_id: z.string().optional().nullable(), // Reference to existing contact
+    supplier_contact_id: z.string().optional(), // Reference to existing contact
     attachment_data: z.string().optional().nullable() // Base64 encoded image data
   })
 
@@ -90,7 +90,9 @@ const ocrResponseSchema = z.object({
   vat_base_0: z.number().optional().nullable(),
   reverse_charge: z.boolean().optional().nullable(),
   vat_regime: z.string().optional().nullable(),
-  payment_method: paymentMethodEnum,
+  payment_method: z
+    .enum(['bank', 'cash', 'card', 'cod', 'crypto', 'other'])
+    .optional(),
   bank_account: z.string().optional().nullable(),
   iban: z.string().optional().nullable(),
   swift_bic: z.string().optional().nullable(),
@@ -192,7 +194,7 @@ export const receivedInvoicesRouter = trpcContext.router({
       // Save the invoice
       const [newInvoice] = await ctx.db
         .insert(receivedInvoiceTb)
-        // @ts-expect-error - TODO fix this
+
         .values({
           ...invoiceData,
           user_id: ctx.user.id,
@@ -235,7 +237,6 @@ export const receivedInvoicesRouter = trpcContext.router({
       // Update the invoice
       const [updatedInvoice] = await ctx.db
         .update(receivedInvoiceTb)
-        // @ts-expect-error - TODO fix this
         .set({
           ...updateData,
           updated_at: new Date().toISOString()

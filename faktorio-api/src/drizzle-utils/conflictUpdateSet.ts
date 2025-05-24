@@ -23,8 +23,7 @@ export function conflictUpdateSetAll<TTable extends SQLiteTable>(
   return Object.assign(
     {},
     ...columns.map((k) => {
-      // @ts-expect-error
-      const raw = `excluded.${(table[k] as Column).name}`
+      const raw = `excluded.${(table[k as keyof TTable] as Column).name}`
       return {
         [k]: sql.raw(raw)
       }

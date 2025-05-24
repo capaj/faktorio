@@ -4,8 +4,7 @@ import { z } from 'zod/v4'
 
 export const insertSchemas = Object.entries(schemas).reduce(
   (acc, [key, value]) => {
-    // @ts-expect-error
-    acc[key] = createInsertSchema(value)
+    acc[key as keyof typeof schemas] = createInsertSchema(value)
     return acc
   },
   {} as Record<keyof typeof schemas, z.ZodSchema<any>>

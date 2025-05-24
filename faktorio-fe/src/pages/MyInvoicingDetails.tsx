@@ -94,7 +94,6 @@ export const MyInvoicingDetails = () => {
         <AutoForm
           formSchema={upsertInvoicingDetailsSchema}
           containerClassName="grid grid-cols-2 gap-x-4"
-          // @ts-expect-error
           fieldConfig={{
             ...fieldConfigForContactForm,
             registration_no: {
@@ -110,7 +109,11 @@ export const MyInvoicingDetails = () => {
                     variant="secondary"
                     size="sm"
                     onClick={fetchAresData}
-                    disabled={!values?.registration_no || values.registration_no.length !== 8 || isLoadingAres}
+                    disabled={
+                      !values?.registration_no ||
+                      values.registration_no.length !== 8 ||
+                      isLoadingAres
+                    }
                     isLoading={isLoadingAres}
                   >
                     Načíst z ARESU
@@ -140,14 +143,16 @@ export const MyInvoicingDetails = () => {
           values={
             values
               ? {
-                ...values,
-                registration_no: values.registration_no ?? undefined
-              }
+                  ...values,
+                  registration_no: values.registration_no ?? undefined
+                }
               : undefined
           }
           onParsedValuesChange={(values) => {
-            // @ts-expect-error
-            setValues(values)
+            setValues((prevValues) => ({
+              ...prevValues!,
+              ...values
+            }))
           }}
           onSubmit={async (values) => {
             await upsert.mutateAsync(values)
