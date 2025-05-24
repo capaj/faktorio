@@ -14,11 +14,11 @@ import { userT } from 'faktorio-api/src/schema'
 import { useLocation } from 'wouter'
 
 import { trpcContext, type TrpcContext } from 'faktorio-api/src/trpcContext'
-import { appRouter, type AppRouter } from 'faktorio-api/src/trpcRouter'
-import { AnyRouter, inferRouterContext } from '@trpc/server'
-import { Database } from 'sql.js'
+import { AppRouter, appRouter } from 'faktorio-api/src/trpcRouter'
+import { inferRouterContext } from '@trpc/server'
 import * as schema from 'faktorio-api/src/schema'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
+import { SQLJsDatabase } from 'drizzle-orm/sql-js'
 import { useDb } from './local-db/DbContext'
 import { createLocalCallerLink } from './createLocalCallerLink'
 const VITE_API_URL = import.meta.env.VITE_API_URL
@@ -159,7 +159,7 @@ export const createCaller: (
 ) => ReturnType<typeof appRouter.createCaller> =
   trpcContext.createCallerFactory(appRouter)
 
-export interface LocalCallerLinkOptions<TRouter extends AnyRouter> {
+export interface LocalCallerLinkOptions<TRouter extends AppRouter> {
   router: TRouter
   onMutation: (mutation: Operation) => void
   createContext: () =>
@@ -170,12 +170,8 @@ export interface LocalCallerLinkOptions<TRouter extends AnyRouter> {
 export const AuthProvider: React.FC<{
   children: React.ReactNode
   localRun?: {
-    user: {
-      id: string
-      email: string
-      fullName: string
-    }
-    db: LibSQLDatabase<typeof schema>
+    user: typeof userT.$inferSelect
+    db: SQLJsDatabase<typeof schema>
   }
 }> = ({ children, localRun }) => {
   const [queryClient] = useState(() => new QueryClient())
@@ -190,16 +186,21 @@ export const AuthProvider: React.FC<{
               saveDatabase()
             },
             router: appRouter,
-            // @ts-expect-error
+
             createContext: () => {
               return {
-                env: {},
-                req: {},
+                env: {
+                  TURSO_DATABASE_URL: '',
+                  TURSO_AUTH_TOKEN: '',
+                  JWT_SECRET: '',
+                  GEMINI_API_KEY: ''
+                },
+                req: {} as Request,
                 generateToken: () => Promise.resolve(''),
-                sessionId: 'local_session',
-                userId: localRun.user.id,
                 user: localRun.user,
-                db: localRun.db
+                db: localRun.db as any as LibSQLDatabase<typeof schema>, // gotta do this conversion, because drizzle types don't work when we define db as union of LibSQL and SQLJs
+                googleGenAIFileManager: {} as any,
+                googleGenAI: {} as any
               }
             }
           })

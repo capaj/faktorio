@@ -5,7 +5,7 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion'
 import { FormField } from '@/components/ui/form'
-import { useForm, useFormContext } from 'react-hook-form'
+import { Path, useForm, useFormContext } from 'react-hook-form'
 import * as z from 'zod/v4'
 import { DEFAULT_ZOD_HANDLERS, INPUT_COMPONENTS } from '../config'
 import { Dependency, FieldConfig, FieldConfigItem } from '../types'
@@ -33,7 +33,7 @@ export default function AutoFormObject<
   dependencies = []
 }: {
   schema: SchemaType | z.ZodPipe<any, SchemaType>
-  form: ReturnType<typeof useForm>
+  form: ReturnType<typeof useForm<z.infer<SchemaType>>>
   fieldConfig?: FieldConfig<z.infer<SchemaType>>
   path?: string[]
   containerClassName?: string
@@ -126,14 +126,13 @@ export default function AutoFormObject<
           false
 
         if (overrideOptions) {
-          item = z.enum(overrideOptions) as any
+          item = z.enum(overrideOptions)
         }
 
         return (
           <FormField
-            // @ts-expect-error
             control={form.control}
-            name={key}
+            name={key as Path<z.infer<SchemaType>>}
             key={key}
             render={({ field }) => {
               const inputType =

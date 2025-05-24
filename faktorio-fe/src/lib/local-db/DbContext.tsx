@@ -11,23 +11,18 @@ import { createId } from '@paralleldrive/cuid2'
 import { drizzle } from 'drizzle-orm/sql-js'
 import * as schema from 'faktorio-api/src/schema'
 import { SQLJsDatabase } from 'drizzle-orm/sql-js'
-
-interface LocalUser {
-  id: string
-  email: string
-  fullName: string
-}
+import { UserSelectType } from 'faktorio-api/src/schema'
 
 interface DbContextType {
   activeDbName: string | null
   activeDb: Database | null
   drizzleDb: SQLJsDatabase<typeof schema> | null
-  localUser: LocalUser | null
+  localUser: UserSelectType | null
   isLoading: boolean
   error: string | null
   setActiveDatabase: (dbName: string) => Promise<boolean>
   clearActiveDatabase: () => void
-  setLocalUser: (user: Omit<LocalUser, 'id'>) => void
+  setLocalUser: (user: UserSelectType) => void
   clearLocalUser: () => void
   saveDatabase: () => void
 }
@@ -47,7 +42,7 @@ export function DbProvider({ children }: DbProviderProps) {
   const [drizzleDb, setDrizzleDb] = useState<SQLJsDatabase<
     typeof schema
   > | null>(null)
-  const [localUser, setLocalUserState] = useState<LocalUser | null>(null)
+  const [localUser, setLocalUserState] = useState<UserSelectType | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -126,8 +121,8 @@ export function DbProvider({ children }: DbProviderProps) {
   }
 
   // Set local user with generated ID
-  const setLocalUser = (userData: Omit<LocalUser, 'id'>) => {
-    const user: LocalUser = {
+  const setLocalUser = (userData: Omit<UserSelectType, 'id'>) => {
+    const user: UserSelectType = {
       id: createId(), // Generate a unique ID using cuid2
       ...userData
     }

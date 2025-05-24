@@ -20,7 +20,7 @@ export default function AutoFormArray({
 }: {
   name: string
   item: z.ZodArray<any>
-  form: ReturnType<typeof useForm>
+  form: ReturnType<typeof useForm<any>>
   path?: string[]
   fieldConfig?: any
 }) {

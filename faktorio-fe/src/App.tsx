@@ -22,6 +22,7 @@ import { ErrorBoundary } from './ErrorBoundary'
 import { Header } from './components/Header'
 import { SignedInRoutes } from './SignedInRoutes'
 import { LocalDbManagementPage } from './pages'
+import { UserSelectType } from 'faktorio-api/src/schema'
 
 interface BlogPost {
   slug: string
@@ -111,8 +112,13 @@ function AppWithLocalDb() {
           user: {
             id: localUser.id,
             email: localUser.email,
-            fullName: localUser.fullName
-          },
+            name: localUser.name,
+            passwordHash: null,
+            pictureUrl: null,
+            googleId: null,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          } as UserSelectType,
           db: drizzleDb
         }
       : undefined
@@ -121,7 +127,6 @@ function AppWithLocalDb() {
     return <SpinnerContainer loading={true} />
   }
   return (
-    // @ts-expect-error
     <AuthProvider localRun={localRunConfig} key={localRunConfig?.user?.id}>
       <AppContent />
     </AuthProvider>

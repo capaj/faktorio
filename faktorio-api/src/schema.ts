@@ -257,6 +257,8 @@ export const userT = sqliteTable('users', {
     .default(sql`(strftime('%s', 'now'))`)
 })
 
+export type UserSelectType = typeof userT.$inferSelect
+
 export const passwordResetTokenT = sqliteTable('password_reset_tokens', {
   id: text('id')
     .$defaultFn(() => createId())

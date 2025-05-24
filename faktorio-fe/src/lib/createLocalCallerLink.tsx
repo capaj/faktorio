@@ -1,13 +1,13 @@
 import { TRPCLink } from '@trpc/client'
-import { AnyRouter } from '@trpc/server'
 import { observable } from '@trpc/server/observable'
 import { TRPCResponseMessage } from '@trpc/server/unstable-core-do-not-import'
 import { LocalCallerLinkOptions, createCaller } from './AuthContext'
+import { AppRouter } from 'faktorio-api/src/trpcRouter'
 
 /**
  * Creates a tRPC link that executes procedures locally using the router's createCaller.
  */
-export function createLocalCallerLink<TRouter extends AnyRouter>(
+export function createLocalCallerLink<TRouter extends AppRouter>(
   opts: LocalCallerLinkOptions<TRouter>
 ): TRPCLink<TRouter> {
   return () => {

@@ -13,6 +13,19 @@ import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Button } from '../components/ui/button'
 import { Download, Upload, Database, LogOut } from 'lucide-react'
+import { createId } from '@paralleldrive/cuid2'
+import { UserSelectType } from 'faktorio-api/src/schema'
+
+const defaultUser: UserSelectType = {
+  id: createId(),
+  name: 'uzivatel',
+  email: '',
+  passwordHash: null,
+  pictureUrl: null,
+  googleId: null,
+  createdAt: new Date(),
+  updatedAt: new Date()
+}
 
 export function LocalDbManagementPage() {
   const [dbFiles, setDbFiles] = useState<string[]>([])
@@ -47,15 +60,11 @@ export function LocalDbManagementPage() {
   // Initialize default user if none exists
   useEffect(() => {
     if (!localUser) {
-      const defaultUser = {
-        fullName: 'uzivatel',
-        email: ''
-      }
       setLocalUser(defaultUser)
-      setUserFullName(defaultUser.fullName)
+      setUserFullName(defaultUser.name)
       setUserEmail(defaultUser.email)
     } else {
-      setUserFullName(localUser.fullName)
+      setUserFullName(localUser.name)
       setUserEmail(localUser.email)
     }
   }, [localUser, setLocalUser])
@@ -88,11 +97,7 @@ export function LocalDbManagementPage() {
   }, [success])
 
   // Helper function to store authentication token for local mode
-  const storeLocalAuthToken = (user: {
-    id: string
-    email: string
-    fullName: string
-  }) => {
+  const storeLocalAuthToken = (user: UserSelectType) => {
     // Create a "fake" token for local mode
     const token = `local_${user.id}`
     // Store auth info in localStorage, similar to how regular login works
@@ -102,7 +107,7 @@ export function LocalDbManagementPage() {
       JSON.stringify({
         id: user.id,
         email: user.email,
-        fullName: user.fullName,
+        fullName: user.name,
         isLocalUser: true // Add a flag to indicate this is a local user
       })
     )
@@ -259,7 +264,8 @@ export function LocalDbManagementPage() {
     try {
       // Create and save the user
       const userData = {
-        fullName: userFullName.trim(),
+        ...defaultUser,
+        name: userFullName.trim(),
         email: userEmail.trim()
       }
       setLocalUser(userData)
