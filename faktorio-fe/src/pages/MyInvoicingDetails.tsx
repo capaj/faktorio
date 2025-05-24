@@ -2,7 +2,6 @@ import AutoForm from '@/components/ui/auto-form'
 
 import {
   AresBusinessInformationSchema,
-  fieldLabels,
   formatStreetAddress
 } from './ContactList/ContactList'
 import { trpcClient } from '@/lib/trpcClient'
@@ -13,6 +12,7 @@ import { omit } from 'lodash-es'
 import diff from 'microdiff'
 import { toast } from 'sonner'
 import { upsertInvoicingDetailsSchema } from 'faktorio-api/src/trpcRouter'
+import { fieldLabels } from './ContactList/ContactForm'
 
 export const MyInvoicingDetails = () => {
   const [data, { refetch }] = trpcClient.invoicingDetails.useSuspenseQuery()
