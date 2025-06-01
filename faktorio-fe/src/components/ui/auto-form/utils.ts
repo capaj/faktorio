@@ -1,7 +1,7 @@
 import React from 'react'
 import { DefaultValues } from 'react-hook-form'
 import { z } from 'zod/v4'
-import { FieldConfig } from './types'
+import { FieldConfig, FieldConfigItem } from './types'
 
 // Updated for Zod v4 - ZodEffects has been replaced with ZodPipe for transforms
 export type ZodObjectOrWrapped =
@@ -108,7 +108,7 @@ export function getDefaultValues<Schema extends z.ZodObject<any, any>>(
   const defaultValues = {} as DefaultValuesType
   if (!shape) return defaultValues
 
-  for (const key of Object.keys(shape)) {
+  for (const key of Object.keys(shape) as (keyof z.infer<Schema>)[]) {
     const item = shape[key] as z.ZodType
 
     if (getBaseType(item) === 'ZodObject') {
@@ -119,16 +119,19 @@ export function getDefaultValues<Schema extends z.ZodObject<any, any>>(
 
       if (defaultItems !== null) {
         for (const defaultItemKey of Object.keys(defaultItems)) {
-          const pathKey = `${key}.${defaultItemKey}` as keyof DefaultValuesType
+          const pathKey =
+            `${key as string}.${defaultItemKey}` as keyof DefaultValuesType
           const value = (defaultItems as any)[defaultItemKey]
           ;(defaultValues as any)[pathKey] = value
         }
       }
     } else {
       let defaultValue = getDefaultValueInZodStack(item)
-      if (!defaultValue && fieldConfig?.[key]?.inputProps) {
-        defaultValue = (fieldConfig?.[key]?.inputProps as unknown as any)
-          .defaultValue
+      if (!defaultValue && fieldConfig?.[key]) {
+        const configItem = fieldConfig[key] as FieldConfigItem
+        if (configItem?.inputProps) {
+          defaultValue = (configItem.inputProps as unknown as any).defaultValue
+        }
       }
       if (defaultValue !== undefined) {
         defaultValues[key as keyof DefaultValuesType] = defaultValue

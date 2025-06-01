@@ -5,7 +5,13 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion'
 import { FormField } from '@/components/ui/form'
-import { Path, useForm, useFormContext } from 'react-hook-form'
+import {
+  Path,
+  useForm,
+  useFormContext,
+  ControllerRenderProps,
+  FieldValues
+} from 'react-hook-form'
 import * as z from 'zod/v4'
 import { DEFAULT_ZOD_HANDLERS, INPUT_COMPONENTS } from '../config'
 import { Dependency, FieldConfig, FieldConfigItem } from '../types'
@@ -64,20 +70,24 @@ export default function AutoFormObject<
     return item
   }
 
+  type SchemaShape = z.infer<SchemaType>
+  type ShapeKeys = keyof SchemaShape
+
   return (
     <Accordion
       type="multiple"
       className={`space-y-5 border-none ${containerClassName}`}
     >
-      {Object.keys(shape).map((name) => {
+      {(Object.keys(shape) as ShapeKeys[]).map((name) => {
         let item = shape[name] as z.ZodType
         item = handleIfZodNumber(item) as z.ZodType
         const zodBaseType = getBaseType(item)
         const fieldConfigForField = (fieldConfig?.[name] ??
           {}) as FieldConfigItem
         const itemName =
-          (fieldConfigForField.label as string) ?? beautifyObjectName(name)
-        const key = [...path, name].join('.')
+          (fieldConfigForField.label as string) ??
+          beautifyObjectName(name as string)
+        const key = [...path, name as string].join('.')
 
         const {
           isHidden,
@@ -91,14 +101,22 @@ export default function AutoFormObject<
 
         if (zodBaseType === 'ZodObject') {
           return (
-            <AccordionItem value={name} key={key} className="border-none">
+            <AccordionItem
+              value={name as string}
+              key={key}
+              className="border-none"
+            >
               <AccordionTrigger>{itemName}</AccordionTrigger>
               <AccordionContent className="p-2">
                 <AutoFormObject
-                  schema={item as unknown as z.ZodObject<any, any>}
-                  form={form}
+                  schema={item as z.ZodObject<any, any>}
+                  form={
+                    form as unknown as ReturnType<
+                      typeof useForm<z.infer<z.ZodObject<any, any>>>
+                    >
+                  }
                   fieldConfig={fieldConfigForField}
-                  path={[...path, name]}
+                  path={[...path, name as string]}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -108,11 +126,11 @@ export default function AutoFormObject<
           return (
             <AutoFormArray
               key={key}
-              name={name}
-              item={item as unknown as z.ZodArray<any>}
+              name={name as string}
+              item={item as z.ZodArray<any>}
               form={form}
               fieldConfig={fieldConfig?.[name] ?? {}}
-              path={[...path, name]}
+              path={[...path, name as string]}
             />
           )
         }
@@ -168,7 +186,12 @@ export default function AutoFormObject<
                 <ParentElement key={`${key}.parent`}>
                   <InputComponent
                     zodInputProps={zodInputProps}
-                    field={field}
+                    field={
+                      field as unknown as ControllerRenderProps<
+                        FieldValues,
+                        string
+                      >
+                    }
                     fieldConfigItem={fieldConfigItem}
                     label={itemName}
                     isRequired={isRequired}
