@@ -18,7 +18,7 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250531.0",
+    "@cloudflare/workers-types": "^4.20250601.0",
     "@types/debug": "^4.1.12",
     "drizzle-kit": "^0.31.1",
     "tsx": "^4.19.4",
@@ -44,6 +44,6 @@
     "drizzle-zod": "0.8.2",
     "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.8",
-    "zod": "^3.25.42"
+    "zod": "^3.25.46"
   }
 }
