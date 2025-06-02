@@ -13,6 +13,7 @@ import migration0007_past_prism from '@api/drizzle/0007_past_prism.sql?raw';
 import migration0008_noisy_mercury from '@api/drizzle/0008_noisy_mercury.sql?raw';
 import migration0009_known_gauntlet from '@api/drizzle/0009_known_gauntlet.sql?raw';
 import migration0010_clever_bloodscream from '@api/drizzle/0010_clever_bloodscream.sql?raw';
+import migration0011_tranquil_terrax from '@api/drizzle/0011_tranquil_terrax.sql?raw';
 
 export const localDBMigrations: Record<string, string> = {
   migration0000_dry_rick_jones,
@@ -26,4 +27,5 @@ export const localDBMigrations: Record<string, string> = {
   migration0008_noisy_mercury,
   migration0009_known_gauntlet,
   migration0010_clever_bloodscream,
+  migration0011_tranquil_terrax,
 };

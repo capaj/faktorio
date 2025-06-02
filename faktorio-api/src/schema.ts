@@ -161,8 +161,8 @@ export const contactTb = sqliteTable(
     type: text('type'),
     default_invoice_due_in_days: integer('default_invoice_due_in_days'), // in days how long the invoice is due
     default_invoice_item_unit: text('default_invoice_item_unit'),
-    currency: text('currency'),
-    language: text('language').default('cs'),
+    currency: text('currency').default('CZK').notNull(),
+    language: text('language').default('cs').notNull(),
     created_at: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),

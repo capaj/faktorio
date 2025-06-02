@@ -85,10 +85,13 @@ export const NewInvoice = () => {
         (contact) => contact.id === formValues.client_contact_id
       )
 
-      setFormValues((prev) => ({
-        ...prev,
-        language: selectedContact?.language ?? 'cs'
-      }))
+      if (selectedContact) {
+        setFormValues((prev) => ({
+          ...prev,
+          language: selectedContact.language,
+          currency: selectedContact.currency
+        }))
+      }
     }
   }, [formValues.client_contact_id, contactsQuery.data])
 
