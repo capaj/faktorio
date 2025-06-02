@@ -18,8 +18,8 @@ importers:
         specifier: ^2.2.2
         version: 2.2.2
       zod:
-        specifier: ^3.25.46
-        version: 3.25.46
+        specifier: ^3.25.47
+        version: 3.25.47
     devDependencies:
       '@playwright/test':
         specifier: ^1.52.0
@@ -64,14 +64,14 @@ importers:
         specifier: ^5.79.0
         version: 5.79.0(react@19.0.0)
       '@trpc/client':
-        specifier: ^11.1.4
-        version: 11.1.4(@trpc/server@11.1.4(typescript@5.8.3))(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3)
       '@trpc/react-query':
-        specifier: ^11.1.4
-        version: 11.1.4(@tanstack/react-query@5.79.0(react@19.0.0))(@trpc/client@11.1.4(@trpc/server@11.1.4(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.1.4(typescript@5.8.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(@tanstack/react-query@5.79.0(react@19.0.0))(@trpc/client@11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.2.0(typescript@5.8.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.3)
       '@trpc/server':
-        specifier: ^11.1.4
-        version: 11.1.4(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(typescript@5.8.3)
       '@tsndr/cloudflare-worker-jwt':
         specifier: ^3.2.0
         version: 3.2.0
@@ -89,7 +89,7 @@ importers:
         version: 0.44.1(@cloudflare/workers-types@4.20250601.0)(@libsql/client@0.15.8)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       drizzle-zod:
         specifier: 0.8.2
-        version: 0.8.2(drizzle-orm@0.44.1(@cloudflare/workers-types@4.20250601.0)(@libsql/client@0.15.8)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.46)
+        version: 0.8.2(drizzle-orm@0.44.1(@cloudflare/workers-types@4.20250601.0)(@libsql/client@0.15.8)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.47)
       faktorio-shared:
         specifier: workspace:*
         version: link:../faktorio-shared
@@ -97,8 +97,8 @@ importers:
         specifier: ^6.0.8
         version: 6.0.8(debug@4.4.1)
       zod:
-        specifier: ^3.25.46
-        version: 3.25.46
+        specifier: ^3.25.47
+        version: 3.25.47
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250601.0
@@ -132,7 +132,7 @@ importers:
         version: 11.14.0(@emotion/react@11.14.0(@types/react@19.1.6)(react@18.3.1))(@types/react@19.1.6)(react@18.3.1)
       '@hookform/resolvers':
         specifier: ^5.0.1
-        version: 5.0.1(react-hook-form@7.56.4(react@18.3.1))
+        version: 5.0.1(react-hook-form@7.57.0(react@18.3.1))
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
@@ -191,14 +191,14 @@ importers:
         specifier: ^5.79.0
         version: 5.79.0(react@18.3.1)
       '@trpc/client':
-        specifier: ^11.1.4
-        version: 11.1.4(@trpc/server@11.1.4(typescript@5.8.3))(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3)
       '@trpc/react-query':
-        specifier: ^11.1.4
-        version: 11.1.4(@tanstack/react-query@5.79.0(react@18.3.1))(@trpc/client@11.1.4(@trpc/server@11.1.4(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.1.4(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(@tanstack/react-query@5.79.0(react@18.3.1))(@trpc/client@11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.2.0(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       '@trpc/server':
-        specifier: ^11.1.4
-        version: 11.1.4(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(typescript@5.8.3)
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
@@ -269,8 +269,8 @@ importers:
         specifier: ^18
         version: 18.3.1(react@18.3.1)
       react-hook-form:
-        specifier: ^7.56.4
-        version: 7.56.4(react@18.3.1)
+        specifier: ^7.57.0
+        version: 7.57.0(react@18.3.1)
       sonner:
         specifier: ^2.0.4
         version: 2.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -293,11 +293,11 @@ importers:
         specifier: ^3.7.1
         version: 3.7.1(react@18.3.1)
       zod:
-        specifier: ^3.25.46
-        version: 3.25.46
+        specifier: ^3.25.47
+        version: 3.25.47
       zod-to-json-schema:
         specifier: ^3.24.5
-        version: 3.24.5(zod@3.25.46)
+        version: 3.24.5(zod@3.25.47)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.1.8
@@ -2455,24 +2455,24 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@trpc/client@11.1.4':
-    resolution: {integrity: sha512-QDaIdwhZlHKMhDAr5m4dJNAYkX4ydo63Up0M01mGcdpnOOmGlvGMRWzdVSLIvGc1JasPSvC15RsgrjMzXpElzw==}
+  '@trpc/client@11.2.0':
+    resolution: {integrity: sha512-uGehc0QvK3+UmTZb1KmIwvMLtRW0I5ykiYQHA1Yqa7yHPzpF9zw7mbwna6gqZAgjclt0/S6jwxAMJizoaP8uqQ==}
     peerDependencies:
-      '@trpc/server': 11.1.4
+      '@trpc/server': 11.2.0
       typescript: '>=5.7.2'
 
-  '@trpc/react-query@11.1.4':
-    resolution: {integrity: sha512-vMwE3Jif7rJcrqWsQ1aKn43xpmwastYPPftMM5CgdcmF9IuvigH/NTLdWRfSzKtbXmNE6wLI45gU1R77uF86yA==}
+  '@trpc/react-query@11.2.0':
+    resolution: {integrity: sha512-eVbvjUzvia7B+Xt3002YRlU2/u+jljtVdOTErT6ffMHC2T5ETop84oyqnsmXpMlnhT5y/We6v/KGpE4GUE2Zkw==}
     peerDependencies:
       '@tanstack/react-query': ^5.67.1
-      '@trpc/client': 11.1.4
-      '@trpc/server': 11.1.4
+      '@trpc/client': 11.2.0
+      '@trpc/server': 11.2.0
       react: '>=18.2.0'
       react-dom: '>=18.2.0'
       typescript: '>=5.7.2'
 
-  '@trpc/server@11.1.4':
-    resolution: {integrity: sha512-X3TSLwQQh5+zi+yY7BnnmUUwVNdeBj3BAt580sAJ+Qd5PvDhz1gSNHGOAlOLulCFn6g/JHf8n+DbnPF/Gb63SA==}
+  '@trpc/server@11.2.0':
+    resolution: {integrity: sha512-clESXvCT3rTRUavB3wjtmPDlbB+rayVPeaTeXEQVeQNdTrK5o6GnYfCdiJJSdQspUQAwkGgQFRnku5pckuISlw==}
     peerDependencies:
       typescript: '>=5.7.2'
 
@@ -4463,8 +4463,8 @@ packages:
     peerDependencies:
       react: ^19.0.0
 
-  react-hook-form@7.56.4:
-    resolution: {integrity: sha512-Rob7Ftz2vyZ/ZGsQZPaRdIefkgOSrQSPXfqBdvOPwJfoGnjwRJUs7EM7Kc1mcoDv3NOtqBzPGbcMB8CGn9CKgw==}
+  react-hook-form@7.57.0:
+    resolution: {integrity: sha512-RbEks3+cbvTP84l/VXGUZ+JMrKOS8ykQCRYdm5aYsxnDquL0vspsyNhGRO7pcH6hsZqWlPOjLye7rJqdtdAmlg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -5406,8 +5406,8 @@ packages:
   zod@3.22.3:
     resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
 
-  zod@3.25.46:
-    resolution: {integrity: sha512-IqRxcHEIjqLd4LNS/zKffB3Jzg3NwqJxQQ0Ns7pdrvgGkwQsEBdEQcOHaBVqvvZArShRzI39+aMST3FBGmTrLQ==}
+  zod@3.25.47:
+    resolution: {integrity: sha512-+f8+agSYoT9niC0VUL60IuXnr81FJeJ27Lf5YPrmcxTWmygcpGBeEuAAovDDEjkyQ36KyqNswwbhISZ1Z7yY+A==}
 
 snapshots:
 
@@ -6406,8 +6406,8 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.11.4
       google-auth-library: 9.15.1
       ws: 8.18.0
-      zod: 3.25.46
-      zod-to-json-schema: 3.24.5(zod@3.25.46)
+      zod: 3.25.47
+      zod-to-json-schema: 3.24.5(zod@3.25.47)
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -6416,10 +6416,10 @@ snapshots:
 
   '@google/generative-ai@0.24.1': {}
 
-  '@hookform/resolvers@5.0.1(react-hook-form@7.56.4(react@18.3.1))':
+  '@hookform/resolvers@5.0.1(react-hook-form@7.57.0(react@18.3.1))':
     dependencies:
       '@standard-schema/utils': 0.3.0
-      react-hook-form: 7.56.4(react@18.3.1)
+      react-hook-form: 7.57.0(react@18.3.1)
 
   '@humanfs/core@0.19.1': {}
 
@@ -6613,8 +6613,8 @@ snapshots:
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
       raw-body: 3.0.0
-      zod: 3.25.46
-      zod-to-json-schema: 3.24.5(zod@3.25.46)
+      zod: 3.25.47
+      zod-to-json-schema: 3.24.5(zod@3.25.47)
     transitivePeerDependencies:
       - supports-color
 
@@ -7516,30 +7516,30 @@ snapshots:
       '@tanstack/query-core': 5.79.0
       react: 19.0.0
 
-  '@trpc/client@11.1.4(@trpc/server@11.1.4(typescript@5.8.3))(typescript@5.8.3)':
+  '@trpc/client@11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3)':
     dependencies:
-      '@trpc/server': 11.1.4(typescript@5.8.3)
+      '@trpc/server': 11.2.0(typescript@5.8.3)
       typescript: 5.8.3
 
-  '@trpc/react-query@11.1.4(@tanstack/react-query@5.79.0(react@18.3.1))(@trpc/client@11.1.4(@trpc/server@11.1.4(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.1.4(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
+  '@trpc/react-query@11.2.0(@tanstack/react-query@5.79.0(react@18.3.1))(@trpc/client@11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.2.0(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
     dependencies:
       '@tanstack/react-query': 5.79.0(react@18.3.1)
-      '@trpc/client': 11.1.4(@trpc/server@11.1.4(typescript@5.8.3))(typescript@5.8.3)
-      '@trpc/server': 11.1.4(typescript@5.8.3)
+      '@trpc/client': 11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3)
+      '@trpc/server': 11.2.0(typescript@5.8.3)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       typescript: 5.8.3
 
-  '@trpc/react-query@11.1.4(@tanstack/react-query@5.79.0(react@19.0.0))(@trpc/client@11.1.4(@trpc/server@11.1.4(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.1.4(typescript@5.8.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.3)':
+  '@trpc/react-query@11.2.0(@tanstack/react-query@5.79.0(react@19.0.0))(@trpc/client@11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.2.0(typescript@5.8.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.3)':
     dependencies:
       '@tanstack/react-query': 5.79.0(react@19.0.0)
-      '@trpc/client': 11.1.4(@trpc/server@11.1.4(typescript@5.8.3))(typescript@5.8.3)
-      '@trpc/server': 11.1.4(typescript@5.8.3)
+      '@trpc/client': 11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3)
+      '@trpc/server': 11.2.0(typescript@5.8.3)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
       typescript: 5.8.3
 
-  '@trpc/server@11.1.4(typescript@5.8.3)':
+  '@trpc/server@11.2.0(typescript@5.8.3)':
     dependencies:
       typescript: 5.8.3
 
@@ -8189,10 +8189,10 @@ snapshots:
       gel: 2.0.0
       sql.js: 1.13.0
 
-  drizzle-zod@0.8.2(drizzle-orm@0.44.1(@cloudflare/workers-types@4.20250601.0)(@libsql/client@0.15.8)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.46):
+  drizzle-zod@0.8.2(drizzle-orm@0.44.1(@cloudflare/workers-types@4.20250601.0)(@libsql/client@0.15.8)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@3.25.47):
     dependencies:
       drizzle-orm: 0.44.1(@cloudflare/workers-types@4.20250601.0)(@libsql/client@0.15.8)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
-      zod: 3.25.46
+      zod: 3.25.47
 
   dunder-proto@1.0.1:
     dependencies:
@@ -9575,7 +9575,7 @@ snapshots:
       react: 19.0.0
       scheduler: 0.25.0
 
-  react-hook-form@7.56.4(react@18.3.1):
+  react-hook-form@7.57.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
@@ -10675,10 +10675,10 @@ snapshots:
       mustache: 4.2.0
       stacktracey: 2.1.8
 
-  zod-to-json-schema@3.24.5(zod@3.25.46):
+  zod-to-json-schema@3.24.5(zod@3.25.47):
     dependencies:
-      zod: 3.25.46
+      zod: 3.25.47
 
   zod@3.22.3: {}
 
-  zod@3.25.46: {}
+  zod@3.25.47: {}
