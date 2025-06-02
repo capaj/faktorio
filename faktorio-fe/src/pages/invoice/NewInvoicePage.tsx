@@ -16,6 +16,7 @@ import { useLocation } from 'wouter'
 import { FormItem, FormLabel, FormControl } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { BankDetailsAccordion } from './BankDetailsAccordion'
+import { createDateFieldConfig } from './dateFieldConfig'
 
 const defaultInvoiceItem = {
   description: '',
@@ -144,20 +145,16 @@ export const NewInvoice = () => {
           currency: {
             label: 'Měna'
           },
-          issued_on: {
-            label: 'Datum vystavení faktury',
-            fieldType: 'date'
-          },
+          issued_on: createDateFieldConfig('Datum vystavení faktury'),
           number: {
             label: 'Číslo faktury'
           },
           payment_method: {
             label: 'Způsob platby'
           },
-          taxable_fulfillment_due: {
-            label: 'Datum zdanitelného plnění',
-            fieldType: 'date'
-          },
+          taxable_fulfillment_due: createDateFieldConfig(
+            'Datum zdanitelného plnění'
+          ),
           footer_note: {
             label: 'Poznámka'
           },

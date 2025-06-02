@@ -24,6 +24,7 @@ import { FormControl } from '@/components/ui/form'
 import { FormItem } from '@/components/ui/form'
 import { FormLabel } from '@/components/ui/form'
 import { BankDetailsAccordion } from './BankDetailsAccordion'
+import { createDateFieldConfig } from './dateFieldConfig'
 
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
@@ -107,20 +108,16 @@ export const EditInvoicePage = () => {
           currency: {
             label: 'Měna'
           },
-          issued_on: {
-            label: 'Datum vystavení faktury',
-            fieldType: 'date'
-          },
+          issued_on: createDateFieldConfig('Datum vystavení faktury'),
           number: {
             label: 'Číslo faktury'
           },
           payment_method: {
             label: 'Způsob platby'
           },
-          taxable_fulfillment_due: {
-            label: 'Datum zdanitelného plnění',
-            fieldType: 'date'
-          },
+          taxable_fulfillment_due: createDateFieldConfig(
+            'Datum zdanitelného plnění'
+          ),
           footer_note: {
             label: 'Poznámka'
           },
