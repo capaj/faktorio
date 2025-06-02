@@ -40,7 +40,8 @@ export const NewInvoice = () => {
       client_contact_id: true
     })
     .extend({
-      client_contact_id: z.string().optional()
+      client_contact_id: z.string().optional(),
+      language: z.string().default('cs')
     })
   const [location, navigate] = useLocation()
   const createInvoice = trpcClient.invoices.create.useMutation()
@@ -50,7 +51,8 @@ export const NewInvoice = () => {
       due_in_days: 14,
       bank_account: invoicingDetails?.bank_account || '',
       iban: invoicingDetails?.iban || '',
-      swift_bic: invoicingDetails?.swift_bic || ''
+      swift_bic: invoicingDetails?.swift_bic || '',
+      language: 'cs'
     })
   )
 
@@ -76,6 +78,19 @@ export const NewInvoice = () => {
     }
     fetchRate()
   }, [formValues.currency])
+
+  useEffect(() => {
+    if (formValues.client_contact_id && contactsQuery.data) {
+      const selectedContact = contactsQuery.data.find(
+        (contact) => contact.id === formValues.client_contact_id
+      )
+
+      setFormValues((prev) => ({
+        ...prev,
+        language: selectedContact?.language ?? 'cs'
+      }))
+    }
+  }, [formValues.client_contact_id, contactsQuery.data])
 
   const [invoiceItems, setInvoiceItems] = useState<
     z.infer<typeof invoiceItemFormSchema>[]
@@ -161,7 +176,7 @@ export const NewInvoice = () => {
           client_contact_id: {
             label: 'Odběratel',
             fieldType: ({ label, isRequired, field, fieldConfigItem }) => (
-              <FormItem className="flex flex-col flew-grow col-span-2">
+              <FormItem className="flex flex-col flew-grow">
                 <FormLabel>
                   {label}
                   {isRequired && (

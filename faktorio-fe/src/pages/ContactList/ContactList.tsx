@@ -114,7 +114,8 @@ const baseContactSchema = z.object({
   zip: z.string().optional(),
   country: z.string().optional(),
   main_email: z.string().email().nullish(),
-  phone_number: z.string().nullish()
+  phone_number: z.string().nullish(),
+  language: z.string().optional()
 })
 
 export type ContactFormSchema = z.infer<typeof baseContactSchema>
@@ -173,7 +174,8 @@ export const ContactList = () => {
         zip: z.string().optional(),
         country: z.string().optional().default('Česká Republika'),
         main_email: z.string().email().nullish(),
-        phone_number: z.string().nullish()
+        phone_number: z.string().nullish(),
+        language: z.string().optional()
       }),
     [contactsQuery.data, contactId]
   )
@@ -188,7 +190,8 @@ export const ContactList = () => {
     main_email: null,
     phone_number: null,
     registration_no: '',
-    vat_no: ''
+    vat_no: '',
+    language: 'cs'
   }
   // Initialize forms with memoized resolvers
   const editForm = useForm<ContactFormSchema>({
@@ -259,7 +262,8 @@ export const ContactList = () => {
           main_email: null,
           phone_number: null,
           registration_no: '',
-          vat_no: ''
+          vat_no: '',
+          language: 'cs'
         })
         setNewDialogOpen(true)
         setEditDialogOpen(false)
@@ -449,7 +453,8 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
       main_email: null,
       phone_number: null,
       registration_no: '',
-      vat_no: ''
+      vat_no: '',
+      language: 'cs'
     })
     navigate('/contacts/new')
   }

@@ -10,6 +10,13 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { FkButton } from '@/components/FkButton'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { UseFormReturn } from 'react-hook-form'
@@ -25,7 +32,8 @@ export const fieldLabels = {
   vat_no: 'DIČ',
   zip: 'Poštovní směrovací číslo',
   phone_number: 'Telefon',
-  country: 'Země'
+  country: 'Země',
+  language: 'Jazyk faktur'
 } as const
 
 // Component for rendering the contact form - moved outside to prevent recreation
@@ -184,21 +192,6 @@ export const ContactForm = ({
 
         <FormField
           control={form.control}
-          name="country"
-          defaultValue="Česká Republika"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{fieldLabels.country}</FormLabel>
-              <FormControl>
-                <Input autoComplete="off" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="main_email"
           render={({ field }) => (
             <FormItem>
@@ -233,6 +226,47 @@ export const ContactForm = ({
             </FormItem>
           )}
         />
+        <div className="flex flex-row gap-2">
+          <FormField
+            control={form.control}
+            name="country"
+            defaultValue="Česká Republika"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>{fieldLabels.country}</FormLabel>
+                <FormControl>
+                  <Input autoComplete="off" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="language"
+            render={({ field }) => (
+              <FormItem className="flex-1/2 max-w-1/3">
+                <FormLabel>{fieldLabels.language}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value || 'cs'}
+                  value={field.value || 'cs'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Vyberte jazyk" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="cs">Česky</SelectItem>
+                    <SelectItem value="en">Anglicky</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {isEdit && (
           <DialogFooter className="col-span-2 flex justify-between">

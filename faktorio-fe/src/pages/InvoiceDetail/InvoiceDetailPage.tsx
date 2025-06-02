@@ -61,7 +61,7 @@ export const InvoiceDetail = ({
   const params = useParams()
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
   const [searchParams] = useSearchParams()
-  const language = searchParams.get('language') ?? 'cs'
+  const language = searchParams.get('language') ?? invoice.language
   const [location, navigate] = useLocation()
 
   const invoiceTotal = invoice.items.reduce(

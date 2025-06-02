@@ -19,7 +19,8 @@
     "SHVXML",
     "TRPC",
     "tsndr",
-    "turso"
+    "turso",
+    "unparse"
   ],
   "ignoreWords": [],
   "import": []
