@@ -30,6 +30,9 @@ CREATE TABLE `__new_contact` (
 	`updated_at` text
 );
 --> statement-breakpoint
+
+UPDATE `contact` SET `currency` = 'CZK', `language` = 'cs' WHERE `currency` IS NULL OR `language` IS NULL;--> statement-breakpoint
+
 INSERT INTO `__new_contact`("id", "user_id", "name", "full_name", "street", "street2", "city", "zip", "country", "registration_no", "vat_no", "bank_account", "iban", "web", "variable_symbol", "phone_number", "phone", "main_email", "email", "email_copy", "private_note", "type", "default_invoice_due_in_days", "default_invoice_item_unit", "currency", "language", "created_at", "updated_at") SELECT "id", "user_id", "name", "full_name", "street", "street2", "city", "zip", "country", "registration_no", "vat_no", "bank_account", "iban", "web", "variable_symbol", "phone_number", "phone", "main_email", "email", "email_copy", "private_note", "type", "default_invoice_due_in_days", "default_invoice_item_unit", "currency", "language", "created_at", "updated_at" FROM `contact`;--> statement-breakpoint
 DROP TABLE `contact`;--> statement-breakpoint
 ALTER TABLE `__new_contact` RENAME TO `contact`;--> statement-breakpoint
