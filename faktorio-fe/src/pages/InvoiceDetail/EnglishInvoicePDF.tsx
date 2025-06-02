@@ -16,8 +16,7 @@ import {
   InsertInvoiceItemType,
   SelectInvoiceType
 } from 'faktorio-api/src/zodDbSchemas'
-import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
-import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
+
 import { reactMainRender } from '@/main'
 
 Font.register({
@@ -173,9 +172,11 @@ const ItemDescText = ({
 }
 
 export const EnglishInvoicePDF = ({
-  invoiceData
+  invoiceData,
+  qrCodeBase64
 }: {
   invoiceData: SelectInvoiceType & { items: InsertInvoiceItemType[] }
+  qrCodeBase64: string
 }) => {
   const taxPaidByRate: Record<number, number> = invoiceData.items.reduce(
     (acc, item) => {
@@ -200,18 +201,6 @@ export const EnglishInvoicePDF = ({
     0
   )
 
-  const qrCodeBase64 = useQRCodeBase64(
-    generateQrPaymentString({
-      accountNumber: invoiceData.iban?.replace(/\s/g, '') ?? '',
-      amount: invoiceTotal + taxTotal,
-      currency: invoiceData.currency,
-      variableSymbol: invoiceData.number.replace('-', ''),
-      message: 'Faktura ' + invoiceData.number
-    })
-  )
-  if (!qrCodeBase64) {
-    return null
-  }
   return (
     <Document key={new Date().toISOString()}>
       <Page size="A4" style={styles.page}>
@@ -252,6 +241,7 @@ export const EnglishInvoicePDF = ({
                   >
                     QR Payment:
                   </Text>
+
                   <Image
                     style={{
                       width: 100,

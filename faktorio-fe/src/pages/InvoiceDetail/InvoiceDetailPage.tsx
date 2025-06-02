@@ -22,6 +22,8 @@ import {
   InsertInvoiceItemType
 } from 'faktorio-api/src/zodDbSchemas'
 import { LucideEdit } from 'lucide-react'
+import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
+import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 
 export function useInvoiceQueryByUrlParam() {
   const { invoiceId } = useParams()
@@ -62,7 +64,38 @@ export const InvoiceDetail = ({
   const language = searchParams.get('language') ?? 'cs'
   const [location, navigate] = useLocation()
 
+  const invoiceTotal = invoice.items.reduce(
+    (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
+    0
+  )
+
+  const taxTotal = invoice.items.reduce((acc, item) => {
+    const total = (item.quantity ?? 0) * (item.unit_price ?? 0)
+    const vat = item.vat_rate ?? 0
+    return acc + total * (vat / 100)
+  }, 0)
+
+  const qrCodeBase64 = useQRCodeBase64(
+    generateQrPaymentString({
+      accountNumber: invoice.iban?.replace(/\s/g, '') ?? '',
+      amount: invoiceTotal + taxTotal,
+      currency: invoice.currency,
+      variableSymbol: invoice.number.replace('-', ''),
+      message: 'Faktura ' + invoice.number
+    })
+  )
+
   const PdfContent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
+
+  if (!qrCodeBase64) {
+    return (
+      <div className="h-full place-content-center flex flex-col">
+        <div className="flex justify-center items-center h-full">
+          <div className="text-lg text-gray-600">Načítání faktury...</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -98,20 +131,22 @@ export const InvoiceDetail = ({
 
         <div className="h-full place-content-center flex">
           <PDFViewer
-            // key={JSON.stringify(invoice)}
+            key={`${invoice.id}-${language}-${!!qrCodeBase64}`}
             showToolbar={false}
             style={{
               width: '70vw',
               height: '1100px'
             }}
           >
-            <PdfContent invoiceData={invoice} />
+            <PdfContent invoiceData={invoice} qrCodeBase64={qrCodeBase64} />
           </PDFViewer>
         </div>
 
         <div className="flex content-center justify-center m-4">
           <PDFDownloadLink
-            document={<PdfContent invoiceData={invoice} />}
+            document={
+              <PdfContent invoiceData={invoice} qrCodeBase64={qrCodeBase64} />
+            }
             fileName={pdfName}
           >
             <Button variant={'default'}>Stáhnout {pdfName}</Button>
