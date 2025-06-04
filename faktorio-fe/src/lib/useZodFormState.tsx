@@ -4,7 +4,6 @@ import { z, ZodSchema, type ZodObject, type ZodTypeAny } from 'zod/v4'
 export function useZodFormState<
   T extends ZodObject<{ [key: string]: ZodTypeAny }>
 >(zodSchema: T, defaultValues?: NoInfer<z.infer<T>>) {
-  // Use TypeScript's ReturnType utility to infer the shape of the default state
   type SchemaOutput = z.infer<T>
 
   const defaultState = zodSchema.safeParse(defaultValues ?? {})
