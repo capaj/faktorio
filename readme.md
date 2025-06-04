@@ -17,7 +17,7 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 | Feature                                    | Faktorio.cz | Fakturovac.cz | Fakturoid.cz | iDoklad.cz |
 | ------------------------------------------ | :---------: | :-----------: | :----------: | :--------: |
 | Generate invoice PDF                       |     ✅      |      ✅       |      ✅      |     ✅     |
-| Extract invoice from JPG/PNG/PDF           |     ✅      |      ❌       |      ❌      |     ❌     |
+| Extract invoice from a raster image        |     ✅      |      ❌       |      ❌      |     ❌     |
 | Search through invoices                    |     ✅      |      ✅       |      ✅      |     ✅     |
 | Contact management (integrated with ARES)  |     ✅      |      ✅       |      ✅      |     ✅     |
 | Support for foreign currencies             |     ✅      |      ❌       |      ✅      |     ✅     |
