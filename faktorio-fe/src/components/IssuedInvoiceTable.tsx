@@ -79,6 +79,25 @@ export function IssuedInvoiceTable({
   year,
   search
 }: InvoiceTableProps) {
+  // Determine if we should show full year in dates
+  const showFullYear = year === null || year === undefined
+
+  // Helper function to format dates in Czech format
+  function formatCzechDate(dateString: string | null): string {
+    if (!dateString) return ''
+
+    const date = new Date(dateString)
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    const year = date.getFullYear()
+
+    if (showFullYear) {
+      return `${day}.${month}.${year}`
+    } else {
+      return `${day}.${month}.`
+    }
+  }
+
   const currencyTotals = invoices.reduce<CurrencyTotals>((acc, invoice) => {
     const currency = invoice.currency || 'N/A' // Handle potential null/undefined currency
     if (!acc[currency]) {
@@ -132,9 +151,15 @@ export function IssuedInvoiceTable({
               </Link>
             </TableCell>
             <TableCell>{invoice.client_name}</TableCell>
-            <TableCell>{invoice.taxable_fulfillment_due}</TableCell>
-            <TableCell>{invoice.issued_on}</TableCell>
-            <TableCell>{invoice.sent_at}</TableCell>
+            <TableCell>
+              {formatCzechDate(invoice.taxable_fulfillment_due, showFullYear)}
+            </TableCell>
+            <TableCell>
+              {formatCzechDate(invoice.issued_on, showFullYear)}
+            </TableCell>
+            <TableCell>
+              {formatCzechDate(invoice.sent_at, showFullYear)}
+            </TableCell>
             <TableCell>
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -143,7 +168,9 @@ export function IssuedInvoiceTable({
                     : 'bg-yellow-100 text-yellow-800'
                 }`}
               >
-                {invoice.paid_on ? invoice.paid_on : 'Nezaplaceno'}
+                {invoice.paid_on
+                  ? formatCzechDate(invoice.paid_on, showFullYear)
+                  : 'Nezaplaceno'}
               </span>
             </TableCell>
             <TableCell>
