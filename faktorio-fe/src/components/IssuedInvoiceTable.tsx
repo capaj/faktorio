@@ -152,14 +152,10 @@ export function IssuedInvoiceTable({
             </TableCell>
             <TableCell>{invoice.client_name}</TableCell>
             <TableCell>
-              {formatCzechDate(invoice.taxable_fulfillment_due, showFullYear)}
+              {formatCzechDate(invoice.taxable_fulfillment_due)}
             </TableCell>
-            <TableCell>
-              {formatCzechDate(invoice.issued_on, showFullYear)}
-            </TableCell>
-            <TableCell>
-              {formatCzechDate(invoice.sent_at, showFullYear)}
-            </TableCell>
+            <TableCell>{formatCzechDate(invoice.issued_on)}</TableCell>
+            <TableCell>{formatCzechDate(invoice.sent_at)}</TableCell>
             <TableCell>
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -169,7 +165,7 @@ export function IssuedInvoiceTable({
                 }`}
               >
                 {invoice.paid_on
-                  ? formatCzechDate(invoice.paid_on, showFullYear)
+                  ? formatCzechDate(invoice.paid_on)
                   : 'Nezaplaceno'}
               </span>
             </TableCell>
