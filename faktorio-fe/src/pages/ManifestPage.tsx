@@ -7,6 +7,11 @@ export const ManifestPage = () => {
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
           Manifest
         </h1>
+        <img
+          src="/images/20250610_1649_Robot Tax Preparation_simple_compose_01jxd4zrkafbvtmnk43fr8armx.png"
+          alt="robot in a factory doing taxes with a keen eye"
+          className="w-full"
+        />
         <p className="mt-3">
           Jako živnostník stojící na prahu podnikání jsem čelil jednoduchému,
           přesto však zdánlivě neřešitelnému dilematu: potřeba vystavovat jednu
