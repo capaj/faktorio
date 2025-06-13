@@ -115,7 +115,9 @@ export default function AutoFormObject<
                       typeof useForm<z.infer<z.ZodObject<any, any>>>
                     >
                   }
-                  fieldConfig={fieldConfigForField}
+                  fieldConfig={
+                    fieldConfigForField as FieldConfig<Record<string, unknown>>
+                  }
                   path={[...path, name as string]}
                 />
               </AccordionContent>
