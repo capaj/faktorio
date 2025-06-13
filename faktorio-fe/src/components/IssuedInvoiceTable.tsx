@@ -283,11 +283,11 @@ export function IssuedInvoiceTable({
                   v {currency}
                 </TableCell>
                 <TableCell></TableCell> {/* Empty cell for alignment */}
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {formatNumberWithSpaces(currencyTotals[currency].subtotal)}{' '}
                   {currency}
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
                   {currency}
                 </TableCell>
@@ -310,7 +310,7 @@ export function IssuedInvoiceTable({
                       : 'faktur'}
                 </TableCell>
                 {/* Display the total sum in CZK */}
-                <TableCell colSpan={1} className="text-left">
+                <TableCell colSpan={1} className="text-left whitespace-nowrap">
                   {formatNumberWithSpaces(totalSumCZK)} CZK
                 </TableCell>
                 <TableCell className="text-right">
