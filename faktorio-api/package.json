@@ -18,16 +18,16 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250613.0",
+    "@cloudflare/workers-types": "^4.20250618.0",
     "@types/debug": "^4.1.12",
     "drizzle-kit": "^0.31.1",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.3",
-    "wrangler": "^4.20.0"
+    "vitest": "^3.2.4",
+    "wrangler": "^4.20.1"
   },
   "dependencies": {
-    "@google/genai": "^1.5.0",
+    "@google/genai": "^1.5.1",
     "@google/generative-ai": "^0.24.1",
     "@libsql/client": "^0.15.9",
     "@paralleldrive/cuid2": "^2.2.2",
@@ -44,6 +44,6 @@
     "drizzle-zod": "0.8.2",
     "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.8",
-    "zod": "^3.25.64"
+    "zod": "^3.25.67"
   }
 }
