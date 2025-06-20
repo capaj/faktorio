@@ -68,7 +68,8 @@ const receivedInvoiceFormSchema = z.object({
   receipt_date: z.date().optional().nullable(),
   total_without_vat: z.number().optional().nullable(),
   total_with_vat: z.number().min(0.01, 'Celková částka musí být větší než 0'),
-  currency: z.string().max(3).min(3).default('CZK')
+  currency: z.string().max(3).min(3).default('CZK'),
+  line_items_summary: z.string().nullish()
 })
 
 type ReceivedInvoiceFormValues = z.infer<typeof receivedInvoiceFormSchema>

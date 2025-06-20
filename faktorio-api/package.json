@@ -18,13 +18,13 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250618.0",
+    "@cloudflare/workers-types": "^4.20250620.0",
     "@types/debug": "^4.1.12",
     "drizzle-kit": "^0.31.1",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
-    "wrangler": "^4.20.1"
+    "wrangler": "^4.20.3"
   },
   "dependencies": {
     "@google/genai": "^1.5.1",
@@ -32,10 +32,10 @@
     "@libsql/client": "^0.15.9",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
-    "@tanstack/react-query": "^5.80.7",
-    "@trpc/client": "^11.4.1",
-    "@trpc/react-query": "^11.4.1",
-    "@trpc/server": "^11.4.1",
+    "@tanstack/react-query": "^5.80.10",
+    "@trpc/client": "^11.4.2",
+    "@trpc/react-query": "^11.4.2",
+    "@trpc/server": "^11.4.2",
     "@tsndr/cloudflare-worker-jwt": "^3.2.0",
     "currency-codes": "^2.2.0",
     "debug": "^4.4.1",
