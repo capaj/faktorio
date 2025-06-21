@@ -24,10 +24,10 @@
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
-    "wrangler": "^4.20.3"
+    "wrangler": "^4.20.5"
   },
   "dependencies": {
-    "@google/genai": "^1.5.1",
+    "@google/genai": "^1.6.0",
     "@google/generative-ai": "^0.24.1",
     "@libsql/client": "^0.15.9",
     "@paralleldrive/cuid2": "^2.2.2",
