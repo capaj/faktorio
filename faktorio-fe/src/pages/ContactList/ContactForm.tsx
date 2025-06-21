@@ -33,8 +33,20 @@ export const fieldLabels = {
   zip: 'Poštovní směrovací číslo',
   phone_number: 'Telefon',
   country: 'Země',
-  language: 'Jazyk faktur'
+  language: 'Jazyk faktur',
+  iban: 'IBAN',
+  swift_bic: 'SWIFT/BIC',
+  bank_account: 'Číslo bankovního účtu - včetně bankovního kódu',
+  web_url: 'Web'
 } as const
+
+// Extended type for invoicing details
+export type InvoicingDetailsFormSchema = ContactFormSchema & {
+  iban?: string | null
+  swift_bic?: string | null
+  bank_account?: string | null
+  web_url?: string | null
+}
 
 // Component for rendering the contact form - moved outside to prevent recreation
 export const ContactForm = ({
@@ -47,10 +59,15 @@ export const ContactForm = ({
   setDeleteInvoices,
   handleShowDeleteDialog,
   isLoadingAres,
-  onFetchAres
+  onFetchAres,
+  showInvoicingFields = false,
+  showDialogFooter = true,
+  customFooter
 }: {
-  form: UseFormReturn<ContactFormSchema>
-  onSubmit: (values: ContactFormSchema) => Promise<void>
+  form: UseFormReturn<ContactFormSchema | InvoicingDetailsFormSchema>
+  onSubmit: (
+    values: ContactFormSchema | InvoicingDetailsFormSchema
+  ) => Promise<void>
   isEdit?: boolean
   hasInvoices?: boolean
   invoiceCount?: number
@@ -59,6 +76,9 @@ export const ContactForm = ({
   handleShowDeleteDialog?: (e: React.MouseEvent) => void
   isLoadingAres?: boolean
   onFetchAres?: () => void
+  showInvoicingFields?: boolean
+  showDialogFooter?: boolean
+  customFooter?: React.ReactNode
 }) => {
   const registrationNo = form.watch('registration_no')
 
@@ -124,7 +144,7 @@ export const ContactForm = ({
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem className="">
+            <FormItem>
               <FormLabel>{fieldLabels.name}</FormLabel>
               <FormControl>
                 <Input autoComplete="off" {...field} />
@@ -226,6 +246,7 @@ export const ContactForm = ({
             </FormItem>
           )}
         />
+
         <div className="flex flex-row gap-2">
           <FormField
             control={form.control}
@@ -268,7 +289,88 @@ export const ContactForm = ({
           />
         </div>
 
-        {isEdit && (
+        {/* Additional fields for invoicing details */}
+        {showInvoicingFields && (
+          <>
+            <FormField
+              control={form.control}
+              name="iban"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{fieldLabels.iban}</FormLabel>
+                  <FormControl>
+                    <Input
+                      autoComplete="off"
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="swift_bic"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{fieldLabels.swift_bic}</FormLabel>
+                  <FormControl>
+                    <Input
+                      autoComplete="off"
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="bank_account"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{fieldLabels.bank_account}</FormLabel>
+                  <FormControl>
+                    <Input
+                      autoComplete="off"
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="web_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{fieldLabels.web_url}</FormLabel>
+                  <FormControl>
+                    <Input
+                      autoComplete="off"
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
+        {/* Custom footer (for MyInvoicingDetails) */}
+        {customFooter && <div className="col-span-2">{customFooter}</div>}
+
+        {/* Dialog footer (for ContactList) */}
+        {showDialogFooter && isEdit && (
           <DialogFooter className="col-span-2 flex justify-between">
             <div className="w-full flex justify-between">
               <div className="flex flex-col items-start gap-2">
@@ -306,7 +408,7 @@ export const ContactForm = ({
           </DialogFooter>
         )}
 
-        {!isEdit && (
+        {showDialogFooter && !isEdit && (
           <DialogFooter className="col-span-2">
             <Button type="submit">Přidat kontakt</Button>
           </DialogFooter>

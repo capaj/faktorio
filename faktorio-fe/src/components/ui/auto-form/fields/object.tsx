@@ -185,7 +185,8 @@ export default function AutoFormObject<
               }
 
               return (
-                <ParentElement key={`${key}.parent`}>
+                // @ts-expect-error
+                <ParentElement key={`${key}.parent`} value={value}>
                   <InputComponent
                     zodInputProps={zodInputProps}
                     field={

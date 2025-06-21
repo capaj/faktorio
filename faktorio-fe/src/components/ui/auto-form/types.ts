@@ -9,19 +9,20 @@ export type FieldConfigItem = {
     showLabel?: boolean
   }
   fieldType?:
-    | keyof typeof INPUT_COMPONENTS
-    | React.FC<AutoFormInputComponentProps>
+  | keyof typeof INPUT_COMPONENTS
+  | React.FC<AutoFormInputComponentProps>
 
   renderParent?: (props: {
     children: React.ReactNode
+    value: string | number | boolean | undefined
   }) => React.ReactElement | null
 }
 
 export type FieldConfig<SchemaType = any> = {
   // Simplified type definition that works with Zod v4
   [Key in keyof SchemaType]?: SchemaType[Key] extends object
-    ? FieldConfig<SchemaType[Key]>
-    : FieldConfigItem
+  ? FieldConfig<SchemaType[Key]>
+  : FieldConfigItem
 }
 
 export enum DependencyType {
