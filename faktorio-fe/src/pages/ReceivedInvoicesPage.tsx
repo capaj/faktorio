@@ -78,8 +78,7 @@ export function ReceivedInvoicesPage() {
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState<number | null>(currentYear)
   const [showAddForm, setShowAddForm] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [ocrResult, setOcrResult] = useState<any>(null)
+
   const [isProcessingImage, setIsProcessingImage] = useState(false)
   const [processedFileUrl, setProcessedFileUrl] = useState<string | null>(null)
   const [isDraggingOver, setIsDraggingOver] = useState(false)
@@ -113,8 +112,6 @@ export function ReceivedInvoicesPage() {
         }
 
         if (data) {
-          setOcrResult(data)
-
           // Calculate total_without_vat from vat_base_xx fields
           const calculatedTotalWithoutVat = [
             data.vat_base_21,
@@ -226,7 +223,6 @@ export function ReceivedInvoicesPage() {
   // File processing logic (extracted for reuse)
   const processFile = (file: File) => {
     if (file) {
-      setIsUploading(true)
       setProcessedFileUrl(null) // Clear previous preview
 
       const handleProcessedFile = (processedFile: File) => {
@@ -250,7 +246,7 @@ export function ReceivedInvoicesPage() {
             if (!base64String) {
               toast.error('Chyba při čtení souboru.')
               setIsProcessingImage(false)
-              setIsUploading(false)
+
               return
             }
 
@@ -271,7 +267,6 @@ export function ReceivedInvoicesPage() {
         } catch (error) {
           toast.error(`Chyba při načítání souboru: ${(error as Error).message}`)
           setIsProcessingImage(false) // Ensure state is reset on error
-          setIsUploading(false)
         }
         // Removed finally block from here to avoid setting setIsUploading(false) too early for BMP conversion
       }
@@ -300,7 +295,6 @@ export function ReceivedInvoicesPage() {
                     handleProcessedFile(pngFile)
                   } else {
                     toast.error('Chyba při konverzi BMP do PNG.')
-                    setIsUploading(false)
                   }
                 },
                 'image/png',
@@ -310,12 +304,10 @@ export function ReceivedInvoicesPage() {
               toast.error(
                 'Chyba při vytváření canvas contextu pro konverzi BMP.'
               )
-              setIsUploading(false)
             }
           }
           img.onerror = () => {
             toast.error('Chyba při načítání BMP obrázku pro konverzi.')
-            setIsUploading(false)
           }
           if (e.target?.result) {
             img.src = e.target.result as string
@@ -323,7 +315,6 @@ export function ReceivedInvoicesPage() {
         }
         reader.onerror = () => {
           toast.error('Chyba při čtení BMP souboru.')
-          setIsUploading(false)
         }
         reader.readAsDataURL(file)
       } else {
@@ -876,7 +867,7 @@ export function ReceivedInvoicesPage() {
                   </TableBody>
                   <TableFooter>
                     <TableRow>
-                      <TableCell colSpan={4} className="font-medium">
+                      <TableCell colSpan={5} className="font-medium">
                         Celkem
                       </TableCell>
                       <TableCell className="text-right font-medium">
