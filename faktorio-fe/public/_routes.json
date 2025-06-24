@@ -27,6 +27,24 @@
       }
     },
     {
+      "src": "^/assets/.*\\.(js|css|woff2?|eot|ttf|otf)$",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "^/assets/.*\\.(png|jpg|jpeg|gif|webp|svg|ico)$",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "^/.*\\.(png|jpg|jpeg|gif|webp|svg|ico)$",
+      "headers": {
+        "Cache-Control": "public, max-age=86400"
+      }
+    },
+    {
       "src": "^/blog/.*",
       "dest": "/blog/index.html"
     },

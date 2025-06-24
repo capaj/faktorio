@@ -115,12 +115,12 @@ function blogPlugin(): Plugin {
       )
       const BLOG_OUTPUT_DIR = path.join(process.cwd(), 'dist/public/blog')
 
-      // Create output directories
-      ;[BLOG_CONTENT_OUTPUT_DIR, BLOG_OUTPUT_DIR].forEach((dir) => {
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true })
-        }
-      })
+        // Create output directories
+        ;[BLOG_CONTENT_OUTPUT_DIR, BLOG_OUTPUT_DIR].forEach((dir) => {
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true })
+          }
+        })
 
       // Generate index.json
       fs.writeFileSync(
@@ -180,7 +180,17 @@ export default defineConfig({
           if (id.includes('node_modules')) {
             return `vendor_${gitHash}`
           }
-        }
+        },
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name?.split('.') || []
+          const ext = info.at(-1)
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || '')) {
+            return `assets/images/[name]-[hash][extname]`
+          }
+          return `assets/[name]-[hash][extname]`
+        },
+        chunkFileNames: `assets/[name]-[hash].js`,
+        entryFileNames: `assets/[name]-[hash].js`
       }
     }
   },
