@@ -7,14 +7,14 @@
   ],
   "devDependencies": {
     "@playwright/test": "^1.53.1",
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.0.7",
     "npm-check-updates": "^18.0.1",
-    "prettier": "^3.6.0",
+    "prettier": "^3.6.2",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@10.12.3",
+  "packageManager": "pnpm@10.12.4",
   "scripts": {
     "dev:fe": "cd faktorio-fe && pnpm dev",
     "dev:api": "cd faktorio-api && pnpm dev",
