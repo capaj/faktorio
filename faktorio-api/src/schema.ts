@@ -111,7 +111,7 @@ export const invoicesTb = sqliteTable(
     created_at: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updated_at: text('updated_at'),
+    updated_at: text('updated_at').$onUpdate(() => sql`CURRENT_TIMESTAMP`),
     published_at: text('published_at'), // published invoices are visible on a public secret URL so that the client can view and download them as PDF
     client_contact_id: text('client_contact_id')
       .notNull()
@@ -166,7 +166,7 @@ export const contactTb = sqliteTable(
     created_at: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updated_at: text('updated_at')
+    updated_at: text('updated_at').$onUpdate(() => sql`CURRENT_TIMESTAMP`)
   },
   (userInvoicingDetails) => {
     return {
@@ -229,7 +229,7 @@ export const invoiceItemsTb = sqliteTable(
     created_at: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updated_at: text('updated_at')
+    updated_at: text('updated_at').$onUpdate(() => sql`CURRENT_TIMESTAMP`)
   },
   (invoiceItems) => {
     return {
@@ -366,7 +366,7 @@ export const receivedInvoiceTb = sqliteTable(
     created_at: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updated_at: text('updated_at'),
+    updated_at: text('updated_at').$onUpdate(() => sql`CURRENT_TIMESTAMP`),
     accounting_period: text('accounting_period') // Účetní období (YYYY-MM format)
   },
   (receivedInvoices) => {
