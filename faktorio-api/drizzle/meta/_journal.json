@@ -85,6 +85,13 @@
       "when": 1748854852522,
       "tag": "0011_tranquil_terrax",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1751375029914,
+      "tag": "0012_nebulous_earthquake",
+      "breakpoints": true
     }
   ]
 }

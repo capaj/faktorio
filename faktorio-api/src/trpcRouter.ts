@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm'
 
 import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
 import { authRouter } from './routers/authRouter'
+import { pushNotificationRouter } from './routers/pushNotificationRouter'
 import { userInvoicingDetailsInsertSchema } from './zodDbSchemas'
 import { z } from 'zod/v4'
 
@@ -32,6 +33,7 @@ export const appRouter = trpcContext.router({
   invoices: invoiceRouter,
   contacts: contactRouter,
   receivedInvoices: receivedInvoicesRouter,
+  push: pushNotificationRouter,
   invoicingDetails: protectedProc.query(async ({ ctx }) => {
     const res = await ctx.db.query.userInvoicingDetailsTb
       .findFirst({
