@@ -2,10 +2,11 @@ import { eq, and, lte, isNull } from 'drizzle-orm'
 import { invoicesTb, userT } from '../schema'
 import { WebPushService } from './webPushService'
 import { djs } from 'faktorio-shared/src/djs'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
-import type { Env } from '../envSchema'
 
-export async function checkAndNotifyDueInvoices(db: DrizzleD1Database, env: Env) {
+import type { Env } from '../envSchema'
+import { LibSQLDatabase } from 'drizzle-orm/libsql'
+
+export async function checkAndNotifyDueInvoices(db: LibSQLDatabase, env: Env) {
   console.log('Starting scheduled check for due invoices...')
 
   const webPushService = new WebPushService(db, {

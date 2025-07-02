@@ -1,7 +1,8 @@
 import webpush from 'web-push'
 import { pushSubscriptionTb } from '../schema'
 import { eq } from 'drizzle-orm'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import { LibSQLDatabase } from 'drizzle-orm/libsql'
+
 
 interface NotificationPayload {
   title: string
@@ -26,7 +27,7 @@ interface PushSubscription {
 
 export class WebPushService {
   constructor(
-    private db: DrizzleD1Database,
+    private db: LibSQLDatabase,
     private vapidKeys: {
       publicKey: string
       privateKey: string
