@@ -3,9 +3,9 @@ main = "src/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# Cron trigger for checking due invoices daily at 9 AM
+# Cron trigger for checking due invoices daily at 14:00 Prague time (12:00 UTC)
 [triggers]
-crons = ["0 9 * * *"]
+crons = ["0 12 * * *"]
 
 [observability.logs]
 enabled = false

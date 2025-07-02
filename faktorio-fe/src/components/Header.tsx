@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '../components/ui/dropdown-menu'
+import { PushNotificationToggle } from './PushNotificationToggle'
 
 export const Header = () => {
   const { isSignedIn, user, logout } = useAuth()
@@ -119,6 +120,7 @@ export const Header = () => {
           <>
             {/* Mobile layout */}
             <div className="sm:hidden flex items-center gap-4">
+              {!isLocalUser && <PushNotificationToggle />}
               <Sheet
                 open={isMenuOpen}
                 onOpenChange={(open) => {
@@ -217,6 +219,7 @@ export const Header = () => {
               <ButtonLink href="/xml-export">Export XML</ButtonLink>
               <ButtonLink href="/contacts">Kontakty</ButtonLink>
 
+              {!isLocalUser && <PushNotificationToggle />}
               <UserDropdownMenu />
             </div>
           </>

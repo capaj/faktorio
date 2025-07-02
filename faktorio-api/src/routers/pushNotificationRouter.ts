@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { protectedProc, t } from '../trpcRouter'
+import { protectedProc } from '../isAuthorizedMiddleware'
+import { trpcContext } from '../trpcContext'
 import { pushSubscriptionTb, invoicesTb } from '../schema'
 import { eq, and, lte, isNull } from 'drizzle-orm'
 import { djs } from 'faktorio-shared/src/djs'
@@ -12,7 +13,7 @@ const pushSubscriptionSchema = z.object({
   })
 })
 
-export const pushNotificationRouter = t.router({
+export const pushNotificationRouter = trpcContext.router({
   subscribe: protectedProc
     .input(pushSubscriptionSchema)
     .mutation(async ({ input, ctx }) => {

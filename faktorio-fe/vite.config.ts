@@ -156,8 +156,25 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
+      srcDir: 'public',
+      filename: 'sw.js',
+      strategies: 'injectManifest',
       workbox: {
         maximumFileSizeToCacheInBytes: 3000000
+      },
+      manifest: {
+        name: 'Faktorio',
+        short_name: 'Faktorio',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
+        icons: [
+          {
+            src: '/faktura.png',
+            sizes: '192x192',
+            type: 'image/png'
+          }
+        ]
       }
     }),
     react(),
