@@ -3,7 +3,13 @@ import { SheetTrigger, SheetContent, Sheet } from '@/components/ui/sheet'
 import { MountainIcon } from '../components/MountainIcon'
 import { ButtonLink } from '../components/ui/link'
 import { Button } from '../components/ui/button'
-import { LucideMenu, LogOut, Database, ScrollIcon } from 'lucide-react'
+import {
+  LucideMenu,
+  LogOut,
+  Database,
+  ScrollIcon,
+  Settings
+} from 'lucide-react'
 import { User } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { useState } from 'react'
@@ -15,7 +21,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '../components/ui/dropdown-menu'
-import { PushNotificationToggle } from './PushNotificationToggle'
 
 export const Header = () => {
   const { isSignedIn, user, logout } = useAuth()
@@ -89,6 +94,13 @@ export const Header = () => {
               <User className="mr-2 h-4 w-4" />
               <span>Přihlašovací údaje</span>
             </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => navigate('/settings')}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Nastavení</span>
+            </DropdownMenuItem>
 
             <DropdownMenuItem
               className="cursor-pointer"
@@ -120,7 +132,6 @@ export const Header = () => {
           <>
             {/* Mobile layout */}
             <div className="sm:hidden flex items-center gap-4">
-              {!isLocalUser && <PushNotificationToggle />}
               <Sheet
                 open={isMenuOpen}
                 onOpenChange={(open) => {
@@ -219,7 +230,6 @@ export const Header = () => {
               <ButtonLink href="/xml-export">Export XML</ButtonLink>
               <ButtonLink href="/contacts">Kontakty</ButtonLink>
 
-              {!isLocalUser && <PushNotificationToggle />}
               <UserDropdownMenu />
             </div>
           </>

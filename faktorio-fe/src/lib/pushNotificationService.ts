@@ -2,6 +2,8 @@ import { trpcClient } from './trpcClient'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
 
+console.log('VAPID_PUBLIC_KEY loaded:', VAPID_PUBLIC_KEY ? 'Yes (length: ' + VAPID_PUBLIC_KEY.length + ')' : 'No')
+
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
   const base64 = (base64String + padding)
@@ -21,6 +23,11 @@ export class PushNotificationService {
   private registration: ServiceWorkerRegistration | null = null
 
   async initialize(): Promise<boolean> {
+    if (!VAPID_PUBLIC_KEY) {
+      console.error('VAPID_PUBLIC_KEY is not set')
+      return false
+    }
+
     if (!('serviceWorker' in navigator)) {
       console.log('Service Worker not supported')
       return false
@@ -55,11 +62,16 @@ export class PushNotificationService {
     }
 
     const permission = await Notification.requestPermission()
+    console.log('Notification permission result:', permission)
     return permission
   }
 
   async subscribe(): Promise<boolean> {
     try {
+      if (!VAPID_PUBLIC_KEY) {
+        throw new Error('VAPID public key is not configured')
+      }
+
       const permission = await this.requestPermission()
       if (permission !== 'granted') {
         throw new Error('Notification permission not granted')
@@ -73,12 +85,17 @@ export class PushNotificationService {
         throw new Error('Service Worker not registered')
       }
 
+      console.log('Converting VAPID key to Uint8Array...')
       const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      console.log('VAPID key converted, length:', applicationServerKey.length)
 
+      console.log('Subscribing to push manager...')
       const subscription = await this.registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey
       })
+
+      console.log('Push subscription successful, sending to server...')
 
       // Send subscription to server
       await trpcClient.push.subscribe.mutate({
@@ -89,10 +106,18 @@ export class PushNotificationService {
         }
       })
 
-      console.log('Push subscription successful:', subscription)
+      console.log('Push subscription sent to server successfully')
       return true
     } catch (error) {
       console.error('Push subscription failed:', error)
+
+      // Log additional details for debugging
+      if (error instanceof Error) {
+        console.error('Error name:', error.name)
+        console.error('Error message:', error.message)
+        console.error('Error stack:', error.stack)
+      }
+
       throw error
     }
   }
