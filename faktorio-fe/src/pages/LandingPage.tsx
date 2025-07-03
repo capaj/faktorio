@@ -1,13 +1,18 @@
 import { Button } from '@/components/ui/button'
 import { Link } from 'wouter'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LucidePiggyBank, LucideTwitter } from 'lucide-react'
+import { LucidePiggyBank, LucideTwitter, Users, FileText } from 'lucide-react'
 import { MountainIcon } from '@/components/MountainIcon'
-import { Footer, PageShell } from './PageShell'
+import { Footer } from './PageShell'
 import { ButtonLink } from '@/components/ui/link'
 import { Separator } from '@/components/ui/separator'
+import { trpcClient } from '@/lib/trpcClient'
 
 export const LandingPage = () => {
+  const { data: systemStats } = trpcClient.systemStats.useQuery(undefined, {
+    staleTime: 24 * 60 * 60 * 1000 // 24 hours
+  })
+
   return (
     <>
       <div>
@@ -21,6 +26,24 @@ export const LandingPage = () => {
                 Nejsnadnější způsob, jak vytvářet faktury.
               </p>
             </div>
+
+            {systemStats && (
+              <div className="flex gap-6 mt-4 mb-6">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-blue-500" />
+                  <span className="text-sm font-medium">
+                    {systemStats.user_count} uživatelů
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-green-500" />
+                  <span className="text-sm font-medium">
+                    {systemStats.invoice_count} faktur
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="mx-auto max-w-[400px] space-y-2">
               <Link href="/signup">
                 <Button
@@ -143,7 +166,7 @@ export const LandingPage = () => {
                     </p>
                   </div>
                   <p>
-                    Tech stack projektu je:
+                    Tech stack projektu:
                     <ul className="ml-4">
                       <li>Typescript</li>
                       <li>React.js</li>

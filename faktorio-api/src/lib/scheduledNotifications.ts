@@ -5,8 +5,9 @@ import { djs } from 'faktorio-shared/src/djs'
 
 import type { Env } from '../envSchema'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
+import * as schema from '../schema'
 
-export async function checkAndNotifyDueInvoices(db: LibSQLDatabase, env: Env) {
+export async function checkAndNotifyDueInvoices(db: LibSQLDatabase<typeof schema>, env: Env) {
   console.log('Starting scheduled check for due invoices...')
 
   const webPushService = new WebPushService(db, {

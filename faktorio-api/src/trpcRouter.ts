@@ -2,9 +2,9 @@ import { trpcContext } from './trpcContext'
 import { invoiceRouter } from './routers/invoices/invoiceRouter'
 import { contactRouter } from './routers/contactRouter'
 import { protectedProc } from './isAuthorizedMiddleware'
-import { userInvoicingDetailsTb } from './schema'
+import { userInvoicingDetailsTb, systemStatsTb } from './schema'
 import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
-import { eq } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 
 import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
 import { authRouter } from './routers/authRouter'
@@ -34,6 +34,13 @@ export const appRouter = trpcContext.router({
   contacts: contactRouter,
   receivedInvoices: receivedInvoicesRouter,
   push: pushNotificationRouter,
+  systemStats: trpcContext.procedure.query(async ({ ctx }) => {
+    const latestStats = await ctx.db.query.systemStatsTb.findFirst({
+      orderBy: desc(systemStatsTb.calculated_at)
+    })
+
+    return latestStats ?? { user_count: 0, invoice_count: 0 }
+  }),
   invoicingDetails: protectedProc.query(async ({ ctx }) => {
     const res = await ctx.db.query.userInvoicingDetailsTb
       .findFirst({

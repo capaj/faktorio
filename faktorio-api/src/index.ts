@@ -13,6 +13,7 @@ import { GoogleAIFileManager } from '@google/generative-ai/server'
 import { GoogleGenAI } from '@google/genai'
 import { Env } from './envSchema'
 import { checkAndNotifyDueInvoices } from './lib/scheduledNotifications'
+import { calculateAndStoreSystemStats } from './lib/calculateSystemStats'
 
 // Add ExecutionContext type from Cloudflare Workers
 type ExecutionContext = {
@@ -157,5 +158,6 @@ export default {
     const db = drizzle(turso, { schema })
 
     ctx.waitUntil(checkAndNotifyDueInvoices(db, env))
+    ctx.waitUntil(calculateAndStoreSystemStats(db))
   }
 }
