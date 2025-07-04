@@ -159,7 +159,7 @@ export default defineConfig({
       srcDir: 'public',
       filename: 'sw.js',
       strategies: 'injectManifest',
-      workbox: {
+      injectManifest: {
         maximumFileSizeToCacheInBytes: 3000000
       },
       manifest: {
