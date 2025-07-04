@@ -1,3 +1,16 @@
+// Import Workbox from CDN
+importScripts(
+  'https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js'
+)
+
+// Initialize Workbox
+workbox.setConfig({
+  debug: false
+})
+
+// Precache and route using the manifest
+workbox.precaching.precacheAndRoute(self.__WB_MANIFEST)
+
 self.addEventListener('push', function (event) {
   console.log('Push event received:', event)
 
