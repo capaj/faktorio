@@ -1,6 +1,10 @@
-import { trpcClient } from './trpcClient'
+import { AppRouter } from 'faktorio-api/src/trpcRouter'
+import { createTRPCClient, httpBatchLink } from '@trpc/client'
+import SuperJSON from 'superjson'
+import { authHeaders } from './AuthContext'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
+const VITE_API_URL = import.meta.env.VITE_API_URL
 
 console.log('VAPID_PUBLIC_KEY loaded:', VAPID_PUBLIC_KEY ? 'Yes (length: ' + VAPID_PUBLIC_KEY.length + ')' : 'No')
 
@@ -21,7 +25,22 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 
 export class PushNotificationService {
   private registration: ServiceWorkerRegistration | null = null
+  trpcClient: ReturnType<typeof createTRPCClient<AppRouter>>
 
+
+  constructor() {
+    this.trpcClient = createTRPCClient<AppRouter>({
+      links: [
+        httpBatchLink({
+          transformer: SuperJSON,
+          url: VITE_API_URL,
+
+          // You can pass any HTTP headers you wish here
+          headers: authHeaders
+        }),
+      ],
+    });
+  }
   async initialize(): Promise<boolean> {
     if (!VAPID_PUBLIC_KEY) {
       console.error('VAPID_PUBLIC_KEY is not set')
@@ -38,6 +57,7 @@ export class PushNotificationService {
       return false
     }
 
+
     try {
       this.registration = await navigator.serviceWorker.register('/sw.js')
       console.log('Service Worker registered:', this.registration)
@@ -46,6 +66,7 @@ export class PushNotificationService {
       console.error('Service Worker registration failed:', error)
       return false
     }
+
   }
 
   async requestPermission(): Promise<NotificationPermission> {
@@ -84,7 +105,6 @@ export class PushNotificationService {
       if (!this.registration) {
         throw new Error('Service Worker not registered')
       }
-
       console.log('Converting VAPID key to Uint8Array...')
       const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       console.log('VAPID key converted, length:', applicationServerKey.length)
@@ -98,7 +118,7 @@ export class PushNotificationService {
       console.log('Push subscription successful, sending to server...')
 
       // Send subscription to server
-      await trpcClient.push.subscribe.mutate({
+      await this.trpcClient.webPushNotifications.subscribe.mutate({
         endpoint: subscription.endpoint,
         keys: {
           p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh') || new ArrayBuffer(0)))),
@@ -134,7 +154,7 @@ export class PushNotificationService {
       }
 
       // Unsubscribe from server first
-      await trpcClient.push.unsubscribe.mutate({
+      await this.trpcClient.webPushNotifications.unsubscribe.mutate({
         endpoint: subscription.endpoint
       })
 

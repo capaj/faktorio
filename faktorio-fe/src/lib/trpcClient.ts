@@ -1,4 +1,5 @@
 import {
+  createTRPCClient,
   createTRPCReact,
   inferReactQueryProcedureOptions,
   type CreateTRPCReact
@@ -13,3 +14,4 @@ export type RouterOutputs = inferRouterOutputs<AppRouter>
 
 export const trpcClient: CreateTRPCReact<AppRouter, unknown> =
   createTRPCReact<AppRouter>()
+

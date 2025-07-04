@@ -33,7 +33,7 @@ export const appRouter = trpcContext.router({
   invoices: invoiceRouter,
   contacts: contactRouter,
   receivedInvoices: receivedInvoicesRouter,
-  push: pushNotificationRouter,
+  webPushNotifications: pushNotificationRouter,
   systemStats: trpcContext.procedure.query(async ({ ctx }) => {
     const latestStats = await ctx.db.query.systemStatsTb.findFirst({
       orderBy: desc(systemStatsTb.calculated_at)
