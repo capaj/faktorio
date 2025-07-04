@@ -12,11 +12,20 @@ import { extractUserFromAuthHeader, generateToken } from './jwtUtils'
 import { GoogleAIFileManager } from '@google/generative-ai/server'
 import { GoogleGenAI } from '@google/genai'
 import { Env } from './envSchema'
+import { checkAndNotifyDueInvoices } from './lib/scheduledNotifications'
+import { calculateAndStoreSystemStats } from './lib/calculateSystemStats'
 
 // Add ExecutionContext type from Cloudflare Workers
 type ExecutionContext = {
   waitUntil(promise: Promise<any>): void
   passThroughOnException(): void
+}
+
+// Cloudflare Workers ScheduledController type
+type ScheduledController = {
+  scheduledTime: number
+  cron: string
+  noRetry(): void
 }
 
 const corsHeaders = {
@@ -134,5 +143,21 @@ export default {
       router: appRouter,
       createContext: createTrpcContext
     })
+  },
+
+  async scheduled(
+    controller: ScheduledController,
+    env: Env,
+    ctx: ExecutionContext
+  ): Promise<void> {
+    const turso = createClient({
+      url: env.TURSO_DATABASE_URL,
+      authToken: env.TURSO_AUTH_TOKEN
+    })
+
+    const db = drizzle(turso, { schema })
+
+    ctx.waitUntil(checkAndNotifyDueInvoices(db, env))
+    ctx.waitUntil(calculateAndStoreSystemStats(db))
   }
 }

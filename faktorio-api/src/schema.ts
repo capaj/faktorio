@@ -388,3 +388,46 @@ export const receivedInvoiceTb = sqliteTable(
     }
   }
 )
+
+export const pushSubscriptionTb = sqliteTable(
+  'push_subscription',
+  {
+    id: text('id')
+      .$defaultFn(() => createId())
+      .primaryKey()
+      .notNull(),
+    user_id: text('user_id')
+      .notNull()
+      .references(() => userT.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    created_at: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updated_at: text('updated_at').$onUpdate(() => sql`CURRENT_TIMESTAMP`)
+  },
+  (pushSubscriptions) => {
+    return {
+      userIndex: index('push_subscriptions_user_idx').on(
+        pushSubscriptions.user_id
+      ),
+      endpointUniqueIndex: unique().on(pushSubscriptions.endpoint)
+    }
+  }
+)
+
+export const systemStatsTb = sqliteTable('system_stats', {
+  id: text('id')
+    .$defaultFn(() => createId())
+    .primaryKey()
+    .notNull(),
+  user_count: integer('user_count').notNull(),
+  invoice_count: integer('invoice_count').notNull(),
+  calculated_at: text('calculated_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  created_at: text('created_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`)
+})

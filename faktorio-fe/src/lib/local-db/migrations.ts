@@ -14,6 +14,8 @@ import migration0008_noisy_mercury from '@api/drizzle/0008_noisy_mercury.sql?raw
 import migration0009_known_gauntlet from '@api/drizzle/0009_known_gauntlet.sql?raw';
 import migration0010_clever_bloodscream from '@api/drizzle/0010_clever_bloodscream.sql?raw';
 import migration0011_tranquil_terrax from '@api/drizzle/0011_tranquil_terrax.sql?raw';
+import migration0012_nebulous_earthquake from '@api/drizzle/0012_nebulous_earthquake.sql?raw';
+import migration0013_dark_silver_samurai from '@api/drizzle/0013_dark_silver_samurai.sql?raw';
 
 export const localDBMigrations: Record<string, string> = {
   migration0000_dry_rick_jones,
@@ -28,4 +30,6 @@ export const localDBMigrations: Record<string, string> = {
   migration0009_known_gauntlet,
   migration0010_clever_bloodscream,
   migration0011_tranquil_terrax,
+  migration0012_nebulous_earthquake,
+  migration0013_dark_silver_samurai,
 };

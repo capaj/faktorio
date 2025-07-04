@@ -12,6 +12,7 @@ import { ReceivedInvoicesPage } from './pages/ReceivedInvoicesPage'
 import { SpinnerContainer } from './components/SpinnerContainer'
 import { useAuth } from './lib/AuthContext'
 import { XMLExportPage } from './pages/XMLExportPage/XMLExportPage'
+import { SettingsPage } from './pages/SettingsPage'
 
 export const SignedInRoutes = () => {
   const { token } = useAuth()
@@ -43,6 +44,7 @@ export const SignedInRoutes = () => {
           component={InvoiceDetailPage}
         ></Route>
         <Route path="/xml-export" component={XMLExportPage}></Route>
+        <Route path="/settings" component={SettingsPage}></Route>
       </Suspense>
     </>
   )

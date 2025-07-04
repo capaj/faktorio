@@ -3,7 +3,13 @@ import { SheetTrigger, SheetContent, Sheet } from '@/components/ui/sheet'
 import { MountainIcon } from '../components/MountainIcon'
 import { ButtonLink } from '../components/ui/link'
 import { Button } from '../components/ui/button'
-import { LucideMenu, LogOut, Database, ScrollIcon } from 'lucide-react'
+import {
+  LucideMenu,
+  LogOut,
+  Database,
+  ScrollIcon,
+  Settings
+} from 'lucide-react'
 import { User } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { useState } from 'react'
@@ -87,6 +93,13 @@ export const Header = () => {
             >
               <User className="mr-2 h-4 w-4" />
               <span>Přihlašovací údaje</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => navigate('/settings')}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Nastavení</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem

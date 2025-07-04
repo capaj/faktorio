@@ -167,6 +167,15 @@ export interface LocalCallerLinkOptions<TRouter extends AppRouter> {
     | inferRouterContext<TRouter>
 }
 
+export async function authHeaders() {
+  const token = localStorage.getItem('auth_token')
+  return token
+    ? {
+        authorization: `Bearer ${token}`
+      }
+    : {}
+}
+
 export const AuthProvider: React.FC<{
   children: React.ReactNode
   localRun?: {
@@ -193,7 +202,12 @@ export const AuthProvider: React.FC<{
                   TURSO_DATABASE_URL: '',
                   TURSO_AUTH_TOKEN: '',
                   JWT_SECRET: '',
-                  GEMINI_API_KEY: ''
+                  GEMINI_API_KEY: '',
+                  VAPID_PRIVATE_KEY: '',
+                  VAPID_PUBLIC_KEY: '',
+                  VAPID_SUBJECT: '',
+                  MAILJET_API_KEY: '',
+                  MAILJET_API_SECRET: ''
                 },
                 req: {} as Request,
                 generateToken: () => Promise.resolve(''),
@@ -213,14 +227,7 @@ export const AuthProvider: React.FC<{
           httpBatchLink({
             transformer: SuperJSON,
             url: VITE_API_URL,
-            async headers() {
-              const token = localStorage.getItem('auth_token')
-              return token
-                ? {
-                    authorization: `Bearer ${token}`
-                  }
-                : {}
-            }
+            headers: authHeaders
           })
         ]
       })

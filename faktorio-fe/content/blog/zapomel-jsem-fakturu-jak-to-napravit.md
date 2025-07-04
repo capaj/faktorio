@@ -5,18 +5,13 @@ date: 2025-02-12
 
 Mně osobně se to stalo několikrát, a když se mi to stalo teď nedávno, tak mě to motivovalo napsat tento článek, protože postup opravdu není jednoduchý, jak by se zdálo.
 
-TLDR:
-
-- kontrolní přiznání je potřeba podat jako dodatečné
-- přiznání DPH je potřeba podat jako opravné
-
 ## Jak to zjistíte
 
 Přijde vám výzva od správy daní: "VÝZVA
 ke změně, doplnění nebo potvrzení údajů"
 
 v ní bude uvedeno, že jiný daňový subjekt vás identifikoval jako dodavatele a tím vznikl nesoulad mezi jeho kontrolním přiznáním a vašim kontrolním přiznáním.
-Není tam uvedena lhůta. Tato lhůta je 17 dní.
+Není tam uvedena lhůta. Tato lhůta je stanovena zákonem, a to na 17 dní.
 
 ## Jak to opravit
 
