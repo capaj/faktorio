@@ -1,5 +1,5 @@
 'use client'
-import { format, parse, isValid } from 'date-fns'
+
 import { Calendar as CalendarIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/popover'
 import { forwardRef, useState, useEffect } from 'react'
 import { Input } from './input'
+import { djs } from 'faktorio-shared/src/djs'
 
 export const DatePicker = forwardRef<
   HTMLDivElement,
@@ -20,14 +21,15 @@ export const DatePicker = forwardRef<
     setDate: (date?: Date) => void
   }
 >(function DatePickerCmp({ date, setDate }, ref) {
+  const djsDate = djs(date)
   const [inputValue, setInputValue] = useState(
-    date ? format(date, 'yyyy-MM-dd') : ''
+    date ? djsDate.format('YYYY-MM-DD') : ''
   )
   const [isInvalid, setIsInvalid] = useState(false)
   const [calendarMonth, setCalendarMonth] = useState<Date | undefined>(date)
 
   useEffect(() => {
-    setInputValue(date ? format(date, 'yyyy-MM-dd') : '')
+    setInputValue(date ? djsDate.format('YYYY-MM-DD') : '')
     setIsInvalid(false)
     setCalendarMonth(date)
   }, [date])
@@ -53,13 +55,14 @@ export const DatePicker = forwardRef<
             return
           }
 
-          const parsed = parse(value, 'yyyy-MM-dd', new Date())
-          const valid = isValid(parsed)
+          const parsed = djs(value)
+          const valid = parsed.isValid()
           setIsInvalid(!valid)
 
           if (valid) {
-            setDate(parsed)
-            setCalendarMonth(parsed)
+            const date = parsed.toDate()
+            setDate(date)
+            setCalendarMonth(date)
           }
         }}
         className={cn(isInvalid && 'border-red-500 focus-visible:ring-red-500')}

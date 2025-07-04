@@ -195,6 +195,32 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // Split large database/SQL libraries
+            if (id.includes('sql.js') || id.includes('drizzle')) {
+              return `db_${gitHash}`
+            }
+
+            // Split React and React-related libraries
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return `react_${gitHash}`
+            }
+
+            // Split UI component libraries
+            if (id.includes('@radix-ui') || id.includes('lucide-react') || id.includes('class-variance-authority') || id.includes('tailwind')) {
+              return `ui_${gitHash}`
+            }
+
+            // Split PDF and document libraries
+            if (id.includes('pdf') || id.includes('jspdf') || id.includes('html2canvas')) {
+              return `pdf_${gitHash}`
+            }
+
+            // Split form and validation libraries
+            if (id.includes('react-hook-form') || id.includes('hookform') || id.includes('validator')) {
+              return `forms_${gitHash}`
+            }
+
+            // Everything else goes to general vendor
             return `vendor_${gitHash}`
           }
         },

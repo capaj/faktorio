@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button'
 import {
   DialogClose,
   Dialog,
@@ -6,14 +6,14 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  DialogTitle
+} from '@/components/ui/dialog'
 import { CheckCircle } from 'lucide-react'
-import { useState } from "react" // Removed useEffect import, wasn't needed
+import { useState } from 'react' // Removed useEffect import, wasn't needed
 import { trpcClient } from '@/lib/trpcClient'
 // Removed unused djs import
 import { DatePicker } from '@/components/ui/date-picker'
-import { format } from 'date-fns'
+import { djs } from 'faktorio-shared/src/djs'
 
 interface MarkAsPaidDialogProps {
   invoiceId: string
@@ -23,7 +23,13 @@ interface MarkAsPaidDialogProps {
   onOpenChange: (open: boolean) => void // New prop
 }
 
-export function MarkAsPaidDialog({ invoiceId, invoiceNumber, onSuccess, open, onOpenChange }: MarkAsPaidDialogProps) {
+export function MarkAsPaidDialog({
+  invoiceId,
+  invoiceNumber,
+  onSuccess,
+  open,
+  onOpenChange
+}: MarkAsPaidDialogProps) {
   // Removed internal open state
   const [paidDate, setPaidDate] = useState<Date>(new Date())
   const markAsPaid = trpcClient.invoices.markAsPaid.useMutation({
@@ -32,7 +38,7 @@ export function MarkAsPaidDialog({ invoiceId, invoiceNumber, onSuccess, open, on
       onOpenChange(false) // Use callback to close
     },
     onError: (error) => {
-      console.error("Failed to mark invoice as paid:", error)
+      console.error('Failed to mark invoice as paid:', error)
     }
   })
 
@@ -42,11 +48,12 @@ export function MarkAsPaidDialog({ invoiceId, invoiceNumber, onSuccess, open, on
     // This can be handled by DialogClose or onOpenChange directly
     // If specific logic is needed before closing, it can stay, otherwise remove.
     // For now, let's rely on onOpenChange.
-    if (e) { // Keep stopPropagation if needed for specific cases, but DialogClose might be better
-        e.preventDefault()
-        e.stopPropagation()
+    if (e) {
+      // Keep stopPropagation if needed for specific cases, but DialogClose might be better
+      e.preventDefault()
+      e.stopPropagation()
     }
-    onOpenChange(false);
+    onOpenChange(false)
   }
 
   // Removed handleOpenChange - now handled by parent via props
@@ -58,58 +65,55 @@ export function MarkAsPaidDialog({ invoiceId, invoiceNumber, onSuccess, open, on
     // Removed try/catch as onError handles it
     await markAsPaid.mutateAsync({
       id: invoiceId,
-      paidOn: format(paidDate, 'yyyy-MM-dd')
+      paidOn: djs(paidDate).format('YYYY-MM-DD')
     })
   }
 
   return (
     // Removed outer fragment and trigger div
     <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent
-          className="sm:max-w-[425px]"
-
-        >
-          <DialogHeader>
-            <DialogTitle>Označit fakturu jako zaplacenou</DialogTitle>
-            <DialogDescription>
-              Zadejte datum, kdy byla faktura {invoiceNumber} zaplacena.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="paid-date" className="text-right">
-                Datum platby
-              </label>
-              <div className="col-span-3">
-                <DatePicker
-                  date={paidDate}
-                  setDate={(date) => setPaidDate(date || new Date())}
-                />
-              </div>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Označit fakturu jako zaplacenou</DialogTitle>
+          <DialogDescription>
+            Zadejte datum, kdy byla faktura {invoiceNumber} zaplacena.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="paid-date" className="text-right">
+              Datum platby
+            </label>
+            <div className="col-span-3">
+              <DatePicker
+                date={paidDate}
+                setDate={(date) => setPaidDate(date || new Date())}
+              />
             </div>
           </div>
-          <DialogFooter>
-            {/* Use DialogClose for standard closing behavior */}
-            <DialogClose asChild>
-              <Button
-                type="button"
-                variant="outline"
-                // onClick={handleCloseDialog} // DialogClose handles this
-                disabled={markAsPaid.isPending}
-              >
-                Zrušit
-              </Button>
-            </DialogClose>
+        </div>
+        <DialogFooter>
+          {/* Use DialogClose for standard closing behavior */}
+          <DialogClose asChild>
             <Button
               type="button"
-              onClick={handleSubmit}
+              variant="outline"
+              // onClick={handleCloseDialog} // DialogClose handles this
               disabled={markAsPaid.isPending}
             >
-              {markAsPaid.isPending ? "Ukládám..." : "Uložit"}
+              Zrušit
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </DialogClose>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={markAsPaid.isPending}
+          >
+            {markAsPaid.isPending ? 'Ukládám...' : 'Uložit'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     // Removed closing fragment
   )
 }
