@@ -195,32 +195,37 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // Split large database/SQL libraries
-            if (id.includes('sql.js') || id.includes('drizzle')) {
-              return `db_${gitHash}`
-            }
-
-            // Split React and React-related libraries
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // React core (react + react-dom only)
+            if (id.includes('react') && !id.includes('react-hook-form') && !id.includes('react-day-picker') && !id.includes('react-pdf') && !id.includes('react-oauth')) {
               return `react_${gitHash}`
             }
 
-            // Split UI component libraries
-            if (id.includes('@radix-ui') || id.includes('lucide-react') || id.includes('class-variance-authority') || id.includes('tailwind')) {
-              return `ui_${gitHash}`
+            // Database libraries (sql.js is very large ~1MB)
+            if (id.includes('sql.js') || id.includes('drizzle-orm')) {
+              return `db_${gitHash}`
             }
 
-            // Split PDF and document libraries
-            if (id.includes('pdf') || id.includes('jspdf') || id.includes('html2canvas')) {
+            // PDF library (@react-pdf/renderer is large)
+            if (id.includes('react-pdf') || id.includes('pdf')) {
               return `pdf_${gitHash}`
             }
 
-            // Split form and validation libraries
-            if (id.includes('react-hook-form') || id.includes('hookform') || id.includes('validator')) {
-              return `forms_${gitHash}`
+            // TanStack Query (React Query - quite large)
+            if (id.includes('@tanstack/react-query')) {
+              return `query_${gitHash}`
             }
 
-            // Everything else goes to general vendor
+            // Validation and schema libraries
+            if (id.includes('zod') || id.includes('zod-to-json-schema')) {
+              return `validation_${gitHash}`
+            }
+
+            // Data processing libraries
+            if (id.includes('papaparse') || id.includes('@zip.js/zip.js') || id.includes('microdiff') || id.includes('query-string')) {
+              return `data_${gitHash}`
+            }
+
+            // Everything else
             return `vendor_${gitHash}`
           }
         },

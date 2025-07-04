@@ -43,6 +43,9 @@ jobs:
           MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
           MAILJET_API_SECRET: ${{ secrets.MAILJET_API_SECRET }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VAPID_PUBLIC_KEY: ${{ vars.VITE_VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
         run: node --experimental-strip-types faktorio-api/scripts/generate-dev-vars.ts
 
       - name: Run Playwright tests
@@ -50,6 +53,7 @@ jobs:
         env:
           VITE_API_URL: http://localhost:9189/trpc
           VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          VITE_VAPID_PUBLIC_KEY: ${{ vars.VITE_VAPID_PUBLIC_KEY }}
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

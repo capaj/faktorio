@@ -7,6 +7,7 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
 const VITE_API_URL = import.meta.env.VITE_API_URL
 
 console.log('VAPID_PUBLIC_KEY loaded:', VAPID_PUBLIC_KEY ? 'Yes (length: ' + VAPID_PUBLIC_KEY.length + ')' : 'No')
+console.log('VAPID_PUBLIC_KEY preview:', VAPID_PUBLIC_KEY ? VAPID_PUBLIC_KEY.substring(0, 20) + '...' : 'Not set')
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
@@ -108,12 +109,25 @@ export class PushNotificationService {
       console.log('Converting VAPID key to Uint8Array...')
       const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       console.log('VAPID key converted, length:', applicationServerKey.length)
+      console.log('VAPID key first 10 bytes:', Array.from(applicationServerKey.slice(0, 10)))
 
       console.log('Subscribing to push manager...')
-      const subscription = await this.registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey
-      })
+      let subscription: PushSubscription
+      try {
+        subscription = await this.registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey
+        })
+      } catch (pushError) {
+        console.error('Push manager subscription failed:', pushError)
+        console.error('Push error details:', {
+          name: pushError instanceof Error ? pushError.name : 'Unknown',
+          message: pushError instanceof Error ? pushError.message : 'Unknown',
+          vapidKeyLength: applicationServerKey.length,
+          vapidKeyPreview: Array.from(applicationServerKey.slice(0, 10))
+        })
+        throw new Error(`Push subscription failed: ${pushError instanceof Error ? pushError.message : 'Unknown error'}`)
+      }
 
       console.log('Push subscription successful, sending to server...')
 

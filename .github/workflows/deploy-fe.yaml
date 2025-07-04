@@ -40,6 +40,10 @@ jobs:
       - name: Deploy Frontend
         uses: cloudflare/wrangler-action@v3
         with:
+          vars: |
+            VITE_API_URL
+            VITE_GOOGLE_CLIENT_ID
+            VITE_VAPID_PUBLIC_KEY
           packageManager: pnpm
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
