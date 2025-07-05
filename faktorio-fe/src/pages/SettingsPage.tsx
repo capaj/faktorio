@@ -1,13 +1,23 @@
 import { useAuth } from '../lib/AuthContext'
 import { PushNotificationToggle } from '../components/PushNotificationToggle'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Button } from '../components/ui/button'
+import { pushNotificationService } from '../lib/pushNotificationService'
 
 export function SettingsPage() {
   const { token } = useAuth()
   const isLocalUser = token?.startsWith('local_')
 
-  const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY
-  const apiUrl = import.meta.env.VITE_API_URL
+  const handleTestPushService = async () => {
+    await pushNotificationService.testPushService()
+  }
+
+  const handleClearServiceWorker = async () => {
+    const success = await pushNotificationService.clearAndReregister()
+    if (success) {
+      console.log('Service worker cleared and re-registered successfully')
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -44,7 +54,23 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              <PushNotificationToggle />
+              <div className="flex gap-2">
+                <PushNotificationToggle />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleTestPushService}
+                >
+                  Test Push Service
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearServiceWorker}
+                >
+                  Clear SW Cache
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
