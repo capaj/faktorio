@@ -10,23 +10,27 @@ export function PushNotificationToggle() {
   const [isSupported, setIsSupported] = useState(false)
 
   useEffect(() => {
-    checkSupport()
-    checkSubscriptionStatus()
-  }, [])
+    async function initializeAndCheck() {
+      try {
+        // First initialize the service worker
+        const supported = await pushNotificationService.initialize()
+        setIsSupported(supported)
 
-  const checkSupport = async () => {
-    const supported = await pushNotificationService.initialize()
-    setIsSupported(supported)
-  }
-
-  const checkSubscriptionStatus = async () => {
-    try {
-      const subscribed = await pushNotificationService.isSubscribed()
-      setIsSubscribed(subscribed)
-    } catch (error) {
-      console.error('Error checking subscription status:', error)
+        // Only check subscription if supported
+        if (supported) {
+          const subscribed = await pushNotificationService.isSubscribed()
+          setIsSubscribed(subscribed)
+          console.log('Initial subscription state:', subscribed)
+        }
+      } catch (error) {
+        console.error('Error initializing push notifications:', error)
+        setIsSupported(false)
+        setIsSubscribed(false)
+      }
     }
-  }
+
+    initializeAndCheck()
+  }, [])
 
   const handleToggle = async () => {
     if (!isSupported) {

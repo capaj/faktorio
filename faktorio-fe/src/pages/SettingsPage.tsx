@@ -1,23 +1,15 @@
 import { useAuth } from '../lib/AuthContext'
 import { PushNotificationToggle } from '../components/PushNotificationToggle'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Button } from '../components/ui/button'
-import { pushNotificationService } from '../lib/pushNotificationService'
 
 export function SettingsPage() {
   const { token } = useAuth()
   const isLocalUser = token?.startsWith('local_')
 
-  const handleTestPushService = async () => {
-    await pushNotificationService.testPushService()
-  }
-
-  const handleClearServiceWorker = async () => {
-    const success = await pushNotificationService.clearAndReregister()
-    if (success) {
-      console.log('Service worker cleared and re-registered successfully')
-    }
-  }
+  // Detect Brave browser
+  const isBrave =
+    navigator.userAgent.includes('Brave') ||
+    (navigator as any).brave !== undefined
 
   return (
     <div className="space-y-6">
@@ -33,6 +25,16 @@ export function SettingsPage() {
               <p className="text-sm text-gray-600">
                 Zapněte si upozornění na splatné faktury přímo do prohlížeče.
               </p>
+
+              {isBrave && (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-sm text-yellow-800">
+                    ⚠️ <strong>Brave Browser:</strong> Push notifikace nemusí
+                    fungovat správně. Doporučujeme použít Firefox,Edge nebo
+                    Chrome pro nejlepší funkčnost.
+                  </p>
+                </div>
+              )}
 
               {/* Debug information */}
               <div className="text-xs text-gray-500 space-y-1">
@@ -54,23 +56,7 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <PushNotificationToggle />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleTestPushService}
-                >
-                  Test Push Service
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearServiceWorker}
-                >
-                  Clear SW Cache
-                </Button>
-              </div>
+              <PushNotificationToggle />
             </div>
           </CardContent>
         </Card>

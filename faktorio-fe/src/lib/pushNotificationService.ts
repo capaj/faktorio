@@ -192,12 +192,24 @@ export class PushNotificationService {
 
   async isSubscribed(): Promise<boolean> {
     try {
+      // Ensure service worker is initialized first
       if (!this.registration) {
-        return false
+        const initialized = await this.initialize()
+        if (!initialized || !this.registration) {
+          return false
+        }
       }
 
       const subscription = await this.registration.pushManager.getSubscription()
-      return subscription !== null
+      const hasSubscription = subscription !== null
+
+      if (hasSubscription) {
+        console.log('Found active push subscription:', subscription.endpoint)
+      } else {
+        console.log('No active push subscription found')
+      }
+
+      return hasSubscription
     } catch (error) {
       console.error('Error checking subscription status:', error)
       return false
@@ -214,98 +226,6 @@ export class PushNotificationService {
     } catch (error) {
       console.error('Error getting subscription:', error)
       return null
-    }
-  }
-
-  // Test method to debug push service issues
-  async testPushService(): Promise<void> {
-    console.log('=== PUSH SERVICE TEST ===')
-
-    try {
-      // Check browser support
-      console.log('Service Worker support:', 'serviceWorker' in navigator)
-      console.log('Push Manager support:', 'PushManager' in window)
-      console.log('Notification support:', 'Notification' in window)
-      console.log('Notification permission:', Notification.permission)
-
-      // Initialize service worker
-      const initialized = await this.initialize()
-      console.log('Service Worker initialized:', initialized)
-
-      if (!initialized || !this.registration) {
-        console.error('Service Worker not initialized')
-        return
-      }
-
-      // Check push manager
-      console.log('Push Manager available:', !!this.registration.pushManager)
-      console.log('Push Manager subscribe method:', 'subscribe' in this.registration.pushManager)
-
-      // Check existing subscription
-      const existingSubscription = await this.registration.pushManager.getSubscription()
-      console.log('Existing subscription:', !!existingSubscription)
-
-      // Test VAPID key conversion
-      const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      console.log('VAPID key length:', applicationServerKey.length)
-      console.log('VAPID key first 4 bytes:', Array.from(applicationServerKey.slice(0, 4)))
-
-      // Test subscription with minimal options
-      console.log('Testing subscription with minimal options...')
-      try {
-        const testSubscription = await this.registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey
-        })
-        console.log('✅ Test subscription successful!')
-        console.log('Endpoint:', testSubscription.endpoint)
-
-        // Clean up test subscription
-        await testSubscription.unsubscribe()
-        console.log('Test subscription cleaned up')
-      } catch (subscriptionError) {
-        console.error('❌ Test subscription failed:', subscriptionError)
-        console.error('Error details:', {
-          name: subscriptionError instanceof Error ? subscriptionError.name : 'Unknown',
-          message: subscriptionError instanceof Error ? subscriptionError.message : 'Unknown'
-        })
-      }
-
-    } catch (error) {
-      console.error('Push service test error:', error)
-    }
-  }
-
-  // Clear service worker and try fresh registration
-  async clearAndReregister(): Promise<boolean> {
-    console.log('=== CLEARING SERVICE WORKER ===')
-
-    try {
-      // Get all registrations
-      const registrations = await navigator.serviceWorker.getRegistrations()
-      console.log('Found registrations:', registrations.length)
-
-      // Unregister all service workers
-      for (const registration of registrations) {
-        console.log('Unregistering service worker:', registration.scope)
-        await registration.unregister()
-      }
-
-      // Clear this registration reference
-      this.registration = null
-
-      // Wait a moment for cleanup
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Re-register fresh
-      console.log('Re-registering service worker...')
-      const success = await this.initialize()
-      console.log('Fresh registration successful:', success)
-
-      return success
-    } catch (error) {
-      console.error('Error clearing service worker:', error)
-      return false
     }
   }
 }
