@@ -210,11 +210,6 @@ export default defineConfig({
               return `pdf_${gitHash}`
             }
 
-            // Split form and validation libraries
-            if (id.includes('react-hook-form') || id.includes('hookform') || id.includes('validator')) {
-              return `forms_${gitHash}`
-            }
-
             // Everything else goes to general vendor
             return `vendor_${gitHash}`
           }
