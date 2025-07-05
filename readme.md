@@ -25,6 +25,8 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 | Export invoices to XML for tax authorities |     ✅      |      ✅       |      ✅      |     ✅     |
 | Send invoices to an email from the app     |     ❌      |      ✅       |      ✅      |     ✅     |
 | API for integrations                       |     ❌      |      ❌       |      ✅      |     ✅     |
+| Push notifications in web app              |     ✅      |      ❌       |      ❌      |     ❌     |
+| Mobile app                                 |     ❌      |      ❌       |      ✅      |     ✅     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
 
