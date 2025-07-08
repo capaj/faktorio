@@ -50,7 +50,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "dayjs": "^1.11.13",
-    "dotenv": "^17.0.1",
+    "dotenv": "^17.1.0",
     "drizzle-orm": "^0.44.2",
     "faktorio-api": "workspace:*",
     "faktorio-shared": "workspace:*",
@@ -62,9 +62,9 @@
     "qrcode": "^1.5.4",
     "query-string": "^9.2.2",
     "react": "^18",
-    "react-day-picker": "^9.7.0",
+    "react-day-picker": "^9.8.0",
     "react-dom": "^18",
-    "react-hook-form": "^7.59.0",
+    "react-hook-form": "^7.60.0",
     "sonner": "^2.0.6",
     "sql.js": "^1.13.0",
     "tailwind-merge": "^3.3.1",
@@ -72,15 +72,15 @@
     "usehooks-ts": "^3.1.1",
     "valtio": "^2.1.5",
     "wouter": "^3.7.1",
-    "zod": "^3.25.74",
+    "zod": "^3.25.76",
     "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "@types/qrcode": "^1.5.5",
     "@types/sql.js": "^1.4.9",
-    "@typescript-eslint/eslint-plugin": "^8.35.1",
-    "@typescript-eslint/parser": "^8.35.1",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
     "@vitejs/plugin-react-swc": "^3.10.2",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.4",
@@ -93,9 +93,9 @@
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
-    "vite": "^7.0.2",
+    "vite": "^7.0.3",
     "vite-plugin-pwa": "^1.0.1",
     "vitest": "^3.2.4",
-    "wrangler": "^4.23.0"
+    "wrangler": "^4.24.0"
   }
 }
