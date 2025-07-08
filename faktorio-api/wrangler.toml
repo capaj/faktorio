@@ -8,7 +8,7 @@ compatibility_flags = ["nodejs_compat"]
 crons = ["0 12 * * *"]
 
 [observability.logs]
-enabled = false
+enabled = true
 
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
