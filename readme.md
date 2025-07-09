@@ -27,6 +27,7 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 | API for integrations                       |     ❌      |      ❌       |      ✅      |     ✅     |
 | Push notifications in web app              |     ✅      |      ❌       |      ❌      |     ❌     |
 | Mobile app                                 |     ❌      |      ❌       |      ✅      |     ✅     |
+| English UI                                 |     ❌      |      ❌       |      ✅      |     ✅     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
 
