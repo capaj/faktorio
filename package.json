@@ -7,7 +7,7 @@
   ],
   "devDependencies": {
     "@playwright/test": "^1.53.2",
-    "@types/node": "^24.0.10",
+    "@types/node": "^24.0.12",
     "npm-check-updates": "^18.0.1",
     "prettier": "^3.6.2",
     "turbo": "^2.5.4",
