@@ -10,7 +10,7 @@ export const ManifestPage = () => {
         <img
           src="/images/20250610_1649_Robot Tax Preparation_simple_compose_01jxd4zrkafbvtmnk43fr8armx.png"
           alt="robot in a factory doing taxes with a keen eye"
-          className="w-full"
+          className="w-full max-h-96"
         />
         <p className="mt-3">
           Jako živnostník stojící na prahu podnikání jsem čelil jednoduchému,
