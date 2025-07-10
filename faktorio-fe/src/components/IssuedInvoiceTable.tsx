@@ -29,7 +29,7 @@ import { InvoicesDownloadButton } from '@/pages/InvoiceList/InvoicesDownloadButt
 
 // Define the shape of an invoice - adjust based on your actual data structure
 // This might need refinement based on the exact structure from your tRPC query
-import { invoicesTb } from 'faktorio-api/src/schema'
+import { invoicesTb } from 'faktorio-db/schema'
 import { InferSelectModel } from 'drizzle-orm'
 
 export type Invoice = Pick<

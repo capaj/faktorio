@@ -2,7 +2,7 @@ import { trpcContext } from './trpcContext'
 import { invoiceRouter } from './routers/invoices/invoiceRouter'
 import { contactRouter } from './routers/contactRouter'
 import { protectedProc } from './isAuthorizedMiddleware'
-import { userInvoicingDetailsTb, systemStatsTb } from './schema'
+import { userInvoicingDetailsTb, systemStatsTb } from 'faktorio-db/schema'
 import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
 import { eq, desc } from 'drizzle-orm'
 

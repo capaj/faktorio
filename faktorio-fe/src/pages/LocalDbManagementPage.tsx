@@ -14,7 +14,7 @@ import { Label } from '../components/ui/label'
 import { Button } from '../components/ui/button'
 import { Download, Upload, Database, LogOut } from 'lucide-react'
 import { createId } from '@paralleldrive/cuid2'
-import { UserSelectType } from 'faktorio-api/src/schema'
+import { UserSelectType } from 'faktorio-db/schema'
 
 const defaultUser: UserSelectType = {
   id: createId(),

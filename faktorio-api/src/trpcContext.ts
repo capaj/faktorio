@@ -1,11 +1,10 @@
 import { initTRPC } from '@trpc/server'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
-import { SQLJsDatabase } from 'drizzle-orm/sql-js'
-import * as schema from './schema'
+import * as schema from 'faktorio-db/schema'
 import superjson from 'superjson'
 import { GoogleAIFileManager } from '@google/generative-ai/server'
 
-import { UserSelectType, userT } from './schema'
+import { UserSelectType, userT } from 'faktorio-db/schema'
 import { Env } from './envSchema'
 import { GoogleGenAI } from '@google/genai'
 

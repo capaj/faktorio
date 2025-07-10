@@ -1,5 +1,5 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import * as schemas from './schema'
+import * as schemas from 'faktorio-db/schema'
 import { z } from 'zod/v4'
 
 export const insertSchemas = Object.entries(schemas).reduce(

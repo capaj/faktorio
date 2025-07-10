@@ -4,7 +4,7 @@ import {
   invoiceItemsTb,
   invoicesTb,
   userInvoicingDetailsTb
-} from '../../schema'
+} from 'faktorio-db/schema'
 import { trpcContext } from '../../trpcContext'
 import {
   SQL,

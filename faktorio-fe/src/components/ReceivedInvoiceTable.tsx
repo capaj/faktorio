@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Trash2Icon, Loader2 } from 'lucide-react' // Keep used icons
 
 // Define the shape of a received invoice
-import { receivedInvoiceTb } from 'faktorio-api/src/schema'
+import { receivedInvoiceTb } from 'faktorio-db/schema'
 import { InferSelectModel } from 'drizzle-orm'
 
 export type ReceivedInvoice = Pick<
