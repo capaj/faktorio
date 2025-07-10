@@ -5,7 +5,7 @@ import { appRouter } from './trpcRouter'
 
 import { createClient } from '@libsql/client'
 
-import * as schema from './schema'
+import * as schema from 'faktorio-db/schema'
 import colorize from '@pinojs/json-colorizer'
 import { TrpcContext } from './trpcContext'
 import { extractUserFromAuthHeader, generateToken } from './jwtUtils'

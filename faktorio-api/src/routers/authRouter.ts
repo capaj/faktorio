@@ -2,7 +2,7 @@ import { trpcContext } from '../trpcContext'
 import z from 'zod/v4'
 
 import { eq, and, isNull } from 'drizzle-orm'
-import { userT, passwordResetTokenT } from '../schema'
+import { userT, passwordResetTokenT } from 'faktorio-db/schema'
 import { TRPCError } from '@trpc/server'
 import jwt from '@tsndr/cloudflare-worker-jwt'
 

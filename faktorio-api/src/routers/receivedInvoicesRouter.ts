@@ -1,6 +1,6 @@
 import { z } from 'zod/v4'
 
-import { receivedInvoiceTb, contactTb } from '../schema'
+import { receivedInvoiceTb, contactTb } from 'faktorio-db/schema'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { trpcContext } from '../trpcContext'
 import { eq, desc, and, gte, lt, SQL } from 'drizzle-orm'
