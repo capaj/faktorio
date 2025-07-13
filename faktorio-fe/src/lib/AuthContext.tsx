@@ -211,6 +211,7 @@ export const AuthProvider: React.FC<{
                 },
                 req: {} as Request,
                 generateToken: () => Promise.resolve(''),
+                sendEmail: () => Promise.resolve(),
                 user: localRun.user,
                 db: localRun.db as any as LibSQLDatabase<typeof schema>, // gotta do this conversion, because drizzle types don't work when we define db as union of LibSQL and SQLJs
                 googleGenAIFileManager: {} as any,
