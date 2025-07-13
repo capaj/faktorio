@@ -12,7 +12,8 @@ import { useAuth } from '../lib/AuthContext'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Button } from '../components/ui/button'
-import { Download, Upload, Database, LogOut } from 'lucide-react'
+import { Textarea } from '../components/ui/textarea'
+import { Download, Upload, Database, LogOut, Settings } from 'lucide-react'
 import { createId } from '@paralleldrive/cuid2'
 import { UserSelectType } from 'faktorio-db/schema'
 
@@ -26,6 +27,14 @@ const defaultUser: UserSelectType = {
   createdAt: new Date(),
   updatedAt: new Date()
 }
+
+const defaultEnvVars = `JWT_SECRET=lsk_${createId()}
+# nepovinne
+GEMINI_API_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_PUBLIC_KEY=
+VAPID_SUBJECT=mailto:admin@example.com
+`
 
 export function LocalDbManagementPage() {
   const [dbFiles, setDbFiles] = useState<string[]>([])
@@ -46,6 +55,10 @@ export function LocalDbManagementPage() {
   const [userEmail, setUserEmail] = useState('')
   const [isSavingUser, setIsSavingUser] = useState(false)
 
+  // Environment variables state
+  const [envVars, setEnvVars] = useState('')
+  const [isSavingEnv, setIsSavingEnv] = useState(false)
+
   const {
     activeDbName,
     setActiveDatabase,
@@ -56,6 +69,16 @@ export function LocalDbManagementPage() {
   } = useDb()
   const { token, logout } = useAuth()
   const isLocalUser = token?.startsWith('local_')
+
+  // Load environment variables from localStorage
+  const loadEnvVars = useCallback(() => {
+    const stored = localStorage.getItem('local_env_vars')
+    if (stored) {
+      setEnvVars(stored)
+    } else {
+      setEnvVars(defaultEnvVars)
+    }
+  }, [])
 
   // Initialize default user if none exists
   useEffect(() => {
@@ -68,7 +91,8 @@ export function LocalDbManagementPage() {
       setUserFullName(localUser.name)
       setUserEmail(localUser.email)
     }
-  }, [localUser, setLocalUser])
+    loadEnvVars()
+  }, [localUser, setLocalUser, loadEnvVars])
 
   const loadFiles = useCallback(async () => {
     setLoading(true)
@@ -329,6 +353,22 @@ export function LocalDbManagementPage() {
     }
   }
 
+  const handleSaveEnvVars = () => {
+    setIsSavingEnv(true)
+    setError(null)
+    try {
+      localStorage.setItem('local_env_vars', envVars)
+      setSuccess('Proměnné prostředí byly úspěšně uloženy.')
+    } catch (err: any) {
+      console.error('Error saving env vars:', err)
+      setError(
+        `Nepodařilo se uložit proměnné prostředí: ${err.message || 'Neznámá chyba'}`
+      )
+    } finally {
+      setIsSavingEnv(false)
+    }
+  }
+
   const renderUserForm = () => {
     if (token && !isLocalUser) {
       return (
@@ -392,6 +432,51 @@ export function LocalDbManagementPage() {
     )
   }
 
+  const renderEnvVarsForm = () => {
+    if (token && !isLocalUser) {
+      return null
+    }
+
+    return (
+      <div className="space-y-2 p-4 bg-gray-50 rounded-lg border">
+        <h3 className="text-xl flex items-center">
+          <Settings className="h-5 w-5 mr-2" />
+          Nastavení proměnných prostředí
+        </h3>
+        <p className="text-sm text-gray-600">
+          Zadejte proměnné prostředí pro lokální běh aplikace. Formát:
+          KLÍČ=hodnota (jeden pár na řádek). Nepovinné-klíče jsou potřeba jen
+          pro některé funkce.
+        </p>
+
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="envVars" className="text-sm font-medium">
+              Proměnné prostředí
+            </Label>
+            <Textarea
+              id="envVars"
+              value={envVars}
+              onChange={(e) => setEnvVars(e.target.value)}
+              placeholder={defaultEnvVars}
+              className="mt-1 font-mono text-sm"
+              rows={10}
+              disabled={isSavingEnv}
+            />
+          </div>
+
+          <Button
+            onClick={handleSaveEnvVars}
+            disabled={isSavingEnv}
+            className="w-full"
+          >
+            {isSavingEnv ? 'Ukládám...' : 'Uložit proměnné prostředí'}
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <h3 className="text-2xl font-bold">Správa lokálních databází</h3>
@@ -410,6 +495,9 @@ export function LocalDbManagementPage() {
 
       {/* User form always visible when not authenticated or when in local mode */}
       {(!token || isLocalUser) && !activeDbName && renderUserForm()}
+
+      {/* Environment variables form */}
+      {(!token || isLocalUser) && renderEnvVarsForm()}
 
       {activeDbName && (
         <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded flex justify-between items-center">

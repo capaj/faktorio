@@ -167,6 +167,62 @@ export interface LocalCallerLinkOptions<TRouter extends AppRouter> {
     | inferRouterContext<TRouter>
 }
 
+function parseEnvVars(): {
+  TURSO_DATABASE_URL: string
+  TURSO_AUTH_TOKEN: string
+  JWT_SECRET: string
+  GEMINI_API_KEY: string
+  VAPID_PRIVATE_KEY: string
+  VAPID_PUBLIC_KEY: string
+  VAPID_SUBJECT: string
+  MAILJET_API_KEY: string
+  MAILJET_API_SECRET: string
+} {
+  const envVarsString = localStorage.getItem('local_env_vars')
+  const envVars: Record<string, string> = {}
+
+  if (envVarsString) {
+    const lines = envVarsString.split('\n')
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+        const [key, ...valueParts] = trimmed.split('=')
+        const value = valueParts.join('=')
+        if (key.trim()) {
+          envVars[key.trim()] = value.trim()
+        }
+      }
+    }
+  }
+
+  // Provide defaults for required environment variables
+  const defaults = {
+    TURSO_DATABASE_URL: '',
+    TURSO_AUTH_TOKEN: '',
+    JWT_SECRET: 'local_secret_key',
+    GEMINI_API_KEY: '',
+    VAPID_PRIVATE_KEY: '',
+    VAPID_PUBLIC_KEY: '',
+    VAPID_SUBJECT: 'mailto:admin@example.com',
+    MAILJET_API_KEY: '',
+    MAILJET_API_SECRET: ''
+  }
+
+  return {
+    TURSO_DATABASE_URL:
+      envVars.TURSO_DATABASE_URL || defaults.TURSO_DATABASE_URL,
+    TURSO_AUTH_TOKEN: envVars.TURSO_AUTH_TOKEN || defaults.TURSO_AUTH_TOKEN,
+    JWT_SECRET: envVars.JWT_SECRET || defaults.JWT_SECRET,
+    GEMINI_API_KEY: envVars.GEMINI_API_KEY || defaults.GEMINI_API_KEY,
+    VAPID_PRIVATE_KEY: envVars.VAPID_PRIVATE_KEY || defaults.VAPID_PRIVATE_KEY,
+    VAPID_PUBLIC_KEY: envVars.VAPID_PUBLIC_KEY || defaults.VAPID_PUBLIC_KEY,
+    VAPID_SUBJECT: envVars.VAPID_SUBJECT || defaults.VAPID_SUBJECT,
+    MAILJET_API_KEY: envVars.MAILJET_API_KEY || defaults.MAILJET_API_KEY,
+    MAILJET_API_SECRET:
+      envVars.MAILJET_API_SECRET || defaults.MAILJET_API_SECRET
+  }
+}
+
 export async function authHeaders() {
   const token = localStorage.getItem('auth_token')
   return token
@@ -197,18 +253,9 @@ export const AuthProvider: React.FC<{
             router: appRouter,
 
             createContext: () => {
+              const env = parseEnvVars()
               return {
-                env: {
-                  TURSO_DATABASE_URL: '',
-                  TURSO_AUTH_TOKEN: '',
-                  JWT_SECRET: '',
-                  GEMINI_API_KEY: '',
-                  VAPID_PRIVATE_KEY: '',
-                  VAPID_PUBLIC_KEY: '',
-                  VAPID_SUBJECT: '',
-                  MAILJET_API_KEY: '',
-                  MAILJET_API_SECRET: ''
-                },
+                env,
                 req: {} as Request,
                 generateToken: () => Promise.resolve(''),
                 sendEmail: () => Promise.resolve(),
