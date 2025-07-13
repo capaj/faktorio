@@ -8,12 +8,14 @@ import {
 import AutoForm from '@/components/ui/auto-form'
 import { invoiceForRenderSchema } from '../InvoiceDetail/InvoiceDetailPage'
 
+const bankAccountSchema = invoiceForRenderSchema.pick({
+  bank_account: true,
+  iban: true,
+  swift_bic: true
+})
+
 interface BankDetailsAccordionProps {
-  formValues: {
-    bank_account: string | null
-    iban: string | null
-    swift_bic: string | null
-  }
+  formValues: z.infer<typeof bankAccountSchema>
   setFormValues: (values: any) => void
 }
 
@@ -21,12 +23,6 @@ export const BankDetailsAccordion = ({
   formValues,
   setFormValues
 }: BankDetailsAccordionProps) => {
-  const bankAccountSchema = invoiceForRenderSchema.pick({
-    bank_account: true,
-    iban: true,
-    swift_bic: true
-  })
-
   return (
     <Accordion type="single" collapsible className="mt-4 mb-6">
       <AccordionItem value="bank-details">
