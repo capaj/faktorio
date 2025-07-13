@@ -10,9 +10,9 @@ import { invoiceForRenderSchema } from '../InvoiceDetail/InvoiceDetailPage'
 
 interface BankDetailsAccordionProps {
   formValues: {
-    bank_account: string
-    iban: string
-    swift_bic: string
+    bank_account: string | null
+    iban: string | null
+    swift_bic: string | null
   }
   setFormValues: (values: any) => void
 }

@@ -1,7 +1,5 @@
 import { z } from 'zod/v4'
 
-import { invoiceInsertSchema } from '../zodDbSchemas'
-
 import cc from 'currency-codes'
 import { djs } from 'faktorio-shared/src/djs'
 
