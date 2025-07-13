@@ -1,5 +1,5 @@
 import { ZodError } from 'zod/v4'
-import { envSchema } from '../../faktorio-api/src/envSchema'
+import { envSchema } from '../src/envSchema'
 
 console.log('Checking environment variables...')
 
