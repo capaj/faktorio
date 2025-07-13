@@ -1,5 +1,3 @@
-
-
 export async function sendEmail(
   emailData: {
     to: { email: string; name: string }
@@ -39,6 +37,7 @@ export async function sendEmail(
   if (!response.ok) {
     const errorText = await response.text()
     console.error('Failed to send email:', response.status, errorText)
+    console.error('env', env)
     throw new Error(`Failed to send email: ${response.status}`)
   }
 
