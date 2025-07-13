@@ -9,6 +9,7 @@ import jwt from '@tsndr/cloudflare-worker-jwt'
 import cuid2 from '@paralleldrive/cuid2'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { verifyPassword, hashPassword } from '../lib/crypto'
+import { sendEmail } from '../sendEmail'
 
 // We'll define a simple user schema here since we can't find the imported one
 const userSchema = z.object({
@@ -17,11 +18,6 @@ const userSchema = z.object({
   email: z.string().email(),
   passwordHash: z.string()
 })
-
-// Mock the email sending function
-async function sendMailjetEmail(emailData: any, env: any): Promise<void> {
-  console.log('Sending email:', emailData)
-}
 
 export const logoutUser = async () => {
   // With JWT, we don't need server-side logout
@@ -280,28 +276,34 @@ export const authRouter = trpcContext.router({
       const token = cuid2.createId()
       const expiresAt = new Date()
       expiresAt.setHours(expiresAt.getHours() + 1) // Token expires in 1 hour
+      const requestedFromIp =
+        ctx.req.headers.get('x-forwarded-for') || 'unknown'
 
       await ctx.db.insert(passwordResetTokenT).values({
         userId: user.id,
-        requestedFromIp: 'unknown', // You'll need to update this based on your context structure
+        requestedFromIp,
         token,
         expiresAt: expiresAt
       })
+      let reqDomain = ctx.req.headers.get('host')
+      let protocol = ctx.req.headers.get('x-forwarded-proto') || 'https'
 
-      const resetLink = `${process.env.APP_URL}/reset-password?token=${token}`
+      if (reqDomain?.startsWith('localhost')) {
+        reqDomain = 'localhost:5173' // default port for dev
+        protocol = 'http'
+      }
+      const resetLink = `${protocol}://${reqDomain}/reset-password?token=${token}`
 
-      await sendMailjetEmail(
-        {
-          to: { email: user.email, name: user.name },
-          subject: 'Reset your password',
-          html: `
-          <p>Click the link below to reset your password:</p>
+      await ctx.sendEmail({
+        to: { email: user.email, name: user.name },
+        subject: 'Obnovení hesla',
+        html: `
+          <p>Klikněte na odkaz níže pro obnovení hesla:</p>
           <a href="${resetLink}">${resetLink}</a>
-          <p>This link will expire in 1 hour.</p>
+          <p>Platnost tohoto odkazu vyprší za 1 hodinu.</p>
+          <p>Pokud jste tento email nevyžádali, ignorujte jej.</p>
         `
-        },
-        {} // You'll need to update this based on your context structure
-      )
+      })
 
       return { success: true }
     }),
@@ -317,17 +319,11 @@ export const authRouter = trpcContext.router({
       })
 
       if (!resetToken) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Invalid or expired reset token'
-        })
+        return { valid: false }
       }
 
       if (resetToken.expiresAt.getTime() < Date.now()) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Reset token has expired'
-        })
+        return { valid: false }
       }
 
       return { valid: true }
