@@ -5,7 +5,7 @@ import { appRouter } from './trpcRouter'
 
 import { createClient } from '@libsql/client'
 
-import * as schema from './schema'
+import * as schema from 'faktorio-db/schema'
 import colorize from '@pinojs/json-colorizer'
 import { TrpcContext } from './trpcContext'
 import { extractUserFromAuthHeader, generateToken } from './jwtUtils'
@@ -14,6 +14,7 @@ import { GoogleGenAI } from '@google/genai'
 import { Env } from './envSchema'
 import { checkAndNotifyDueInvoices } from './lib/scheduledNotifications'
 import { calculateAndStoreSystemStats } from './lib/calculateSystemStats'
+import { sendEmail } from './sendEmail'
 
 // Add ExecutionContext type from Cloudflare Workers
 type ExecutionContext = {
@@ -91,6 +92,7 @@ export default {
         req: request,
         googleGenAIFileManager: fileManager,
         googleGenAI: genAI,
+        sendEmail: (email) => sendEmail(email, env),
         generateToken: (user) => generateToken(user, env.JWT_SECRET)
       }
     }

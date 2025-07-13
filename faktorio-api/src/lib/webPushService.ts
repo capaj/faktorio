@@ -1,9 +1,8 @@
 import webpush from 'web-push'
-import { pushSubscriptionTb } from '../schema'
+import { pushSubscriptionTb } from 'faktorio-db/schema'
 import { eq } from 'drizzle-orm'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
-import * as schema from '../schema'
-
+import * as schema from 'faktorio-db/schema'
 
 interface NotificationPayload {
   title: string
@@ -92,17 +91,13 @@ export class WebPushService {
       }
     }
 
-    return webpush.sendNotification(
-      pushSubscription,
-      JSON.stringify(payload),
-      {
-        TTL: 24 * 60 * 60, // 24 hours
-        urgency: 'normal'
-      }
-    )
+    return webpush.sendNotification(pushSubscription, JSON.stringify(payload), {
+      TTL: 24 * 60 * 60, // 24 hours
+      urgency: 'normal'
+    })
   }
 
   static generateVapidKeys() {
     return webpush.generateVAPIDKeys()
   }
-} 
+}

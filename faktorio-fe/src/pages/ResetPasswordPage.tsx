@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useLocation } from 'wouter'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -15,14 +15,17 @@ import { toast } from 'sonner'
 import { ButtonLink } from '../components/ui/link'
 import { trpcClient } from '../lib/trpcClient'
 import { SpinnerContainer } from '../components/SpinnerContainer'
+import { PasswordInput } from '@/components/ui/password-input'
 
 export function ResetPasswordPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const [, navigate] = useLocation()
+
+  const params = new URLSearchParams(window.location.search)
+  const token = params.get('token')
 
   const verifyTokenQuery = trpcClient.auth.verifyResetToken.useQuery(
     { token: token || '' },
@@ -30,16 +33,8 @@ export function ResetPasswordPage() {
       enabled: !!token
     }
   )
-  const [isTokenValid, setIsTokenValid] = useState(verifyTokenQuery.data?.valid)
-
 
   const setNewPasswordMutation = trpcClient.auth.setNewPassword.useMutation()
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const tokenParam = params.get('token')
-    setToken(tokenParam)
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,7 +75,7 @@ export function ResetPasswordPage() {
     return <SpinnerContainer loading={true} />
   }
 
-  if (!isTokenValid) {
+  if (verifyTokenQuery.data?.valid === false) {
     return (
       <div className="flex justify-center items-center min-h-[80vh]">
         <Card className="w-full max-w-md">
@@ -111,7 +106,7 @@ export function ResetPasswordPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password">Nové heslo</Label>
-              <Input
+              <PasswordInput
                 id="password"
                 type="password"
                 value={password}
@@ -122,7 +117,7 @@ export function ResetPasswordPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Potvrzení hesla</Label>
-              <Input
+              <PasswordInput
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}

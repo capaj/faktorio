@@ -22,7 +22,7 @@ import { ErrorBoundary } from './ErrorBoundary'
 import { Header } from './components/Header'
 import { SignedInRoutes } from './SignedInRoutes'
 import { LocalDbManagementPage } from './pages'
-import { UserSelectType } from 'faktorio-api/src/schema'
+import { UserSelectType } from 'faktorio-db/schema'
 
 interface BlogPost {
   slug: string

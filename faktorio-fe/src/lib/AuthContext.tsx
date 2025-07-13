@@ -10,13 +10,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink, Operation } from '@trpc/client'
 import { SuperJSON } from 'superjson'
 import { trpcLinks } from './errorToastLink'
-import { userT } from 'faktorio-api/src/schema'
+import { userT } from 'faktorio-db/schema'
 import { useLocation } from 'wouter'
 
 import { trpcContext, type TrpcContext } from 'faktorio-api/src/trpcContext'
 import { AppRouter, appRouter } from 'faktorio-api/src/trpcRouter'
 import { inferRouterContext } from '@trpc/server'
-import * as schema from 'faktorio-api/src/schema'
+import * as schema from 'faktorio-db/schema'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
 import { SQLJsDatabase } from 'drizzle-orm/sql-js'
 import { useDb } from './local-db/DbContext'
@@ -211,6 +211,7 @@ export const AuthProvider: React.FC<{
                 },
                 req: {} as Request,
                 generateToken: () => Promise.resolve(''),
+                sendEmail: () => Promise.resolve(),
                 user: localRun.user,
                 db: localRun.db as any as LibSQLDatabase<typeof schema>, // gotta do this conversion, because drizzle types don't work when we define db as union of LibSQL and SQLJs
                 googleGenAIFileManager: {} as any,

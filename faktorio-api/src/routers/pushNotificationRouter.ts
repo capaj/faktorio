@@ -1,7 +1,7 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { trpcContext } from '../trpcContext'
-import { pushSubscriptionTb, invoicesTb } from '../schema'
+import { pushSubscriptionTb, invoicesTb } from 'faktorio-db/schema'
 import { eq, and, lte, isNull } from 'drizzle-orm'
 import { djs } from 'faktorio-shared/src/djs'
 
@@ -86,4 +86,4 @@ export const pushNotificationRouter = trpcContext.router({
 
     return dueInvoices
   })
-}) 
+})

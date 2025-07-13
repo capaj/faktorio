@@ -1,6 +1,6 @@
 import { getTableName, sql } from 'drizzle-orm'
-import * as schema from '../src/schema'
-import { db } from '../src/db'
+import * as schema from 'faktorio-db/schema'
+import { db } from 'faktorio-db/db'
 
 const allTableNames = Object.values(schema).map(
   (table) => getTableName(table) as string

@@ -1,11 +1,10 @@
 import { initTRPC } from '@trpc/server'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
-import { SQLJsDatabase } from 'drizzle-orm/sql-js'
-import * as schema from './schema'
+import * as schema from 'faktorio-db/schema'
 import superjson from 'superjson'
 import { GoogleAIFileManager } from '@google/generative-ai/server'
 
-import { UserSelectType, userT } from './schema'
+import { UserSelectType } from 'faktorio-db/schema'
 import { Env } from './envSchema'
 import { GoogleGenAI } from '@google/genai'
 
@@ -18,6 +17,11 @@ export type TrpcContext = {
   user: UserSelectType | undefined
   req: Request
   generateToken: (user: UserSelectType) => Promise<string>
+  sendEmail: (email: {
+    to: { email: string; name: string }
+    subject: string
+    html: string
+  }) => Promise<void>
   googleGenAIFileManager: GoogleAIFileManager
   googleGenAI: GoogleGenAI
 }
