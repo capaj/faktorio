@@ -37,7 +37,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@react-oauth/google": "^0.12.2",
     "@react-pdf/renderer": "^4.3.0",
-    "@tanstack/react-query": "^5.82.0",
+    "@tanstack/react-query": "^5.83.0",
     "@trpc/client": "^11.4.3",
     "@trpc/react-query": "^11.4.3",
     "@trpc/server": "^11.4.3",
@@ -73,7 +73,7 @@
     "usehooks-ts": "^3.1.1",
     "valtio": "^2.1.5",
     "wouter": "^3.7.1",
-    "zod": "^4.0.2",
+    "zod": "^4.0.5",
     "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
@@ -85,7 +85,7 @@
     "@vitejs/plugin-react-swc": "^3.10.2",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.4",
-    "eslint": "^9.30.1",
+    "eslint": "^9.31.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "gray-matter": "^4.0.3",
@@ -97,6 +97,6 @@
     "vite": "^7.0.4",
     "vite-plugin-pwa": "^1.0.1",
     "vitest": "^3.2.4",
-    "wrangler": "^4.24.1"
+    "wrangler": "^4.24.3"
   }
 }

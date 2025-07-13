@@ -6,12 +6,12 @@
   "scripts": {
     "bump": "npm-check-updates -u"
   },
-  "packageManager": "pnpm@10.12.4",
+  "packageManager": "pnpm@10.13.1",
   "dependencies": {
     "@libsql/client": "^0.15.9",
     "faktorio-shared": "workspace:*",
     "@paralleldrive/cuid2": "^2.2.2",
-    "dotenv": "^17.1.0",
+    "dotenv": "^17.2.0",
     "drizzle-orm": "^0.44.2"
   }
 }
