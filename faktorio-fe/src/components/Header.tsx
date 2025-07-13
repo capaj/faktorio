@@ -214,13 +214,15 @@ export const Header = () => {
                     Kontakty
                   </ButtonLink>
 
-                  <ButtonLink
-                    className={mobileMenuButtonClass}
-                    href="/local-dbs"
-                  >
-                    <Database className="mr-2 h-4 w-4" />
-                    Lokální databáze
-                  </ButtonLink>
+                  {isLocalUser && (
+                    <ButtonLink
+                      className={mobileMenuButtonClass}
+                      href="/local-dbs"
+                    >
+                      <Database className="mr-2 h-4 w-4" />
+                      Lokální databáze
+                    </ButtonLink>
+                  )}
 
                   {isLocalUser && activeDbName && (
                     <div className="inline-flex h-9 items-center justify-start rounded-md bg-blue-50 px-4 text-sm font-medium text-blue-800">
