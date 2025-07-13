@@ -8,9 +8,15 @@ import {
   LogOut,
   Database,
   ScrollIcon,
-  Settings
+  Settings,
+  User,
+  BookOpen,
+  Plus,
+  FileText,
+  Download,
+  Users,
+  Receipt
 } from 'lucide-react'
-import { User } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { useState } from 'react'
 import { useLocation } from 'wouter'
@@ -31,9 +37,13 @@ export const Header = () => {
   // Check if this is a local user (from auth token in localStorage)
   const isLocalUser = localStorage.getItem('auth_token')?.startsWith('local_')
 
+  // Shared className for mobile menu buttons
+  const mobileMenuButtonClass =
+    'inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50'
+
   const UserDropdownMenu = () => (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild className="ml-3">
         {user?.pictureUrl ? (
           <div
             style={{
@@ -122,7 +132,8 @@ export const Header = () => {
           <MountainIcon className="h-6 w-6" />
           <span className="sr-only">Faktorio</span>
         </ButtonLink>
-        <ButtonLink href="/blog" className="hidden sm:block">
+        <ButtonLink href="/blog" className="hidden md:flex items-center gap-2">
+          <BookOpen className="h-4 w-4" />
           Blog
         </ButtonLink>
       </div>
@@ -158,52 +169,56 @@ export const Header = () => {
                     }
                   }}
                 >
-                  <ButtonLink
-                    className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-                    href="/blog"
-                  >
+                  <ButtonLink className={mobileMenuButtonClass} href="/blog">
+                    <BookOpen className="mr-2 h-4 w-4" />
                     Blog
                   </ButtonLink>
                   <ButtonLink
-                    className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                    className={mobileMenuButtonClass}
                     href="/new-invoice"
                   >
+                    <Plus className="mr-2 h-4 w-4" />
                     Vystavit fakturu
                   </ButtonLink>
                   <ButtonLink
-                    className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                    className={mobileMenuButtonClass}
                     href="/invoices"
                   >
+                    <Receipt className="mr-2 h-4 w-4" />
                     Faktury
                   </ButtonLink>
 
                   {!isLocalUser && (
                     <ButtonLink
-                      className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                      className={mobileMenuButtonClass}
                       href="/received-invoices"
                     >
+                      <Download className="mr-2 h-4 w-4" />
                       Přijaté faktury
                     </ButtonLink>
                   )}
 
                   <ButtonLink
-                    className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                    className={mobileMenuButtonClass}
                     href="/xml-export"
                   >
+                    <FileText className="mr-2 h-4 w-4" />
                     Export XML
                   </ButtonLink>
 
                   <ButtonLink
-                    className="inline-flex h-9 items-center justify-start rounded-md px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900  focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                    className="inline-flex h-9 items-center justify-start rounded-md px-4 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-gray-900 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                     href="/contacts"
                   >
+                    <Users className="mr-2 h-4 w-4" />
                     Kontakty
                   </ButtonLink>
 
                   <ButtonLink
-                    className="inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                    className={mobileMenuButtonClass}
                     href="/local-dbs"
                   >
+                    <Database className="mr-2 h-4 w-4" />
                     Lokální databáze
                   </ButtonLink>
 
@@ -221,14 +236,44 @@ export const Header = () => {
 
             {/* Desktop layout */}
             <div className="hidden sm:flex lg:flex justify-center items-center">
-              <ButtonLink href="/new-invoice">Vystavit fakturu</ButtonLink>
-              <ButtonLink href="/invoices">Vystavené</ButtonLink>
+              <ButtonLink
+                href="/new-invoice"
+                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Vystavit fakturu
+              </ButtonLink>
+              <ButtonLink
+                href="/invoices"
+                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+              >
+                <Receipt className="h-4 w-4" />
+                Vystavené
+              </ButtonLink>
               {!isLocalUser && (
-                <ButtonLink href="/received-invoices">Přijaté</ButtonLink>
+                <ButtonLink
+                  href="/received-invoices"
+                  className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                  Přijaté
+                </ButtonLink>
               )}
 
-              <ButtonLink href="/xml-export">Export XML</ButtonLink>
-              <ButtonLink href="/contacts">Kontakty</ButtonLink>
+              <ButtonLink
+                href="/xml-export"
+                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+              >
+                <FileText className="h-4 w-4" />
+                Export XML
+              </ButtonLink>
+              <ButtonLink
+                href="/contacts"
+                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+              >
+                <Users className="h-4 w-4" />
+                Kontakty
+              </ButtonLink>
 
               <UserDropdownMenu />
             </div>
