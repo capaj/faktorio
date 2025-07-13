@@ -291,6 +291,8 @@ export const authRouter = trpcContext.router({
       if (reqDomain?.startsWith('localhost')) {
         reqDomain = 'localhost:5173' // default port for dev
         protocol = 'http'
+      } else if (reqDomain === 'faktorio-api.capaj.workers.dev') {
+        reqDomain = 'faktorio.cz' // production domain
       }
       const resetLink = `${protocol}://${reqDomain}/reset-password?token=${token}`
 
