@@ -11,6 +11,30 @@ workbox.setConfig({
 // Precache and route using the manifest
 workbox.precaching.precacheAndRoute(self.__WB_MANIFEST)
 
+// Enable automatic updates - skip waiting and claim clients immediately
+self.addEventListener('install', (event) => {
+  self.skipWaiting()
+})
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    Promise.all([
+      // Clean up old caches
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== workbox.core.cacheNames.precache) {
+              return caches.delete(cacheName)
+            }
+          })
+        )
+      }),
+      // Take control of all clients immediately
+      self.clients.claim()
+    ])
+  )
+})
+
 self.addEventListener('push', function (event) {
   console.log('Push event received:', event)
 

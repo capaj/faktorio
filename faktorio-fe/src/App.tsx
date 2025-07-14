@@ -23,6 +23,7 @@ import { Header } from './components/Header'
 import { SignedInRoutes } from './SignedInRoutes'
 import { LocalDbManagementPage } from './pages'
 import { UserSelectType } from 'faktorio-db/schema'
+import { useAutoUpdate } from './lib/autoUpdateService'
 
 interface BlogPost {
   slug: string
@@ -38,6 +39,9 @@ function AppContent() {
   const { token, isSignedIn } = useAuth()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  
+  // Initialize auto-update service
+  useAutoUpdate()
 
   useEffect(() => {
     fetch('/blog-content/index.json')

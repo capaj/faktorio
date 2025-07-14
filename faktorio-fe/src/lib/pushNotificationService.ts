@@ -6,14 +6,18 @@ import { authHeaders } from './AuthContext'
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
 const VITE_API_URL = import.meta.env.VITE_API_URL
 
-console.log('VAPID_PUBLIC_KEY loaded:', VAPID_PUBLIC_KEY ? 'Yes (length: ' + VAPID_PUBLIC_KEY.length + ')' : 'No')
-console.log('VAPID_PUBLIC_KEY preview:', VAPID_PUBLIC_KEY ? VAPID_PUBLIC_KEY.substring(0, 20) + '...' : 'Not set')
+console.log(
+  'VAPID_PUBLIC_KEY loaded:',
+  VAPID_PUBLIC_KEY ? 'Yes (length: ' + VAPID_PUBLIC_KEY.length + ')' : 'No'
+)
+console.log(
+  'VAPID_PUBLIC_KEY preview:',
+  VAPID_PUBLIC_KEY ? VAPID_PUBLIC_KEY.substring(0, 20) + '...' : 'Not set'
+)
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4)
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/')
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
 
   const rawData = window.atob(base64)
   const outputArray = new Uint8Array(rawData.length)
@@ -25,9 +29,8 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export class PushNotificationService {
-  private registration: ServiceWorkerRegistration | null = null
+  private registration: ServiceWorkerRegistration | undefined
   trpcClient: ReturnType<typeof createTRPCClient<AppRouter>>
-
 
   constructor() {
     this.trpcClient = createTRPCClient<AppRouter>({
@@ -38,9 +41,9 @@ export class PushNotificationService {
 
           // You can pass any HTTP headers you wish here
           headers: authHeaders
-        }),
-      ],
-    });
+        })
+      ]
+    })
   }
   async initialize(): Promise<boolean> {
     if (!VAPID_PUBLIC_KEY) {
@@ -59,24 +62,21 @@ export class PushNotificationService {
     }
 
     try {
-      // Check for existing service worker
-      const existingRegistration = await navigator.serviceWorker.getRegistration()
-      if (existingRegistration) {
-        console.log('Found existing service worker:', existingRegistration)
-        this.registration = existingRegistration
-        return true
-      }
-
-      this.registration = await navigator.serviceWorker.register('/sw.js')
-      console.log('Service Worker registered:', this.registration)
-
-      // Wait for service worker to be ready
+      // Wait for service worker to be ready (VitePWA handles registration)
       await navigator.serviceWorker.ready
       console.log('Service Worker ready')
 
-      return true
+      // Get the registration from VitePWA
+      this.registration = await navigator.serviceWorker.getRegistration()
+      if (this.registration) {
+        console.log('Found service worker registration:', this.registration)
+        return true
+      }
+
+      console.error('No service worker registration found')
+      return false
     } catch (error) {
-      console.error('Service Worker registration failed:', error)
+      console.error('Service Worker initialization failed:', error)
       return false
     }
   }
@@ -119,7 +119,8 @@ export class PushNotificationService {
       }
 
       // Check if there's an existing subscription
-      const existingSubscription = await this.registration.pushManager.getSubscription()
+      const existingSubscription =
+        await this.registration.pushManager.getSubscription()
       if (existingSubscription) {
         console.log('Found existing subscription, unsubscribing first...')
         await existingSubscription.unsubscribe()
@@ -130,7 +131,10 @@ export class PushNotificationService {
       console.log('VAPID key converted, length:', applicationServerKey.length)
 
       console.log('Subscribing to push manager...')
-      console.log('Push manager supported:', 'subscribe' in this.registration.pushManager)
+      console.log(
+        'Push manager supported:',
+        'subscribe' in this.registration.pushManager
+      )
 
       const subscription = await this.registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -143,8 +147,20 @@ export class PushNotificationService {
       await this.trpcClient.webPushNotifications.subscribe.mutate({
         endpoint: subscription.endpoint,
         keys: {
-          p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh') || new ArrayBuffer(0)))),
-          auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth') || new ArrayBuffer(0))))
+          p256dh: btoa(
+            String.fromCharCode(
+              ...new Uint8Array(
+                subscription.getKey('p256dh') || new ArrayBuffer(0)
+              )
+            )
+          ),
+          auth: btoa(
+            String.fromCharCode(
+              ...new Uint8Array(
+                subscription.getKey('auth') || new ArrayBuffer(0)
+              )
+            )
+          )
         }
       })
 
@@ -230,4 +246,4 @@ export class PushNotificationService {
   }
 }
 
-export const pushNotificationService = new PushNotificationService() 
+export const pushNotificationService = new PushNotificationService()
