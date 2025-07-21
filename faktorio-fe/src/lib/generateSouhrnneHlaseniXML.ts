@@ -49,7 +49,6 @@ export function generateSouhrnneHlaseniXML({
       if (
         countryCode.length !== 2 ||
         !/^[A-Z]+$/.test(countryCode) || // Ensure it's letters
-        countryCode === 'CZ' || // Exclude domestic
         vatNumberWithoutPrefix.length === 0 // Ensure there's something after prefix
       ) {
         console.warn(

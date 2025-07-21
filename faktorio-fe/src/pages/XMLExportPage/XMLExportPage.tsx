@@ -22,6 +22,37 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { formatCzechDate } from '@/lib/utils'
 
+// EU country codes
+const EU_COUNTRY_CODES = [
+  'AT',
+  'BE',
+  'BG',
+  'CZ',
+  'HR',
+  'CY',
+  'DK',
+  'EE',
+  'FI',
+  'FR',
+  'DE',
+  'GR',
+  'HU',
+  'IE',
+  'IT',
+  'LV',
+  'LT',
+  'LU',
+  'MT',
+  'NL',
+  'PL',
+  'PT',
+  'RO',
+  'SK',
+  'SI',
+  'ES',
+  'SE'
+]
+
 // Helper function to format date as YYYY-MM-DD
 const formatDate = (date: Date) => {
   const y = date.getFullYear()
@@ -108,7 +139,7 @@ export function XMLExportPage() {
       : getMonthlyDateRange(selectedYear, selectedMonth)
 
   // Fetch issued invoices for the selected period
-  const [issuedInvoicesWithVat] =
+  const [issuedInvoicesWithVat, { refetch: refetchIssuedInvoices }] =
     trpcClient.invoices.listInvoices.useSuspenseQuery({
       from: startDate,
       to: endDate,
@@ -117,14 +148,25 @@ export function XMLExportPage() {
       }
     })
 
-  const [eurInvoices] = trpcClient.invoices.listInvoices.useSuspenseQuery({
-    from: startDate,
-    to: endDate,
-    currency: 'EUR',
-    vat: {
-      maximum: 0 // only include reverse charge invoices for now
+  // Fetch reverse charge invoices (VAT = 0) to filter for EU invoices
+  const [invoicesWithoutVat] =
+    trpcClient.invoices.listInvoices.useSuspenseQuery({
+      from: startDate,
+      to: endDate,
+      vat: {
+        maximum: 0
+      }
+    })
+
+  // Filter reverse charge invoices to only include EU countries based on VAT ID prefix
+  const reverseChargeInvoices = invoicesWithoutVat.filter(
+    (invoice: { client_vat_no?: string | null }) => {
+      if (!invoice.client_vat_no || invoice.client_vat_no.length < 2)
+        return false
+      const countryCode = invoice.client_vat_no.substring(0, 2).toUpperCase()
+      return EU_COUNTRY_CODES.includes(countryCode)
     }
-  })
+  )
 
   // Fetch received invoices for the selected period
   const [receivedInvoices] = trpcClient.receivedInvoices.list.useSuspenseQuery({
@@ -193,7 +235,7 @@ export function XMLExportPage() {
       receivedInvoices,
       submitterData,
       year: selectedYear,
-      czkSumEurServices: eurInvoices.reduce(
+      czkSumEurServices: reverseChargeInvoices.reduce(
         (sum: number, inv: { native_total?: number | null }) =>
           sum + (inv.native_total ?? 0),
         0
@@ -222,7 +264,7 @@ export function XMLExportPage() {
       return
     }
 
-    if (eurInvoices.length === 0) {
+    if (reverseChargeInvoices.length === 0) {
       alert(
         'Nebyly nalezeny žádné relevantní EUR faktury pro generování Souhrnného hlášení.'
       )
@@ -231,7 +273,7 @@ export function XMLExportPage() {
 
     try {
       // Filter is simplified as generator now handles VAT ID parsing and validation
-      const relevantInvoices = eurInvoices.filter(
+      const relevantInvoices = reverseChargeInvoices.filter(
         (inv: {
           client_vat_no?: string | null
           native_total?: number | null
@@ -361,43 +403,28 @@ export function XMLExportPage() {
       </div>
 
       {/* Display Issued Invoices */}
-      <h4 className="text-lg font-semibold mt-4 mb-2">Tuzemské faktury</h4>
-      <IssuedInvoiceTable
-        invoices={issuedInvoicesWithVat}
-        isLoading={false}
-        onDelete={async () => {
-          /* No delete action here */
-        }}
-        onMarkAsPaid={() => {
-          /* No mark as paid action here */
-        }}
-        onMarkAsUnpaid={async () => {
-          /* No mark as unpaid action here */
-        }}
-      />
+      <h4 className="text-lg font-semibold mt-4 mb-2">
+        Tuzemské faktury s DPH
+      </h4>
+      <IssuedInvoiceTable invoices={issuedInvoicesWithVat} isLoading={false} />
 
-      {eurInvoices.length > 0 && (
+      {reverseChargeInvoices.length > 0 && (
         <div className="my-4">
-          <h4 className="text-lg font-semibold mt-4 mb-2">EU faktury</h4>
+          <h4 className="text-lg font-semibold mt-4 mb-2">
+            Reverse charge faktury
+          </h4>
           <IssuedInvoiceTable
-            invoices={eurInvoices}
+            invoices={reverseChargeInvoices}
             isLoading={false}
-            onDelete={async () => {
-              /* No delete action here */
-            }}
-            onMarkAsPaid={() => {
-              /* No mark as paid action here */
-            }}
-            onMarkAsUnpaid={async () => {
-              /* No mark as unpaid action here */
-            }}
           />
 
           <p className="text-sm text-muted-foreground mt-1">
-            Pro účely exportu předpokládáme, že faktury do zemí EU jsou:
-            "Poskytnutí služeb s místem plnění v jiném členském státě vymezených
-            v § 102 odst. 1 písm. d) a odst. 3 písm a)" tedy řádek 21 v daňovém
-            přiznání.
+            EU faktury jsou identifikovány podle prvních 2 písmen DIČ odběratele
+            (např. DE123456789 pro Německo) a zahrnují pouze faktury s
+            přenesenou daňovou povinností (reverse charge) do zemí EU. Pro účely
+            exportu předpokládáme, že se jedná o "Poskytnutí služeb s místem
+            plnění v jiném členském státě vymezených v § 102 odst. 1 písm. d) a
+            odst. 3 písm a)" tedy řádek 21 v daňovém přiznání.
           </p>
         </div>
       )}
@@ -433,7 +460,7 @@ export function XMLExportPage() {
         <div className="flex justify-end space-x-2 flex-wrap gap-y-2">
           <Button
             disabled={
-              eurInvoices.length === 0 ||
+              reverseChargeInvoices.length === 0 ||
               cadence !== 'quarterly' ||
               !isAcknowledgementChecked
             }
@@ -441,7 +468,7 @@ export function XMLExportPage() {
             title={
               cadence !== 'quarterly'
                 ? 'SHV je pouze čtvrtletní'
-                : eurInvoices.length === 0
+                : reverseChargeInvoices.length === 0
                   ? 'Nejsou žádné EUR faktury pro SHV'
                   : undefined
             }

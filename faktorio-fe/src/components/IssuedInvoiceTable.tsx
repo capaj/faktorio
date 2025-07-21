@@ -60,9 +60,9 @@ type CurrencyTotals = {
 interface InvoiceTableProps {
   invoices: Invoice[]
   isLoading: boolean
-  onDelete: (id: string) => Promise<void>
-  onMarkAsPaid: (id: string, number: string) => void
-  onMarkAsUnpaid: (id: string) => Promise<void>
+  onDelete?: (id: string) => Promise<void>
+  onMarkAsPaid?: (id: string, number: string) => void
+  onMarkAsUnpaid?: (id: string) => Promise<void>
   showTotals?: boolean
   year?: number | null
   search?: string
@@ -201,7 +201,7 @@ export function IssuedInvoiceTable({
                     </Link>
                   </DropdownMenuItem>
 
-                  {!invoice.paid_on && (
+                  {!invoice.paid_on && onMarkAsPaid && (
                     <DropdownMenuItem
                       className="cursor-pointer"
                       onSelect={(e) => e.preventDefault()}
@@ -216,7 +216,7 @@ export function IssuedInvoiceTable({
                     </DropdownMenuItem>
                   )}
 
-                  {invoice.paid_on && (
+                  {invoice.paid_on && onMarkAsUnpaid && (
                     <DropdownMenuItem
                       className="text-red-600 focus:text-red-700 focus:bg-red-50"
                       onSelect={(e) => e.preventDefault()}
@@ -231,6 +231,7 @@ export function IssuedInvoiceTable({
                     </DropdownMenuItem>
                   )}
 
+                  {onDelete && (
                   <RemoveDialogUncontrolled
                     title={
                       <span>
@@ -246,7 +247,8 @@ export function IssuedInvoiceTable({
                       <Trash2 size={16} strokeWidth="1.5" />
                       <span className="ml-2">Smazat</span>
                     </DropdownMenuItem>
-                  </RemoveDialogUncontrolled>
+                    </RemoveDialogUncontrolled>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>

@@ -17,7 +17,8 @@ import {
   like,
   lte,
   ne,
-  or
+  or,
+  sql
 } from 'drizzle-orm'
 import { protectedProc } from '../../isAuthorizedMiddleware'
 import { getInvoiceCreateSchema, stringDateSchema } from '../zodSchemas'
@@ -183,24 +184,18 @@ export const invoiceRouter = trpcContext.router({
       }
 
       if (input.vat?.minimum !== null && input.vat?.minimum !== undefined) {
-        const vatCondition = or(
-          gte(invoicesTb.vat_21, input.vat.minimum),
-          gte(invoicesTb.vat_12, input.vat.minimum)
-        )
-        if (vatCondition) {
-          conditions.push(vatCondition)
-        }
+        // Filter for invoices where total VAT is >= minimum
+        // Total VAT = vat_21 + vat_12 (+ other VAT rates if they exist)
+        const totalVatExpression = sql`COALESCE(${invoicesTb.vat_21}, 0) + COALESCE(${invoicesTb.vat_12}, 0)`
+        conditions.push(sql`${totalVatExpression} >= ${input.vat.minimum}`)
       } else if (
         input.vat?.maximum !== null &&
         input.vat?.maximum !== undefined
       ) {
-        const vatCondition = or(
-          lte(invoicesTb.vat_21, input.vat.maximum),
-          lte(invoicesTb.vat_12, input.vat.maximum)
-        )
-        if (vatCondition) {
-          conditions.push(vatCondition)
-        }
+        // Filter for invoices where total VAT is <= maximum
+        // Total VAT = vat_21 + vat_12 (+ other VAT rates if they exist)
+        const totalVatExpression = sql`COALESCE(${invoicesTb.vat_21}, 0) + COALESCE(${invoicesTb.vat_12}, 0)`
+        conditions.push(sql`${totalVatExpression} <= ${input.vat.maximum}`)
       }
 
       if (input.currency) {
