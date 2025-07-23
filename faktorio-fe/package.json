@@ -45,7 +45,7 @@
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@zip.js/zip.js": "^2.7.63",
+    "@zip.js/zip.js": "^2.7.68",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -80,16 +80,16 @@
     "@tailwindcss/vite": "^4.1.11",
     "@types/qrcode": "^1.5.5",
     "@types/sql.js": "^1.4.9",
-    "@typescript-eslint/eslint-plugin": "^8.36.0",
-    "@typescript-eslint/parser": "^8.36.0",
-    "@vitejs/plugin-react-swc": "^3.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "@vitejs/plugin-react-swc": "^3.11.0",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.31.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "gray-matter": "^4.0.3",
-    "marked": "^16.0.0",
+    "marked": "^16.1.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.3",
@@ -97,6 +97,6 @@
     "vite": "^7.0.5",
     "vite-plugin-pwa": "^1.0.1",
     "vitest": "^3.2.4",
-    "wrangler": "^4.24.3"
+    "wrangler": "^4.25.1"
   }
 }
