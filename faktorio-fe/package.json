@@ -51,7 +51,7 @@
     "cmdk": "^1.1.1",
     "dayjs": "^1.11.13",
     "dotenv": "^17.2.0",
-    "drizzle-orm": "^0.44.2",
+    "drizzle-orm": "^0.44.3",
     "faktorio-api": "workspace:*",
     "faktorio-shared": "workspace:*",
     "faktorio-db": "workspace:*",
@@ -94,7 +94,7 @@
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
-    "vite": "^7.0.4",
+    "vite": "^7.0.5",
     "vite-plugin-pwa": "^1.0.1",
     "vitest": "^3.2.4",
     "wrangler": "^4.24.3"

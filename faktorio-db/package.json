@@ -12,6 +12,6 @@
     "faktorio-shared": "workspace:*",
     "@paralleldrive/cuid2": "^2.2.2",
     "dotenv": "^17.2.0",
-    "drizzle-orm": "^0.44.2"
+    "drizzle-orm": "^0.44.3"
   }
 }

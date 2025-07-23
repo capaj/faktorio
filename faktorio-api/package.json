@@ -42,7 +42,7 @@
     "currency-codes": "^2.2.0",
     "debug": "^4.4.1",
     "dotenv": "^17.2.0",
-    "drizzle-orm": "^0.44.2",
+    "drizzle-orm": "^0.44.3",
     "drizzle-zod": "0.8.2",
     "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.8",
