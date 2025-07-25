@@ -44,15 +44,20 @@ export function generateKontrolniHlaseniXML({
   const VAT_THRESHOLD = 10000 // CZK threshold for B2/B3 split
   const todayCzech = formatCzechDate(new Date())
 
-  // Process Issued Invoices (VetaA4)
+  // Process Issued Invoices (VetaA1 for reverse charge, VetaA4 for regular)
+  let vetaA1Xml = ''
   let vetaA4Xml = ''
   let issuedInvoiceSubtotalSum = 0
-  issuedInvoices.forEach((inv, index) => {
+  let a1Index = 0
+  let a4Index = 0
+
+  issuedInvoices.forEach((inv) => {
     const clientVatId = inv.client_vat_no || 'MISSING_DIC_ODB'
     const taxableDate = formatCzechDate(inv.taxable_fulfillment_due)
-    const subtotal = inv.subtotal ?? 0
-    const vatAmount = (inv.total ?? 0) - subtotal
-    issuedInvoiceSubtotalSum += subtotal
+    const subtotalAmount = inv.subtotal ?? 0
+    const totalAmount = inv.total ?? 0
+    const vatAmount = totalAmount - subtotalAmount
+    issuedInvoiceSubtotalSum += subtotalAmount
 
     if (
       !inv.number ||
@@ -67,17 +72,38 @@ export function generateKontrolniHlaseniXML({
       return
     }
 
-    vetaA4Xml += `
+    // Check if this is a reverse charge invoice (no VAT charged)
+    // This happens when subtotal equals total (vatAmount is 0)
+    // and both client and supplier are Czech (CZ VAT IDs)
+    const isReverseCharge =
+      vatAmount === 0 &&
+      clientVatId.startsWith('CZ') &&
+      submitterData.dic.startsWith('CZ')
+
+    if (isReverseCharge) {
+      a1Index++
+      vetaA1Xml += `
+    <VetaA1
+      c_radku="${a1Index}"
+      dic_odb="${clientVatId.replace('CZ', '')}"
+      c_evid_dd="${inv.number}"
+      duzp="${taxableDate}"
+      zakl_dane1="${toInt(subtotalAmount)}"
+    />`
+    } else {
+      a4Index++
+      vetaA4Xml += `
     <VetaA4
-      c_radku="${index + 1}"
+      c_radku="${a4Index}"
       dic_odb="${clientVatId.replace('CZ', '')}"
       c_evid_dd="${inv.number}"
       dppd="${taxableDate}"
-      zakl_dane1="${toInt(subtotal)}"
+      zakl_dane1="${toInt(subtotalAmount)}"
       dan1="${toInt(vatAmount)}"
       kod_rezim_pl="0"
       zdph_44="N"
     />`
+    }
   })
 
   // Process Received Invoices (VetaB2 and VetaB3)
@@ -157,6 +183,7 @@ export function generateKontrolniHlaseniXML({
   <VetaP
     dic="${submitterData.dic.replace('CZ', '')}" typ_ds="${submitterData.typ_ds}" jmeno="${submitterData.jmeno}" prijmeni="${submitterData.prijmeni}" ulice="${submitterData.ulice}" psc="${submitterData.psc}" stat="${submitterData.stat}" email="${submitterData.email}" sest_jmeno="${submitterData.jmeno}" sest_prijmeni="${submitterData.prijmeni}"
   />
+  ${vetaA1Xml}
   ${vetaA4Xml}
   ${vetaB2Xml}
   ${vetaB3Xml}

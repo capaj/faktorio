@@ -98,4 +98,67 @@ describe('generateKontrolniHlaseniXML', () => {
 
     expect(xmlString).toMatchSnapshot()
   })
+
+  it('should handle reverse charge invoice inside czechia-czech contractor invoicing a czech company', () => {
+    // this is a special case where the invoice is issued by a czech company to a czech company, but it is a reverse charge invoice. It only applies to a very limited set of goods and services, for example https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni
+
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-04-21'))
+
+    const mockIssuedInvoices: Invoice[] = [
+      {
+        id: 'iss1',
+        number: '2024-001',
+        client_name: 'Client A',
+        client_vat_no: 'CZ11111111', //
+        taxable_fulfillment_due: '2024-07-15',
+        issued_on: '2024-07-10',
+        sent_at: '2024-07-11',
+        total: 12100,
+        subtotal: 12100,
+        currency: 'CZK',
+        exchange_rate: 1,
+        paid_on: '2024-07-20'
+      }
+    ]
+
+    const mockReceivedInvoices: ReceivedInvoice[] = [
+      {
+        id: 'rec1',
+        supplier_name: 'Supplier B',
+        supplier_vat_no: 'CZ22222222', //
+        invoice_number: 'INV-B-100',
+        issue_date: '2024-08-01',
+        due_date: '2024-08-15',
+        total_without_vat: 5000,
+        total_with_vat: 6050, // Below threshold
+        currency: 'CZK',
+        status: 'paid'
+      }
+    ]
+
+    const mockSubmitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 123',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@submitter.com'
+    }
+    const year = 2024
+    const month = 7 // July
+    // --- Generate XML ---
+    const xmlString = generateKontrolniHlaseniXML({
+      issuedInvoices: mockIssuedInvoices,
+      receivedInvoices: mockReceivedInvoices,
+      submitterData: mockSubmitterData,
+      year,
+      month
+    })
+
+    expect(xmlString).toMatchSnapshot()
+  })
 })
