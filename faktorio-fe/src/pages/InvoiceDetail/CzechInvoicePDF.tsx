@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import ReactPDF, {
   Document,
   Page,
   Text,
   View,
-  StyleSheet,
+  pdfStylesheet,
   Image,
   Font,
   Link,
@@ -15,8 +15,10 @@ import {
   InsertInvoiceItemType,
   SelectInvoiceType
 } from 'faktorio-api/src/zodDbSchemas'
+import { Flex, FlexRow, ItemDescText, pdfpdfStyles, SectionHeading, TextLabel, ThirdWidthColumnRight } from './pdfStyles'
 
 import { reactMainRender } from '@/main'
+import { pdfStyles } from './pdfStyles'
 
 Font.register({
   family: 'Inter',
@@ -74,115 +76,6 @@ function reformatDateToCzech(dateString: string) {
   return `${parseInt(day, 10)}.${parseInt(month, 10)}.${year}`
 }
 
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: 'column',
-    backgroundColor: '#fff',
-    // padding: 10,
-    fontFamily: 'Inter',
-    color: '#000'
-  },
-  section: {
-    marginTop: 10,
-
-    fontSize: 12,
-    fontFamily: 'Inter'
-  },
-  flex: {
-    display: 'flex',
-    flexDirection: 'row'
-  }
-})
-
-const Flex = ({
-  children,
-  style
-}: {
-  children?: React.ReactNode
-  style?: DocumentProps['style']
-}) => {
-  return (
-    <View
-      style={{
-        display: 'flex',
-        ...style
-      }}
-    >
-      {children}
-    </View>
-  )
-}
-
-const SectionHeading = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Text
-      style={{
-        fontSize: 12,
-        color: '#454545'
-      }}
-    >
-      {children}
-    </Text>
-  )
-}
-
-const TextLabel = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Text
-      style={{
-        fontSize: 10,
-        color: '#454545'
-      }}
-    >
-      {children}
-    </Text>
-  )
-}
-
-const FlexRow = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Flex
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        fontSize: 10
-      }}
-    >
-      {children}
-    </Flex>
-  )
-}
-
-const ThirdWidthColumnRight = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Flex
-      style={{
-        width: '33%',
-        textAlign: 'right'
-      }}
-    >
-      <Text>{children}</Text>
-    </Flex>
-  )
-}
-const ItemDescText = ({
-  children,
-  style
-}: {
-  children: React.ReactNode
-  style?: DocumentProps['style']
-}) => {
-  return (
-    <Text
-      style={{
-        marginRight: 10,
-        ...style
-      }}
-    >
-      {children}
-    </Text>
-  )
-}
 
 export const CzechInvoicePDF = ({
   invoiceData,
@@ -215,7 +108,7 @@ export const CzechInvoicePDF = ({
 
   return (
     <Document key={new Date().toISOString()}>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" style={pdfStyles.page}>
         <View
           style={{
             display: 'flex',
@@ -309,7 +202,7 @@ export const CzechInvoicePDF = ({
             >
               <SectionHeading>Dodavatel</SectionHeading>
 
-              <View style={styles.section}>
+              <View style={pdfStyles.section}>
                 <View style={{ maxWidth: '95%' }}>
                   <Text
                     style={{
@@ -343,7 +236,7 @@ export const CzechInvoicePDF = ({
               </Flex>
               <View
                 style={{
-                  ...styles.section,
+                  ...pdfStyles.section,
                   paddingRight: 40
                 }}
               >
@@ -379,7 +272,7 @@ export const CzechInvoicePDF = ({
             >
               <SectionHeading>Odběratel</SectionHeading>
 
-              <View style={styles.section}>
+              <View style={pdfStyles.section}>
                 <Text
                   style={{
                     fontSize: 13,
@@ -559,12 +452,17 @@ export const CzechInvoicePDF = ({
               </FlexRow>
               {Object.entries(taxPaidByRate).map(([rate, tax]) => {
                 return (
-                  <FlexRow key={rate}>
-                    <TextLabel>DPH {Number(rate)}%</TextLabel>
-                    <Text>{formatMoneyCzech(tax, invoiceData.currency)}</Text>
-                  </FlexRow>
+                  <Fragment key={rate}>
+                    <FlexRow >
+                      <TextLabel>DPH {Number(rate)}%</TextLabel>
+                      <Text>{formatMoneyCzech(tax, invoiceData.currency)}</Text>
+                    </FlexRow>
+
+                  </Fragment>
+
                 )
               })}
+
             </Flex>
 
             <Text
@@ -579,6 +477,75 @@ export const CzechInvoicePDF = ({
             </Text>
           </Flex>
         </Flex>
+       { invoiceData.exchange_rate > 1 && <Flex
+          style={{
+            marginTop: 30,
+            marginRight: 22,
+            flexDirection: 'row'
+          }}
+        >
+          <Flex
+            style={{
+              width: '60%'
+            }}
+          ></Flex>
+          <Flex
+            style={{
+              flexDirection: 'column',
+              width: '40%'
+            }}
+          >
+            <Flex
+              style={{
+                borderBottom: '1px solid #444'
+              }}
+            >
+              <Text style={{ fontSize: 12, color: 'gray' }}>
+                Přepočet na CZK kurz <Text style={{ fontWeight: 500, color: 'black' }}>
+                  {invoiceData.exchange_rate} CZK / 1 {invoiceData.currency}
+                </Text>
+              </Text>
+              <FlexRow>
+                <TextLabel>Celkem bez DPH</TextLabel>
+                <Text style={{ color: 'gray' }}>
+                  {formatMoneyCzech(invoiceTotal * invoiceData.exchange_rate, 'CZK')}
+                </Text>
+              </FlexRow>
+              {Object.entries(taxPaidByRate).map(([rate, tax]) => {
+                return (
+                  <Fragment key={rate}>
+
+                    <FlexRow>
+                      <TextLabel style={{ color: 'gray' }}>DPH {Number(rate)}% v CZK</TextLabel>
+                      <Text style={{
+                        color: 'gray'
+                      }}>
+                        {formatMoneyCzech(
+                          tax * invoiceData.exchange_rate,
+                          'CZK'
+                        )}
+                      </Text>
+                    </FlexRow>
+                  </Fragment>
+
+                )
+              })}
+
+            </Flex>
+
+            <Text
+              style={{
+                fontSize: 16,
+                color: 'gray',
+                marginTop: 6,
+                textAlign: 'right',
+                fontWeight: 500
+              }}
+            >
+              {formatMoneyCzech((invoiceTotal + taxTotal) * invoiceData.exchange_rate, 'CZK')}
+            </Text>
+          </Flex>
+        </Flex>}
         <Text style={{ marginLeft: 22, marginTop: 10, fontSize: 10 }}>
           {invoiceData.footer_note}
         </Text>

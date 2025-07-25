@@ -1,14 +1,13 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import {
   Document,
   Page,
   Text,
   View,
-  StyleSheet,
+
   Image,
   Font,
   Link,
-  DocumentProps
 } from '@react-pdf/renderer'
 
 import { formatMoneyEnglish } from '../../lib/formatMoney'
@@ -18,6 +17,7 @@ import {
 } from 'faktorio-api/src/zodDbSchemas'
 
 import { reactMainRender } from '@/main'
+import { Flex, FlexRow, ItemDescText, pdfStyles, SectionHeading, TextLabel, ThirdWidthColumnRight } from './pdfStyles'
 
 Font.register({
   family: 'Inter',
@@ -61,115 +61,7 @@ Font.register({
   ]
 })
 
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: 'column',
-    backgroundColor: '#fff',
-    // padding: 10,
-    fontFamily: 'Inter',
-    color: '#000'
-  },
-  section: {
-    marginTop: 10,
 
-    fontSize: 12,
-    fontFamily: 'Inter'
-  },
-  flex: {
-    display: 'flex',
-    flexDirection: 'row'
-  }
-})
-
-const Flex = ({
-  children,
-  style
-}: {
-  children?: React.ReactNode
-  style?: DocumentProps['style']
-}) => {
-  return (
-    <View
-      style={{
-        display: 'flex',
-        ...style
-      }}
-    >
-      {children}
-    </View>
-  )
-}
-
-const SectionHeading = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Text
-      style={{
-        fontSize: 12,
-        color: '#454545'
-      }}
-    >
-      {children}
-    </Text>
-  )
-}
-
-const TextLabel = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Text
-      style={{
-        fontSize: 10,
-        color: '#454545'
-      }}
-    >
-      {children}
-    </Text>
-  )
-}
-
-const FlexRow = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Flex
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        fontSize: 10
-      }}
-    >
-      {children}
-    </Flex>
-  )
-}
-
-const ThirdWidthColumnRight = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Flex
-      style={{
-        width: '33%',
-        textAlign: 'right'
-      }}
-    >
-      <Text>{children}</Text>
-    </Flex>
-  )
-}
-const ItemDescText = ({
-  children,
-  style
-}: {
-  children: React.ReactNode
-  style?: DocumentProps['style']
-}) => {
-  return (
-    <Text
-      style={{
-        marginRight: 10,
-        ...style
-      }}
-    >
-      {children}
-    </Text>
-  )
-}
 
 export const EnglishInvoicePDF = ({
   invoiceData,
@@ -203,7 +95,7 @@ export const EnglishInvoicePDF = ({
 
   return (
     <Document key={new Date().toISOString()}>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" style={pdfStyles.page}>
         <View
           style={{
             display: 'flex',
@@ -294,7 +186,7 @@ export const EnglishInvoicePDF = ({
               }}
             >
               <SectionHeading>Supplier</SectionHeading>
-              <View style={styles.section}>
+              <View style={pdfStyles.section}>
                 <View style={{ maxWidth: '95%' }}>
                   <Text
                     style={{
@@ -328,7 +220,7 @@ export const EnglishInvoicePDF = ({
               </Flex>
               <View
                 style={{
-                  ...styles.section,
+                  ...pdfStyles.section,
                   paddingRight: 40
                 }}
               >
@@ -363,7 +255,7 @@ export const EnglishInvoicePDF = ({
             >
               <SectionHeading>Recipient</SectionHeading>
 
-              <View style={styles.section}>
+              <View style={pdfStyles.section}>
                 <Text
                   style={{
                     fontSize: 13,
@@ -565,6 +457,75 @@ export const EnglishInvoicePDF = ({
             </Text>
           </Flex>
         </Flex>
+        {invoiceData.exchange_rate > 1 && <Flex
+          style={{
+            marginTop: 30,
+            marginRight: 22,
+            flexDirection: 'row'
+          }}
+        >
+          <Flex
+            style={{
+              width: '60%'
+            }}
+          ></Flex>
+          <Flex
+            style={{
+              flexDirection: 'column',
+              width: '40%'
+            }}
+          >
+            <Flex
+              style={{
+                borderBottom: '1px solid #444'
+              }}
+            >
+              <Text style={{ fontSize: 12, color: 'gray' }}>
+                At the exchange rate <Text style={{ fontWeight: 500, color: 'black' }}>
+                  {invoiceData.exchange_rate} CZK / 1 {invoiceData.currency}
+                </Text>
+              </Text>
+              <FlexRow>
+                <TextLabel style={{ color: 'gray' }}>Total without VAT</TextLabel>
+                <Text style={{ color: 'gray' }}>
+                  {formatMoneyEnglish(invoiceTotal * invoiceData.exchange_rate, 'CZK')}
+                </Text>
+              </FlexRow>
+              {Object.entries(taxPaidByRate).map(([rate, tax]) => {
+                return (
+                  <Fragment key={rate}>
+
+                    <FlexRow>
+                      <TextLabel style={{ color: 'gray' }}>VAT {Number(rate)}% in CZK</TextLabel>
+                      <Text style={{
+                        color: 'gray'
+                      }}>
+                        {formatMoneyEnglish(
+                          tax * invoiceData.exchange_rate,
+                          'CZK'
+                        )}
+                      </Text>
+                    </FlexRow>
+                  </Fragment>
+
+                )
+              })}
+
+            </Flex>
+
+            <Text
+              style={{
+                fontSize: 16,
+                color: 'gray',
+                marginTop: 6,
+                textAlign: 'right',
+                fontWeight: 500
+              }}
+            >
+              {formatMoneyEnglish((invoiceTotal + taxTotal) * invoiceData.exchange_rate, 'CZK')}
+            </Text>
+          </Flex>
+        </Flex>}
         <Text style={{ marginLeft: 22, marginTop: 10, fontSize: 10 }}>
           {invoiceData.footer_note}
         </Text>
