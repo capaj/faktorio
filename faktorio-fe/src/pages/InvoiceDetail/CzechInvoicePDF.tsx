@@ -475,7 +475,7 @@ export const CzechInvoicePDF = ({
             </Text>
           </Flex>
         </Flex>
-        {invoiceData.exchange_rate > 1 && <Flex
+        {invoiceData.exchange_rate !== 1 && <Flex
           style={{
             marginTop: 30,
             marginRight: 22,
