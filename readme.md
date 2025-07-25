@@ -14,21 +14,22 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 
 ## Feature Comparison
 
-| Feature                                    | Faktorio.cz | Fakturovac.cz | Fakturoid.cz | iDoklad.cz |
-| ------------------------------------------ | :---------: | :-----------: | :----------: | :--------: |
-| Generate invoice PDF                       |     ✅      |      ✅       |      ✅      |     ✅     |
-| Extract invoice from a raster image        |     ✅      |      ❌       |      ❌      |     ❌     |
-| Search through invoices                    |     ✅      |      ✅       |      ✅      |     ✅     |
-| Contact management (integrated with ARES)  |     ✅      |      ✅       |      ✅      |     ✅     |
-| Support for foreign currencies             |     ✅      |      ❌       |      ✅      |     ✅     |
-| Export invoices to Excel, CSV              |     ✅      |      ✅       |      ✅      |     ✅     |
-| Export invoices to XML for tax authorities |     ✅      |      ✅       |      ✅      |     ✅     |
-| Send invoices to an email from the app     |     ❌      |      ✅       |      ✅      |     ✅     |
-| API for integrations                       |     ❌      |      ❌       |      ✅      |     ✅     |
-| Push notifications in web app              |     ✅      |      ❌       |      ❌      |     ❌     |
-| Mobile app                                 |     ❌      |      ❌       |      ✅      |     ✅     |
-| English UI                                 |     ❌      |      ❌       |      ✅      |     ✅     |
-| English invoices                           |     ✅      |      ❌       |      ✅      |     ✅     |
+| Feature                                                   | Faktorio.cz | Fakturovac.cz | Fakturoid.cz | iDoklad.cz |
+| --------------------------------------------------------- | :---------: | :-----------: | :----------: | :--------: |
+| Generate invoice PDF                                      |     ✅      |      ✅       |      ✅      |     ✅     |
+| Extract invoice from a raster image                       |     ✅      |      ❌       |      ❌      |     ❌     |
+| Search through invoices                                   |     ✅      |      ✅       |      ✅      |     ✅     |
+| Contact management (integrated with ARES)                 |     ✅      |      ✅       |      ✅      |     ✅     |
+| Support for foreign currencies                            |     ✅      |      ❌       |      ✅      |     ✅     |
+| Export invoices to Excel, CSV                             |     ✅      |      ✅       |      ✅      |     ✅     |
+| Export invoices to XML for tax authorities                |     ✅      |      ✅       |      ✅      |     ✅     |
+| Send invoices to an email from the app                    |     ❌      |      ✅       |      ✅      |     ✅     |
+| API for integrations                                      |     ❌      |      ❌       |      ✅      |     ✅     |
+| Push notifications in web app                             |     ✅      |      ❌       |      ❌      |     ❌     |
+| Mobile app                                                |     ❌      |      ❌       |      ✅      |     ✅     |
+| English UI                                                |     ❌      |      ❌       |      ✅      |     ✅     |
+| English invoices                                          |     ✅      |      ❌       |      ✅      |     ✅     |
+| Support reverse charge invoices(both domestic and abroad) |     ✅      |      ❌       |      ✅      |     ✅     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
 
