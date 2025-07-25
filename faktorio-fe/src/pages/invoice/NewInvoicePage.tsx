@@ -17,6 +17,14 @@ import { FormItem, FormLabel, FormControl } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { BankDetailsAccordion } from './BankDetailsAccordion'
 import { createDateFieldConfig } from './dateFieldConfig'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog'
 
 const defaultInvoiceItem = {
   description: '',
@@ -107,7 +115,7 @@ export const NewInvoice = () => {
     (acc, item) =>
       acc +
       ((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
-        100,
+      100,
     0
   )
 
@@ -199,13 +207,13 @@ export const NewInvoice = () => {
             formValues.currency === 'CZK'
               ? { fieldType: () => null }
               : {
-                  inputProps: {
-                    type: 'number',
-                    min: 0,
-                    disabled: !isCzkInvoice
-                  },
-                  label: 'Kurz'
+                inputProps: {
+                  type: 'number',
+                  min: 0,
+                  disabled: !isCzkInvoice
                 },
+                label: 'Kurz'
+              },
           // Hide bank account fields from the main form
           bank_account: {
             fieldType: () => null
@@ -231,6 +239,8 @@ export const NewInvoice = () => {
             <InvoiceItemForm
               key={index}
               data={item}
+              contactsQuery={contactsQuery}
+              selectedContactId={formValues.client_contact_id}
               onDelete={() => {
                 setInvoiceItems(invoiceItems.filter((_, i) => i !== index))
               }}
@@ -323,17 +333,50 @@ export const NewInvoice = () => {
 const InvoiceItemForm = ({
   data,
   onDelete,
-  onChange
+  onChange,
+  contactsQuery,
+  selectedContactId
 }: {
   data: z.infer<typeof invoiceItemFormSchema>
   onDelete: () => void
   onChange: (data: z.infer<typeof invoiceItemFormSchema>) => void
+  contactsQuery: any
+  selectedContactId?: string
 }) => {
   const zodForm = useZodFormState(invoiceItemFormSchema, data)
+  const [showVatWarning, setShowVatWarning] = useState<boolean | null>(null)
 
   useEffect(() => {
     onChange(zodForm.formState)
   }, [zodForm.formState])
+
+  const handleVatRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const vatRate = parseFloat(e.target.value)
+
+    // Check if VAT rate is 0 and contact is Czech, but only if warning hasn't been dismissed
+    if (vatRate === 0 && selectedContactId && contactsQuery.data && showVatWarning !== false) {
+      const selectedContact = contactsQuery.data.find(
+        (contact: any) => contact.id === selectedContactId
+      )
+
+      if (selectedContact?.vat_no?.startsWith('CZ')) {
+        setShowVatWarning(true)
+        return
+      }
+    }
+
+    // If not a problematic case, proceed with normal change
+    zodForm.inputProps('vat_rate').onChange(e)
+  }
+
+  const handleConfirmZeroVat = () => {
+    // User confirmed they want to use 0% VAT
+    setShowVatWarning(false) // Set to false to never show again
+
+    zodForm.setField('vat_rate', 0)
+
+  }
+
 
   return (
     <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 align-baseline items-end">
@@ -403,6 +446,7 @@ const InvoiceItemForm = ({
             type="number"
             min={0}
             {...zodForm.inputProps('vat_rate')}
+            onChange={handleVatRateChange}
           />
         </div>
         <div>
@@ -415,6 +459,43 @@ const InvoiceItemForm = ({
           </button>
         </div>
       </div>
+
+      <Dialog open={showVatWarning === true} onOpenChange={(open) => {
+        if (!open) {
+          setShowVatWarning(null)
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upozornění</DialogTitle>
+            <DialogDescription>
+              Nulová DPH pro tuzemskou fakturu lze použít pouze pro omezené typy zboží a služeb. Zde je jejich výčet:{' '}
+              <a
+                href="https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
+                https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni
+              </a>
+
+              <p className='mt-4'>
+                V xml exportu kontrolního hlášení bude tato faktura v sekci A.1 a budete muset ručně doplnit kód plnění
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowVatWarning(null)
+            }}>
+              Zrušit
+            </Button>
+            <Button onClick={handleConfirmZeroVat}>
+              Rozumím, pokračovat s 0% DPH
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
