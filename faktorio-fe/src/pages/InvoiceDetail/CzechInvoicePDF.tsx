@@ -1,24 +1,22 @@
 import React, { Fragment } from 'react'
-import ReactPDF, {
+import {
   Document,
   Page,
   Text,
   View,
-  pdfStylesheet,
   Image,
   Font,
   Link,
-  DocumentProps
 } from '@react-pdf/renderer'
 import { formatMoneyCzech } from '../../lib/formatMoney'
 import {
   InsertInvoiceItemType,
   SelectInvoiceType
 } from 'faktorio-api/src/zodDbSchemas'
-import { Flex, FlexRow, ItemDescText, pdfpdfStyles, SectionHeading, TextLabel, ThirdWidthColumnRight } from './pdfStyles'
+import { Flex, FlexRow, ItemDescText, pdfStyles, SectionHeading, TextLabel, ThirdWidthColumnRight } from './pdfStyles'
 
 import { reactMainRender } from '@/main'
-import { pdfStyles } from './pdfStyles'
+
 
 Font.register({
   family: 'Inter',
@@ -477,7 +475,7 @@ export const CzechInvoicePDF = ({
             </Text>
           </Flex>
         </Flex>
-       { invoiceData.exchange_rate > 1 && <Flex
+        {invoiceData.exchange_rate > 1 && <Flex
           style={{
             marginTop: 30,
             marginRight: 22,
