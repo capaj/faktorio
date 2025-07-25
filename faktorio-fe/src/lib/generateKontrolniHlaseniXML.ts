@@ -54,8 +54,8 @@ export function generateKontrolniHlaseniXML({
   issuedInvoices.forEach((inv) => {
     const clientVatId = inv.client_vat_no
     const taxableDate = formatCzechDate(inv.taxable_fulfillment_due)
-    const subtotalAmount = inv.subtotal ?? 0
-    const totalAmount = inv.total ?? 0
+    const subtotalAmount = inv.native_subtotal ?? 0
+    const totalAmount = inv.native_total ?? 0
     const vatAmount = totalAmount - subtotalAmount
     issuedInvoiceSubtotalSum += subtotalAmount
 

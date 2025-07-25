@@ -41,6 +41,8 @@ export type Invoice = Pick<
   | 'issued_on'
   | 'sent_at'
   | 'total'
+  | 'native_total'
+  | 'native_subtotal'
   | 'subtotal'
   | 'currency'
   | 'paid_on'
@@ -158,11 +160,10 @@ export function IssuedInvoiceTable({
             <TableCell>{formatCzechDate(invoice.sent_at)}</TableCell>
             <TableCell>
               <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  invoice.paid_on
+                className={`px-2 py-1 rounded-full text-xs font-medium ${invoice.paid_on
                     ? 'bg-green-100 text-green-800'
                     : 'bg-yellow-100 text-yellow-800'
-                }`}
+                  }`}
               >
                 {invoice.paid_on
                   ? formatCzechDate(invoice.paid_on)
@@ -223,8 +224,8 @@ export function IssuedInvoiceTable({
                       onClick={async () => {
                         await onMarkAsUnpaid(invoice.id)
                       }}
-                      // Consider passing mutation status if needed for disabling
-                      // disabled={markAsUnpaidMutation.isPending}
+                    // Consider passing mutation status if needed for disabling
+                    // disabled={markAsUnpaidMutation.isPending}
                     >
                       <XCircle size={16} strokeWidth="1.5" />
                       <span className="ml-2">Označit jako nezaplacené</span>
@@ -232,21 +233,21 @@ export function IssuedInvoiceTable({
                   )}
 
                   {onDelete && (
-                  <RemoveDialogUncontrolled
-                    title={
-                      <span>
-                        Opravdu chcete smazat fakturu{' '}
-                        <strong>{invoice.number}</strong>?
-                      </span>
-                    }
-                    onRemove={async () => {
-                      await onDelete(invoice.id)
-                    }}
-                  >
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Trash2 size={16} strokeWidth="1.5" />
-                      <span className="ml-2">Smazat</span>
-                    </DropdownMenuItem>
+                    <RemoveDialogUncontrolled
+                      title={
+                        <span>
+                          Opravdu chcete smazat fakturu{' '}
+                          <strong>{invoice.number}</strong>?
+                        </span>
+                      }
+                      onRemove={async () => {
+                        await onDelete(invoice.id)
+                      }}
+                    >
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Trash2 size={16} strokeWidth="1.5" />
+                        <span className="ml-2">Smazat</span>
+                      </DropdownMenuItem>
                     </RemoveDialogUncontrolled>
                   )}
                 </DropdownMenuContent>
@@ -279,7 +280,7 @@ export function IssuedInvoiceTable({
                   {currencyTotals[currency].count === 1
                     ? 'faktura'
                     : currencyTotals[currency].count > 1 &&
-                        currencyTotals[currency].count < 5
+                      currencyTotals[currency].count < 5
                       ? 'faktury'
                       : 'faktur'}{' '}
                   v {currency}

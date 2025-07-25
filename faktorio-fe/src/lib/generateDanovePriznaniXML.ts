@@ -28,8 +28,8 @@ export function generateDanovePriznaniXML({
   let obrat23 = 0
   let dan23 = 0
   issuedInvoices.forEach((inv) => {
-    const subtotal = inv.subtotal ?? 0
-    const vatAmount = (inv.total ?? 0) - subtotal
+    const subtotal = inv.native_subtotal ?? 0
+    const vatAmount = (inv.native_total ?? 0) - subtotal
     obrat23 += subtotal
     dan23 += vatAmount
   })
