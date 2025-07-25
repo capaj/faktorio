@@ -52,23 +52,15 @@ export function generateKontrolniHlaseniXML({
   let a4Index = 0
 
   issuedInvoices.forEach((inv) => {
-    const clientVatId = inv.client_vat_no || 'MISSING_DIC_ODB'
+    const clientVatId = inv.client_vat_no
     const taxableDate = formatCzechDate(inv.taxable_fulfillment_due)
     const subtotalAmount = inv.subtotal ?? 0
     const totalAmount = inv.total ?? 0
     const vatAmount = totalAmount - subtotalAmount
     issuedInvoiceSubtotalSum += subtotalAmount
 
-    if (
-      !inv.number ||
-      !taxableDate ||
-      !clientVatId ||
-      clientVatId === 'MISSING_DIC_ODB'
-    ) {
-      console.warn(
-        'Skipping issued invoice due to missing data (number, taxableDate, clientVatId):',
-        inv
-      )
+    if (!clientVatId) {
+      console.warn('Skipping issued invoice due to missing client VAT ID:', inv)
       return
     }
 

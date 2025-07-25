@@ -159,12 +159,12 @@ export function XMLExportPage() {
     })
 
   // Filter reverse charge invoices to only include EU countries based on VAT ID prefix
-  const reverseChargeInvoices = invoicesWithoutVat.filter(
+  const reverseChargeAbroadInvoices = invoicesWithoutVat.filter(
     (invoice: { client_vat_no?: string | null }) => {
       if (!invoice.client_vat_no || invoice.client_vat_no.length < 2)
         return false
       const countryCode = invoice.client_vat_no.substring(0, 2).toUpperCase()
-      return EU_COUNTRY_CODES.includes(countryCode)
+      return EU_COUNTRY_CODES.includes(countryCode) && countryCode !== 'CZ'
     }
   )
 
@@ -235,7 +235,7 @@ export function XMLExportPage() {
       receivedInvoices,
       submitterData,
       year: selectedYear,
-      czkSumEurServices: reverseChargeInvoices.reduce(
+      czkSumEurServices: reverseChargeAbroadInvoices.reduce(
         (sum: number, inv: { native_total?: number | null }) =>
           sum + (inv.native_total ?? 0),
         0
@@ -264,7 +264,7 @@ export function XMLExportPage() {
       return
     }
 
-    if (reverseChargeInvoices.length === 0) {
+    if (reverseChargeAbroadInvoices.length === 0) {
       alert(
         'Nebyly nalezeny žádné relevantní EUR faktury pro generování Souhrnného hlášení.'
       )
@@ -273,7 +273,7 @@ export function XMLExportPage() {
 
     try {
       // Filter is simplified as generator now handles VAT ID parsing and validation
-      const relevantInvoices = reverseChargeInvoices.filter(
+      const relevantInvoices = reverseChargeAbroadInvoices.filter(
         (inv: {
           client_vat_no?: string | null
           native_total?: number | null
@@ -408,13 +408,13 @@ export function XMLExportPage() {
       </h4>
       <IssuedInvoiceTable invoices={issuedInvoicesWithVat} isLoading={false} />
 
-      {reverseChargeInvoices.length > 0 && (
+      {reverseChargeAbroadInvoices.length > 0 && (
         <div className="my-4">
           <h4 className="text-lg font-semibold mt-4 mb-2">
-            Reverse charge faktury
+            Reverse charge faktury mezinárodní v rámci EU
           </h4>
           <IssuedInvoiceTable
-            invoices={reverseChargeInvoices}
+            invoices={reverseChargeAbroadInvoices}
             isLoading={false}
           />
 
@@ -460,7 +460,7 @@ export function XMLExportPage() {
         <div className="flex justify-end space-x-2 flex-wrap gap-y-2">
           <Button
             disabled={
-              reverseChargeInvoices.length === 0 ||
+              reverseChargeAbroadInvoices.length === 0 ||
               cadence !== 'quarterly' ||
               !isAcknowledgementChecked
             }
@@ -468,7 +468,7 @@ export function XMLExportPage() {
             title={
               cadence !== 'quarterly'
                 ? 'SHV je pouze čtvrtletní'
-                : reverseChargeInvoices.length === 0
+                : reverseChargeAbroadInvoices.length === 0
                   ? 'Nejsou žádné EUR faktury pro SHV'
                   : undefined
             }

@@ -10,8 +10,10 @@
     "faktorio",
     "fakturoid",
     "gstatic",
+    "Hlaseni",
     "IBAN",
     "ilike",
+    "Kontrolni",
     "libsql",
     "Lucide",
     "Mailjet",
@@ -20,7 +22,8 @@
     "TRPC",
     "tsndr",
     "turso",
-    "unparse"
+    "unparse",
+    "Veta"
   ],
   "ignoreWords": [],
   "import": []
