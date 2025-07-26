@@ -27,6 +27,8 @@ describe('generateKontrolniHlaseniXML', () => {
         sent_at: '2024-07-11',
         total: 12100,
         subtotal: 10000,
+        native_subtotal: 10000, // Use native_subtotal for consistency
+        native_total: 12100, // 21% VAT
         currency: 'CZK',
         exchange_rate: 1,
         paid_on: '2024-07-20'
@@ -116,6 +118,8 @@ describe('generateKontrolniHlaseniXML', () => {
         sent_at: '2024-07-11',
         total: 12100,
         subtotal: 12100,
+        native_subtotal: 12100, // Use native_subtotal for consistency
+        native_total: 12100, // 0% VAT for reverse charge
         currency: 'CZK',
         exchange_rate: 1,
         paid_on: '2024-07-20'

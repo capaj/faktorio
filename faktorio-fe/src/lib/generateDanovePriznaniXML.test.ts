@@ -34,6 +34,8 @@ describe('generateDanovePriznaniXML', () => {
         exchange_rate: 1,
         taxable_fulfillment_due: new Date('2024-07-15').toISOString(),
         subtotal: 10000,
+        native_subtotal: 10000, // Use native_subtotal for consistency
+        native_total: 12100, // 21% VAT
         total: 12100, // 21% VAT
         currency: 'CZK'
       },
@@ -49,6 +51,8 @@ describe('generateDanovePriznaniXML', () => {
         taxable_fulfillment_due: new Date('2024-08-05').toISOString(),
         subtotal: 5000,
         total: 6050, // 21% VAT
+        native_subtotal: 5000, // Use native_subtotal for consistency
+        native_total: 6050, // 21% VAT
         currency: 'CZK'
       }
     ]
