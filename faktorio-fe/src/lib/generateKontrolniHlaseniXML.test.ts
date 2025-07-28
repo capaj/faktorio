@@ -34,7 +34,7 @@ describe('generateKontrolniHlaseniXML', () => {
         paid_on: '2024-07-20'
       }
     ]
-
+´
     const mockReceivedInvoices: ReceivedInvoice[] = [
       {
         id: 'rec1',
