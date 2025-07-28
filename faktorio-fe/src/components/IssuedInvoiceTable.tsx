@@ -126,6 +126,11 @@ export function IssuedInvoiceTable({
     }
     return acc + amountInCZK
   }, 0)
+  const totalVAT = invoices.reduce((acc, invoice) => {
+    // Assuming native_total includes VAT, we can calculate VAT as:
+    const vat = (invoice.native_total ?? 0) - invoice.native_subtotal
+    return acc + (vat > 0 ? vat : 0) // Only add positive VAT amounts
+  }, 0)
 
   const sortedCurrencies = Object.keys(currencyTotals).sort()
 
@@ -161,8 +166,8 @@ export function IssuedInvoiceTable({
             <TableCell>
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${invoice.paid_on
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-yellow-100 text-yellow-800'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-yellow-100 text-yellow-800'
                   }`}
               >
                 {invoice.paid_on
@@ -302,7 +307,7 @@ export function IssuedInvoiceTable({
             {/* Overall Total Count, Sum, and Download Row - Only show if multiple currencies */}
             {Object.keys(currencyTotals).length > 1 && (
               <TableRow className="bg-gray-200 font-semibold">
-                <TableCell colSpan={7}>
+                <TableCell colSpan={5}>
                   {' '}
                   {/* Adjusted colspan to push sum next to button */}
                   Ve všech měnách {invoices.length}{' '}
@@ -312,10 +317,21 @@ export function IssuedInvoiceTable({
                       ? 'faktury'
                       : 'faktur'}
                 </TableCell>
+                <TableCell colSpan={1} className="text-right">
+                  Celkem částka DPH: {formatNumberWithSpaces(totalVAT)} CZK
+                </TableCell>
+
+                <TableCell colSpan={1} className="text-left whitespace-nowrap">
+                  {formatNumberWithSpaces(
+                    invoices.reduce((acc, inv) => acc + inv.native_subtotal, 0)
+                  )}{' '}
+                  CZK
+                </TableCell>
                 {/* Display the total sum in CZK */}
                 <TableCell colSpan={1} className="text-left whitespace-nowrap">
                   {formatNumberWithSpaces(totalSumCZK)} CZK
                 </TableCell>
+
                 <TableCell className="text-right">
                   {year !== undefined && search !== undefined && (
                     <InvoicesDownloadButton year={year} search={search} />
