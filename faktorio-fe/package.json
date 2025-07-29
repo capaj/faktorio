@@ -55,7 +55,7 @@
     "faktorio-shared": "workspace:*",
     "faktorio-db": "workspace:*",
     "lodash-es": "^4.17.21",
-    "lucide-react": "^0.527.0",
+    "lucide-react": "^0.532.0",
     "microdiff": "^1.5.0",
     "next-themes": "^0.4.6",
     "papaparse": "^5.5.3",
@@ -72,7 +72,7 @@
     "usehooks-ts": "^3.1.1",
     "valtio": "^2.1.5",
     "wouter": "^3.7.1",
-    "zod": "^4.0.10",
+    "zod": "^4.0.11",
     "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
