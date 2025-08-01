@@ -115,7 +115,7 @@ export const NewInvoicePage = () => {
     (acc, item) =>
       acc +
       ((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
-        100,
+      100,
     0
   )
 
@@ -207,30 +207,30 @@ export const NewInvoicePage = () => {
             formValues.currency === 'CZK'
               ? { fieldType: () => null }
               : {
-                  fieldType: ({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Kurz
-                        <span className="text-destructive">{`\u00A0*`}</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          step={0.01}
-                          disabled={false}
-                          {...field}
-                          value={field.value ?? ''}
-                          onBlur={(e) => {
-                            const value = e.target.value
-                            const numValue = parseFloat(value)
-                            field.onChange(isNaN(numValue) ? null : numValue)
-                          }}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )
-                },
+                fieldType: ({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Kurz
+                      <span className="text-destructive">{`\u00A0*`}</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        disabled={false}
+                        {...field}
+                        value={field.value ?? ''}
+                        onBlur={(e) => {
+                          const value = e.target.value
+                          const numValue = parseFloat(value)
+                          field.onChange(isNaN(numValue) ? null : numValue)
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )
+              },
           // Hide bank account fields from the main form
           bank_account: {
             fieldType: () => null
@@ -371,12 +371,7 @@ const InvoiceItemForm = ({
     const vatRate = parseFloat(e.target.value)
 
     // Check if VAT rate is 0 and contact is Czech, but only if warning hasn't been dismissed
-    if (
-      vatRate === 0 &&
-      selectedContactId &&
-      contactsQuery.data &&
-      showVatWarning !== false
-    ) {
+    if (vatRate === 0 && selectedContactId && contactsQuery.data && showVatWarning !== false) {
       const selectedContact = contactsQuery.data.find(
         (contact: any) => contact.id === selectedContactId
       )
@@ -396,7 +391,9 @@ const InvoiceItemForm = ({
     setShowVatWarning(false) // Set to false to never show again
 
     zodForm.setField('vat_rate', 0)
+
   }
+
 
   return (
     <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 align-baseline items-end">
@@ -480,20 +477,16 @@ const InvoiceItemForm = ({
         </div>
       </div>
 
-      <Dialog
-        open={showVatWarning === true}
-        onOpenChange={(open) => {
-          if (!open) {
-            setShowVatWarning(null)
-          }
-        }}
-      >
+      <Dialog open={showVatWarning === true} onOpenChange={(open) => {
+        if (!open) {
+          setShowVatWarning(null)
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Upozornění</DialogTitle>
             <DialogDescription>
-              Nulová DPH pro tuzemskou fakturu lze použít pouze pro omezené typy
-              zboží a služeb. Zde je jejich výčet:{' '}
+              Nulová DPH pro tuzemskou fakturu lze použít pouze pro omezené typy zboží a služeb. Zde je jejich výčet:{' '}
               <a
                 href="https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni"
                 target="_blank"
@@ -502,19 +495,16 @@ const InvoiceItemForm = ({
               >
                 https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni
               </a>
-              <p className="mt-4">
-                V xml exportu kontrolního hlášení bude tato faktura v sekci A.1
-                a budete muset ručně doplnit kód plnění
+
+              <p className='mt-4'>
+                V xml exportu kontrolního hlášení bude tato faktura v sekci A.1 a budete muset ručně doplnit kód plnění
               </p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowVatWarning(null)
-              }}
-            >
+            <Button variant="outline" onClick={() => {
+              setShowVatWarning(null)
+            }}>
               Zrušit
             </Button>
             <Button onClick={handleConfirmZeroVat}>
