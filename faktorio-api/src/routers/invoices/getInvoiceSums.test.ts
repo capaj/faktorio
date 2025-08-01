@@ -12,8 +12,12 @@ describe('getInvoiceSums', () => {
       native_total: 0,
       vat_base_21: 0,
       vat_21: 0,
+      vat_base_15: 0,
+      vat_15: 0,
       vat_base_12: 0,
       vat_12: 0,
+      vat_base_10: 0,
+      vat_10: 0,
       vat_base_0: 0
     })
   })
@@ -45,8 +49,12 @@ describe('getInvoiceSums', () => {
     expect(result.native_total).toBeCloseTo(302.5)
     expect(result.vat_base_21).toBeCloseTo(250)
     expect(result.vat_21).toBeCloseTo(52.5)
+    expect(result.vat_base_15).toBeCloseTo(0)
+    expect(result.vat_15).toBeCloseTo(0)
     expect(result.vat_base_12).toBeCloseTo(0)
     expect(result.vat_12).toBeCloseTo(0)
+    expect(result.vat_base_10).toBeCloseTo(0)
+    expect(result.vat_10).toBeCloseTo(0)
   })
 
   it('should calculate correct sums with exchange rate', () => {
@@ -105,8 +113,12 @@ describe('getInvoiceSums', () => {
     expect(result.total).toBeCloseTo(599.6)
     expect(result.vat_base_21).toBeCloseTo(200)
     expect(result.vat_21).toBeCloseTo(42)
+    expect(result.vat_base_15).toBeCloseTo(0)
+    expect(result.vat_15).toBeCloseTo(0)
     expect(result.vat_base_12).toBeCloseTo(230)
     expect(result.vat_12).toBeCloseTo(27.6)
+    expect(result.vat_base_10).toBeCloseTo(0)
+    expect(result.vat_10).toBeCloseTo(0)
     expect(result.vat_base_0).toBeCloseTo(100)
   })
 
@@ -139,8 +151,12 @@ describe('getInvoiceSums', () => {
     // VAT bases depend on vat_rate filter
     expect(result.vat_base_21).toBeCloseTo(0)
     expect(result.vat_21).toBeCloseTo(0)
+    expect(result.vat_base_15).toBeCloseTo(0)
+    expect(result.vat_15).toBeCloseTo(0)
     expect(result.vat_base_12).toBeCloseTo(0)
     expect(result.vat_12).toBeCloseTo(0)
+    expect(result.vat_base_10).toBeCloseTo(0)
+    expect(result.vat_10).toBeCloseTo(0)
     expect(result.vat_base_0).toBeCloseTo(0)
   })
 })
