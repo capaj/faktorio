@@ -81,7 +81,7 @@ function AutoForm<SchemaType extends ZodObjectOrWrapped>({
     if (parsedValues.success) {
       onParsedValuesChange?.(parsedValues.data as z.infer<SchemaType>)
     } else {
-      // console.log('parsedValues', parsedValues)
+      console.log('Form validation failed:', parsedValues.error)
     }
   }, [valuesString])
 

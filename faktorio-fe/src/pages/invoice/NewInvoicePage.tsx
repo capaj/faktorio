@@ -186,7 +186,7 @@ export const NewInvoice = () => {
           },
           client_contact_id: {
             label: 'Odběratel',
-            fieldType: ({ label, isRequired, field, fieldConfigItem }) => (
+            fieldType: ({ label, isRequired, field }) => (
               <FormItem className="flex flex-col flew-grow">
                 <FormLabel>
                   {label}
@@ -207,12 +207,29 @@ export const NewInvoice = () => {
             formValues.currency === 'CZK'
               ? { fieldType: () => null }
               : {
-                inputProps: {
-                  type: 'number',
-                  min: 0,
-                  disabled: !isCzkInvoice
-                },
-                label: 'Kurz'
+                fieldType: ({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Kurz
+                      <span className="text-destructive">{`\u00A0*`}</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        disabled={false}
+                        {...field}
+                        value={field.value ?? ''}
+                        onBlur={(e) => {
+                          const value = e.target.value
+                          const numValue = parseFloat(value)
+                          field.onChange(isNaN(numValue) ? null : numValue)
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )
               },
           // Hide bank account fields from the main form
           bank_account: {
@@ -269,26 +286,26 @@ export const NewInvoice = () => {
         <>
           {isCzkInvoice && (
             <span className="text-sm text-gray-500">
-              Celkem: {total * exchangeRate} CZK
+              Celkem: {(total * exchangeRate).toFixed(2)} CZK
             </span>
           )}
           <h3
             className={`text-md text-right ${isCzkInvoice ? '' : 'col-span-2'}`}
           >
-            Celkem: {total} {formValues.currency}
+            Celkem: {total.toFixed(2)} {formValues.currency}
           </h3>
           {isCzkInvoice && (
             <span className="text-sm text-gray-500">
-              DPH: {totalVat * exchangeRate} CZK
+              DPH: {(totalVat * exchangeRate).toFixed(2)} CZK
             </span>
           )}
           <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
-            DPH: {totalVat} {formValues.currency}
+            DPH: {totalVat.toFixed(2)} {formValues.currency}
           </h3>
 
           {isCzkInvoice && (
             <span className="text-sm text-gray-500">
-              Celkem s DPH: {(total + totalVat) * exchangeRate} CZK
+              Celkem s DPH: {((total + totalVat) * exchangeRate).toFixed(2)} CZK
             </span>
           )}
           <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
