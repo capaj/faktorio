@@ -3,7 +3,7 @@ import { Route } from 'wouter'
 // Create Document Component
 import { InvoiceDetailPage } from './pages/InvoiceDetail/InvoiceDetailPage'
 import { InvoiceListPage } from './pages/InvoiceList/InvoiceListPage'
-import { NewInvoice } from './pages/invoice/NewInvoicePage'
+import { NewInvoicePage } from './pages/invoice/NewInvoicePage'
 import { ContactList } from './pages/ContactList/ContactList'
 import { MyInvoicingDetails } from './pages/MyInvoicingDetails'
 import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
@@ -23,7 +23,7 @@ export const SignedInRoutes = () => {
         <Route path="/invoices" component={InvoiceListPage}></Route>
         <Route path="/contacts" component={ContactList}></Route>
         <Route path="/contacts/:contactId" component={ContactList}></Route>
-        <Route path="/new-invoice" component={NewInvoice}></Route>
+        <Route path="/new-invoice" component={NewInvoicePage}></Route>
         {!isLocalUser && (
           <Route
             path="/received-invoices"
