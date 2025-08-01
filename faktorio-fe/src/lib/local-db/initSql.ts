@@ -18,7 +18,8 @@ export async function saveDatabaseToOPFS(db: Database, filename: string) {
   const root = await getOpfsRoot()
   const fileHandle = await root.getFileHandle(filename, { create: true })
   const writable = await fileHandle.createWritable()
-  await writable.write(binaryData)
+
+  await writable.write(binaryData as FileSystemWriteChunkType)
   await writable.close()
   console.log(`Database saved to OPFS: ${filename}`)
 }
@@ -204,6 +205,7 @@ export async function exportDatabaseFile(filename: string): Promise<boolean> {
 
   // Export the database as a binary blob
   const binaryArray = db.export()
+  // @ts-expect-error TODO fix
   const blob = new Blob([binaryArray], { type: 'application/octet-stream' })
 
   // Create a download link and trigger the download

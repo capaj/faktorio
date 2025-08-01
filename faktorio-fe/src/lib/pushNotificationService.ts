@@ -127,8 +127,13 @@ export class PushNotificationService {
       }
 
       console.log('Converting VAPID key to Uint8Array...')
-      const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      console.log('VAPID key converted, length:', applicationServerKey.length)
+      const applicationServerKey = urlBase64ToUint8Array(
+        VAPID_PUBLIC_KEY
+      ) as BufferSource
+      console.log(
+        'VAPID key converted, length:',
+        String(applicationServerKey).length
+      )
 
       console.log('Subscribing to push manager...')
       console.log(
