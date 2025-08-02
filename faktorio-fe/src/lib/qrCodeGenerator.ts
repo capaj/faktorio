@@ -1,15 +1,21 @@
 export interface BankingInfo {
-  accountNumber: string // The bank account number in IBAN format
+  accountNumber: string | null // The bank account number in IBAN format
   amount: number // The amount to be transferred
   currency: string // The currency code (e.g., CZK, EUR)
   message?: string // Optional payment message to the recipient
   variableSymbol?: string // Optional variable symbol for identifying the payment
 }
 
-export function generateQrPaymentString(bankingInfo: BankingInfo): string {
+/** Generate a QR payment string from banking information. Should work for most czech banking mobile apps */
+export function generateQrPaymentString(
+  bankingInfo: BankingInfo
+): string | null {
   const { accountNumber, amount, currency, message, variableSymbol } =
     bankingInfo
 
+  if (!accountNumber) {
+    return null
+  }
   // Start with the payment identifier and version
   let qrData = 'SPD*1.0'
 

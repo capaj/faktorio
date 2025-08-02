@@ -77,7 +77,7 @@ export const InvoiceDetail = ({
 
   const qrCodeBase64 = useQRCodeBase64(
     generateQrPaymentString({
-      accountNumber: invoice.iban?.replace(/\s/g, '') ?? '',
+      accountNumber: invoice.iban?.replace(/\s/g, '') ?? invoice.bank_account ?? null,
       amount: invoiceTotal + taxTotal,
       currency: invoice.currency,
       variableSymbol: invoice.number.replace('-', ''),
@@ -87,15 +87,7 @@ export const InvoiceDetail = ({
 
   const PdfContent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
 
-  if (!qrCodeBase64) {
-    return (
-      <div className="h-full place-content-center flex flex-col">
-        <div className="flex justify-center items-center h-full">
-          <div className="text-lg text-gray-600">Načítání faktury...</div>
-        </div>
-      </div>
-    )
-  }
+
 
   return (
     <>

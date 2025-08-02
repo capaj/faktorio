@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 
-export const useQRCodeBase64 = (data: string) => {
+export const useQRCodeBase64 = (data: string | null) => {
   const [base64URL, setBase64URL] = useState('')
 
   useEffect(() => {

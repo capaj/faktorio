@@ -68,7 +68,7 @@ export const EnglishInvoicePDF = ({
   qrCodeBase64
 }: {
   invoiceData: SelectInvoiceType & { items: InsertInvoiceItemType[] }
-  qrCodeBase64: string
+  qrCodeBase64?: string
 }) => {
   const taxPaidByRate: Record<number, number> = invoiceData.items.reduce(
     (acc, item) => {
@@ -121,27 +121,28 @@ export const EnglishInvoicePDF = ({
                   width: '50%'
                 }}
               >
-                <View
-                  style={{
-                    margin: 20
-                  }}
-                >
-                  <Text
+                {qrCodeBase64 && (
+                  <View
                     style={{
-                      fontSize: 13
+                      margin: 20
                     }}
                   >
-                    QR Payment:
-                  </Text>
+                    <Text
+                      style={{
+                        fontSize: 13
+                      }}
+                    >
+                      QR Payment:
+                    </Text>
 
-                  <Image
-                    style={{
-                      width: 100,
-                      height: 100
-                    }}
-                    source={qrCodeBase64}
-                  ></Image>
-                </View>
+                    <Image
+                      style={{
+                        width: 100,
+                        height: 100
+                      }}
+                      source={qrCodeBase64}
+                    ></Image>
+                  </View>)}
               </View>
               <Flex
                 style={{

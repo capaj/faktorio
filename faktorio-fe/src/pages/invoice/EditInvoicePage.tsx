@@ -283,8 +283,7 @@ export const EditInvoicePage = () => {
             />
           </div>
 
-          {/* @ts-expect-error */}
-          <BankDetailsAccordion form={form} />
+          <BankDetailsAccordion control={form.control} />
 
           <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
             <h3 className="flex items-center gap-2">Položky</h3>
