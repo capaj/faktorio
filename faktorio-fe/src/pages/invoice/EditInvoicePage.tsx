@@ -311,9 +311,20 @@ export const EditInvoicePage = () => {
             <h3>DPH: {totalVat} </h3>
             <h3>Celkem s DPH: {(total + totalVat).toFixed(2)} </h3>
           </div>
-          <Center className="mb-8">
+          <Center className="mb-8 flex gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={updateInvoice.isPending || !form.formState.isDirty}
+              onClick={() => {
+                form.reset(invoice)
+              }}
+            >
+              Zrušit změny
+            </Button>
             <ButtonWithLoader
               isLoading={updateInvoice.isPending}
+              disabled={!form.formState.isDirty || updateInvoice.isPending}
               type="submit"
             >
               Uložit změny na faktuře
