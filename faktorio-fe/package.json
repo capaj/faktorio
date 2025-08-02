@@ -64,7 +64,7 @@
     "react": "^18",
     "react-day-picker": "^9.8.1",
     "react-dom": "^18",
-    "react-hook-form": "^7.61.1",
+    "react-hook-form": "^7.62.0",
     "sonner": "^2.0.6",
     "sql.js": "^1.13.0",
     "tailwind-merge": "^3.3.1",

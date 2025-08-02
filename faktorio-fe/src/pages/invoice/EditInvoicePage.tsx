@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/form'
 import { BankDetailsAccordion } from './BankDetailsAccordion'
 import { DatePicker } from '@/components/ui/date-picker'
+import { useExchangeRate } from '@/hooks/useExchangeRate'
 
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
@@ -51,6 +52,10 @@ export const EditInvoicePage = () => {
 
   const formValues = form.watch()
   const invoiceItems = form.watch('items')
+  const currency = form.watch('currency')
+  const taxableFulfillmentDue = form.watch('taxable_fulfillment_due')
+
+  useExchangeRate({ currency, taxableFulfillmentDue, form })
 
   const total = invoiceItems.reduce(
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
@@ -85,7 +90,12 @@ export const EditInvoicePage = () => {
     const invoiceCompleteForPreview = {
       ...formValues,
       ...getInvoiceSums(invoiceItems, formValues.exchange_rate ?? 1),
-      items: invoiceItems,
+      items: invoiceItems.map(item => ({
+        ...item,
+        quantity: item.quantity ?? undefined,
+        unit_price: item.unit_price ?? undefined,
+        vat_rate: item.vat_rate ?? undefined
+      })),
       due_on: djs(formValues.issued_on)
         .add(formValues.due_in_days, 'day')
         .format('YYYY-MM-DD'),
@@ -265,6 +275,7 @@ export const EditInvoicePage = () => {
             />
           </div>
 
+          {/* @ts-expect-error */}
           <BankDetailsAccordion form={form} />
 
           <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
@@ -375,7 +386,9 @@ const InvoiceItemForm = ({
             <Input
               className="w-32"
               placeholder="cena"
-              type="text"
+              type="number"
+              step="0.01"
+              min={0}
               {...field}
               value={field.value || ''}
             />

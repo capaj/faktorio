@@ -126,7 +126,7 @@ export function LoginPage() {
               <PasswordInput
                 id="password"
                 value={password}
-                tabIndex={-1}
+
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />

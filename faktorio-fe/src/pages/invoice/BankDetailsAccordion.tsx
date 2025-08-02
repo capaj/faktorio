@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { UseFormReturn } from 'react-hook-form'
 
-interface IBankAccountDetails {
+export interface IBankAccountDetails {
   bank_account?: string
   iban?: string
   swift_bic?: string

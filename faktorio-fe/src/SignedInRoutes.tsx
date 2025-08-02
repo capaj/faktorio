@@ -5,7 +5,7 @@ import { InvoiceDetailPage } from './pages/InvoiceDetail/InvoiceDetailPage'
 import { InvoiceListPage } from './pages/InvoiceList/InvoiceListPage'
 import { NewInvoicePage } from './pages/invoice/NewInvoicePage'
 import { ContactList } from './pages/ContactList/ContactList'
-import { MyInvoicingDetails } from './pages/MyInvoicingDetails'
+import { UserInvoicingDetails } from './pages/UserInvoicingDetails'
 import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
 import { ManageLoginDetails } from './pages/ManageLoginDetails'
 import { ReceivedInvoicesPage } from './pages/ReceivedInvoicesPage'
@@ -30,7 +30,7 @@ export const SignedInRoutes = () => {
             component={ReceivedInvoicesPage}
           ></Route>
         )}
-        <Route path="/my-details" component={MyInvoicingDetails}></Route>
+        <Route path="/my-details" component={UserInvoicingDetails}></Route>
         <Route
           path="/manage-login-details"
           component={ManageLoginDetails}

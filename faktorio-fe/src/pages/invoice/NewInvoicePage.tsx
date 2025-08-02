@@ -1,4 +1,3 @@
-import AutoForm from '@/components/ui/auto-form'
 import { trpcClient } from '@/lib/trpcClient'
 
 import { ContactComboBox } from './ContactComboBox'
@@ -7,24 +6,32 @@ import { Input } from '@/components/ui/input'
 import { Button, ButtonWithLoader } from '@/components/ui/button'
 import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
 import { djs } from 'faktorio-shared/src/djs'
-import { useZodFormState } from '@/lib/useZodFormState'
+import { useFieldArray, useForm, useFormContext } from 'react-hook-form'
 import { z } from 'zod/v4'
 import { invoiceItemFormSchema } from 'faktorio-api/src/zodDbSchemas'
 import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
-import { FormItem, FormLabel, FormControl } from '@/components/ui/form'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel
+} from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { BankDetailsAccordion } from './BankDetailsAccordion'
-import { createDateFieldConfig } from './dateFieldConfig'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogFooter
+  DialogTitle
 } from '@/components/ui/dialog'
+import { DatePicker } from '@/components/ui/date-picker'
+import { useExchangeRate } from '@/hooks/useExchangeRate'
+
 
 const defaultInvoiceItem = {
   description: '',
@@ -38,7 +45,6 @@ export const NewInvoicePage = () => {
   const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
-  const utils = trpcClient.useUtils()
 
   const invoiceOrdinal =
     parseInt(lastInvoice?.number?.split('-')[1] ?? '0', 10) + 1
@@ -51,61 +57,50 @@ export const NewInvoicePage = () => {
       client_contact_id: z.string().optional(),
       language: z.string().default('cs')
     })
-  const [location, navigate] = useLocation()
+
+  const form = useForm<
+    z.infer<typeof formSchema> & { items: z.infer<typeof invoiceItemFormSchema>[] }
+  >({
+    defaultValues: {
+      ...formSchema.parse({
+        due_in_days: 14,
+        bank_account: invoicingDetails?.bank_account || '',
+        iban: invoicingDetails?.iban || '',
+        swift_bic: invoicingDetails?.swift_bic || '',
+        language: 'cs'
+      }),
+      items: [defaultInvoiceItem]
+    }
+  })
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'items'
+  })
+
+  const [_location, navigate] = useLocation()
   const createInvoice = trpcClient.invoices.create.useMutation()
 
-  const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(
-    formSchema.parse({
-      due_in_days: 14,
-      bank_account: invoicingDetails?.bank_account || '',
-      iban: invoicingDetails?.iban || '',
-      swift_bic: invoicingDetails?.swift_bic || '',
-      language: 'cs'
-    })
-  )
+  const formValues = form.watch()
+  const invoiceItems = form.watch('items')
+  const currency = form.watch('currency')
+  const taxableFulfillmentDue = form.watch('taxable_fulfillment_due')
+  const clientContactId = form.watch('client_contact_id')
+
+  useExchangeRate({ currency, taxableFulfillmentDue, form })
 
   useEffect(() => {
-    if (formValues.currency === 'CZK') {
-      setFormValues((prev) => ({
-        ...prev,
-        exchange_rate: 1
-      }))
-      return
-    }
-    const fetchRate = async () => {
-      const rate = await utils.invoices.getExchangeRate.fetch({
-        currency: formValues.currency,
-        date: djs(formValues.taxable_fulfillment_due).format('YYYY-MM-DD')
-      })
-      if (rate !== null) {
-        setFormValues((prev) => ({
-          ...prev,
-          exchange_rate: rate
-        }))
-      }
-    }
-    fetchRate()
-  }, [formValues.currency])
-
-  useEffect(() => {
-    if (formValues.client_contact_id && contactsQuery.data) {
+    if (clientContactId && contactsQuery.data) {
       const selectedContact = contactsQuery.data.find(
-        (contact) => contact.id === formValues.client_contact_id
+        (contact) => contact.id === clientContactId
       )
 
       if (selectedContact) {
-        setFormValues((prev) => ({
-          ...prev,
-          language: selectedContact.language,
-          currency: selectedContact.currency
-        }))
+        form.setValue('language', selectedContact.language)
+        form.setValue('currency', selectedContact.currency)
       }
     }
-  }, [formValues.client_contact_id, contactsQuery.data])
-
-  const [invoiceItems, setInvoiceItems] = useState<
-    z.infer<typeof invoiceItemFormSchema>[]
-  >([defaultInvoiceItem])
+  }, [clientContactId, contactsQuery.data, form])
 
   const total = invoiceItems.reduce(
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
@@ -114,8 +109,8 @@ export const NewInvoicePage = () => {
   const totalVat = invoiceItems.reduce(
     (acc, item) =>
       acc +
-      ((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
-      100,
+      (((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
+        100),
     0
   )
 
@@ -160,240 +155,274 @@ export const NewInvoicePage = () => {
     <div>
       <h2 className="mb-5">Nová faktura</h2>
 
-      <AutoForm
-        formSchema={formSchema}
-        values={formValues}
-        containerClassName="grid grid-cols-2 md:grid-cols-3 gap-4"
-        onParsedValuesChange={(values) => {
-          setFormValues(values as z.infer<typeof formSchema>)
-        }}
-        fieldConfig={{
-          currency: {
-            label: 'Měna'
-          },
-          issued_on: createDateFieldConfig('Datum vystavení faktury'),
-          number: {
-            label: 'Číslo faktury'
-          },
-          payment_method: {
-            label: 'Způsob platby'
-          },
-          taxable_fulfillment_due: createDateFieldConfig(
-            'Datum zdanitelného plnění'
-          ),
-          footer_note: {
-            label: 'Poznámka'
-          },
-          client_contact_id: {
-            label: 'Odběratel',
-            fieldType: ({ label, isRequired, field }) => (
-              <FormItem className="flex flex-col flew-grow">
-                <FormLabel>
-                  {label}
-                  {isRequired && (
-                    <span className="text-destructive">{`\u00A0*`}</span>
-                  )}
-                </FormLabel>
-                <FormControl>
-                  <ContactComboBox {...field} />
-                </FormControl>
-              </FormItem>
-            )
-          },
-          due_in_days: {
-            label: 'Splatnost (v dnech)'
-          },
-          exchange_rate:
-            formValues.currency === 'CZK'
-              ? { fieldType: () => null }
-              : {
-                fieldType: ({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Kurz
-                      <span className="text-destructive">{`\u00A0*`}</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={0}
-                        step={0.01}
-                        disabled={false}
-                        {...field}
-                        value={field.value ?? ''}
-                        onBlur={(e) => {
-                          const value = e.target.value
-                          const numValue = parseFloat(value)
-                          field.onChange(isNaN(numValue) ? null : numValue)
-                        }}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )
-              },
-          // Hide bank account fields from the main form
-          bank_account: {
-            fieldType: () => null
-          },
-          iban: {
-            fieldType: () => null
-          },
-          swift_bic: {
-            fieldType: () => null
-          }
-        }}
-      ></AutoForm>
-
-      <BankDetailsAccordion
-        formValues={formValues}
-        setFormValues={setFormValues}
-      />
-
-      <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
-        <h4 className="flex items-center gap-2">Položky</h4>
-        {invoiceItems.map((item, index) => {
-          return (
-            <InvoiceItemForm
-              key={index}
-              data={item}
-              contactsQuery={contactsQuery}
-              selectedContactId={formValues.client_contact_id}
-              onDelete={() => {
-                setInvoiceItems(invoiceItems.filter((_, i) => i !== index))
-              }}
-              onChange={(data) => {
-                const newInvoiceItems = [...invoiceItems]
-                newInvoiceItems[index] = data
-                setInvoiceItems(newInvoiceItems)
-              }}
-            />
-          )
-        })}
-
-        <div className="flex gap-4">
-          <Button
-            className="flex items-center gap-2 bg-green-500 text-white"
-            onClick={() => {
-              setInvoiceItems([...invoiceItems, defaultInvoiceItem])
-            }}
-          >
-            <LucidePlus className="text-white" />
-            Další položka
-          </Button>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-6 mt-8">
-        <>
-          {isCzkInvoice && (
-            <span className="text-sm text-gray-500">
-              Celkem: {(total * exchangeRate).toFixed(2)} CZK
-            </span>
-          )}
-          <h3
-            className={`text-md text-right ${isCzkInvoice ? '' : 'col-span-2'}`}
-          >
-            Celkem: {total.toFixed(2)} {formValues.currency}
-          </h3>
-          {isCzkInvoice && (
-            <span className="text-sm text-gray-500">
-              DPH: {(totalVat * exchangeRate).toFixed(2)} CZK
-            </span>
-          )}
-          <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
-            DPH: {totalVat.toFixed(2)} {formValues.currency}
-          </h3>
-
-          {isCzkInvoice && (
-            <span className="text-sm text-gray-500">
-              Celkem s DPH: {((total + totalVat) * exchangeRate).toFixed(2)} CZK
-            </span>
-          )}
-          <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
-            Celkem s DPH: {(total + totalVat).toFixed(2)} {formValues.currency}
-          </h3>
-        </>
-      </div>
-      <Center>
-        <ButtonWithLoader
-          isLoading={createInvoice.isPending}
-          disabled={!contact || total === 0}
-          onClick={async () => {
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(async (values) => {
             if (!contact) {
               alert('Kontakt nenalezen')
               return
             }
 
-            if (!formValues.client_contact_id) {
+            if (!values.client_contact_id) {
               alert('Vyberte kontakt')
               return
             }
 
-            const newInvoice = await createInvoice.mutateAsync({
+            const { items, ...invoiceData } = values
+
+            const newInvoiceId = await createInvoice.mutateAsync({
               invoice: {
-                ...formValues,
-                client_contact_id: contact.id
+                ...invoiceData,
+                client_contact_id: contact.id,
+                issued_on: djs(invoiceData.issued_on).format('YYYY-MM-DD'),
+                taxable_fulfillment_due: djs(
+                  invoiceData.taxable_fulfillment_due
+                ).format('YYYY-MM-DD')
               },
-              items: invoiceItems
+              items: items
             })
 
-            console.log('newInvoice:', newInvoice)
-            navigate(`/invoices/${newInvoice}`)
-          }}
+            navigate(`/invoices/${newInvoiceId}`)
+          })}
         >
-          Vytvořit fakturu a přejít na náhled a odeslání
-        </ButtonWithLoader>
-      </Center>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Číslo faktury</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="client_contact_id"
+              render={({ field }) => (
+                <FormItem className="flex flex-col flew-grow col-span-2">
+                  <FormLabel>Odběratel</FormLabel>
+                  <FormControl>
+                    <ContactComboBox
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      disabled={field.disabled}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="issued_on"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Datum vystavení faktury</FormLabel>
+                  <FormControl>
+                    <DatePicker
+                      date={field.value ? djs(field.value).toDate() : undefined}
+                      setDate={(date) => {
+                        field.onChange(
+                          date ? djs(date).format('YYYY-MM-DD') : ''
+                        )
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="taxable_fulfillment_due"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Datum zdanitelného plnění</FormLabel>
+                  <FormControl>
+                    <DatePicker
+                      date={field.value ? djs(field.value).toDate() : undefined}
+                      setDate={(date) => {
+                        field.onChange(
+                          date ? djs(date).format('YYYY-MM-DD') : ''
+                        )
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="due_in_days"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Splatnost (v dnech)</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="payment_method"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Způsob platby</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="currency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Měna</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            {isCzkInvoice && (
+              <FormField
+                control={form.control}
+                name="exchange_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kurz</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        {...field}
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
+            <FormField
+              control={form.control}
+              name="footer_note"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Poznámka</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ''} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* @ts-expect-error */}
+          <BankDetailsAccordion form={form} />
+
+          <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
+            <h3 className="flex items-center gap-2">Položky</h3>
+            {fields.map((item, index) => {
+              return (
+                <InvoiceItemForm
+                  key={item.id}
+                  control={form.control}
+                  index={index}
+                  onDelete={() => remove(index)}
+                  contactsQuery={contactsQuery}
+                  selectedContactId={formValues.client_contact_id}
+                />
+              )
+            })}
+
+            <div className="flex gap-4">
+              <Button
+                type="button"
+                className="flex items-center gap-2 bg-green-500 text-white"
+                onClick={() => {
+                  append(defaultInvoiceItem)
+                }}
+              >
+                <LucidePlus className="text-white" />
+                Další položka
+              </Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-6 mt-8">
+            <>
+              {isCzkInvoice && (
+                <span className="text-sm text-gray-500">
+                  Celkem: {(total * exchangeRate).toFixed(2)} CZK
+                </span>
+              )}
+              <h3
+                className={`text-md text-right ${isCzkInvoice ? '' : 'col-span-2'}`}
+              >
+                Celkem: {total.toFixed(2)} {formValues.currency}
+              </h3>
+              {isCzkInvoice && (
+                <span className="text-sm text-gray-500">
+                  DPH: {(totalVat * exchangeRate).toFixed(2)} CZK
+                </span>
+              )}
+              <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
+                DPH: {totalVat.toFixed(2)} {formValues.currency}
+              </h3>
+
+              {isCzkInvoice && (
+                <span className="text-sm text-gray-500">
+                  Celkem s DPH:{' '}
+                  {((total + totalVat) * exchangeRate).toFixed(2)} CZK
+                </span>
+              )}
+              <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
+                Celkem s DPH: {(total + totalVat).toFixed(2)}{' '}
+                {formValues.currency}
+              </h3>
+            </>
+          </div>
+          <Center>
+            <ButtonWithLoader
+              isLoading={createInvoice.isPending}
+              disabled={!contact || total === 0}
+              type="submit"
+            >
+              Vytvořit fakturu a přejít na náhled a odeslání
+            </ButtonWithLoader>
+          </Center>
+        </form>
+      </Form>
     </div>
   )
 }
 
 const InvoiceItemForm = ({
-  data,
+  control,
+  index,
   onDelete,
-  onChange,
   contactsQuery,
   selectedContactId
 }: {
-  data: z.infer<typeof invoiceItemFormSchema>
+  control: any,
+  index: number
   onDelete: () => void
-  onChange: (data: z.infer<typeof invoiceItemFormSchema>) => void
   contactsQuery: any
   selectedContactId?: string
 }) => {
-  const zodForm = useZodFormState(invoiceItemFormSchema, data)
+  const { setValue } = useFormContext()
   const [showVatWarning, setShowVatWarning] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    onChange(zodForm.formState)
-  }, [zodForm.formState])
-
-  const handleVatRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const vatRate = parseFloat(e.target.value)
-
-    // Check if VAT rate is 0 and contact is Czech, but only if warning hasn't been dismissed
-    if (vatRate === 0 && selectedContactId && contactsQuery.data && showVatWarning !== false) {
-      const selectedContact = contactsQuery.data.find(
-        (contact: any) => contact.id === selectedContactId
-      )
-
-      if (selectedContact?.vat_no?.startsWith('CZ')) {
-        setShowVatWarning(true)
-        return
-      }
-    }
-
-    // If not a problematic case, proceed with normal change
-    zodForm.inputProps('vat_rate').onChange(e)
-  }
 
   const handleConfirmZeroVat = () => {
     // User confirmed they want to use 0% VAT
     setShowVatWarning(false) // Set to false to never show again
-
-    zodForm.setField('vat_rate', 0)
-
+    setValue(`items.${index}.vat_rate`, 0)
   }
-
 
   return (
     <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 align-baseline items-end">
@@ -401,69 +430,120 @@ const InvoiceItemForm = ({
         <div>
           <Label
             className="text-xs text-gray-500 mb-1 block md:block"
-            htmlFor="quantity"
+            htmlFor={`items.${index}.quantity`}
           >
             Množství
           </Label>
-          <Input
-            className="w-full sm:w-24"
-            type="number"
-            min={0}
-            placeholder="Množství"
-            {...zodForm.inputProps('quantity')}
+          <FormField
+            control={control}
+            name={`items.${index}.quantity`}
+            render={({ field }) => (
+              <Input
+                className="w-full sm:w-24"
+                type="number"
+                min={0}
+                placeholder="Množství"
+                {...field}
+                value={field.value || ''}
+              />
+            )}
           />
         </div>
 
         <div>
           <Label
             className="text-xs text-gray-500 mb-1 block md:block"
-            htmlFor="unit"
+            htmlFor={`items.${index}.unit`}
           >
             Jednotka
           </Label>
-          <Input
-            placeholder="Jednotka"
-            type="text"
-            className="w-full sm:w-32"
-            {...zodForm.inputProps('unit')}
+          <FormField
+            control={control}
+            name={`items.${index}.unit`}
+            render={({ field }) => (
+              <Input
+                placeholder="Jednotka"
+                type="text"
+                className="w-full sm:w-32"
+                {...field}
+                value={field.value || ''}
+              />
+            )}
           />
         </div>
-        <Input
-          className="w-full sm:w-96 md:flex-grow col-span-2"
-          placeholder="Popis položky"
-          type="text"
-          {...zodForm.inputProps('description')}
+        <FormField
+          control={control}
+          name={`items.${index}.description`}
+          render={({ field }) => (
+            <Input
+              className="w-full sm:w-96 md:flex-grow col-span-2"
+              placeholder="Popis položky"
+              type="text"
+              {...field}
+              value={field.value || ''}
+            />
+          )}
         />
       </div>
       <div className="flex gap-4 items-end">
         <div className="flex-grow sm:flex-grow-0">
           <Label
             className="text-xs text-gray-500 mb-1 block md:block"
-            htmlFor="unit_price"
+            htmlFor={`items.${index}.unit_price`}
           >
             Cena/jedn.
           </Label>
-          <Input
-            className="w-full sm:w-32"
-            placeholder="Cena/jedn."
-            type="text"
-            {...zodForm.inputProps('unit_price')}
+          <FormField
+            control={control}
+            name={`items.${index}.unit_price`}
+            render={({ field }) => (
+              <Input
+                className="w-full sm:w-32"
+                placeholder="Cena/jedn."
+                type="number"
+                step="0.01"
+                min={0}
+                {...field}
+                value={field.value || ''}
+              />
+            )}
           />
         </div>
         <div className="flex-grow sm:flex-grow-0">
           <Label
             className="text-xs text-gray-500 mb-1 block md:block"
-            htmlFor="vat_rate"
+            htmlFor={`items.${index}.vat_rate`}
           >
             DPH %
           </Label>
-          <Input
-            className="w-full sm:w-20"
-            placeholder="DPH %"
-            type="number"
-            min={0}
-            {...zodForm.inputProps('vat_rate')}
-            onChange={handleVatRateChange}
+          <FormField
+            control={control}
+            name={`items.${index}.vat_rate`}
+            render={({ field }) => (
+              <Input
+                className="w-full sm:w-20"
+                placeholder="DPH %"
+                type="number"
+                min={0}
+                {...field}
+                value={field.value || ''}
+                onChange={(e) => {
+                  const vatRate = parseFloat(e.target.value)
+                  if (
+                    vatRate === 0 &&
+                    selectedContactId &&
+                    contactsQuery.data?.find(
+                      (c: any) => c.id === selectedContactId
+                    )?.vat_no?.startsWith('CZ') &&
+                    showVatWarning !== false
+                  ) {
+                    setShowVatWarning(true)
+                  } else {
+                    field.onChange(e)
+                  }
+                }}
+              />
+            )}
           />
         </div>
         <div>
@@ -477,16 +557,20 @@ const InvoiceItemForm = ({
         </div>
       </div>
 
-      <Dialog open={showVatWarning === true} onOpenChange={(open) => {
-        if (!open) {
-          setShowVatWarning(null)
-        }
-      }}>
+      <Dialog
+        open={showVatWarning === true}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowVatWarning(null)
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Upozornění</DialogTitle>
             <DialogDescription>
-              Nulová DPH pro tuzemskou fakturu lze použít pouze pro omezené typy zboží a služeb. Zde je jejich výčet:{' '}
+              Nulová DPH pro tuzemskou fakturu lze použít pouze pro omezené typy
+              zboží a služeb. Zde je jejich výčet:{' '}
               <a
                 href="https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni"
                 target="_blank"
@@ -495,16 +579,19 @@ const InvoiceItemForm = ({
               >
                 https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni
               </a>
-
-              <p className='mt-4'>
-                V xml exportu kontrolního hlášení bude tato faktura v sekci A.1 a budete muset ručně doplnit kód plnění
+              <p className="mt-4">
+                V xml exportu kontrolního hlášení bude tato faktura v sekci A.1
+                a budete muset ručně doplnit kód plnění
               </p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setShowVatWarning(null)
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowVatWarning(null)
+              }}
+            >
               Zrušit
             </Button>
             <Button onClick={handleConfirmZeroVat}>
