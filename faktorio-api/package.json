@@ -39,6 +39,7 @@
     "@trpc/react-query": "^11.4.3",
     "@trpc/server": "^11.4.3",
     "@tsndr/cloudflare-worker-jwt": "^3.2.0",
+    "currency-codes": "^2.2.0",
     "debug": "^4.4.1",
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.44.4",
