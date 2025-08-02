@@ -31,13 +31,25 @@ const invoiceSchema = getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001')
 
 const createInvoiceInput = z.object({
   invoice: invoiceSchema,
-  items: z.array(invoiceItemFormSchema)
+  items: z.array(
+    invoiceItemFormSchema.extend({
+      quantity: z.coerce.number().optional(),
+      unit_price: z.coerce.number().optional(),
+      vat_rate: z.coerce.number().optional()
+    })
+  )
 })
 
 const updateInvoiceInput = z.object({
   id: z.string(),
   invoice: invoiceSchema,
-  items: z.array(invoiceItemFormSchema)
+  items: z.array(
+    invoiceItemFormSchema.extend({
+      quantity: z.coerce.number().optional(),
+      unit_price: z.coerce.number().optional(),
+      vat_rate: z.coerce.number().optional()
+    })
+  )
 })
 
 export const invoiceRouter = trpcContext.router({

@@ -63,20 +63,59 @@ export const contactRouter = trpcContext.router({
 
       return contact
     }),
-  createMany: protectedProc
+  upsertMany: protectedProc
     .input(z.array(contactCreateFormSchema))
     .mutation(async ({ input, ctx }) => {
-      const contacts = await ctx.db
+      let nonExistingContacts = []
+
+      for (const contact of input) {
+        if (!contact.id) {
+          nonExistingContacts.push(contact)
+          continue
+        }
+        const existing = await ctx.db.query.contactTb.findFirst({
+          where: and(
+            eq(contactTb.user_id, ctx.user.id),
+            eq(contactTb.id, contact.id)
+          )
+        })
+        if (existing) {
+          // If the contact exists, we can update it
+          await ctx.db
+            .update(contactTb)
+            .set(contact)
+            .where(
+              and(
+                eq(contactTb.id, contact.id),
+                eq(contactTb.user_id, ctx.user.id)
+              )
+            )
+            .execute()
+        } else {
+          nonExistingContacts.push(contact)
+        }
+      }
+
+      if (nonExistingContacts.length === 0) {
+        return {
+          updated: input.length,
+          created: 0
+        }
+      }
+      const newContacts = await ctx.db
         .insert(contactTb)
         .values(
-          input.map((contact) => ({
+          nonExistingContacts.map((contact) => ({
             ...contact,
             user_id: ctx.user.id
           }))
         )
         .execute()
 
-      return contacts
+      return {
+        updated: input.length - nonExistingContacts.length,
+        created: nonExistingContacts.length
+      }
     }),
   getInvoiceCount: protectedProc
     .input(

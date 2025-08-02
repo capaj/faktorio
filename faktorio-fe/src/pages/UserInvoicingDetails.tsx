@@ -34,7 +34,7 @@ export type InvoicingDetailsFormSchema = z.infer<
   typeof invoicingDetailsFormSchema
 >
 
-export const MyInvoicingDetails = () => {
+export const UserInvoicingDetails = () => {
   const [data, { refetch }] = trpcClient.invoicingDetails.useSuspenseQuery()
 
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()

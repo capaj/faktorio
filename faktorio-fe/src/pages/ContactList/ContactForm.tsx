@@ -18,7 +18,6 @@ import {
   SelectValue
 } from '@/components/ui/select'
 
-import { Checkbox } from '@/components/ui/checkbox'
 import { UseFormReturn } from 'react-hook-form'
 import { ContactFormSchema } from './ContactList'
 
@@ -53,10 +52,6 @@ export const ContactForm = ({
   form,
   onSubmit,
   isEdit = false,
-  hasInvoices,
-  invoiceCount,
-  deleteInvoices,
-  setDeleteInvoices,
   handleShowDeleteDialog,
   isLoadingAres,
   onFetchAres,
@@ -69,10 +64,7 @@ export const ContactForm = ({
     values: ContactFormSchema | InvoicingDetailsFormSchema
   ) => Promise<void>
   isEdit?: boolean
-  hasInvoices?: boolean
   invoiceCount?: number
-  deleteInvoices?: boolean
-  setDeleteInvoices?: (value: boolean) => void
   handleShowDeleteDialog?: (e: React.MouseEvent) => void
   isLoadingAres?: boolean
   onFetchAres?: () => void
@@ -374,29 +366,12 @@ export const ContactForm = ({
           <DialogFooter className="col-span-2 flex justify-between">
             <div className="w-full flex justify-between">
               <div className="flex flex-col items-start gap-2">
-                {hasInvoices && setDeleteInvoices && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="delete-invoices"
-                      checked={deleteInvoices}
-                      onCheckedChange={(checked) =>
-                        setDeleteInvoices(checked === true)
-                      }
-                    />
-                    <label
-                      htmlFor="delete-invoices"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Smazat všechny faktury kontaktu ({invoiceCount})
-                    </label>
-                  </div>
-                )}
+
                 {handleShowDeleteDialog && (
                   <Button
                     className="align-left self-start justify-self-start"
                     variant={'destructive'}
                     onClick={handleShowDeleteDialog}
-                    disabled={hasInvoices && !deleteInvoices}
                     type="button"
                   >
                     Smazat

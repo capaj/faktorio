@@ -27,7 +27,7 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
     taxable_fulfillment_due: stringDateSchema.default(
       djs().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')
     ),
-    due_in_days: z.number(),
+    due_in_days: z.coerce.number(),
     client_contact_id: z.string(),
     exchange_rate: z.number().nullable().default(1),
     bank_account: z.string().nullish().default(''),

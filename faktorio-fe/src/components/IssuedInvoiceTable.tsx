@@ -307,7 +307,7 @@ export function IssuedInvoiceTable({
             {/* Overall Total Count, Sum, and Download Row - Only show if multiple currencies */}
             {Object.keys(currencyTotals).length > 1 && (
               <TableRow className="bg-gray-200 font-semibold">
-                <TableCell colSpan={5}>
+                <TableCell colSpan={3}>
                   {' '}
                   {/* Adjusted colspan to push sum next to button */}
                   Ve všech měnách {invoices.length}{' '}
@@ -317,8 +317,11 @@ export function IssuedInvoiceTable({
                       ? 'faktury'
                       : 'faktur'}
                 </TableCell>
-                <TableCell colSpan={1} className="text-right">
-                  Celkem částka DPH: {formatNumberWithSpaces(totalVAT)} CZK
+                <TableCell colSpan={3} className="text-right font-light">
+                  Celkem částka DPH:{' '}
+                  <span className="font-bold text-yellow-800">
+                    {formatNumberWithSpaces(totalVAT)} CZK
+                  </span>
                 </TableCell>
 
                 <TableCell colSpan={1} className="text-left whitespace-nowrap">
