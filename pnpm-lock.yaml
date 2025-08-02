@@ -78,9 +78,6 @@ importers:
       '@tsndr/cloudflare-worker-jwt':
         specifier: ^3.2.0
         version: 3.2.0
-      currency-codes:
-        specifier: ^2.2.0
-        version: 2.2.0
       debug:
         specifier: ^4.4.1
         version: 4.4.1
@@ -247,9 +244,9 @@ importers:
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.1.7(@types/react@19.1.9))(@types/react@19.1.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      country-data-list:
-        specifier: ^1.4.1
-        version: 1.4.1
+      currency-codes:
+        specifier: ^2.2.0
+        version: 2.2.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -2975,9 +2972,6 @@ packages:
   cors@2.8.5:
     resolution: {integrity: sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==}
     engines: {node: '>= 0.10'}
-
-  country-data-list@1.4.1:
-    resolution: {integrity: sha512-TQoQNS0a5+7GuAgDNYKLOVG4JwVmjZ2entwcStNh/yN7YzO5SfqVwSyZPK7O9JksxM2OXDzRD3zVHp4CmLzrsg==}
 
   cross-spawn@6.0.6:
     resolution: {integrity: sha512-VqCUuhcd1iB+dsv8gxPttb5iZh/D0iubSP21g36KXdEuf6I5JiioesUVjpCdHV9MZRUfVFlvwtIUyPfxo5trtw==}
@@ -8142,8 +8136,6 @@ snapshots:
       object-assign: 4.1.1
       vary: 1.1.2
     optional: true
-
-  country-data-list@1.4.1: {}
 
   cross-spawn@6.0.6:
     dependencies:
