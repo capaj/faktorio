@@ -27,6 +27,7 @@ import { BankDetailsAccordion } from './BankDetailsAccordion'
 import { DatePicker } from '@/components/ui/date-picker'
 import { useExchangeRate } from '@/hooks/useExchangeRate'
 import { CurrencySelect } from '@/components/ui/currency-select'
+import { InvoiceTotals } from './InvoiceTotals'
 
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
@@ -107,6 +108,7 @@ export const EditInvoicePage = () => {
   }, [formValues, invoiceItems])
 
   const isCzkInvoice = formValues.currency !== 'CZK'
+  const exchangeRate = formValues.exchange_rate ?? 1
 
   return (
     <div>
@@ -310,13 +312,14 @@ export const EditInvoicePage = () => {
               </Button>
             </div>
           </div>
-          <div className="flex gap-6 flex-col items-end justify-end mt-8">
-            <h3>
-              Celkem: {total} {formValues.currency}
-            </h3>
-            <h3>DPH: {totalVat} </h3>
-            <h3>Celkem s DPH: {(total + totalVat).toFixed(2)} </h3>
-          </div>
+
+          <InvoiceTotals
+            total={total}
+            totalVat={totalVat}
+            currency={formValues.currency}
+            exchangeRate={exchangeRate}
+            isCzkInvoice={isCzkInvoice}
+          />
           <Center className="mb-8 flex gap-4">
             <Button
               type="button"

@@ -32,6 +32,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker'
 import { useExchangeRate } from '@/hooks/useExchangeRate'
 import { CurrencySelect } from '@/components/ui/currency-select'
+import { InvoiceTotals } from './InvoiceTotals'
 
 
 const defaultInvoiceItem = {
@@ -360,39 +361,13 @@ export const NewInvoicePage = () => {
               </Button>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6 mt-8">
-            <>
-              {isCzkInvoice && (
-                <span className="text-sm text-gray-500">
-                  Celkem: {(total * exchangeRate).toFixed(2)} CZK
-                </span>
-              )}
-              <h3
-                className={`text-md text-right ${isCzkInvoice ? '' : 'col-span-2'}`}
-              >
-                Celkem: {total.toFixed(2)} {formValues.currency}
-              </h3>
-              {isCzkInvoice && (
-                <span className="text-sm text-gray-500">
-                  DPH: {(totalVat * exchangeRate).toFixed(2)} CZK
-                </span>
-              )}
-              <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
-                DPH: {totalVat.toFixed(2)} {formValues.currency}
-              </h3>
-
-              {isCzkInvoice && (
-                <span className="text-sm text-gray-500">
-                  Celkem s DPH:{' '}
-                  {((total + totalVat) * exchangeRate).toFixed(2)} CZK
-                </span>
-              )}
-              <h3 className={`text-right ${isCzkInvoice ? '' : 'col-span-2'}`}>
-                Celkem s DPH: {(total + totalVat).toFixed(2)}{' '}
-                {formValues.currency}
-              </h3>
-            </>
-          </div>
+          <InvoiceTotals
+            total={total}
+            totalVat={totalVat}
+            currency={formValues.currency}
+            exchangeRate={exchangeRate}
+            isCzkInvoice={isCzkInvoice}
+          />
           <Center>
             <ButtonWithLoader
               isLoading={createInvoice.isPending}
