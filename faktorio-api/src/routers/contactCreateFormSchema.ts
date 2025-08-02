@@ -9,6 +9,7 @@ export const contactCreateFormSchema = contactInsertSchema
     updated_at: true
   })
   .extend({
+    id: z.string().optional(),
     name: z.string(),
     registration_no: z.string().optional(),
     vat_no: z.string().optional(),

@@ -25,13 +25,20 @@ import { SpinnerContainer } from '@/components/SpinnerContainer'
 import { z } from 'zod/v4'
 import Papa from 'papaparse'
 import { toast } from 'sonner'
-import { UploadIcon, HelpCircleIcon } from 'lucide-react'
+import { UploadIcon, HelpCircleIcon, DownloadIcon, ChevronDownIcon } from 'lucide-react'
+import { contactCreateFormSchema } from 'faktorio-api/src/routers/contactCreateFormSchema'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { Spinner } from '@/components/ui/spinner'
 import { useForm, UseFormReturn } from 'react-hook-form'
 import { ContactForm } from './ContactForm'
@@ -119,9 +126,9 @@ export type ContactFormSchema = z.infer<typeof baseContactSchema>
 export const ContactList = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const create = trpcClient.contacts.create.useMutation()
-  const createMany = trpcClient.contacts.createMany.useMutation()
+  const upsertMany = trpcClient.contacts.upsertMany.useMutation()
   const update = trpcClient.contacts.update.useMutation()
-  const deleteContact = trpcClient.contacts.delete.useMutation()
+
   const deleteWithInvoices =
     trpcClient.contacts.deleteWithInvoices.useMutation()
   const params = useParams()
@@ -143,10 +150,10 @@ export const ContactList = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [newDialogOpen, setNewDialogOpen] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
-  const [deleteInvoices, setDeleteInvoices] = useState(false)
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isLoadingAres, setIsLoadingAres] = useState(false)
-  const [location, navigate] = useLocation()
+  const [_location, navigate] = useLocation()
 
   // Memoize schema to prevent unnecessary re-computation
   const schema = useMemo(
@@ -312,8 +319,48 @@ export const ContactList = () => {
     navigate(`/contacts/${contactId}`)
   }
 
-  const csvFormatExample = `name,street,city,zip,country,registration_no,vat_no,email
-Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
+  const csvFormatExample = `id,name,street,street2,city,zip,country,registration_no,vat_no,bank_account,iban,web,variable_symbol,full_name,phone,email,email_copy,private_note,type,due,currency,language
+Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ123456789,https://example.com,VS123,John Doe Company Ltd,+420123456789,contact@example.com,copy@example.com,Some notes,client,14,CZK,cs`
+
+  const handleCsvExport = () => {
+    if (!contactsQuery.data || contactsQuery.data.length === 0) {
+      toast.error('Žádné kontakty k exportu')
+      return
+    }
+
+    // Map contacts to CSV format - spread all fields and override specific mappings
+    const csvData = contactsQuery.data.map((contact) => {
+      const {
+        user_id: _user_id,
+        created_at: _created_at,
+        updated_at: _updated_at,
+        default_invoice_due_in_days: _default_invoice_due_in_days,
+        ...contactWithoutUserId
+      } = contact
+      return {
+        ...contactWithoutUserId,
+        phone: contact.phone_number,
+        email: contact.main_email,
+        due: contact.default_invoice_due_in_days ?? 14, // Default to 14 days if not set
+      }
+    })
+
+    // Convert to CSV
+    const csv = Papa.unparse(csvData)
+
+    // Create and download file
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `kontakty_${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    toast.success(`Export dokončen - ${contactsQuery.data.length} kontaktů`)
+  }
 
   const handleCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -328,46 +375,56 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
         try {
           const contacts = results.data as Record<string, string>[]
 
-          // Map CSV fields to contact fields
-          const mappedContacts = contacts.map((contact) => ({
-            name: contact.name || '',
-            street: contact.street || '',
-            street2: contact.street2 || '',
-            city: contact.city || '',
-            zip: contact.zip || '',
-            country: contact.country || '',
-            registration_no: contact.registration_no || '',
-            vat_no: contact.vat_no || '',
-            bank_account: contact.bank_account || '',
-            iban: contact.iban || '',
-            web: contact.web || '',
-            variable_symbol: contact.variable_symbol || '',
-            full_name: contact.full_name || '',
-            phone: contact.phone || '',
-            main_email: contact.email || '',
-            email: contact.email || '',
-            email_copy: contact.email_copy || '',
-            private_note: contact.private_note || '',
-            type: contact.type || '',
-            due: contact.due ? parseInt(contact.due) : undefined,
-            currency: contact.currency || '',
-            language: contact.language || ''
-          }))
+          // Map CSV fields to contact fields and validate with Zod schema
+          const validContacts: z.infer<typeof contactCreateFormSchema>[] = []
+          const invalidContacts: string[] = []
 
-          // Filter out contacts with empty names
-          const validContacts = mappedContacts.filter(
-            (contact) => contact.name.trim() !== ''
-          )
+          for (const contact of contacts) {
+            // Map CSV field names to database field names
+            const mappedContact = {
+              ...contact,
+              phone_number: contact.phone || contact.phone_number,
+              main_email: contact.email || contact.main_email,
+              due: contact.due && contact.due.trim() !== '' ? parseInt(contact.due, 10) : undefined
+            }
+
+            // Remove system fields that shouldn't be in the create schema
+            const cleanContact: any = { ...mappedContact }
+
+            delete cleanContact.created_at
+            delete cleanContact.updated_at
+            delete cleanContact.user_id
+            delete cleanContact.phone
+            delete cleanContact.email
+
+            // Validate with Zod schema
+            const parseResult = contactCreateFormSchema.safeParse(cleanContact)
+
+            if (parseResult.success) {
+              validContacts.push(parseResult.data)
+            } else {
+              console.warn('Invalid contact data:', contact, parseResult.error)
+              invalidContacts.push(contact.name || 'Unknown contact')
+            }
+          }
 
           if (validContacts.length === 0) {
-            toast.error('Žádné platné kontakty k importu')
+            if (invalidContacts.length > 0) {
+              toast.error(`Všechny kontakty mají neplatná data. Neplatné kontakty: ${invalidContacts.join(', ')}`)
+            } else {
+              toast.error('Žádné platné kontakty k importu')
+            }
             setIsImporting(false)
             return
           }
 
-          await createMany.mutateAsync(validContacts)
+          if (invalidContacts.length > 0) {
+            toast.warning(`Některé kontakty byly přeskočeny kvůli neplatným datům: ${invalidContacts.join(', ')}`)
+          }
+
+          const res = await upsertMany.mutateAsync(validContacts)
           contactsQuery.refetch()
-          toast.success(`Úspěšně importováno ${validContacts.length} kontaktů`)
+          toast.success(`Vytvořeno ${res.created} kontaktů, aktualizováno ${res.updated} kontaktů`)
 
           // Reset file input
           if (fileInputRef.current) {
@@ -418,7 +475,7 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
     if (contactId) {
       await deleteWithInvoices.mutateAsync({
         contactId,
-        deleteInvoices
+        deleteInvoices: true
       })
       contactsQuery.refetch()
       setEditDialogOpen(false)
@@ -463,14 +520,25 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
           Přidat klienta
         </Button>
         <div className="relative flex items-end ml-auto">
-          <Button
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isImporting}
-          >
-            <UploadIcon className="mr-2 h-4 w-4" />
-            {isImporting ? 'Importuji...' : 'Import CSV'}
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" disabled={isImporting}>
+                <UploadIcon className="mr-2 h-4 w-4" />
+                {isImporting ? 'Importuji...' : 'CSV'}
+                <ChevronDownIcon className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                <UploadIcon className="mr-2 h-4 w-4" />
+                Import CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCsvExport}>
+                <DownloadIcon className="mr-2 h-4 w-4" />
+                Export CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <input
             type="file"
             ref={fileInputRef}
@@ -515,10 +583,6 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
               form={editForm}
               onSubmit={handleUpdateSubmit}
               isEdit={true}
-              hasInvoices={hasInvoices}
-              invoiceCount={invoiceCount}
-              deleteInvoices={deleteInvoices}
-              setDeleteInvoices={setDeleteInvoices}
               handleShowDeleteDialog={handleShowDeleteDialog}
               isLoadingAres={isLoadingAres}
               onFetchAres={handleFetchAresEdit}
@@ -536,7 +600,7 @@ Company Ltd,123 Main St,Prague,10000,CZ,12345678,CZ12345678,contact@example.com`
                 Opravdu chcete smazat kontakt{' '}
                 <strong>{editForm.getValues('name')}</strong>?
               </DialogTitle>
-              {hasInvoices && deleteInvoices && (
+              {hasInvoices && (
                 <DialogDescription className="pt-2 text-red-500">
                   Budou smazány také všechny faktury ({invoiceCount}) spojené s
                   tímto kontaktem!

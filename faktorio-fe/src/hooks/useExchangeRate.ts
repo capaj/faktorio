@@ -9,19 +9,23 @@ interface UseExchangeRateProps {
   form: UseFormReturn<any>
 }
 
-export const useExchangeRate = ({ currency, taxableFulfillmentDue, form }: UseExchangeRateProps) => {
+export const useExchangeRate = ({
+  currency,
+  taxableFulfillmentDue,
+  form
+}: UseExchangeRateProps) => {
   const utils = trpcClient.useUtils()
 
   useEffect(() => {
     if (!currency || currency.length !== 3) {
       return
     }
-    
+
     if (currency === 'CZK') {
       form.setValue('exchange_rate', 1)
       return
     }
-    
+
     const fetchRate = async () => {
       try {
         const rate = await utils.invoices.getExchangeRate.fetch({
