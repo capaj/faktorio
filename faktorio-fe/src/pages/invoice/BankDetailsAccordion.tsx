@@ -27,7 +27,7 @@ export const BankDetailsAccordion = ({ form }: BankDetailsAccordionProps) => {
   }
 
   return (
-    <Accordion type="single" collapsible className="mt-4 mb-6 background-muted hover:bg-muted p-4">
+    <Accordion type="single" collapsible className="mt-4 mb-6 background-muted hover:bg-muted p-4 rounded-md">
       <AccordionItem value="bank-details">
         <AccordionTrigger className="font-semibold">
           Bankovní údaje

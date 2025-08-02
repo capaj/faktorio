@@ -26,6 +26,7 @@ import {
 import { BankDetailsAccordion } from './BankDetailsAccordion'
 import { DatePicker } from '@/components/ui/date-picker'
 import { useExchangeRate } from '@/hooks/useExchangeRate'
+import { CurrencySelect } from '@/components/ui/currency-select'
 
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
@@ -236,7 +237,12 @@ export const EditInvoicePage = () => {
                 <FormItem>
                   <FormLabel>Měna</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <CurrencySelect
+                      {...field}
+                      name="currency"
+                      placeholder="CZK"
+
+                    />
                   </FormControl>
                 </FormItem>
               )}

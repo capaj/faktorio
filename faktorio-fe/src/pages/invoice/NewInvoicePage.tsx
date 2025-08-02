@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/dialog'
 import { DatePicker } from '@/components/ui/date-picker'
 import { useExchangeRate } from '@/hooks/useExchangeRate'
+import { CurrencySelect } from '@/components/ui/currency-select'
 
 
 const defaultInvoiceItem = {
@@ -284,7 +285,12 @@ export const NewInvoicePage = () => {
                 <FormItem>
                   <FormLabel>Měna</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <CurrencySelect
+                      {...field}
+                      name="currency"
+                      placeholder="CZK"
+
+                    />
                   </FormControl>
                 </FormItem>
               )}
