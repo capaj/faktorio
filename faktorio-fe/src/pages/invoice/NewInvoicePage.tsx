@@ -34,7 +34,6 @@ import { useExchangeRate } from '@/hooks/useExchangeRate'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
 
-
 const defaultInvoiceItem = {
   description: '',
   unit: 'manday',
@@ -61,7 +60,9 @@ export const NewInvoicePage = () => {
     })
 
   const form = useForm<
-    z.infer<typeof formSchema> & { items: z.infer<typeof invoiceItemFormSchema>[] }
+    z.infer<typeof formSchema> & {
+      items: z.infer<typeof invoiceItemFormSchema>[]
+    }
   >({
     defaultValues: {
       ...formSchema.parse({
@@ -111,8 +112,8 @@ export const NewInvoicePage = () => {
   const totalVat = invoiceItems.reduce(
     (acc, item) =>
       acc +
-      (((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
-        100),
+      ((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
+        100,
     0
   )
 
@@ -290,7 +291,6 @@ export const NewInvoicePage = () => {
                       {...field}
                       name="currency"
                       placeholder="CZK"
-
                     />
                   </FormControl>
                 </FormItem>
@@ -389,7 +389,7 @@ const InvoiceItemForm = ({
   contactsQuery,
   selectedContactId
 }: {
-  control: any,
+  control: any
   index: number
   onDelete: () => void
   contactsQuery: any
@@ -482,7 +482,6 @@ const InvoiceItemForm = ({
                 placeholder="Cena/jedn."
                 type="number"
                 step="0.01"
-                min={0}
                 {...field}
                 value={field.value || ''}
               />
@@ -511,10 +510,11 @@ const InvoiceItemForm = ({
                   const vatRate = parseFloat(e.target.value)
                   if (
                     vatRate === 0 &&
+                    field.value > 0 &&
                     selectedContactId &&
-                    contactsQuery.data?.find(
-                      (c: any) => c.id === selectedContactId
-                    )?.vat_no?.startsWith('CZ') &&
+                    contactsQuery.data
+                      ?.find((c: any) => c.id === selectedContactId)
+                      ?.vat_no?.startsWith('CZ') &&
                     showVatWarning !== false
                   ) {
                     setShowVatWarning(true)

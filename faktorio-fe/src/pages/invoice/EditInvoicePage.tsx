@@ -67,7 +67,7 @@ export const EditInvoicePage = () => {
     (acc, item) =>
       acc +
       ((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
-      100,
+        100,
     0
   )
 
@@ -92,7 +92,7 @@ export const EditInvoicePage = () => {
     const invoiceCompleteForPreview = {
       ...formValues,
       ...getInvoiceSums(invoiceItems, formValues.exchange_rate ?? 1),
-      items: invoiceItems.map(item => ({
+      items: invoiceItems.map((item) => ({
         ...item,
         quantity: item.quantity ?? undefined,
         unit_price: item.unit_price ?? undefined,
@@ -184,7 +184,9 @@ export const EditInvoicePage = () => {
                     <DatePicker
                       date={field.value ? djs(field.value).toDate() : undefined}
                       setDate={(date) => {
-                        field.onChange(date ? djs(date).format('YYYY-MM-DD') : '')
+                        field.onChange(
+                          date ? djs(date).format('YYYY-MM-DD') : ''
+                        )
                       }}
                     />
                   </FormControl>
@@ -201,7 +203,9 @@ export const EditInvoicePage = () => {
                     <DatePicker
                       date={field.value ? djs(field.value).toDate() : undefined}
                       setDate={(date) => {
-                        field.onChange(date ? djs(date).format('YYYY-MM-DD') : '')
+                        field.onChange(
+                          date ? djs(date).format('YYYY-MM-DD') : ''
+                        )
                       }}
                     />
                   </FormControl>
@@ -243,7 +247,6 @@ export const EditInvoicePage = () => {
                       {...field}
                       name="currency"
                       placeholder="CZK"
-
                     />
                   </FormControl>
                 </FormItem>
@@ -407,7 +410,6 @@ const InvoiceItemForm = ({
               placeholder="cena"
               type="number"
               step="0.01"
-              min={0}
               {...field}
               value={field.value || ''}
             />
