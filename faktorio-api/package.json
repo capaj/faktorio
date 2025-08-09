@@ -18,7 +18,7 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250802.0",
+    "@cloudflare/workers-types": "^4.20250809.0",
     "@types/debug": "^4.1.12",
     "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.31.4",
@@ -26,27 +26,27 @@
     "tsx": "^4.20.3",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
-    "wrangler": "^4.27.0"
+    "wrangler": "^4.28.1"
   },
   "dependencies": {
-    "@google/genai": "^1.12.0",
+    "@google/genai": "^1.13.0",
     "@google/generative-ai": "^0.24.1",
     "@libsql/client": "^0.15.10",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
-    "@tanstack/react-query": "^5.84.1",
-    "@trpc/client": "^11.4.3",
-    "@trpc/react-query": "^11.4.3",
-    "@trpc/server": "^11.4.3",
+    "@tanstack/react-query": "^5.84.2",
+    "@trpc/client": "^11.4.4",
+    "@trpc/react-query": "^11.4.4",
+    "@trpc/server": "^11.4.4",
     "@tsndr/cloudflare-worker-jwt": "^3.2.0",
     "currency-codes": "^2.2.0",
     "debug": "^4.4.1",
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.44.4",
-    "drizzle-zod": "0.8.2",
+    "drizzle-zod": "0.8.3",
     "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.9",
     "web-push": "^3.6.7",
-    "zod": "^4.0.14"
+    "zod": "^4.0.16"
   }
 }
