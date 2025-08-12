@@ -335,6 +335,7 @@ export const EditInvoicePage = () => {
             </Button>
             <Button
               type="button"
+              variant="outline"
               onClick={(event) => {
                 event.preventDefault()
 
