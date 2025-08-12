@@ -21,7 +21,8 @@ import {
   Pencil,
   Trash2,
   CheckCircle,
-  XCircle
+  XCircle,
+  Eye
 } from 'lucide-react'
 import { Link } from 'wouter'
 import { formatNumberWithSpaces } from '@/pages/formatNumberWithSpaces' // Adjust path if needed
@@ -31,6 +32,7 @@ import { InvoicesDownloadButton } from '@/pages/InvoiceList/InvoicesDownloadButt
 // This might need refinement based on the exact structure from your tRPC query
 import { invoicesTb } from 'faktorio-db/schema'
 import { InferSelectModel } from 'drizzle-orm'
+import { toast } from 'sonner'
 
 export type Invoice = Pick<
   InferSelectModel<typeof invoicesTb>,
@@ -212,7 +214,7 @@ export function IssuedInvoiceTable({
                       href={`/invoices/${invoice.id}`}
                       className="flex w-full"
                     >
-                      <Pencil size={16} strokeWidth="1.5" />
+                      <Eye size={16} strokeWidth="1.5" />
                       <span className="ml-2">Zobrazit PDF</span>
                     </Link>
                   </DropdownMenuItem>
@@ -256,7 +258,19 @@ export function IssuedInvoiceTable({
                         </span>
                       }
                       onRemove={async () => {
-                        await onDelete(invoice.id)
+                        const timeoutId = setTimeout(async () => {
+                          await onDelete(invoice.id)
+                        }, 1000 * 20)
+                        toast.warning(
+                          'Faktura bude smazána za 20 sekund, klikněte pro zachování.',
+                          {
+                            duration: 1000 * 20,
+                            onDismiss: () => {
+                              clearTimeout(timeoutId)
+                              toast.dismiss()
+                            }
+                          }
+                        )
                       }}
                     >
                       <DropdownMenuItem className="cursor-pointer">
