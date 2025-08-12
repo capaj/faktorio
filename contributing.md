@@ -16,16 +16,17 @@ Mailjet you only need if you want to send emails.
 2. `cd faktorio-fe && cp .env.example .env`
 3. `cd faktorio-api && cp .dev.vars.example .dev.vars`
 4. fill in missing env vars in both files, keep empty those you don't want to use(mailjet, google client ID)
-5. `pnpm dev`
-
-## How to generate new migrations
-
-1. `cd faktorio-api`
-2. `pnpm generate`
+5. run migrations
+6. `pnpm dev`
 
 ## How to run migrations
 
-1. `cd faktorio-api`
+1. `cd faktorio-db`
 2. `pnpm migrate`
+
+## How to generate new migrations
+
+1. `cd faktorio-db`
+2. `pnpm generate`
 
 Migration do not run on CI. They must be run manually for now.

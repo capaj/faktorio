@@ -99,6 +99,13 @@
       "when": 1751529098715,
       "tag": "0013_dark_silver_samurai",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1755025307885,
+      "tag": "0014_volatile_vermin",
+      "breakpoints": true
     }
   ]
 }

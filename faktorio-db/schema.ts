@@ -424,6 +424,7 @@ export const systemStatsTb = sqliteTable('system_stats', {
     .notNull(),
   user_count: integer('user_count').notNull(),
   invoice_count: integer('invoice_count').notNull(),
+  received_invoice_count: integer('received_invoice_count').notNull(),
   calculated_at: text('calculated_at')
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
