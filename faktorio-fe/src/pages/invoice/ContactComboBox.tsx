@@ -34,10 +34,10 @@ export function ContactComboBox(props: {
 
   useEffect(() => {
     const defaultContactValue = contacts.length === 1 ? contacts[0].id : ''
-    if (!value && lastInvoice && contacts.length > 0) {
+    if (!value) {
       const lastUsedContactId = lastInvoice?.client_contact_id
 
-      const firstContact = contacts[0]
+      const firstContact = contacts?.[0]
 
       // NOTE: when the newest contact is added recently, select it
       if (
@@ -50,7 +50,9 @@ export function ContactComboBox(props: {
         return
       }
 
-      props.onChange?.(lastUsedContactId ?? defaultContactValue)
+      props.onChange?.(
+        lastUsedContactId || defaultContactValue || firstContact?.id
+      )
     }
   }, [contactsQuery.data])
 
