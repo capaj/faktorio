@@ -50,9 +50,12 @@ export function ContactComboBox(props: {
         return
       }
 
-      props.onChange?.(
+      const someDefaultContactId =
         lastUsedContactId || defaultContactValue || firstContact?.id
-      )
+
+      if (someDefaultContactId) {
+        props.onChange?.(someDefaultContactId)
+      }
     }
   }, [contactsQuery.data])
 

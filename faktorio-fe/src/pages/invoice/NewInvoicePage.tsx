@@ -219,7 +219,11 @@ export const NewInvoicePage = () => {
                         />
                       </FormControl>
                     </div>
-                    <ButtonLink href="/contacts/new?next=/new-invoice">
+                    <ButtonLink
+                      type="button"
+                      tabIndex={100}
+                      href="/contacts/new?next=/new-invoice"
+                    >
                       Nový kontakt
                     </ButtonLink>
                   </div>
@@ -377,9 +381,11 @@ export const NewInvoicePage = () => {
           />
           <Center>
             <ButtonWithLoader
+              autoFocus
               isLoading={createInvoice.isPending}
               disabled={!contact || total === 0}
               type="submit"
+              tabIndex={-1}
             >
               Vytvořit fakturu a přejít na náhled a odeslání
             </ButtonWithLoader>

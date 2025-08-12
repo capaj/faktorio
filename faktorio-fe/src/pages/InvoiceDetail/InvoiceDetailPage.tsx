@@ -77,17 +77,16 @@ export const InvoiceDetail = ({
 
   const qrCodeBase64 = useQRCodeBase64(
     generateQrPaymentString({
-      accountNumber: invoice.iban?.replace(/\s/g, '') ?? invoice.bank_account ?? null,
+      accountNumber:
+        invoice.iban?.replace(/\s/g, '') ?? invoice.bank_account ?? null,
       amount: invoiceTotal + taxTotal,
       currency: invoice.currency,
-      variableSymbol: invoice.number.replace('-', ''),
+      variableSymbol: invoice.number?.replace('-', ''),
       message: 'Faktura ' + invoice.number
     })
   )
 
   const PdfContent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
-
-
 
   return (
     <>
@@ -137,9 +136,12 @@ export const InvoiceDetail = ({
         <div className="flex content-center justify-center m-4">
           <PDFDownloadLink
             document={
-              <PdfContent invoiceData={invoice} qrCodeBase64={qrCodeBase64} />
+              <PdfContent
+                invoiceData={invoice}
+                qrCodeBase64={qrCodeBase64 ?? ''}
+              />
             }
-            fileName={pdfName}
+            fileName={pdfName ?? ''}
           >
             <Button variant={'default'}>Stáhnout {pdfName}</Button>
           </PDFDownloadLink>
