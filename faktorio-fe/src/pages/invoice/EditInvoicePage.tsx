@@ -333,6 +333,23 @@ export const EditInvoicePage = () => {
             >
               Zrušit změny
             </Button>
+            <Button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault()
+
+                if (
+                  form.formState.isDirty &&
+                  !confirm('Pokud odejdete na náhled, změna se ztratí!')
+                ) {
+                  return
+                }
+
+                navigate(`/invoices/${invoice.id}`)
+              }}
+            >
+              Zobrazit fakturu (bez uložení změn!)
+            </Button>
             <ButtonWithLoader
               isLoading={updateInvoice.isPending}
               disabled={!form.formState.isDirty || updateInvoice.isPending}
