@@ -165,10 +165,11 @@ export function IssuedInvoiceTable({
             <TableCell>{formatCzechDate(invoice.sent_at)}</TableCell>
             <TableCell>
               <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${invoice.paid_on
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-yellow-100 text-yellow-800'
-                  }`}
+                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  invoice.paid_on
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}
               >
                 {invoice.paid_on
                   ? formatCzechDate(invoice.paid_on)
@@ -206,6 +207,15 @@ export function IssuedInvoiceTable({
                       <span className="ml-2">Editovat</span>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link
+                      href={`/invoices/${invoice.id}`}
+                      className="flex w-full"
+                    >
+                      <Pencil size={16} strokeWidth="1.5" />
+                      <span className="ml-2">Zobrazit PDF</span>
+                    </Link>
+                  </DropdownMenuItem>
 
                   {!invoice.paid_on && onMarkAsPaid && (
                     <DropdownMenuItem
@@ -229,8 +239,8 @@ export function IssuedInvoiceTable({
                       onClick={async () => {
                         await onMarkAsUnpaid(invoice.id)
                       }}
-                    // Consider passing mutation status if needed for disabling
-                    // disabled={markAsUnpaidMutation.isPending}
+                      // Consider passing mutation status if needed for disabling
+                      // disabled={markAsUnpaidMutation.isPending}
                     >
                       <XCircle size={16} strokeWidth="1.5" />
                       <span className="ml-2">Označit jako nezaplacené</span>
@@ -285,7 +295,7 @@ export function IssuedInvoiceTable({
                   {currencyTotals[currency].count === 1
                     ? 'faktura'
                     : currencyTotals[currency].count > 1 &&
-                      currencyTotals[currency].count < 5
+                        currencyTotals[currency].count < 5
                       ? 'faktury'
                       : 'faktur'}{' '}
                   v {currency}
