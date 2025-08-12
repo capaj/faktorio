@@ -169,7 +169,7 @@ export const EditInvoicePage = () => {
                 <FormItem className="flex flex-col flew-grow col-span-2">
                   <FormLabel>Odběratel</FormLabel>
                   <FormControl>
-                    <ContactComboBox {...field} />
+                    <ContactComboBox disabled {...field} />
                   </FormControl>
                 </FormItem>
               )}
