@@ -28,10 +28,13 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { useExchangeRate } from '@/hooks/useExchangeRate'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
+import { InvoicingDetailsFormSchema } from '../UserInvoicingDetails'
 
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const contactsQuery = trpcClient.contacts.all.useQuery()
+
+  const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
   const [_previewInvoice, setPreviewInvoice] = useDebounceValue<z.infer<
     typeof invoiceForRenderSchema
   > | null>(null, 3000)
@@ -63,13 +66,17 @@ export const EditInvoicePage = () => {
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
     0
   )
-  const totalVat = invoiceItems.reduce(
-    (acc, item) =>
-      acc +
-      ((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
-        100,
-    0
-  )
+  const totalVat = invoicingDetails?.vat_payer
+    ? invoiceItems.reduce(
+        (acc, item) =>
+          acc +
+          ((item.quantity ?? 0) *
+            (item.unit_price ?? 0) *
+            (item.vat_rate ?? 0)) /
+            100,
+        0
+      )
+    : 0
 
   if (contactsQuery.data?.length === 0) {
     return null
@@ -295,6 +302,7 @@ export const EditInvoicePage = () => {
                 <InvoiceItemForm
                   key={item.id}
                   control={form.control}
+                  invoicingDetails={invoicingDetails}
                   index={index}
                   onDelete={() => remove(index)}
                 />
@@ -317,6 +325,7 @@ export const EditInvoicePage = () => {
 
           <InvoiceTotals
             total={total}
+            vatPayer={invoice.vat_payer}
             totalVat={totalVat}
             currency={formValues.currency}
             exchangeRate={exchangeRate}
@@ -369,10 +378,12 @@ export const EditInvoicePage = () => {
 const InvoiceItemForm = ({
   control,
   index,
-  onDelete
+  onDelete,
+  invoicingDetails
 }: {
   control: any
   index: number
+  invoicingDetails: InvoicingDetailsFormSchema | null
   onDelete: () => void
 }) => {
   return (
@@ -433,20 +444,22 @@ const InvoiceItemForm = ({
             />
           )}
         />
-        <FormField
-          control={control}
-          name={`items.${index}.vat_rate`}
-          render={({ field }) => (
-            <Input
-              className="w-20"
-              placeholder="DPH"
-              type="number"
-              min={0}
-              {...field}
-              value={field.value || ''}
-            />
-          )}
-        />
+        {invoicingDetails?.vat_payer && (
+          <FormField
+            control={control}
+            name={`items.${index}.vat_rate`}
+            render={({ field }) => (
+              <Input
+                className="w-20"
+                placeholder="DPH"
+                type="number"
+                min={0}
+                {...field}
+                value={field.value || ''}
+              />
+            )}
+          />
+        )}
         <button
           type="button"
           className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300"

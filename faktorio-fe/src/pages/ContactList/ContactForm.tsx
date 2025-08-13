@@ -3,6 +3,7 @@ import { DialogFooter } from '@/components/ui/dialog'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,6 +21,7 @@ import {
 
 import { UseFormReturn } from 'react-hook-form'
 import { ContactFormSchema } from './ContactList'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export const fieldLabels = {
   registration_no: 'IČO',
@@ -49,6 +51,7 @@ export type InvoicingDetailsFormSchema = ContactFormSchema & {
 
 // Component for rendering the contact form - moved outside to prevent recreation
 export const ContactForm = ({
+  displayVatPayer,
   form,
   onSubmit,
   isEdit = false,
@@ -59,6 +62,7 @@ export const ContactForm = ({
   showDialogFooter = true,
   customFooter
 }: {
+  displayVatPayer?: boolean
   form: UseFormReturn<ContactFormSchema | InvoicingDetailsFormSchema>
   onSubmit: (
     values: ContactFormSchema | InvoicingDetailsFormSchema
@@ -118,9 +122,34 @@ export const ContactForm = ({
           )}
         />
 
+        {displayVatPayer && (
+          <FormField
+            control={form.control}
+            name="vat_payer"
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormLabel>Plátce DPH</FormLabel>
+                <FormControl>
+                  <Checkbox
+                    {...field}
+                    value={Number(field.value)}
+                    checked={Boolean(field.value)}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Označte, pokud je tato firma plátce VAT.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         <FormField
           control={form.control}
           name="vat_no"
+          disabled={!form.watch('vat_payer')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.vat_no}</FormLabel>
@@ -131,7 +160,6 @@ export const ContactForm = ({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="name"
@@ -366,7 +394,6 @@ export const ContactForm = ({
           <DialogFooter className="col-span-2 flex justify-between">
             <div className="w-full flex justify-between">
               <div className="flex flex-col items-start gap-2">
-
                 {handleShowDeleteDialog && (
                   <Button
                     className="align-left self-start justify-self-start"
