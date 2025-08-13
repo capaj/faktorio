@@ -11,7 +11,7 @@ import { z } from 'zod/v4'
 import { invoiceItemFormSchema } from 'faktorio-api/src/zodDbSchemas'
 import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
-import { useLocation } from 'wouter'
+import { Link, useLocation } from 'wouter'
 import {
   Form,
   FormControl,
@@ -33,6 +33,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { useExchangeRate } from '@/hooks/useExchangeRate'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
+import { ButtonLink } from '@/components/ui/link'
 
 const defaultInvoiceItem = {
   description: '',
@@ -207,14 +208,25 @@ export const NewInvoicePage = () => {
               render={({ field }) => (
                 <FormItem className="flex flex-col flew-grow col-span-2">
                   <FormLabel>Odběratel</FormLabel>
-                  <FormControl>
-                    <ContactComboBox
-                      value={field.value ?? ''}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      disabled={field.disabled}
-                    />
-                  </FormControl>
+                  <div className="flex flex-row justify-between">
+                    <div className="flex-grow flex flex-col flew-grow">
+                      <FormControl>
+                        <ContactComboBox
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          disabled={field.disabled}
+                        />
+                      </FormControl>
+                    </div>
+                    <ButtonLink
+                      type="button"
+                      tabIndex={100}
+                      href="/contacts/new?next=/new-invoice"
+                    >
+                      Nový kontakt
+                    </ButtonLink>
+                  </div>
                 </FormItem>
               )}
             />
@@ -369,9 +381,11 @@ export const NewInvoicePage = () => {
           />
           <Center>
             <ButtonWithLoader
+              autoFocus
               isLoading={createInvoice.isPending}
               disabled={!contact || total === 0}
               type="submit"
+              tabIndex={-1}
             >
               Vytvořit fakturu a přejít na náhled a odeslání
             </ButtonWithLoader>

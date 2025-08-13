@@ -21,7 +21,8 @@ import {
   Pencil,
   Trash2,
   CheckCircle,
-  XCircle
+  XCircle,
+  Eye
 } from 'lucide-react'
 import { Link } from 'wouter'
 import { formatNumberWithSpaces } from '@/pages/formatNumberWithSpaces' // Adjust path if needed
@@ -31,6 +32,8 @@ import { InvoicesDownloadButton } from '@/pages/InvoiceList/InvoicesDownloadButt
 // This might need refinement based on the exact structure from your tRPC query
 import { invoicesTb } from 'faktorio-db/schema'
 import { InferSelectModel } from 'drizzle-orm'
+import { toast } from 'sonner'
+import { describe } from 'vitest'
 
 export type Invoice = Pick<
   InferSelectModel<typeof invoicesTb>,
@@ -83,6 +86,10 @@ export function IssuedInvoiceTable({
 }: InvoiceTableProps) {
   // Determine if we should show full year in dates
   const showFullYear = year === null || year === undefined
+
+  const [invoiceIdsToDelete, setInvoiceIdsToDelete] = React.useState<
+    Set<string>
+  >(new Set())
 
   // Helper function to format dates in Czech format
   function formatCzechDate(dateString: string | null): string {
@@ -150,116 +157,149 @@ export function IssuedInvoiceTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {invoices.map((invoice) => (
-          <TableRow key={invoice.id}>
-            <TableCell className="font-medium">
-              <Link href={`/invoices/${invoice.id}/?language=cs`}>
-                {invoice.number}
-              </Link>
-            </TableCell>
-            <TableCell>{invoice.client_name}</TableCell>
-            <TableCell>
-              {formatCzechDate(invoice.taxable_fulfillment_due)}
-            </TableCell>
-            <TableCell>{formatCzechDate(invoice.issued_on)}</TableCell>
-            <TableCell>{formatCzechDate(invoice.sent_at)}</TableCell>
-            <TableCell>
-              <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${invoice.paid_on
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-yellow-100 text-yellow-800'
+        {invoices.map((invoice) =>
+          invoiceIdsToDelete.has(invoice.id) ? null : (
+            <TableRow key={invoice.id}>
+              <TableCell className="font-medium">
+                <Link href={`/invoices/${invoice.id}/?language=cs`}>
+                  {invoice.number}
+                </Link>
+              </TableCell>
+              <TableCell>{invoice.client_name}</TableCell>
+              <TableCell>
+                {formatCzechDate(invoice.taxable_fulfillment_due)}
+              </TableCell>
+              <TableCell>{formatCzechDate(invoice.issued_on)}</TableCell>
+              <TableCell>{formatCzechDate(invoice.sent_at)}</TableCell>
+              <TableCell>
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    invoice.paid_on
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
                   }`}
-              >
-                {invoice.paid_on
-                  ? formatCzechDate(invoice.paid_on)
-                  : 'Nezaplaceno'}
-              </span>
-            </TableCell>
-            <TableCell>
-              {invoice.subtotal} {invoice.currency}
-              {invoice.currency !== 'CZK' &&
-                invoice.exchange_rate &&
-                invoice.subtotal && (
-                  <div className="text-xs text-gray-500">
-                    ({invoice.exchange_rate * invoice.subtotal} CZK)
-                  </div>
-                )}
-            </TableCell>
-            <TableCell>
-              {invoice.total} {invoice.currency}
-            </TableCell>
-
-            <TableCell className="text-right">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="bg-gray-200">
-                    <LucideEllipsisVertical className="h-5 w-5 text-gray-400" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="cursor-pointer">
-                  <DropdownMenuItem>
-                    <Link
-                      href={`/invoices/${invoice.id}/edit`}
-                      className="flex w-full"
-                    >
-                      <Pencil size={16} strokeWidth="1.5" />
-                      <span className="ml-2">Editovat</span>
-                    </Link>
-                  </DropdownMenuItem>
-
-                  {!invoice.paid_on && onMarkAsPaid && (
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onSelect={(e) => e.preventDefault()}
-                      onClick={() => onMarkAsPaid(invoice.id, invoice.number)}
-                    >
-                      <CheckCircle
-                        size={16}
-                        strokeWidth="1.5"
-                        className="text-green-600"
-                      />
-                      <span className="ml-2">Označit jako zaplacené</span>
-                    </DropdownMenuItem>
+                >
+                  {invoice.paid_on
+                    ? formatCzechDate(invoice.paid_on)
+                    : 'Nezaplaceno'}
+                </span>
+              </TableCell>
+              <TableCell>
+                {invoice.subtotal} {invoice.currency}
+                {invoice.currency !== 'CZK' &&
+                  invoice.exchange_rate &&
+                  invoice.subtotal && (
+                    <div className="text-xs text-gray-500">
+                      ({invoice.exchange_rate * invoice.subtotal} CZK)
+                    </div>
                   )}
+              </TableCell>
+              <TableCell>
+                {invoice.total} {invoice.currency}
+              </TableCell>
 
-                  {invoice.paid_on && onMarkAsUnpaid && (
-                    <DropdownMenuItem
-                      className="text-red-600 focus:text-red-700 focus:bg-red-50"
-                      onSelect={(e) => e.preventDefault()}
-                      onClick={async () => {
-                        await onMarkAsUnpaid(invoice.id)
-                      }}
-                    // Consider passing mutation status if needed for disabling
-                    // disabled={markAsUnpaidMutation.isPending}
-                    >
-                      <XCircle size={16} strokeWidth="1.5" />
-                      <span className="ml-2">Označit jako nezaplacené</span>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="bg-gray-200">
+                      <LucideEllipsisVertical className="h-5 w-5 text-gray-400" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="cursor-pointer">
+                    <DropdownMenuItem>
+                      <Link
+                        href={`/invoices/${invoice.id}/edit`}
+                        className="flex w-full"
+                      >
+                        <Pencil size={16} strokeWidth="1.5" />
+                        <span className="ml-2">Editovat</span>
+                      </Link>
                     </DropdownMenuItem>
-                  )}
+                    <DropdownMenuItem>
+                      <Link
+                        href={`/invoices/${invoice.id}`}
+                        className="flex w-full"
+                      >
+                        <Eye size={16} strokeWidth="1.5" />
+                        <span className="ml-2">Zobrazit PDF</span>
+                      </Link>
+                    </DropdownMenuItem>
 
-                  {onDelete && (
-                    <RemoveDialogUncontrolled
-                      title={
-                        <span>
-                          Opravdu chcete smazat fakturu{' '}
-                          <strong>{invoice.number}</strong>?
-                        </span>
-                      }
-                      onRemove={async () => {
-                        await onDelete(invoice.id)
-                      }}
-                    >
-                      <DropdownMenuItem className="cursor-pointer">
-                        <Trash2 size={16} strokeWidth="1.5" />
-                        <span className="ml-2">Smazat</span>
+                    {!invoice.paid_on && onMarkAsPaid && (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={(e) => e.preventDefault()}
+                        onClick={() => onMarkAsPaid(invoice.id, invoice.number)}
+                      >
+                        <CheckCircle
+                          size={16}
+                          strokeWidth="1.5"
+                          className="text-green-600"
+                        />
+                        <span className="ml-2">Označit jako zaplacené</span>
                       </DropdownMenuItem>
-                    </RemoveDialogUncontrolled>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        ))}
+                    )}
+
+                    {invoice.paid_on && onMarkAsUnpaid && (
+                      <DropdownMenuItem
+                        className="text-red-600 focus:text-red-700 focus:bg-red-50"
+                        onSelect={(e) => e.preventDefault()}
+                        onClick={async () => {
+                          await onMarkAsUnpaid(invoice.id)
+                        }}
+                        // Consider passing mutation status if needed for disabling
+                        // disabled={markAsUnpaidMutation.isPending}
+                      >
+                        <XCircle size={16} strokeWidth="1.5" />
+                        <span className="ml-2">Označit jako nezaplacené</span>
+                      </DropdownMenuItem>
+                    )}
+
+                    {onDelete && (
+                      <RemoveDialogUncontrolled
+                        title={
+                          <span>
+                            Opravdu chcete smazat fakturu{' '}
+                            <strong>{invoice.number}</strong>?
+                          </span>
+                        }
+                        onRemove={async () => {
+                          const takeBackTimeout = 1000 * 10
+                          const invoiceIdToDelete = invoice.id
+                          const timeoutId = setTimeout(async () => {
+                            await onDelete(invoiceIdToDelete)
+                            toast.success('Faktura smazána.')
+                          }, takeBackTimeout)
+                          toast('Faktura bude smazána za 10 sekund.', {
+                            duration: takeBackTimeout,
+                            action: {
+                              label: 'Zrušit smazání',
+                              onClick: () => {
+                                clearTimeout(timeoutId)
+                                setInvoiceIdsToDelete((prev) => {
+                                  prev.delete(invoiceIdToDelete)
+                                  return new Set(prev)
+                                })
+                              }
+                            }
+                          })
+                          setInvoiceIdsToDelete(
+                            (prev) => new Set(prev.add(invoiceIdToDelete))
+                          )
+                        }}
+                      >
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Trash2 size={16} strokeWidth="1.5" />
+                          <span className="ml-2">Smazat</span>
+                        </DropdownMenuItem>
+                      </RemoveDialogUncontrolled>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          )
+        )}
         {isLoading && (
           <TableRow>
             <TableCell colSpan={9} className="text-center">
@@ -285,7 +325,7 @@ export function IssuedInvoiceTable({
                   {currencyTotals[currency].count === 1
                     ? 'faktura'
                     : currencyTotals[currency].count > 1 &&
-                      currencyTotals[currency].count < 5
+                        currencyTotals[currency].count < 5
                       ? 'faktury'
                       : 'faktur'}{' '}
                   v {currency}

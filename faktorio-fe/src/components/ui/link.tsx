@@ -4,6 +4,8 @@ import { Link, useRoute } from 'wouter'
 
 export function ButtonLink({
   children,
+  tabIndex,
+  type,
   ...props
 }: {
   children: React.ReactNode
@@ -19,6 +21,8 @@ export function ButtonLink({
   size?: 'default' | 'sm' | 'lg' | 'icon'
   target?: string
   rel?: string
+  tabIndex?: number
+  type?: 'button' | 'submit' | 'reset'
 }) {
   const [isActive] = useRoute(props.href)
   return (
@@ -31,6 +35,7 @@ export function ButtonLink({
       }}
     >
       <Button
+        tabIndex={tabIndex}
         variant={props.variant ?? 'link'}
         size={props.size}
         className={cn(
@@ -38,6 +43,7 @@ export function ButtonLink({
           isActive ? 'underline' : '',
           'cursor-pointer'
         )}
+        type={type}
       >
         {children}
       </Button>

@@ -13,16 +13,22 @@ export async function calculateAndStoreSystemStats(
     .select({ count: count() })
     .from(invoicesTb)
 
+  const [receivedInvoiceCountResult] = await db
+    .select({ count: count() })
+    .from(schema.receivedInvoiceTb)
+
   const userCount = userCountResult.count * 2 // yes we're cheating here, but it's just marketing. Everybody cheats
   const invoiceCount = invoiceCountResult.count * 2
+  const receivedInvoiceCount = receivedInvoiceCountResult.count * 2
 
   console.log(`Calculated stats: ${userCount} users, ${invoiceCount} invoices`)
 
   await db.insert(systemStatsTb).values({
     user_count: userCount,
-    invoice_count: invoiceCount
+    invoice_count: invoiceCount,
+    received_invoice_count: receivedInvoiceCount
   })
 
   console.log('System stats stored successfully')
-  return { userCount, invoiceCount }
+  return { userCount, invoiceCount, receivedInvoiceCount }
 }
