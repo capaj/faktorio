@@ -113,7 +113,9 @@ export const NewInvoicePage = () => {
   const totalVat = invoiceItems.reduce(
     (acc, item) =>
       acc +
-      ((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
+      ((item.quantity ?? 0) *
+        (item.unit_price ?? 0) *
+        (!invoicingDetails?.vat_payer ? 0 : (item.vat_rate ?? 0))) /
         100,
     0
   )
@@ -350,6 +352,7 @@ export const NewInvoicePage = () => {
               return (
                 <InvoiceItemForm
                   key={item.id}
+                  vatPayer={invoicingDetails?.vat_payer}
                   control={form.control}
                   index={index}
                   onDelete={() => remove(index)}
@@ -374,6 +377,7 @@ export const NewInvoicePage = () => {
           </div>
           <InvoiceTotals
             total={total}
+            vatPayer={invoicingDetails?.vat_payer}
             totalVat={totalVat}
             currency={formValues.currency}
             exchangeRate={exchangeRate}
@@ -400,12 +404,14 @@ const InvoiceItemForm = ({
   control,
   index,
   onDelete,
+  vatPayer,
   contactsQuery,
   selectedContactId
 }: {
   control: any
   index: number
   onDelete: () => void
+  vatPayer?: boolean
   contactsQuery: any
   selectedContactId?: string
 }) => {
@@ -502,44 +508,46 @@ const InvoiceItemForm = ({
             )}
           />
         </div>
-        <div className="flex-grow sm:flex-grow-0">
-          <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
-            htmlFor={`items.${index}.vat_rate`}
-          >
-            DPH %
-          </Label>
-          <FormField
-            control={control}
-            name={`items.${index}.vat_rate`}
-            render={({ field }) => (
-              <Input
-                className="w-full sm:w-20"
-                placeholder="DPH %"
-                type="number"
-                min={0}
-                {...field}
-                value={field.value || ''}
-                onChange={(e) => {
-                  const vatRate = parseFloat(e.target.value)
-                  if (
-                    vatRate === 0 &&
-                    field.value > 0 &&
-                    selectedContactId &&
-                    contactsQuery.data
-                      ?.find((c: any) => c.id === selectedContactId)
-                      ?.vat_no?.startsWith('CZ') &&
-                    showVatWarning !== false
-                  ) {
-                    setShowVatWarning(true)
-                  } else {
-                    field.onChange(e)
-                  }
-                }}
-              />
-            )}
-          />
-        </div>
+        {vatPayer && (
+          <div className="flex-grow sm:flex-grow-0">
+            <Label
+              className="text-xs text-gray-500 mb-1 block md:block"
+              htmlFor={`items.${index}.vat_rate`}
+            >
+              DPH %
+            </Label>
+            <FormField
+              control={control}
+              name={`items.${index}.vat_rate`}
+              render={({ field }) => (
+                <Input
+                  className="w-full sm:w-20"
+                  placeholder="DPH %"
+                  type="number"
+                  min={0}
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => {
+                    const vatRate = parseFloat(e.target.value)
+                    if (
+                      vatRate === 0 &&
+                      field.value > 0 &&
+                      selectedContactId &&
+                      contactsQuery.data
+                        ?.find((c: any) => c.id === selectedContactId)
+                        ?.vat_no?.startsWith('CZ') &&
+                      showVatWarning !== false
+                    ) {
+                      setShowVatWarning(true)
+                    } else {
+                      field.onChange(e)
+                    }
+                  }}
+                />
+              )}
+            />
+          </div>
+        )}
         <div>
           <button
             type="button"

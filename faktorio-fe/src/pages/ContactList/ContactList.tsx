@@ -123,7 +123,8 @@ const baseContactSchema = z.object({
   country: z.string().optional(),
   main_email: z.string().email().nullish(),
   phone_number: z.string().nullish(),
-  language: z.string().optional()
+  language: z.string().optional(),
+  vat_payer: z.boolean().optional().default(true)
 })
 
 export type ContactFormSchema = z.infer<typeof baseContactSchema>
