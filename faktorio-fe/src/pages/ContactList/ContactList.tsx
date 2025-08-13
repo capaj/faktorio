@@ -25,7 +25,12 @@ import { SpinnerContainer } from '@/components/SpinnerContainer'
 import { z } from 'zod/v4'
 import Papa from 'papaparse'
 import { toast } from 'sonner'
-import { UploadIcon, HelpCircleIcon, DownloadIcon, ChevronDownIcon } from 'lucide-react'
+import {
+  UploadIcon,
+  HelpCircleIcon,
+  DownloadIcon,
+  ChevronDownIcon
+} from 'lucide-react'
 import { contactCreateFormSchema } from 'faktorio-api/src/routers/contactCreateFormSchema'
 import {
   Tooltip,
@@ -341,7 +346,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
         ...contactWithoutUserId,
         phone: contact.phone_number,
         email: contact.main_email,
-        due: contact.default_invoice_due_in_days ?? 14, // Default to 14 days if not set
+        due: contact.default_invoice_due_in_days ?? 14 // Default to 14 days if not set
       }
     })
 
@@ -353,7 +358,10 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
     const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
-    link.setAttribute('download', `kontakty_${new Date().toISOString().split('T')[0]}.csv`)
+    link.setAttribute(
+      'download',
+      `kontakty_${new Date().toISOString().split('T')[0]}.csv`
+    )
     link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
@@ -385,7 +393,10 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
               ...contact,
               phone_number: contact.phone || contact.phone_number,
               main_email: contact.email || contact.main_email,
-              due: contact.due && contact.due.trim() !== '' ? parseInt(contact.due, 10) : undefined
+              due:
+                contact.due && contact.due.trim() !== ''
+                  ? parseInt(contact.due, 10)
+                  : undefined
             }
 
             // Remove system fields that shouldn't be in the create schema
@@ -410,7 +421,9 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
 
           if (validContacts.length === 0) {
             if (invalidContacts.length > 0) {
-              toast.error(`Všechny kontakty mají neplatná data. Neplatné kontakty: ${invalidContacts.join(', ')}`)
+              toast.error(
+                `Všechny kontakty mají neplatná data. Neplatné kontakty: ${invalidContacts.join(', ')}`
+              )
             } else {
               toast.error('Žádné platné kontakty k importu')
             }
@@ -419,12 +432,16 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
           }
 
           if (invalidContacts.length > 0) {
-            toast.warning(`Některé kontakty byly přeskočeny kvůli neplatným datům: ${invalidContacts.join(', ')}`)
+            toast.warning(
+              `Některé kontakty byly přeskočeny kvůli neplatným datům: ${invalidContacts.join(', ')}`
+            )
           }
 
           const res = await upsertMany.mutateAsync(validContacts)
           contactsQuery.refetch()
-          toast.success(`Vytvořeno ${res.created} kontaktů, aktualizováno ${res.updated} kontaktů`)
+          toast.success(
+            `Vytvořeno ${res.created} kontaktů, aktualizováno ${res.updated} kontaktů`
+          )
 
           // Reset file input
           if (fileInputRef.current) {
@@ -461,8 +478,15 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
   // Handle form submission for creating a new contact
   const handleCreateSubmit = async (values: ContactFormSchema) => {
     await create.mutateAsync(values)
-    contactsQuery.refetch()
+    const refreshPromise = contactsQuery.refetch()
     setNewDialogOpen(false)
+
+    const maybeNext = new URLSearchParams(window.location.search)?.get('next')
+    if (maybeNext) {
+      await refreshPromise
+      navigate(maybeNext)
+      return
+    }
     navigate('/contacts')
   }
 

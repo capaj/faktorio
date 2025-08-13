@@ -33,10 +33,28 @@ export function ContactComboBox(props: {
   const { value } = props
 
   useEffect(() => {
+    const defaultContactValue = contacts.length === 1 ? contacts[0].id : ''
     if (!value) {
       const lastUsedContactId = lastInvoice?.client_contact_id
-      if (lastUsedContactId) {
-        props.onChange?.(lastUsedContactId) // preselect the last used contact
+
+      const firstContact = contacts?.[0]
+
+      // NOTE: when the newest contact is added recently, select it
+      if (
+        firstContact &&
+        new Date().getTime() -
+          new Date(firstContact.created_at?.replace(' ', 'T') + 'Z').getTime() <
+          1000 * 60 * 2 // 2 minutes
+      ) {
+        props.onChange?.(firstContact.id)
+        return
+      }
+
+      const someDefaultContactId =
+        lastUsedContactId || defaultContactValue || firstContact?.id
+
+      if (someDefaultContactId) {
+        props.onChange?.(someDefaultContactId)
       }
     }
   }, [contactsQuery.data])

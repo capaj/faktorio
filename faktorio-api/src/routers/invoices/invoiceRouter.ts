@@ -205,7 +205,10 @@ export const invoiceRouter = trpcContext.router({
         where: and(...conditions),
         limit: input.limit ?? undefined,
         offset: input.offset ?? undefined,
-        orderBy: desc(invoicesTb.taxable_fulfillment_due) // Order by taxable date
+        orderBy: [
+          desc(invoicesTb.taxable_fulfillment_due),
+          desc(invoicesTb.created_at)
+        ] // Order by taxable date
       })
 
       return invoicesForUser

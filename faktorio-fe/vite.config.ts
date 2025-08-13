@@ -115,12 +115,12 @@ function blogPlugin(): Plugin {
       )
       const BLOG_OUTPUT_DIR = path.join(process.cwd(), 'dist/public/blog')
 
-        // Create output directories
-        ;[BLOG_CONTENT_OUTPUT_DIR, BLOG_OUTPUT_DIR].forEach((dir) => {
-          if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true })
-          }
-        })
+      // Create output directories
+      ;[BLOG_CONTENT_OUTPUT_DIR, BLOG_OUTPUT_DIR].forEach((dir) => {
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true })
+        }
+      })
 
       // Generate index.json
       fs.writeFileSync(
@@ -201,12 +201,20 @@ export default defineConfig({
             }
 
             // Split React and React-related libraries
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            if (
+              id.includes('react') ||
+              id.includes('react-dom') ||
+              id.includes('react-router')
+            ) {
               return `react_${gitHash}`
             }
 
             // Split PDF and document libraries
-            if (id.includes('pdf') || id.includes('jspdf') || id.includes('html2canvas')) {
+            if (
+              id.includes('pdf') ||
+              id.includes('jspdf') ||
+              id.includes('html2canvas')
+            ) {
               return `pdf_${gitHash}`
             }
 
@@ -229,8 +237,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@api': path.resolve(__dirname, '../faktorio-api')
+      '@': path.resolve(__dirname, './src')
     }
   }
 })
