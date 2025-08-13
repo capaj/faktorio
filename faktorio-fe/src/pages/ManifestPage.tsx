@@ -36,7 +36,7 @@ export const ManifestPage = () => {
         </p>
         <p>
           Stát zároveň daňovou legislativu neustále mění, takže musím být
-          neustále ve střehu, abych neudělal chybu. Stát by měl by měl být
+          neustále ve střehu, abych neudělal chybu. Stát by měl být
           partnerem podnikatele. Dát mu zdarma moderní a přívětivé nástroje pro
           vedení účetnictví a daňové evidence. Bohužel tady selhává stát na plné
           čáře. Formuláře pro daňové přiznání jsou extrémě složité a
