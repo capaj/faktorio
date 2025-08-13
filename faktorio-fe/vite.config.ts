@@ -237,9 +237,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@api': path.resolve(__dirname, '../faktorio-api'),
-      '@db': path.resolve(__dirname, '../faktorio-db')
+      '@': path.resolve(__dirname, './src')
     }
   }
 })
