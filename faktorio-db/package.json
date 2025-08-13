@@ -13,10 +13,9 @@
   "packageManager": "pnpm@10.14.0",
   "dependencies": {
     "@libsql/client": "^0.15.10",
-    "faktorio-shared": "workspace:*",
     "@paralleldrive/cuid2": "^2.2.2",
-    "dotenv": "^17.2.1",
-    "drizzle-orm": "^0.44.4"
+    "drizzle-orm": "^0.44.4",
+    "faktorio-shared": "workspace:*"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.4",

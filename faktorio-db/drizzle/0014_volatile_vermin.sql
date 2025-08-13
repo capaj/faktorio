@@ -1,1 +1,1 @@
-ALTER TABLE `system_stats` ADD `received_invoice_count` integer NOT NULL;
+ALTER TABLE `system_stats` ADD `received_invoice_count` integer NOT NULL DEFAULT 0;
