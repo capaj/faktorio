@@ -65,7 +65,7 @@ async function generateMigrationsFile() {
 
     // Vite specific import for raw file content: https://vitejs.dev/guide/assets.html#importing-asset-as-string
     importStatements.push(
-      `import ${variableName} from '@db/drizzle/${sqlFile}?raw';`
+      `import ${variableName} from 'faktorio-db/drizzle/${sqlFile}?raw';`
     )
     // Property format: 'migration0000_create_users': migration0000_create_users,
     objectProperties.push(`  ${variableName},`)
