@@ -59,6 +59,7 @@ export const InvoiceDetail = ({
   invoice: SelectInvoiceType & { items: InsertInvoiceItemType[] }
 }) => {
   const params = useParams()
+  const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
   const [searchParams] = useSearchParams()
   const language = searchParams.get('language') ?? invoice.language
@@ -71,7 +72,7 @@ export const InvoiceDetail = ({
 
   const taxTotal = invoice.items.reduce((acc, item) => {
     const total = (item.quantity ?? 0) * (item.unit_price ?? 0)
-    const vat = item.vat_rate ?? 0
+    const vat = invoice.vat_payer ? (item.vat_rate ?? 0) : 0
     return acc + total * (vat / 100)
   }, 0)
 
@@ -129,7 +130,11 @@ export const InvoiceDetail = ({
               height: '1100px'
             }}
           >
-            <PdfContent invoiceData={invoice} qrCodeBase64={qrCodeBase64} />
+            <PdfContent
+              invoiceData={invoice}
+              qrCodeBase64={qrCodeBase64}
+              vatPayer={invoicingDetails?.vat_payer}
+            />
           </PDFViewer>
         </div>
 

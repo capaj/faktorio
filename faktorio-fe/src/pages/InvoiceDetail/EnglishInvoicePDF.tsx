@@ -4,10 +4,9 @@ import {
   Page,
   Text,
   View,
-
   Image,
   Font,
-  Link,
+  Link
 } from '@react-pdf/renderer'
 
 import { formatMoneyEnglish } from '../../lib/formatMoney'
@@ -17,7 +16,15 @@ import {
 } from 'faktorio-api/src/zodDbSchemas'
 
 import { reactMainRender } from '@/main'
-import { Flex, FlexRow, ItemDescText, pdfStyles, SectionHeading, TextLabel, ThirdWidthColumnRight } from './pdfStyles'
+import {
+  Flex,
+  FlexRow,
+  ItemDescText,
+  pdfStyles,
+  SectionHeading,
+  TextLabel,
+  ThirdWidthColumnRight
+} from './pdfStyles'
 
 Font.register({
   family: 'Inter',
@@ -61,14 +68,14 @@ Font.register({
   ]
 })
 
-
-
 export const EnglishInvoicePDF = ({
   invoiceData,
-  qrCodeBase64
+  qrCodeBase64,
+  vatPayer
 }: {
   invoiceData: SelectInvoiceType & { items: InsertInvoiceItemType[] }
   qrCodeBase64?: string
+  vatPayer?: boolean
 }) => {
   const taxPaidByRate: Record<number, number> = invoiceData.items.reduce(
     (acc, item) => {
@@ -142,7 +149,8 @@ export const EnglishInvoicePDF = ({
                       }}
                       source={qrCodeBase64}
                     ></Image>
-                  </View>)}
+                  </View>
+                )}
               </View>
               <Flex
                 style={{
@@ -458,75 +466,87 @@ export const EnglishInvoicePDF = ({
             </Text>
           </Flex>
         </Flex>
-        {invoiceData.exchange_rate !== 1 && <Flex
-          style={{
-            marginTop: 30,
-            marginRight: 22,
-            flexDirection: 'row'
-          }}
-        >
+        {invoiceData.exchange_rate !== 1 && (
           <Flex
             style={{
-              width: '60%'
-            }}
-          ></Flex>
-          <Flex
-            style={{
-              flexDirection: 'column',
-              width: '40%'
+              marginTop: 30,
+              marginRight: 22,
+              flexDirection: 'row'
             }}
           >
             <Flex
               style={{
-                borderBottom: '1px solid #444'
+                width: '60%'
               }}
-            >
-              <Text style={{ fontSize: 12, color: 'gray' }}>
-                At the exchange rate <Text style={{ fontWeight: 500, color: 'black' }}>
-                  {invoiceData.exchange_rate} CZK / 1 {invoiceData.currency}
-                </Text>
-              </Text>
-              <FlexRow>
-                <TextLabel style={{ color: 'gray' }}>Total without VAT</TextLabel>
-                <Text style={{ color: 'gray' }}>
-                  {formatMoneyEnglish(invoiceTotal * invoiceData.exchange_rate, 'CZK')}
-                </Text>
-              </FlexRow>
-              {Object.entries(taxPaidByRate).map(([rate, tax]) => {
-                return (
-                  <Fragment key={rate}>
-
-                    <FlexRow>
-                      <TextLabel style={{ color: 'gray' }}>VAT {Number(rate)}% in CZK</TextLabel>
-                      <Text style={{
-                        color: 'gray'
-                      }}>
-                        {formatMoneyEnglish(
-                          tax * invoiceData.exchange_rate,
-                          'CZK'
-                        )}
-                      </Text>
-                    </FlexRow>
-                  </Fragment>
-
-                )
-              })}
-
-            </Flex>
-
-            <Text
+            ></Flex>
+            <Flex
               style={{
-                fontSize: 16,
-                color: 'gray',
-                marginTop: 6,
-                textAlign: 'right',
-                fontWeight: 500
+                flexDirection: 'column',
+                width: '40%'
               }}
             >
-              {formatMoneyEnglish((invoiceTotal + taxTotal) * invoiceData.exchange_rate, 'CZK')}
-            </Text>
+              <Flex
+                style={{
+                  borderBottom: '1px solid #444'
+                }}
+              >
+                <Text style={{ fontSize: 12, color: 'gray' }}>
+                  At the exchange rate{' '}
+                  <Text style={{ fontWeight: 500, color: 'black' }}>
+                    {invoiceData.exchange_rate} CZK / 1 {invoiceData.currency}
+                  </Text>
+                </Text>
+                <FlexRow>
+                  <TextLabel style={{ color: 'gray' }}>
+                    Total without VAT
+                  </TextLabel>
+                  <Text style={{ color: 'gray' }}>
+                    {formatMoneyEnglish(
+                      invoiceTotal * invoiceData.exchange_rate,
+                      'CZK'
+                    )}
+                  </Text>
+                </FlexRow>
+                {Object.entries(taxPaidByRate).map(([rate, tax]) => {
+                  return (
+                    <Fragment key={rate}>
+                      <FlexRow>
+                        <TextLabel style={{ color: 'gray' }}>
+                          VAT {Number(rate)}% in CZK
+                        </TextLabel>
+                        <Text
+                          style={{
+                            color: 'gray'
+                          }}
+                        >
+                          {formatMoneyEnglish(
+                            tax * invoiceData.exchange_rate,
+                            'CZK'
+                          )}
+                        </Text>
+                      </FlexRow>
+                    </Fragment>
+                  )
+                })}
+              </Flex>
+
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: 'gray',
+                  marginTop: 6,
+                  textAlign: 'right',
+                  fontWeight: 500
+                }}
+              >
+                {formatMoneyEnglish(
+                  (invoiceTotal + taxTotal) * invoiceData.exchange_rate,
+                  'CZK'
+                )}
+              </Text>
+            </Flex>
           </Flex>
-        </Flex>}
+        )}
         <Text style={{ marginLeft: 22, marginTop: 10, fontSize: 10 }}>
           {invoiceData.footer_note}
         </Text>
