@@ -50,6 +50,8 @@ export type InvoicingDetailsFormSchema = ContactFormSchema & {
 }
 
 // Component for rendering the contact form - moved outside to prevent recreation
+type ContactFormValues = ContactFormSchema & Partial<InvoicingDetailsFormSchema>
+
 export const ContactForm = ({
   displayVatPayer,
   form,
@@ -63,10 +65,8 @@ export const ContactForm = ({
   customFooter
 }: {
   displayVatPayer?: boolean
-  form: UseFormReturn<ContactFormSchema | InvoicingDetailsFormSchema>
-  onSubmit: (
-    values: ContactFormSchema | InvoicingDetailsFormSchema
-  ) => Promise<void>
+  form: UseFormReturn<ContactFormValues>
+  onSubmit: (values: ContactFormValues) => Promise<void>
   isEdit?: boolean
   invoiceCount?: number
   handleShowDeleteDialog?: (e: React.MouseEvent) => void
@@ -127,19 +127,21 @@ export const ContactForm = ({
             control={form.control}
             name="vat_payer"
             render={({ field }) => (
-              <FormItem className="flex items-center space-x-2">
+              <FormItem className="flex flex-col items-start space-x-2">
                 <FormLabel>Plátce DPH</FormLabel>
-                <FormControl>
-                  <Checkbox
-                    {...field}
-                    value={Number(field.value)}
-                    checked={Boolean(field.value)}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Označte, pokud je tato firma plátce VAT.
-                </FormDescription>
+                <div className="flex items-center space-x-2 mt-4">
+                  <FormControl>
+                    <Checkbox
+                      {...field}
+                      value={Number(field.value)}
+                      checked={Boolean(field.value)}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Označte, pokud je tato firma plátce VAT.
+                  </FormDescription>
+                </div>
                 <FormMessage />
               </FormItem>
             )}

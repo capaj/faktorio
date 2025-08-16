@@ -77,10 +77,13 @@ export const EnglishInvoicePDF = ({
   qrCodeBase64?: string
   vatPayer?: boolean
 }) => {
+  const inferredInvoiceVatRate =
+    invoiceData.items.find((i) => i.vat_rate != null)?.vat_rate ?? 0
+  const invoiceVatrate = vatPayer ? inferredInvoiceVatRate : 0
   const taxPaidByRate: Record<number, number> = invoiceData.items.reduce(
     (acc, item) => {
       const total = (item.quantity ?? 0) * (item.unit_price ?? 0)
-      const vat = item.vat_rate ?? 0
+      const vat = invoiceVatrate
       const tax = total * (vat / 100)
       return {
         ...acc,
@@ -329,9 +332,11 @@ export const EnglishInvoicePDF = ({
               justifyContent: 'space-between'
             }}
           >
-            <ThirdWidthColumnRight>VAT</ThirdWidthColumnRight>
+            {vatPayer && <ThirdWidthColumnRight>VAT</ThirdWidthColumnRight>}
             <ThirdWidthColumnRight>Unit Price</ThirdWidthColumnRight>
-            <ThirdWidthColumnRight>Total Excl. VAT</ThirdWidthColumnRight>
+            <ThirdWidthColumnRight>
+              Total {vatPayer && 'Excl. VAT'}
+            </ThirdWidthColumnRight>
           </Flex>
         </Flex>
 
@@ -350,7 +355,7 @@ export const EnglishInvoicePDF = ({
           {invoiceData.items.map((item, index) => {
             const unitPrice = item.unit_price ?? 0
             const quantity = item.quantity ?? 0
-            const vatRate = item.vat_rate ?? 0
+            const vatRate = invoiceVatrate
             const hourPluralized = quantity === 1 ? 'hour' : 'hours'
             const unit =
               item.unit === 'hodina' || item.unit === 'hodin'
@@ -396,7 +401,9 @@ export const EnglishInvoicePDF = ({
                     flexDirection: 'row'
                   }}
                 >
-                  <ThirdWidthColumnRight>{vatRate} %</ThirdWidthColumnRight>
+                  <ThirdWidthColumnRight>
+                    {vatPayer ? `${vatRate}%` : ''}
+                  </ThirdWidthColumnRight>
                   <ThirdWidthColumnRight>
                     {formatMoneyEnglish(unitPrice, invoiceData.currency)}
                   </ThirdWidthColumnRight>
@@ -436,19 +443,22 @@ export const EnglishInvoicePDF = ({
               }}
             >
               <FlexRow>
-                <TextLabel>Total without VAT</TextLabel>
+                <TextLabel>Total {vatPayer && 'without VAT'}</TextLabel>
                 <Text>
                   {formatMoneyEnglish(invoiceTotal, invoiceData.currency)}
                 </Text>
               </FlexRow>
-              {Object.entries(taxPaidByRate).map(([rate, tax]) => {
-                return (
-                  <FlexRow key={rate}>
-                    <TextLabel>VAT {Number(rate)}%</TextLabel>
-                    <Text>{formatMoneyEnglish(tax, invoiceData.currency)}</Text>
-                  </FlexRow>
-                )
-              })}
+              {vatPayer &&
+                Object.entries(taxPaidByRate).map(([rate, tax]) => {
+                  return (
+                    <FlexRow key={rate}>
+                      <TextLabel>VAT {Number(rate)}%</TextLabel>
+                      <Text>
+                        {formatMoneyEnglish(tax, invoiceData.currency)}
+                      </Text>
+                    </FlexRow>
+                  )
+                })}
             </Flex>
 
             <Text

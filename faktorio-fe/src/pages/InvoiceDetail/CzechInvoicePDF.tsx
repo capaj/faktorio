@@ -90,11 +90,10 @@ export const CzechInvoicePDF = ({
   qrCodeBase64?: string
   vatPayer?: boolean
 }) => {
-  const invoiceVatrate = vatPayer ? invoiceData.vat_rate : 0
   const taxPaidByRate: Record<number, number> = invoiceData.items.reduce(
     (acc, item) => {
       const total = (item.quantity ?? 0) * (item.unit_price ?? 0)
-      const vat = invoiceVatrate
+      const vat = vatPayer ? (item.vat_rate ?? 0) : 0
       const tax = total * (vat / 100)
       return {
         ...acc,
@@ -374,7 +373,7 @@ export const CzechInvoicePDF = ({
           {invoiceData.items.map((item, index) => {
             const unitPrice = item.unit_price ?? 0
             const quantity = item.quantity ?? 0
-            const vatRate = invoiceVatrate
+            const vatRate = vatPayer ? (item.vat_rate ?? 0) : 0
             return (
               <Flex
                 key={index}

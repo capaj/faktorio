@@ -28,7 +28,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { useExchangeRate } from '@/hooks/useExchangeRate'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
-import { InvoicingDetailsFormSchema } from '../UserInvoicingDetails'
+// import removed: InvoicingDetailsFormSchema
 import { Label } from '@/components/ui/label'
 
 export const EditInvoicePage = () => {
@@ -326,7 +326,7 @@ export const EditInvoicePage = () => {
 
           <InvoiceTotals
             total={total}
-            vatPayer={invoice.vat_payer}
+            vatPayer={invoicingDetails?.vat_payer}
             totalVat={totalVat}
             currency={formValues.currency}
             exchangeRate={exchangeRate}
@@ -384,7 +384,7 @@ const InvoiceItemForm = ({
 }: {
   control: any
   index: number
-  invoicingDetails: InvoicingDetailsFormSchema | null
+  invoicingDetails: { vat_payer?: boolean } | null
   onDelete: () => void
 }) => {
   return (

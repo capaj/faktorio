@@ -63,7 +63,7 @@ export const InvoiceDetail = ({
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
   const [searchParams] = useSearchParams()
   const language = searchParams.get('language') ?? invoice.language
-  const [location, navigate] = useLocation()
+  const [_location, navigate] = useLocation()
 
   const invoiceTotal = invoice.items.reduce(
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
@@ -72,7 +72,7 @@ export const InvoiceDetail = ({
 
   const taxTotal = invoice.items.reduce((acc, item) => {
     const total = (item.quantity ?? 0) * (item.unit_price ?? 0)
-    const vat = invoice.vat_payer ? (item.vat_rate ?? 0) : 0
+    const vat = invoicingDetails?.vat_payer ? (item.vat_rate ?? 0) : 0
     return acc + total * (vat / 100)
   }, 0)
 
