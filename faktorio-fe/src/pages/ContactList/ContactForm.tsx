@@ -64,8 +64,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
   onFetchAres,
   showInvoicingFields = false,
   showDialogFooter = true,
-  customFooter,
-  vatPayerField
+  customFooter
 }: {
   displayVatPayer?: boolean
   form: UseFormReturn<T>
@@ -78,7 +77,6 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
   showInvoicingFields?: boolean
   showDialogFooter?: boolean
   customFooter?: React.ReactNode
-  vatPayerField?: FieldPath<T>
 }) => {
   const asPath = <K extends keyof ContactFormValues & string>(k: K) =>
     k as unknown as FieldPath<T>
@@ -105,7 +103,6 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                       placeholder="8 čísel"
                       autoComplete="off"
                       {...field}
-                      value={(field.value as string | undefined) ?? ''}
                     />
                   </FormControl>
                 </div>
@@ -131,10 +128,10 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
           )}
         />
 
-        {displayVatPayer && vatPayerField && (
+        {displayVatPayer && (
           <FormField
             control={form.control}
-            name={vatPayerField}
+            name={asPath('vat_payer')}
             render={({ field }) => (
               <FormItem className="flex flex-col items-start space-x-2">
                 <FormLabel>Plátce DPH</FormLabel>
@@ -160,16 +157,12 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
         <FormField
           control={form.control}
           name={asPath('vat_no')}
-          disabled={vatPayerField ? !form.watch(vatPayerField) : false}
+          disabled={displayVatPayer ? !form.watch(asPath('vat_payer')) : false}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.vat_no}</FormLabel>
               <FormControl>
-                <Input
-                  autoComplete="off"
-                  {...field}
-                  value={(field.value as string | undefined) ?? ''}
-                />
+                <Input autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -182,11 +175,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
             <FormItem>
               <FormLabel>{fieldLabels.name}</FormLabel>
               <FormControl>
-                <Input
-                  autoComplete="off"
-                  {...field}
-                  value={(field.value as string | undefined) ?? ''}
-                />
+                <Input autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -200,11 +189,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
             <FormItem>
               <FormLabel>{fieldLabels.street}</FormLabel>
               <FormControl>
-                <Input
-                  autoComplete="off"
-                  {...field}
-                  value={(field.value as string | undefined) ?? ''}
-                />
+                <Input autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -218,11 +203,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
             <FormItem>
               <FormLabel>{fieldLabels.street2}</FormLabel>
               <FormControl>
-                <Input
-                  autoComplete="off"
-                  {...field}
-                  value={(field.value as string | undefined) ?? ''}
-                />
+                <Input autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -236,11 +217,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
             <FormItem>
               <FormLabel>{fieldLabels.city}</FormLabel>
               <FormControl>
-                <Input
-                  autoComplete="off"
-                  {...field}
-                  value={(field.value as string | undefined) ?? ''}
-                />
+                <Input autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -254,11 +231,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
             <FormItem>
               <FormLabel>{fieldLabels.zip}</FormLabel>
               <FormControl>
-                <Input
-                  autoComplete="off"
-                  {...field}
-                  value={(field.value as string | undefined) ?? ''}
-                />
+                <Input autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -272,14 +245,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
             <FormItem>
               <FormLabel>{fieldLabels.main_email}</FormLabel>
               <FormControl>
-                <Input
-                  type="email"
-                  autoComplete="off"
-                  {...field}
-                  value={
-                    ((field.value as string | null | undefined) ?? '') as string
-                  }
-                />
+                <Input type="email" autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -314,11 +280,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
               <FormItem className="flex-1">
                 <FormLabel>{fieldLabels.country}</FormLabel>
                 <FormControl>
-                  <Input
-                    autoComplete="off"
-                    {...field}
-                    value={(field.value as string | undefined) ?? ''}
-                  />
+                  <Input autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -361,11 +323,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                 <FormItem>
                   <FormLabel>{fieldLabels.iban}</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      {...field}
-                      value={(field.value as string | undefined) ?? ''}
-                    />
+                    <Input autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -379,11 +337,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                 <FormItem>
                   <FormLabel>{fieldLabels.swift_bic}</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      {...field}
-                      value={(field.value as string | undefined) ?? ''}
-                    />
+                    <Input autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -397,11 +351,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                 <FormItem>
                   <FormLabel>{fieldLabels.bank_account}</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      {...field}
-                      value={(field.value as string | undefined) ?? ''}
-                    />
+                    <Input autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -415,11 +365,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                 <FormItem>
                   <FormLabel>{fieldLabels.web_url}</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      {...field}
-                      value={(field.value as string | undefined) ?? ''}
-                    />
+                    <Input autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

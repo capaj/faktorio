@@ -159,7 +159,7 @@ export const UserInvoicingDetails = () => {
       <h2>Moje fakturační údaje</h2>
       <p className="text-xs">
         Zde zadejte údaje, které se budou zobrazovat na fakturách, které
-        vytvoríte.
+        vytvoříte.
       </p>
       <div className="flex mt-5 flex-col">
         <ContactForm
