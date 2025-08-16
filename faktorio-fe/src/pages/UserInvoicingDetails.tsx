@@ -28,7 +28,8 @@ const invoicingDetailsFormSchema = z.object({
   swift_bic: z.string().optional(),
   bank_account: z.string().optional(),
   web_url: z.string().optional(),
-  language: z.string().optional()
+  language: z.string().optional(),
+  vat_payer: z.boolean().optional().default(true)
 })
 
 export type InvoicingDetailsFormSchema = z.infer<
@@ -60,6 +61,7 @@ export const UserInvoicingDetails = () => {
       swift_bic: data?.swift_bic || '',
       bank_account: data?.bank_account || '',
       web_url: data?.web_url || '',
+      vat_payer: data?.vat_payer || true,
       language: 'cs'
     }
   })
@@ -82,6 +84,7 @@ export const UserInvoicingDetails = () => {
         swift_bic: data.swift_bic || '',
         bank_account: data.bank_account || '',
         web_url: data.web_url || '',
+        vat_payer: data.vat_payer || true,
         language: 'cs'
       })
     }
@@ -140,7 +143,8 @@ export const UserInvoicingDetails = () => {
       iban: values.iban || undefined,
       swift_bic: values.swift_bic || undefined,
       bank_account: values.bank_account || undefined,
-      web_url: values.web_url || undefined
+      web_url: values.web_url || undefined,
+      vat_payer: values.vat_payer || undefined
     }
     await upsert.mutateAsync(formattedValues)
     refetch()
@@ -160,6 +164,7 @@ export const UserInvoicingDetails = () => {
       </p>
       <div className="flex mt-5 flex-col">
         <ContactForm
+          displayVatPayer
           form={form as any}
           onSubmit={handleSubmit as any}
           showInvoicingFields={true}

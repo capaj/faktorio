@@ -166,7 +166,8 @@ export const contactTb = sqliteTable(
     created_at: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updated_at: text('updated_at').$onUpdate(() => sql`CURRENT_TIMESTAMP`)
+    updated_at: text('updated_at').$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+    vat_payer: integer('vat_payer', { mode: 'boolean' }).notNull().default(true)
   },
   (userInvoicingDetails) => {
     return {
@@ -200,7 +201,8 @@ export const userInvoicingDetailsTb = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
     updated_at: text('updated_at'),
     phone_number: text('phone_number'),
-    web_url: text('web_url')
+    web_url: text('web_url'),
+    vat_payer: integer('vat_payer', { mode: 'boolean' }).notNull().default(true)
   },
   (userInvoicingDetails) => {
     return {
