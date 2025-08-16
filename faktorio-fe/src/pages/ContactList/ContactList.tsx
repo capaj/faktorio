@@ -123,8 +123,7 @@ const baseContactSchema = z.object({
   country: z.string().optional(),
   main_email: z.string().email().nullish(),
   phone_number: z.string().nullish(),
-  language: z.string().optional(),
-  vat_payer: z.boolean().optional().default(true)
+  language: z.string().optional()
 })
 
 export type ContactFormSchema = z.infer<typeof baseContactSchema>
@@ -184,8 +183,7 @@ export const ContactList = () => {
         country: z.string().optional().default('Česká Republika'),
         main_email: z.string().email().nullish(),
         phone_number: z.string().nullish(),
-        language: z.string().optional(),
-        vat_payer: z.boolean().optional().default(true)
+        language: z.string().optional()
       }),
     [contactsQuery.data, contactId]
   )
@@ -201,8 +199,7 @@ export const ContactList = () => {
     phone_number: null,
     registration_no: '',
     vat_no: '',
-    language: 'cs',
-    vat_payer: true
+    language: 'cs'
   }
   // Initialize forms with memoized resolvers
   const editForm = useForm<ContactFormSchema>({
@@ -274,8 +271,7 @@ export const ContactList = () => {
           phone_number: null,
           registration_no: '',
           vat_no: '',
-          language: 'cs',
-          vat_payer: true
+          language: 'cs'
         })
         setNewDialogOpen(true)
         setEditDialogOpen(false)
@@ -535,8 +531,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
       phone_number: null,
       registration_no: '',
       vat_no: '',
-      language: 'cs',
-      vat_payer: true
+      language: 'cs'
     })
     navigate('/contacts/new')
   }

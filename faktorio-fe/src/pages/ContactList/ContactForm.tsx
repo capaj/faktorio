@@ -19,7 +19,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 
-import { UseFormReturn } from 'react-hook-form'
+import { UseFormReturn, FieldPath } from 'react-hook-form'
 import { ContactFormSchema } from './ContactList'
 import { Checkbox } from '@/components/ui/checkbox'
 
@@ -41,18 +41,20 @@ export const fieldLabels = {
   web_url: 'Web'
 } as const
 
-// Extended type for invoicing details
-export type InvoicingDetailsFormSchema = ContactFormSchema & {
+// Superset of fields the ContactForm can work with
+export type ContactFormValues = ContactFormSchema & {
+  main_email?: string | null
+  phone_number?: string | null
+  language?: string
   iban?: string | null
   swift_bic?: string | null
   bank_account?: string | null
   web_url?: string | null
+  vat_payer?: boolean
 }
 
 // Component for rendering the contact form - moved outside to prevent recreation
-type ContactFormValues = ContactFormSchema & Partial<InvoicingDetailsFormSchema>
-
-export const ContactForm = ({
+export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
   displayVatPayer,
   form,
   onSubmit,
@@ -62,11 +64,12 @@ export const ContactForm = ({
   onFetchAres,
   showInvoicingFields = false,
   showDialogFooter = true,
-  customFooter
+  customFooter,
+  vatPayerField
 }: {
   displayVatPayer?: boolean
-  form: UseFormReturn<ContactFormValues>
-  onSubmit: (values: ContactFormValues) => Promise<void>
+  form: UseFormReturn<T>
+  onSubmit: (values: T) => Promise<void>
   isEdit?: boolean
   invoiceCount?: number
   handleShowDeleteDialog?: (e: React.MouseEvent) => void
@@ -75,8 +78,13 @@ export const ContactForm = ({
   showInvoicingFields?: boolean
   showDialogFooter?: boolean
   customFooter?: React.ReactNode
+  vatPayerField?: FieldPath<T>
 }) => {
-  const registrationNo = form.watch('registration_no')
+  const asPath = <K extends keyof ContactFormValues & string>(k: K) =>
+    k as unknown as FieldPath<T>
+  const registrationNo = form.watch(asPath('registration_no')) as
+    | string
+    | undefined
 
   return (
     <Form {...form}>
@@ -86,7 +94,7 @@ export const ContactForm = ({
       >
         <FormField
           control={form.control}
-          name="registration_no"
+          name={asPath('registration_no')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.registration_no}</FormLabel>
@@ -97,6 +105,7 @@ export const ContactForm = ({
                       placeholder="8 čísel"
                       autoComplete="off"
                       {...field}
+                      value={(field.value as string | undefined) ?? ''}
                     />
                   </FormControl>
                 </div>
@@ -122,10 +131,10 @@ export const ContactForm = ({
           )}
         />
 
-        {displayVatPayer && (
+        {displayVatPayer && vatPayerField && (
           <FormField
             control={form.control}
-            name="vat_payer"
+            name={vatPayerField}
             render={({ field }) => (
               <FormItem className="flex flex-col items-start space-x-2">
                 <FormLabel>Plátce DPH</FormLabel>
@@ -150,13 +159,17 @@ export const ContactForm = ({
 
         <FormField
           control={form.control}
-          name="vat_no"
-          disabled={!form.watch('vat_payer')}
+          name={asPath('vat_no')}
+          disabled={vatPayerField ? !form.watch(vatPayerField) : false}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.vat_no}</FormLabel>
               <FormControl>
-                <Input autoComplete="off" {...field} />
+                <Input
+                  autoComplete="off"
+                  {...field}
+                  value={(field.value as string | undefined) ?? ''}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -164,86 +177,15 @@ export const ContactForm = ({
         />
         <FormField
           control={form.control}
-          name="name"
+          name={asPath('name')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.name}</FormLabel>
               <FormControl>
-                <Input autoComplete="off" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="street"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{fieldLabels.street}</FormLabel>
-              <FormControl>
-                <Input autoComplete="off" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="street2"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{fieldLabels.street2}</FormLabel>
-              <FormControl>
-                <Input autoComplete="off" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="city"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{fieldLabels.city}</FormLabel>
-              <FormControl>
-                <Input autoComplete="off" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="zip"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{fieldLabels.zip}</FormLabel>
-              <FormControl>
-                <Input autoComplete="off" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="main_email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{fieldLabels.main_email}</FormLabel>
-              <FormControl>
                 <Input
-                  type="email"
                   autoComplete="off"
                   {...field}
-                  value={field.value || ''}
+                  value={(field.value as string | undefined) ?? ''}
                 />
               </FormControl>
               <FormMessage />
@@ -253,7 +195,100 @@ export const ContactForm = ({
 
         <FormField
           control={form.control}
-          name="phone_number"
+          name={asPath('street')}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.street}</FormLabel>
+              <FormControl>
+                <Input
+                  autoComplete="off"
+                  {...field}
+                  value={(field.value as string | undefined) ?? ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name={asPath('street2')}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.street2}</FormLabel>
+              <FormControl>
+                <Input
+                  autoComplete="off"
+                  {...field}
+                  value={(field.value as string | undefined) ?? ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name={asPath('city')}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.city}</FormLabel>
+              <FormControl>
+                <Input
+                  autoComplete="off"
+                  {...field}
+                  value={(field.value as string | undefined) ?? ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name={asPath('zip')}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.zip}</FormLabel>
+              <FormControl>
+                <Input
+                  autoComplete="off"
+                  {...field}
+                  value={(field.value as string | undefined) ?? ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name={asPath('main_email')}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{fieldLabels.main_email}</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  autoComplete="off"
+                  {...field}
+                  value={
+                    ((field.value as string | null | undefined) ?? '') as string
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name={asPath('phone_number')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.phone_number}</FormLabel>
@@ -261,7 +296,9 @@ export const ContactForm = ({
                 <Input
                   autoComplete="off"
                   {...field}
-                  value={field.value || ''}
+                  value={
+                    ((field.value as string | null | undefined) ?? '') as string
+                  }
                 />
               </FormControl>
               <FormMessage />
@@ -272,13 +309,16 @@ export const ContactForm = ({
         <div className="flex flex-row gap-2">
           <FormField
             control={form.control}
-            name="country"
-            defaultValue="Česká Republika"
+            name={asPath('country')}
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>{fieldLabels.country}</FormLabel>
                 <FormControl>
-                  <Input autoComplete="off" {...field} />
+                  <Input
+                    autoComplete="off"
+                    {...field}
+                    value={(field.value as string | undefined) ?? ''}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -286,14 +326,14 @@ export const ContactForm = ({
           />
           <FormField
             control={form.control}
-            name="language"
+            name={asPath('language')}
             render={({ field }) => (
               <FormItem className="flex-1/2 max-w-1/3">
                 <FormLabel>{fieldLabels.language}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value || 'cs'}
-                  value={field.value || 'cs'}
+                  defaultValue={(field.value as string | undefined) || 'cs'}
+                  value={String((field.value as string | undefined) || 'cs')}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -316,7 +356,7 @@ export const ContactForm = ({
           <>
             <FormField
               control={form.control}
-              name="iban"
+              name={asPath('iban')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{fieldLabels.iban}</FormLabel>
@@ -324,7 +364,7 @@ export const ContactForm = ({
                     <Input
                       autoComplete="off"
                       {...field}
-                      value={field.value || ''}
+                      value={(field.value as string | undefined) ?? ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -334,7 +374,7 @@ export const ContactForm = ({
 
             <FormField
               control={form.control}
-              name="swift_bic"
+              name={asPath('swift_bic')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{fieldLabels.swift_bic}</FormLabel>
@@ -342,7 +382,7 @@ export const ContactForm = ({
                     <Input
                       autoComplete="off"
                       {...field}
-                      value={field.value || ''}
+                      value={(field.value as string | undefined) ?? ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -352,7 +392,7 @@ export const ContactForm = ({
 
             <FormField
               control={form.control}
-              name="bank_account"
+              name={asPath('bank_account')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{fieldLabels.bank_account}</FormLabel>
@@ -360,7 +400,7 @@ export const ContactForm = ({
                     <Input
                       autoComplete="off"
                       {...field}
-                      value={field.value || ''}
+                      value={(field.value as string | undefined) ?? ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -370,7 +410,7 @@ export const ContactForm = ({
 
             <FormField
               control={form.control}
-              name="web_url"
+              name={asPath('web_url')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{fieldLabels.web_url}</FormLabel>
@@ -378,7 +418,7 @@ export const ContactForm = ({
                     <Input
                       autoComplete="off"
                       {...field}
-                      value={field.value || ''}
+                      value={(field.value as string | undefined) ?? ''}
                     />
                   </FormControl>
                   <FormMessage />

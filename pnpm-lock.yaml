@@ -142,6 +142,9 @@ importers:
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.1
       drizzle-orm:
         specifier: ^0.44.4
         version: 0.44.4(@cloudflare/workers-types@4.20250813.0)(@libsql/client@0.15.11)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)

@@ -1,13 +1,15 @@
 {
   "version": "0.2",
-  "ignorePaths": [],
+  "ignorePaths": ["faktorio-fe/src/lib/local-db/migrations.ts"],
   "dictionaryDefinitions": [],
   "dictionaries": [],
   "language": "en,cs",
   "words": [
     "ADIS",
+    "ARESU",
     "Celkem",
     "DPHDP",
+    "DUZP",
     "faktorio",
     "fakturoid",
     "gstatic",
@@ -18,14 +20,16 @@
     "libsql",
     "Lucide",
     "Mailjet",
+    "Nace",
     "papaparse",
     "SHVXML",
     "TRPC",
     "tsndr",
     "turso",
     "unparse",
-    "Veta"
+    "Veta",
+    "wouter"
   ],
   "ignoreWords": [],
-  "import": []
+  "ignore": []
 }

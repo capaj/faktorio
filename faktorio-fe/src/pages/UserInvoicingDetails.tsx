@@ -11,7 +11,6 @@ import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@/lib/zodResolver'
 import { z } from 'zod/v4'
-import { useLocation } from 'wouter'
 
 const invoicingDetailsFormSchema = z.object({
   registration_no: z.string().optional(),
@@ -165,8 +164,8 @@ export const UserInvoicingDetails = () => {
       <div className="flex mt-5 flex-col">
         <ContactForm
           displayVatPayer
-          form={form as any}
-          onSubmit={handleSubmit as any}
+          form={form}
+          onSubmit={handleSubmit}
           showInvoicingFields={true}
           showDialogFooter={false}
           isLoadingAres={isLoadingAres}
