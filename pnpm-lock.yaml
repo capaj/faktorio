@@ -55,8 +55,8 @@ importers:
         specifier: ^0.24.1
         version: 0.24.1
       '@libsql/client':
-        specifier: ^0.15.11
-        version: 0.15.11
+        specifier: ^0.15.12
+        version: 0.15.12
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
@@ -89,10 +89,10 @@ importers:
         version: 17.2.1
       drizzle-orm:
         specifier: ^0.44.4
-        version: 0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.11)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.12)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       drizzle-zod:
         specifier: 0.8.3
-        version: 0.8.3(drizzle-orm@0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.11)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@4.0.17)
+        version: 0.8.3(drizzle-orm@0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.12)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@4.0.17)
       faktorio-shared:
         specifier: workspace:*
         version: link:../faktorio-shared
@@ -137,8 +137,8 @@ importers:
   faktorio-db:
     dependencies:
       '@libsql/client':
-        specifier: ^0.15.11
-        version: 0.15.11
+        specifier: ^0.15.12
+        version: 0.15.12
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
@@ -147,7 +147,7 @@ importers:
         version: 17.2.1
       drizzle-orm:
         specifier: ^0.44.4
-        version: 0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.11)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.12)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       faktorio-shared:
         specifier: workspace:*
         version: link:../faktorio-shared
@@ -265,7 +265,7 @@ importers:
         version: 17.2.1
       drizzle-orm:
         specifier: ^0.44.4
-        version: 0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.11)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.12)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       faktorio-api:
         specifier: workspace:*
         version: link:../faktorio-api
@@ -279,8 +279,8 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
       lucide-react:
-        specifier: ^0.539.0
-        version: 0.539.0(react@18.3.1)
+        specifier: ^0.540.0
+        version: 0.540.0(react@18.3.1)
       microdiff:
         specifier: ^1.5.0
         version: 1.5.0
@@ -1483,11 +1483,11 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@libsql/client@0.15.11':
-    resolution: {integrity: sha512-JB8RWRs+cAbHX35/dQ9wD3m4W5EVGevq1fFqiHKTT4Pa5HR7WrcGRVT+8NL2M7gtTlOvyPh9zzms2DPLBCswig==}
+  '@libsql/client@0.15.12':
+    resolution: {integrity: sha512-JIqB0XsNrqYqBQZuhcgZdTcQoNOoQ5AMF+1yxc7vcZrLtm42QJwRazmTuBfyDwtWASEmVgjxeaLF4NT1iyVX8g==}
 
-  '@libsql/core@0.15.11':
-    resolution: {integrity: sha512-DQDYnEhCSYOsx30ASlOGuOqcQhvwELhOS2qM4dnIP+ZhKki2epZU1j5VZSNeQlrQXHkByMcWBy+wt7tBNx/9uA==}
+  '@libsql/core@0.15.12':
+    resolution: {integrity: sha512-S3tF6885ZizVjfym7f8SevL2VId/+DzxiKmP5zFbrhA8oMLh2XH8bYXChmhab7o9qUSHx+XjK4jCFpUwR5g+Ig==}
 
   '@libsql/darwin-arm64@0.5.16':
     resolution: {integrity: sha512-Q1fXH2YVTU/Iym8kN79Z2bQiNtkIV1QiDikgRD79a2eLO/v9ZghZqama65U6lDP6zZXXGtxhb6sfisnP9HQrug==}
@@ -4219,8 +4219,8 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lucide-react@0.539.0:
-    resolution: {integrity: sha512-VVISr+VF2krO91FeuCrm1rSOLACQUYVy7NQkzrOty52Y8TlTPcXcMdQFj9bYzBgXbWCiywlwSZ3Z8u6a+6bMlg==}
+  lucide-react@0.540.0:
+    resolution: {integrity: sha512-armkCAqQvO62EIX4Hq7hqX/q11WSZu0Jd23cnnqx0/49yIxGXyL/zyZfBxNN9YDx0ensPTb4L+DjTh3yQXUxtQ==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -6702,9 +6702,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@libsql/client@0.15.11':
+  '@libsql/client@0.15.12':
     dependencies:
-      '@libsql/core': 0.15.11
+      '@libsql/core': 0.15.12
       '@libsql/hrana-client': 0.7.0
       js-base64: 3.7.7
       libsql: 0.5.16
@@ -6713,7 +6713,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@libsql/core@0.15.11':
+  '@libsql/core@0.15.12':
     dependencies:
       js-base64: 3.7.7
 
@@ -8477,17 +8477,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.11)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0):
+  drizzle-orm@0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.12)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0):
     optionalDependencies:
       '@cloudflare/workers-types': 4.20250816.0
-      '@libsql/client': 0.15.11
+      '@libsql/client': 0.15.12
       '@types/sql.js': 1.4.9
       gel: 2.0.0
       sql.js: 1.13.0
 
-  drizzle-zod@0.8.3(drizzle-orm@0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.11)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@4.0.17):
+  drizzle-zod@0.8.3(drizzle-orm@0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.12)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@4.0.17):
     dependencies:
-      drizzle-orm: 0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.11)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+      drizzle-orm: 0.44.4(@cloudflare/workers-types@4.20250816.0)(@libsql/client@0.15.12)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       zod: 4.0.17
 
   dunder-proto@1.0.1:
@@ -9512,7 +9512,7 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lucide-react@0.539.0(react@18.3.1):
+  lucide-react@0.540.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
