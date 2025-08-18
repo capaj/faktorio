@@ -3,6 +3,7 @@ import { DialogFooter } from '@/components/ui/dialog'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,8 +19,9 @@ import {
   SelectValue
 } from '@/components/ui/select'
 
-import { UseFormReturn } from 'react-hook-form'
+import { UseFormReturn, FieldPath } from 'react-hook-form'
 import { ContactFormSchema } from './ContactList'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export const fieldLabels = {
   registration_no: 'IČO',
@@ -39,16 +41,21 @@ export const fieldLabels = {
   web_url: 'Web'
 } as const
 
-// Extended type for invoicing details
-export type InvoicingDetailsFormSchema = ContactFormSchema & {
+// Superset of fields the ContactForm can work with
+export type ContactFormValues = ContactFormSchema & {
+  main_email?: string | null
+  phone_number?: string | null
+  language?: string
   iban?: string | null
   swift_bic?: string | null
   bank_account?: string | null
   web_url?: string | null
+  vat_payer?: boolean
 }
 
 // Component for rendering the contact form - moved outside to prevent recreation
-export const ContactForm = ({
+export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
+  displayVatPayer,
   form,
   onSubmit,
   isEdit = false,
@@ -59,10 +66,9 @@ export const ContactForm = ({
   showDialogFooter = true,
   customFooter
 }: {
-  form: UseFormReturn<ContactFormSchema | InvoicingDetailsFormSchema>
-  onSubmit: (
-    values: ContactFormSchema | InvoicingDetailsFormSchema
-  ) => Promise<void>
+  displayVatPayer?: boolean
+  form: UseFormReturn<T>
+  onSubmit: (values: T) => Promise<void>
   isEdit?: boolean
   invoiceCount?: number
   handleShowDeleteDialog?: (e: React.MouseEvent) => void
@@ -72,7 +78,11 @@ export const ContactForm = ({
   showDialogFooter?: boolean
   customFooter?: React.ReactNode
 }) => {
-  const registrationNo = form.watch('registration_no')
+  const asPath = <K extends keyof ContactFormValues & string>(k: K) =>
+    k as unknown as FieldPath<T>
+  const registrationNo = form.watch(asPath('registration_no')) as
+    | string
+    | undefined
 
   return (
     <Form {...form}>
@@ -82,7 +92,7 @@ export const ContactForm = ({
       >
         <FormField
           control={form.control}
-          name="registration_no"
+          name={asPath('registration_no')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.registration_no}</FormLabel>
@@ -118,9 +128,36 @@ export const ContactForm = ({
           )}
         />
 
+        {displayVatPayer && (
+          <FormField
+            control={form.control}
+            name={asPath('vat_payer')}
+            render={({ field }) => (
+              <FormItem className="flex flex-col items-start space-x-2">
+                <FormLabel>Plátce DPH</FormLabel>
+                <div className="flex items-center space-x-2 mt-4">
+                  <FormControl>
+                    <Checkbox
+                      {...field}
+                      value={Number(field.value)}
+                      checked={Boolean(field.value)}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Označte, pokud je tato firma plátce VAT.
+                  </FormDescription>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         <FormField
           control={form.control}
-          name="vat_no"
+          name={asPath('vat_no')}
+          disabled={displayVatPayer ? !form.watch(asPath('vat_payer')) : false}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.vat_no}</FormLabel>
@@ -131,10 +168,9 @@ export const ContactForm = ({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
-          name="name"
+          name={asPath('name')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.name}</FormLabel>
@@ -148,7 +184,7 @@ export const ContactForm = ({
 
         <FormField
           control={form.control}
-          name="street"
+          name={asPath('street')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.street}</FormLabel>
@@ -162,7 +198,7 @@ export const ContactForm = ({
 
         <FormField
           control={form.control}
-          name="street2"
+          name={asPath('street2')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.street2}</FormLabel>
@@ -176,7 +212,7 @@ export const ContactForm = ({
 
         <FormField
           control={form.control}
-          name="city"
+          name={asPath('city')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.city}</FormLabel>
@@ -190,7 +226,7 @@ export const ContactForm = ({
 
         <FormField
           control={form.control}
-          name="zip"
+          name={asPath('zip')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.zip}</FormLabel>
@@ -204,17 +240,12 @@ export const ContactForm = ({
 
         <FormField
           control={form.control}
-          name="main_email"
+          name={asPath('main_email')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.main_email}</FormLabel>
               <FormControl>
-                <Input
-                  type="email"
-                  autoComplete="off"
-                  {...field}
-                  value={field.value || ''}
-                />
+                <Input type="email" autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -223,7 +254,7 @@ export const ContactForm = ({
 
         <FormField
           control={form.control}
-          name="phone_number"
+          name={asPath('phone_number')}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.phone_number}</FormLabel>
@@ -231,7 +262,9 @@ export const ContactForm = ({
                 <Input
                   autoComplete="off"
                   {...field}
-                  value={field.value || ''}
+                  value={
+                    ((field.value as string | null | undefined) ?? '') as string
+                  }
                 />
               </FormControl>
               <FormMessage />
@@ -242,8 +275,7 @@ export const ContactForm = ({
         <div className="flex flex-row gap-2">
           <FormField
             control={form.control}
-            name="country"
-            defaultValue="Česká Republika"
+            name={asPath('country')}
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>{fieldLabels.country}</FormLabel>
@@ -256,14 +288,14 @@ export const ContactForm = ({
           />
           <FormField
             control={form.control}
-            name="language"
+            name={asPath('language')}
             render={({ field }) => (
               <FormItem className="flex-1/2 max-w-1/3">
                 <FormLabel>{fieldLabels.language}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value || 'cs'}
-                  value={field.value || 'cs'}
+                  defaultValue={(field.value as string | undefined) || 'cs'}
+                  value={String((field.value as string | undefined) || 'cs')}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -286,16 +318,12 @@ export const ContactForm = ({
           <>
             <FormField
               control={form.control}
-              name="iban"
+              name={asPath('iban')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{fieldLabels.iban}</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      {...field}
-                      value={field.value || ''}
-                    />
+                    <Input autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -304,16 +332,12 @@ export const ContactForm = ({
 
             <FormField
               control={form.control}
-              name="swift_bic"
+              name={asPath('swift_bic')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{fieldLabels.swift_bic}</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      {...field}
-                      value={field.value || ''}
-                    />
+                    <Input autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -322,16 +346,12 @@ export const ContactForm = ({
 
             <FormField
               control={form.control}
-              name="bank_account"
+              name={asPath('bank_account')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{fieldLabels.bank_account}</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      {...field}
-                      value={field.value || ''}
-                    />
+                    <Input autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -340,16 +360,12 @@ export const ContactForm = ({
 
             <FormField
               control={form.control}
-              name="web_url"
+              name={asPath('web_url')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{fieldLabels.web_url}</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      {...field}
-                      value={field.value || ''}
-                    />
+                    <Input autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -366,7 +382,6 @@ export const ContactForm = ({
           <DialogFooter className="col-span-2 flex justify-between">
             <div className="w-full flex justify-between">
               <div className="flex flex-col items-start gap-2">
-
                 {handleShowDeleteDialog && (
                   <Button
                     className="align-left self-start justify-self-start"

@@ -200,7 +200,8 @@ export const userInvoicingDetailsTb = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
     updated_at: text('updated_at'),
     phone_number: text('phone_number'),
-    web_url: text('web_url')
+    web_url: text('web_url'),
+    vat_payer: integer('vat_payer', { mode: 'boolean' }).notNull().default(true)
   },
   (userInvoicingDetails) => {
     return {

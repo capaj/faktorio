@@ -28,10 +28,14 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { useExchangeRate } from '@/hooks/useExchangeRate'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
+// import removed: InvoicingDetailsFormSchema
+import { Label } from '@/components/ui/label'
 
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const contactsQuery = trpcClient.contacts.all.useQuery()
+
+  const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
   const [_previewInvoice, setPreviewInvoice] = useDebounceValue<z.infer<
     typeof invoiceForRenderSchema
   > | null>(null, 3000)
@@ -63,13 +67,17 @@ export const EditInvoicePage = () => {
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
     0
   )
-  const totalVat = invoiceItems.reduce(
-    (acc, item) =>
-      acc +
-      ((item.quantity ?? 0) * (item.unit_price ?? 0) * (item.vat_rate ?? 0)) /
-        100,
-    0
-  )
+  const totalVat = invoicingDetails?.vat_payer
+    ? invoiceItems.reduce(
+        (acc, item) =>
+          acc +
+          ((item.quantity ?? 0) *
+            (item.unit_price ?? 0) *
+            (item.vat_rate ?? 0)) /
+            100,
+        0
+      )
+    : 0
 
   if (contactsQuery.data?.length === 0) {
     return null
@@ -295,6 +303,7 @@ export const EditInvoicePage = () => {
                 <InvoiceItemForm
                   key={item.id}
                   control={form.control}
+                  invoicingDetails={invoicingDetails}
                   index={index}
                   onDelete={() => remove(index)}
                 />
@@ -317,6 +326,7 @@ export const EditInvoicePage = () => {
 
           <InvoiceTotals
             total={total}
+            vatPayer={invoicingDetails?.vat_payer}
             totalVat={totalVat}
             currency={formValues.currency}
             exchangeRate={exchangeRate}
@@ -369,48 +379,68 @@ export const EditInvoicePage = () => {
 const InvoiceItemForm = ({
   control,
   index,
-  onDelete
+  onDelete,
+  invoicingDetails
 }: {
   control: any
   index: number
+  invoicingDetails: { vat_payer?: boolean } | null
   onDelete: () => void
 }) => {
   return (
-    <div className="grid grid-cols-[2fr_1fr] gap-4">
-      <div className="flex gap-4">
-        <FormField
-          control={control}
-          name={`items.${index}.quantity`}
-          render={({ field }) => (
-            <Input
-              className="w-[190px]"
-              type="number"
-              min={0}
-              {...field}
-              value={field.value || ''}
-            />
-          )}
-        />
-        <FormField
-          control={control}
-          name={`items.${index}.unit`}
-          render={({ field }) => (
-            <Input
-              placeholder="jednotka"
-              type="text"
-              className="w-[190px]"
-              {...field}
-              value={field.value || ''}
-            />
-          )}
-        />
+    <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 align-baseline items-end">
+      <div className="sm:flex sm:flex-row gap-4 flex-grow grid grid-cols-2 flex-wrap items-end">
+        <div>
+          <Label
+            className="text-xs text-gray-500 mb-1 block md:block"
+            htmlFor={`items.${index}.quantity`}
+          >
+            Množství
+          </Label>
+          <FormField
+            control={control}
+            name={`items.${index}.quantity`}
+            render={({ field }) => (
+              <Input
+                className="w-full sm:w-24"
+                type="number"
+                min={0}
+                placeholder="Množství"
+                {...field}
+                value={field.value || ''}
+              />
+            )}
+          />
+        </div>
+
+        <div>
+          <Label
+            className="text-xs text-gray-500 mb-1 block md:block"
+            htmlFor={`items.${index}.unit`}
+          >
+            Jednotka
+          </Label>
+          <FormField
+            control={control}
+            name={`items.${index}.unit`}
+            render={({ field }) => (
+              <Input
+                placeholder="Jednotka"
+                type="text"
+                className="w-full sm:w-32"
+                {...field}
+                value={field.value || ''}
+              />
+            )}
+          />
+        </div>
         <FormField
           control={control}
           name={`items.${index}.description`}
           render={({ field }) => (
             <Input
-              className="w-full"
-              placeholder="popis položky"
+              className="w-full sm:w-96 md:flex-grow col-span-2"
+              placeholder="Popis položky"
               type="text"
               {...field}
               value={field.value || ''}
@@ -418,42 +448,62 @@ const InvoiceItemForm = ({
           )}
         />
       </div>
-      <div className="flex gap-4 justify-end">
-        <FormField
-          control={control}
-          name={`items.${index}.unit_price`}
-          render={({ field }) => (
-            <Input
-              className="w-32"
-              placeholder="cena"
-              type="number"
-              step="0.01"
-              {...field}
-              value={field.value || ''}
+      <div className="flex gap-4 items-end">
+        <div className="flex-grow sm:flex-grow-0">
+          <Label
+            className="text-xs text-gray-500 mb-1 block md:block"
+            htmlFor={`items.${index}.unit_price`}
+          >
+            Cena/jedn.
+          </Label>
+          <FormField
+            control={control}
+            name={`items.${index}.unit_price`}
+            render={({ field }) => (
+              <Input
+                className="w-full sm:w-32"
+                placeholder="Cena/jedn."
+                type="number"
+                step="0.01"
+                {...field}
+                value={field.value || ''}
+              />
+            )}
+          />
+        </div>
+        {invoicingDetails?.vat_payer && (
+          <div className="flex-grow sm:flex-grow-0">
+            <Label
+              className="text-xs text-gray-500 mb-1 block md:block"
+              htmlFor={`items.${index}.vat_rate`}
+            >
+              DPH %
+            </Label>
+            <FormField
+              control={control}
+              name={`items.${index}.vat_rate`}
+              render={({ field }) => (
+                <Input
+                  className="w-full sm:w-20"
+                  placeholder="DPH %"
+                  type="number"
+                  min={0}
+                  {...field}
+                  value={field.value || ''}
+                />
+              )}
             />
-          )}
-        />
-        <FormField
-          control={control}
-          name={`items.${index}.vat_rate`}
-          render={({ field }) => (
-            <Input
-              className="w-20"
-              placeholder="DPH"
-              type="number"
-              min={0}
-              {...field}
-              value={field.value || ''}
-            />
-          )}
-        />
-        <button
-          type="button"
-          className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300"
-          onClick={onDelete}
-        >
-          <LucideTrash2 className="text-gray-600" />
-        </button>
+          </div>
+        )}
+        <div>
+          <button
+            type="button"
+            className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300 flex-shrink-0"
+            onClick={onDelete}
+          >
+            <LucideTrash2 className="text-gray-600" />
+          </button>
+        </div>
       </div>
     </div>
   )

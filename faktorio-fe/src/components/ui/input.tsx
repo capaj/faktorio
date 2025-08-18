@@ -3,10 +3,18 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> {
+  value?: string | number | readonly string[] | boolean | null | undefined
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, value, ...props }, ref) => {
+    const normalizedValue: string | number | readonly string[] | undefined =
+      value === null || value === undefined
+        ? ''
+        : typeof value === 'boolean'
+          ? String(value)
+          : value
     return (
       <input
         type={type}
@@ -15,6 +23,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
+        value={normalizedValue}
         {...props}
       />
     )
