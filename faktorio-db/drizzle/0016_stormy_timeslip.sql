@@ -1,0 +1,1 @@
+ALTER TABLE `user_invoicing_detail` ADD `vat_payer` integer DEFAULT true NOT NULL;
