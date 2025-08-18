@@ -46,20 +46,20 @@ export const UserInvoicingDetails = () => {
   const form = useForm<InvoicingDetailsFormSchema>({
     resolver: zodResolver(invoicingDetailsFormSchema),
     defaultValues: {
-      registration_no: data?.registration_no || '',
-      name: data?.name || '',
-      vat_no: data?.vat_no || '',
-      street: data?.street || '',
-      street2: data?.street2 || '',
-      city: data?.city || '',
-      zip: data?.zip || '',
+      registration_no: data?.registration_no ?? '',
+      name: data?.name ?? '',
+      vat_no: data?.vat_no ?? '',
+      street: data?.street ?? '',
+      street2: data?.street2 ?? '',
+      city: data?.city ?? '',
+      zip: data?.zip ?? '',
       country: data?.country || 'Česká Republika',
-      main_email: data?.main_email || '',
-      phone_number: data?.phone_number || '',
-      iban: data?.iban || '',
-      swift_bic: data?.swift_bic || '',
-      bank_account: data?.bank_account || '',
-      web_url: data?.web_url || '',
+      main_email: data?.main_email ?? '',
+      phone_number: data?.phone_number ?? '',
+      iban: data?.iban ?? '',
+      swift_bic: data?.swift_bic ?? '',
+      bank_account: data?.bank_account ?? '',
+      web_url: data?.web_url ?? '',
       vat_payer: data?.vat_payer,
       language: 'cs'
     }
@@ -69,20 +69,20 @@ export const UserInvoicingDetails = () => {
   useEffect(() => {
     if (data) {
       form.reset({
-        registration_no: data.registration_no || '',
-        name: data.name || '',
-        vat_no: data.vat_no || '',
-        street: data.street || '',
-        street2: data.street2 || '',
-        city: data.city || '',
-        zip: data.zip || '',
+        registration_no: data.registration_no ?? '',
+        name: data.name ?? '',
+        vat_no: data.vat_no ?? '',
+        street: data.street ?? '',
+        street2: data.street2 ?? '',
+        city: data.city ?? '',
+        zip: data.zip ?? '',
         country: data.country || 'Česká Republika',
-        main_email: data.main_email || '',
-        phone_number: data.phone_number || '',
-        iban: data.iban || '',
-        swift_bic: data.swift_bic || '',
-        bank_account: data.bank_account || '',
-        web_url: data.web_url || '',
+        main_email: data.main_email ?? '',
+        phone_number: data.phone_number ?? '',
+        iban: data.iban ?? '',
+        swift_bic: data.swift_bic ?? '',
+        bank_account: data.bank_account ?? '',
+        web_url: data.web_url ?? '',
         vat_payer: data.vat_payer,
         language: 'cs'
       })
@@ -127,25 +127,7 @@ export const UserInvoicingDetails = () => {
   }
 
   const handleSubmit = async (values: InvoicingDetailsFormSchema) => {
-    // Convert the form values to match the expected API format
-    const formattedValues = {
-      registration_no: values.registration_no || undefined,
-      name: values.name,
-      vat_no: values.vat_no || undefined,
-      street: values.street,
-      street2: values.street2 || undefined,
-      city: values.city,
-      zip: values.zip,
-      country: values.country,
-      main_email: values.main_email || undefined,
-      phone_number: values.phone_number || undefined,
-      iban: values.iban || undefined,
-      swift_bic: values.swift_bic || undefined,
-      bank_account: values.bank_account || undefined,
-      web_url: values.web_url || undefined,
-      vat_payer: values.vat_payer ?? undefined
-    }
-    await upsert.mutateAsync(formattedValues)
+    await upsert.mutateAsync(values)
     refetch()
     toast.success('Údaje byly úspěšně uloženy')
   }
@@ -177,19 +159,19 @@ export const UserInvoicingDetails = () => {
                 variant="outline"
                 onClick={() => {
                   const details = [
-                    `Jméno: ${currentValues?.name || ''}`,
-                    `IČO: ${currentValues?.registration_no || ''}`,
-                    `DIČ: ${currentValues?.vat_no || ''}`,
-                    `Ulice: ${currentValues?.street || ''}`,
-                    `Část obce: ${currentValues?.street2 || ''}`,
-                    `Město: ${currentValues?.city || ''}`,
-                    `PSČ: ${currentValues?.zip || ''}`,
-                    `Země: ${currentValues?.country || ''}`,
-                    `IBAN: ${currentValues?.iban || ''}`,
-                    `SWIFT/BIC: ${currentValues?.swift_bic || ''}`,
-                    `Číslo účtu: ${currentValues?.bank_account || ''}`,
-                    `Telefon: ${currentValues?.phone_number || ''}`,
-                    `Web: ${currentValues?.web_url || ''}`
+                    `Jméno: ${currentValues?.name ?? ''}`,
+                    `IČO: ${currentValues?.registration_no ?? ''}`,
+                    `DIČ: ${currentValues?.vat_no ?? ''}`,
+                    `Ulice: ${currentValues?.street ?? ''}`,
+                    `Část obce: ${currentValues?.street2 ?? ''}`,
+                    `Město: ${currentValues?.city ?? ''}`,
+                    `PSČ: ${currentValues?.zip ?? ''}`,
+                    `Země: ${currentValues?.country ?? ''}`,
+                    `IBAN: ${currentValues?.iban ?? ''}`,
+                    `SWIFT/BIC: ${currentValues?.swift_bic ?? ''}`,
+                    `Číslo účtu: ${currentValues?.bank_account ?? ''}`,
+                    `Telefon: ${currentValues?.phone_number ?? ''}`,
+                    `Web: ${currentValues?.web_url ?? ''}`
                   ]
                     .filter((line) => line.split(': ')[1]) // Keep only lines with values
                     .join('\n')
