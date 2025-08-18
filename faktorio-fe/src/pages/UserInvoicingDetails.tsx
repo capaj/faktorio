@@ -60,7 +60,7 @@ export const UserInvoicingDetails = () => {
       swift_bic: data?.swift_bic || '',
       bank_account: data?.bank_account || '',
       web_url: data?.web_url || '',
-      vat_payer: data?.vat_payer || true,
+      vat_payer: data?.vat_payer,
       language: 'cs'
     }
   })
@@ -83,7 +83,7 @@ export const UserInvoicingDetails = () => {
         swift_bic: data.swift_bic || '',
         bank_account: data.bank_account || '',
         web_url: data.web_url || '',
-        vat_payer: data.vat_payer || true,
+        vat_payer: data.vat_payer,
         language: 'cs'
       })
     }
@@ -143,7 +143,7 @@ export const UserInvoicingDetails = () => {
       swift_bic: values.swift_bic || undefined,
       bank_account: values.bank_account || undefined,
       web_url: values.web_url || undefined,
-      vat_payer: values.vat_payer || undefined
+      vat_payer: values.vat_payer ?? undefined
     }
     await upsert.mutateAsync(formattedValues)
     refetch()
