@@ -7,6 +7,7 @@ import { useLocation, useParams, useSearchParams } from 'wouter'
 import { useState } from 'react'
 import { trpcClient } from '@/lib/trpcClient'
 import { EnglishInvoicePDF } from './EnglishInvoicePDF'
+import { IsdocDownloadButton } from '@/components/IsdocDownloadButton'
 import {
   Select,
   SelectTrigger,
@@ -140,15 +141,23 @@ export const InvoiceDetail = ({
               </SelectContent>
             </Select>
           </div>
-          <Button
-            variant={'outline'}
-            onClick={() => {
-              navigate(`/invoices/${params.invoiceId}/edit`)
-            }}
-          >
-            <LucideEdit />
-            Upravit
-          </Button>
+          <div className="flex gap-2">
+            <IsdocDownloadButton
+              invoiceId={params.invoiceId || ''}
+              variant={'outline'}
+            >
+              Stáhnout ISDOC
+            </IsdocDownloadButton>
+            <Button
+              variant={'outline'}
+              onClick={() => {
+                navigate(`/invoices/${params.invoiceId}/edit`)
+              }}
+            >
+              <LucideEdit />
+              Upravit
+            </Button>
+          </div>
         </div>
 
         <div className="h-full place-content-center flex">
