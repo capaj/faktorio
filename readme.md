@@ -9,7 +9,7 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 - generate invoice PDF
 - extract entire invoice from any JPG/PNG/BMP or PDF
 - search through invoices
-- contact management(integrated with ARES)
+- contact management(integrated with [ARES](https://ares.gov.cz/))
 - support for foreign currencies
 - export invoices to Excel, CSV
 - export invoices to XML for Czech tax authorities
