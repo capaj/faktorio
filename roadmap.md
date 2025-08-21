@@ -18,7 +18,6 @@
 - be able to export as excel
 - hack integration with gemini:
 - ability to create an organization and add users to it. Users can see all the invoices for the organization.
-
   - zeptat se treba na veci jako:
     - kolik dlužím na dani z prijmu tento rok?
     - kolik jsem vystavil faktur tento rok?
@@ -31,8 +30,7 @@
 - allow to add expense invoices by drag and drop PDF file(parse PDF with google gemini)
 - be able to export as CSV/excel
 - enable editing of invoices
-- fix TSC
-- add TSC check on github'
+- add TSC check on github CI
 - migrate from clerk
 - local-first mode
 - mark invoices as paid
