@@ -1,6 +1,6 @@
 {
   "version": "0.2",
-  "ignorePaths": ["faktorio-fe/src/lib/local-db/migrations.ts"],
+  "ignorePaths": ["faktorio-fe/src/lib/local-db/migrations.ts", "package.json"],
   "dictionaryDefinitions": [],
   "dictionaries": [],
   "language": "en,cs",
