@@ -3,7 +3,9 @@
   "private": true,
   "workspaces": [
     "faktorio-api",
-    "faktorio-fe"
+    "faktorio-fe",
+    "faktorio-db",
+    "faktorio-public-api"
   ],
   "devDependencies": {
     "@playwright/test": "^1.55.0",

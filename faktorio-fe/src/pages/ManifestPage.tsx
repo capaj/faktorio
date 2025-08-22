@@ -7,11 +7,13 @@ export const ManifestPage = () => {
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
           Manifest
         </h1>
-        <img
-          src="/images/20250610_1649_Robot Tax Preparation_simple_compose_01jxd4zrkafbvtmnk43fr8armx.png"
-          alt="robot in a factory doing taxes with a keen eye"
-          className="w-full max-h-96"
-        />
+        <div className='flex justify-center w-full'>
+          <img
+            src="/images/20250610_1649_Robot Tax Preparation_simple_compose_01jxd4zrkafbvtmnk43fr8armx.png"
+            alt="robot in a factory doing taxes with a keen eye"
+            className="max-h-96"
+          />
+        </div>
         <p className="mt-3">
           Jako živnostník stojící na prahu podnikání jsem čelil jednoduchému,
           přesto však zdánlivě neřešitelnému dilematu: potřeba vystavovat jednu
@@ -51,7 +53,22 @@ export const ManifestPage = () => {
           jsem tomu pár hodin svého času obětoval a když vidím jak se to daří,
           tak mě to motivuje k tomu pokračovat.
         </p>
-        {/* TODO add donation links */}
+        <h4 className='mt-6'>Jak můžete pomoci?</h4>
+        <p className="mt-3">
+          Přispět na provoz faktorio.cz můžete zasláním peněz na můj{' '}
+          <a
+            className="text-accent underline underline-offset-2 bg-accent text-black"
+            href="https://revolut.me/capaj"
+          >
+            revolut účet
+          </a>
+          <br />
+          Nezapomeňte uvést do poznámky faktorio.cz
+        </p>
+        <p className="mt-3">
+          Preferujete-li kryptoměnu, můžete mi poslat litecoin na
+          adresu: LKpED8uFA2tj8da8JYNEGWCUNjorEbetrQ
+        </p>
       </PageShell>
     </>
   )
