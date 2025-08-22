@@ -16,7 +16,6 @@
 - allow to send invoice as email
 - be able to share invoice link
 - be able to export as excel
-- hack integration with gemini:
 - ability to create an organization and add users to it. Users can see all the invoices for the organization.
   - zeptat se treba na veci jako:
     - kolik dlužím na dani z prijmu tento rok?
@@ -35,3 +34,4 @@
 - local-first mode
 - mark invoices as paid
 - add english invoice rendering
+- integration with gemini
