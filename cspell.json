@@ -1,6 +1,9 @@
 {
   "version": "0.2",
-  "ignorePaths": ["faktorio-fe/src/lib/local-db/migrations.ts", "package.json"],
+  "ignorePaths": [
+    "faktorio-fe/src/lib/local-db/migrations.ts",
+    "package.json"
+  ],
   "dictionaryDefinitions": [],
   "dictionaries": [],
   "language": "en,cs",
@@ -10,6 +13,7 @@
     "Celkem",
     "DPHDP",
     "DUZP",
+    "Elysia",
     "faktorio",
     "fakturoid",
     "gstatic",
