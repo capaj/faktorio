@@ -11,7 +11,7 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-import { Elysia } from 'elysia'
+import { Elysia, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
 import { createClient, Client as LibsqlClient } from '@libsql/client'
 import { drizzle, LibSQLDatabase } from 'drizzle-orm/libsql'
@@ -37,10 +37,28 @@ export default {
       dbInstance = drizzle(client)
     }
 
+    const whitelistedRoutes = ['/swagger', '/swagger/json']
+    const isDocRoute = whitelistedRoutes.includes(new URL(request.url).pathname)
     const apiKey =
       request.headers.get('X-API-KEY') ?? request.headers.get('x-api-key')
-    if (!apiKey) {
+    if (!apiKey && !isDocRoute) {
       return new Response('Missing X-API-KEY', { status: 401 })
+    }
+
+    let tokenRow: { user_id: string }
+    if (!isDocRoute) {
+      const apiKeyVerified = apiKey!
+
+      const tokenRows = await dbInstance!
+        .select({ user_id: userApiTokensTb.user_id })
+        .from(userApiTokensTb)
+        .where(eq(userApiTokensTb.token, apiKeyVerified))
+        .all()
+
+      tokenRow = tokenRows[0]
+      if (!tokenRow) {
+        return new Response('Invalid API key', { status: 403 })
+      }
     }
 
     const app = new Elysia({ aot: false })
@@ -64,27 +82,8 @@ export default {
       .get('/', () => 'ok')
       .get(
         '/invoices',
-        async ({ request, set }) => {
-          const url = new URL(request.url)
-          const limitParam = url.searchParams.get('limit')
-          const offsetParam = url.searchParams.get('offset')
-          let limit = Number(limitParam)
-          if (!Number.isFinite(limit) || limit <= 0) limit = 100
-          if (limit > 5000) limit = 5000
-          let offset = Number(offsetParam)
-          if (!Number.isFinite(offset) || offset < 0) offset = 0
-
-          const tokenRows = await dbInstance!
-            .select({ user_id: userApiTokensTb.user_id })
-            .from(userApiTokensTb)
-            .where(eq(userApiTokensTb.token, apiKey))
-            .all()
-
-          const tokenRow = tokenRows[0]
-          if (!tokenRow) {
-            set.status = 403
-            return { error: 'Invalid API key' }
-          }
+        async ({ set, query }) => {
+          const { limit = 100, offset = 0 } = query
 
           const rows = await dbInstance!
             .select()
@@ -100,7 +99,13 @@ export default {
           detail: {
             tags: ['Invoices'],
             security: [{ ApiKeyAuth: [] }]
-          }
+          },
+          query: t.Object({
+            limit: t.Optional(
+              t.Integer({ minimum: 1, maximum: 5000, default: 100 })
+            ),
+            offset: t.Optional(t.Integer({ minimum: 0, default: 0 }))
+          })
         }
       )
 
