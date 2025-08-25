@@ -1,5 +1,5 @@
-import { Suspense } from 'react'
-import { Route } from 'wouter'
+import { Suspense, useEffect } from 'react'
+import { Route, useParams } from 'wouter'
 // Create Document Component
 import { InvoiceDetailPage } from './pages/InvoiceDetail/InvoiceDetailPage'
 import { InvoiceListPage } from './pages/InvoiceList/InvoiceListPage'
@@ -13,6 +13,10 @@ import { SpinnerContainer } from './components/SpinnerContainer'
 import { useAuth } from './lib/AuthContext'
 import { XMLExportPage } from './pages/XMLExportPage/XMLExportPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { IsdocExportPage } from './pages/InvoiceDetail/IsdocExportPage'
+import { trpcClient } from './lib/trpcClient'
+import { generateIsdocXml } from './lib/isdoc/generateIsdocXml'
+import { snakeCase } from 'lodash-es'
 
 export const SignedInRoutes = () => {
   const { token } = useAuth()
@@ -43,6 +47,11 @@ export const SignedInRoutes = () => {
           path="/invoices/:invoiceId"
           component={InvoiceDetailPage}
         ></Route>
+        <Route
+          path="/invoices/:invoiceId/isdoc"
+          component={IsdocExportPage}
+        ></Route>
+
         <Route path="/xml-export" component={XMLExportPage}></Route>
         <Route path="/settings" component={SettingsPage}></Route>
       </Suspense>
