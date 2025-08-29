@@ -12,10 +12,10 @@
   },
   "packageManager": "pnpm@10.15.0",
   "dependencies": {
-    "@libsql/client": "^0.15.12",
+    "@libsql/client": "^0.15.14",
     "@paralleldrive/cuid2": "^2.2.2",
     "dotenv": "^17.2.1",
-    "drizzle-orm": "^0.44.4",
+    "drizzle-orm": "^0.44.5",
     "faktorio-shared": "workspace:*"
   },
   "devDependencies": {
