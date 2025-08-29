@@ -273,7 +273,11 @@ export const EditInvoicePage = () => {
                         min={0}
                         step={0.01}
                         {...field}
-                        value={field.value || ''}
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const v = e.target.value
+                          field.onChange(v === '' ? null : Number(v))
+                        }}
                       />
                     </FormControl>
                   </FormItem>
