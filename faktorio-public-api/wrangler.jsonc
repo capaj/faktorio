@@ -4,7 +4,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "lively-bread-d015",
+  "name": "faktorio-public-api",
   "main": "src/index.ts",
   "compatibility_date": "2025-08-22",
   "compatibility_flags": ["nodejs_compat"],
