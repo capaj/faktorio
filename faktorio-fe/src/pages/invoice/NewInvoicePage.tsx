@@ -11,7 +11,7 @@ import { z } from 'zod/v4'
 import { invoiceItemFormSchema } from 'faktorio-api/src/zodDbSchemas'
 import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
-import { Link, useLocation } from 'wouter'
+import { useLocation } from 'wouter'
 import {
   Form,
   FormControl,
@@ -323,7 +323,11 @@ export const NewInvoicePage = () => {
                         min={0}
                         step={0.01}
                         {...field}
-                        value={field.value || ''}
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const v = e.target.value
+                          field.onChange(v === '' ? null : Number(v))
+                        }}
                       />
                     </FormControl>
                   </FormItem>

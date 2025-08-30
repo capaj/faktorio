@@ -6,7 +6,7 @@ import {
   index,
   unique
 } from 'drizzle-orm/sqlite-core'
-import { createId } from '@paralleldrive/cuid2'
+import { createId, init } from '@paralleldrive/cuid2'
 import { sql } from 'drizzle-orm'
 import { djs } from 'faktorio-shared/src/djs'
 // always add postfix Tb to table names
@@ -275,6 +275,26 @@ export const passwordResetTokenT = sqliteTable('password_reset_tokens', {
     .notNull()
     .default(sql`(strftime('%s', 'now'))`),
   usedAt: integer('used_at', { mode: 'timestamp' })
+})
+
+const apiTokenCreateId = init({
+  length: 48,
+  fingerprint: 'faktorio'
+}) // double the length just to be safe
+
+export const userApiTokensTb = sqliteTable('user_api_tokens', {
+  token: text('id', {
+    length: 48
+  })
+    .$defaultFn(() => apiTokenCreateId())
+    .primaryKey()
+    .notNull(),
+  user_id: text('user_id')
+    .notNull()
+    .references(() => userT.id, { onDelete: 'cascade' }),
+  created_at: text('created_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`)
 })
 
 export const receivedInvoiceTb = sqliteTable(

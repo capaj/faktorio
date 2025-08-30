@@ -3,13 +3,15 @@
   "private": true,
   "workspaces": [
     "faktorio-api",
-    "faktorio-fe"
+    "faktorio-fe",
+    "faktorio-db",
+    "faktorio-public-api"
   ],
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "@types/node": "^24.3.0",
-    "npm-check-updates": "^18.0.2",
-    "oxlint": "^1.12.0",
+    "npm-check-updates": "^18.0.3",
+    "oxlint": "^1.13.0",
     "prettier": "^3.6.2",
     "turbo": "^2.5.6",
     "typescript": "^5.9.2",
@@ -33,9 +35,9 @@
     "test:e2e": "pnpm exec playwright test"
   },
   "dependencies": {
-    "dayjs": "^1.11.13",
+    "dayjs": "^1.11.17",
     "npm-run-all": "^4.1.5",
     "superjson": "^2.2.2",
-    "zod": "^4.0.17"
+    "zod": "^4.1.5"
   }
 }

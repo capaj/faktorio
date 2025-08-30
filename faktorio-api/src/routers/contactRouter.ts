@@ -5,6 +5,7 @@ import { and, asc, count, desc, eq, like } from 'drizzle-orm'
 import { contactCreateFormSchema } from './contactCreateFormSchema'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { contactInsertSchema } from '../zodDbSchemas'
+import { TRPCError } from '@trpc/server'
 
 export const contactRouter = trpcContext.router({
   all: protectedProc
@@ -102,7 +103,7 @@ export const contactRouter = trpcContext.router({
           created: 0
         }
       }
-      const newContacts = await ctx.db
+      await ctx.db
         .insert(contactTb)
         .values(
           nonExistingContacts.map((contact) => ({
@@ -133,7 +134,10 @@ export const contactRouter = trpcContext.router({
       })
 
       if (!contact) {
-        throw new Error('Contact not found')
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Contact not found'
+        })
       }
 
       // Count invoices for this contact
@@ -167,7 +171,10 @@ export const contactRouter = trpcContext.router({
       })
 
       if (!contact) {
-        throw new Error('Contact not found')
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Contact not found'
+        })
       }
 
       // If deleteInvoices is true, delete all invoices for this contact

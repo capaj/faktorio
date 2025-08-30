@@ -14,20 +14,20 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250822.0",
+    "@cloudflare/workers-types": "^4.20250829.0",
     "@types/debug": "^4.1.12",
     "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.31.4",
     "faktorio-db": "workspace:*",
-    "tsx": "^4.20.4",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
-    "wrangler": "^4.32.0"
+    "wrangler": "^4.33.1"
   },
   "dependencies": {
-    "@google/genai": "^1.15.0",
+    "@google/genai": "^1.16.0",
     "@google/generative-ai": "^0.24.1",
-    "@libsql/client": "^0.15.12",
+    "@libsql/client": "^0.15.14",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
     "@tanstack/react-query": "^5.85.5",
@@ -38,11 +38,11 @@
     "currency-codes": "^2.2.0",
     "debug": "^4.4.1",
     "dotenv": "^17.2.1",
-    "drizzle-orm": "^0.44.4",
+    "drizzle-orm": "^0.44.5",
     "drizzle-zod": "0.8.3",
     "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.9",
     "web-push": "^3.6.7",
-    "zod": "^4.0.17"
+    "zod": "^4.1.5"
   }
 }

@@ -45,13 +45,18 @@ export const InvoiceDetailPage = () => {
 
 export const invoiceForRenderSchema = getInvoiceCreateSchema(
   djs().format('YYYYMMDD') + '001'
-).extend({
-  your_name: z.string().optional(),
-  items: z.array(invoiceItemFormSchema),
-  bank_account: z.string().nullish(),
-  iban: z.string().nullish(),
-  swift_bic: z.string().nullish()
-})
+)
+  .extend({
+    your_name: z.string().optional(),
+    items: z.array(invoiceItemFormSchema),
+    bank_account: z.string().nullish(),
+    iban: z.string().nullish(),
+    swift_bic: z.string().nullish()
+  })
+  .refine((data) => data.bank_account || data.iban, {
+    message: 'Either bank_account or iban must be provided',
+    path: ['bank_account']
+  })
 
 export const InvoiceDetail = ({
   invoice

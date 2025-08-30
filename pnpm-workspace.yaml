@@ -3,3 +3,4 @@ packages:
   - 'faktorio-fe/**'
   - 'faktorio-shared/**'
   - 'faktorio-db/**'
+  - 'faktorio-public-api/**'

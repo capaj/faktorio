@@ -1,0 +1,51 @@
+name: Deploy Public API
+
+on:
+  push:
+    paths:
+      - 'faktorio-public-api/**'
+      - '.github/workflows/deploy-public-api.yaml'
+
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+    name: Deploy Public API
+    env:
+      TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+      TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install deps (with cache)
+        run: pnpm install
+
+      - name: Check Environment Variables
+        working-directory: ./faktorio-public-api
+        run: pnpm check-env
+
+      - name: Deploy Public API
+        uses: cloudflare/wrangler-action@v3
+
+        with:
+          packageManager: pnpm
+          secrets: |
+            TURSO_DATABASE_URL
+            TURSO_AUTH_TOKEN
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: './faktorio-public-api'
