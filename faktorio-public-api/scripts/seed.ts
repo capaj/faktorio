@@ -23,7 +23,7 @@ export async function seedDb() {
   const __filename = fileURLToPath(import.meta.url)
   const __dirname = dirname(__filename)
   const migrationsFolder = resolve(__dirname, '../../faktorio-db/drizzle')
-  // @ts-ignore
+  // @ts-expect-error
   await migrate(db, { migrationsFolder })
 
   await db
