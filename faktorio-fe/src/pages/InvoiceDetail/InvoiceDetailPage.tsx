@@ -149,6 +149,7 @@ export const InvoiceDetail = ({
               <PdfContent
                 invoiceData={invoice}
                 qrCodeBase64={qrCodeBase64 ?? ''}
+                vatPayer={invoicingDetails?.vat_payer}
               />
             }
             fileName={pdfName ?? ''}

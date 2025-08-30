@@ -32,6 +32,7 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 | English UI                                                |     ❌      |      ❌       |      ✅      |     ✅     |
 | English invoices                                          |     ✅      |      ❌       |      ✅      |     ✅     |
 | Support reverse charge invoices(both domestic and abroad) |     ✅      |      ❌       |      ✅      |     ✅     |
+| Integration API                                           |     ❌      |      ❌       |      ✅      |     ✅     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
 

@@ -59,25 +59,31 @@ export function InvoicesDownloadButton({
         }, 0)
 
         const qrPaymentString = generateQrPaymentString({
-          accountNumber: invoiceWithItems.iban?.replace(/\s/g, '') ?? invoiceWithItems.bank_account ?? null,
+          accountNumber:
+            invoiceWithItems.iban?.replace(/\s/g, '') ??
+            invoiceWithItems.bank_account ??
+            null,
           amount: invoiceTotal + taxTotal,
           currency: invoiceWithItems.currency,
           variableSymbol: invoiceWithItems.number.replace('-', ''),
           message: 'Faktura ' + invoiceWithItems.number
         })
-        const qrCodeBase64 = qrPaymentString ? await QRCode.toDataURL(
-          qrPaymentString
-        ) : undefined
+        const qrCodeBase64 = qrPaymentString
+          ? await QRCode.toDataURL(qrPaymentString)
+          : undefined
 
         const PdfComponent =
           invoiceWithItems.language === 'en'
             ? EnglishInvoicePDF
             : CzechInvoicePDF
 
+        const invoicingDetails = await utils.invoicingDetails.fetch()
+
         const PdfDoc = (
           <PdfComponent
             invoiceData={invoiceWithItems}
             qrCodeBase64={qrCodeBase64}
+            vatPayer={invoicingDetails?.vat_payer}
           />
         )
 
