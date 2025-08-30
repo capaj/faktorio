@@ -25,7 +25,7 @@ type WorkerEnv = {
   TURSO_AUTH_TOKEN?: string
 }
 
-// App initialization is performed inside fetch to avoid disallowed global operations on Workers
+// Elysia App initialization is performed inside fetch to avoid disallowed global operations on Workers
 
 export default {
   async fetch(request, env: WorkerEnv) {
