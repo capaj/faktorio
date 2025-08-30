@@ -1,11 +1,6 @@
-import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config';
+import { defineConfig } from 'vitest/config'
 
-export default defineWorkersConfig({
-	test: {
-		poolOptions: {
-			workers: {
-				wrangler: { configPath: './wrangler.jsonc' },
-			},
-		},
-	},
-});
+// we do not use cloudflare vitest-pool-workers environment for testing as we need to access the database on file system
+export default defineConfig({
+  test: {}
+})

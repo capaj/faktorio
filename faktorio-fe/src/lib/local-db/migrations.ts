@@ -19,6 +19,7 @@ import migration0013_dark_silver_samurai from 'faktorio-db/drizzle/0013_dark_sil
 import migration0014_volatile_vermin from 'faktorio-db/drizzle/0014_volatile_vermin.sql?raw';
 import migration0015_dazzling_quicksilver from 'faktorio-db/drizzle/0015_dazzling_quicksilver.sql?raw';
 import migration0016_stormy_timeslip from 'faktorio-db/drizzle/0016_stormy_timeslip.sql?raw';
+import migration0017_large_killer_shrike from 'faktorio-db/drizzle/0017_large_killer_shrike.sql?raw';
 
 export const localDBMigrations: Record<string, string> = {
   migration0000_dry_rick_jones,
@@ -38,4 +39,5 @@ export const localDBMigrations: Record<string, string> = {
   migration0014_volatile_vermin,
   migration0015_dazzling_quicksilver,
   migration0016_stormy_timeslip,
+  migration0017_large_killer_shrike,
 };

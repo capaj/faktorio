@@ -120,6 +120,13 @@
       "when": 1755494784291,
       "tag": "0016_stormy_timeslip",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1756531931978,
+      "tag": "0017_large_killer_shrike",
+      "breakpoints": true
     }
   ]
 }

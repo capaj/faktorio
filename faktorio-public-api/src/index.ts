@@ -13,7 +13,7 @@
 
 import { Elysia, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
-import { createClient, Client as LibsqlClient } from '@libsql/client'
+import { createClient, type Client as LibsqlClient } from '@libsql/client'
 import { drizzle, LibSQLDatabase } from 'drizzle-orm/libsql'
 import { invoicesTb, userApiTokensTb } from 'faktorio-db/schema'
 import { eq } from 'drizzle-orm'

@@ -16,3 +16,5 @@ dist
 /playwright/.cache/
 
 tsconfig.tsbuildinfo
+dev.sqlite
+test.sqlite
