@@ -36,7 +36,7 @@ Frontend env:
 | Export invoices to Excel, CSV                             |     ✅      |      ✅       |      ✅      |     ✅     |
 | Export invoices to XML for tax authorities                |     ✅      |      ✅       |      ✅      |     ✅     |
 | Send invoices to an email from the app                    |     ❌      |      ✅       |      ✅      |     ✅     |
-| API for integrations                                      |     ❌      |      ❌       |      ✅      |     ✅     |
+| API for integrations                                      |     ✅      |      ❌       |      ✅      |     ✅     |
 | Push notifications in web app                             |     ✅      |      ❌       |      ❌      |     ❌     |
 | Mobile app                                                |     ❌      |      ❌       |      ✅      |     ✅     |
 | English UI                                                |     ❌      |      ❌       |      ✅      |     ✅     |
