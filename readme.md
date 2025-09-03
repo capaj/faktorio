@@ -7,6 +7,16 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 ## Features
 
 - generate invoice PDF
+
+## Shared invoices
+
+Public URL format: https://faktorio.cz/shared-invoice/:invoiceShareId
+
+Backend stores share records and tracks events (view, download, copy) including IP, UA, and country when available.
+
+Frontend env:
+
+- VITE_PUBLIC_API_URL points to the public API worker (defaults to production when missing).
 - extract entire invoice from any JPG/PNG/BMP or PDF
 - search through invoices
 - contact management(integrated with [ARES](https://ares.gov.cz/))
@@ -26,13 +36,13 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 | Export invoices to Excel, CSV                             |     ✅      |      ✅       |      ✅      |     ✅     |
 | Export invoices to XML for tax authorities                |     ✅      |      ✅       |      ✅      |     ✅     |
 | Send invoices to an email from the app                    |     ❌      |      ✅       |      ✅      |     ✅     |
-| API for integrations                                      |     ❌      |      ❌       |      ✅      |     ✅     |
+| API for integrations                                      |     ✅      |      ❌       |      ✅      |     ✅     |
 | Push notifications in web app                             |     ✅      |      ❌       |      ❌      |     ❌     |
 | Mobile app                                                |     ❌      |      ❌       |      ✅      |     ✅     |
 | English UI                                                |     ❌      |      ❌       |      ✅      |     ✅     |
 | English invoices                                          |     ✅      |      ❌       |      ✅      |     ✅     |
 | Support reverse charge invoices(both domestic and abroad) |     ✅      |      ❌       |      ✅      |     ✅     |
-| Integration API                                           |     ❌      |      ❌       |      ✅      |     ✅     |
+| Share invoice publicly through a public link              |     ✅      |      ❌       |      ✅      |     ✅     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
 

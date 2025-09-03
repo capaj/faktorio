@@ -24,6 +24,8 @@ import {
 import { LucideEdit } from 'lucide-react'
 import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
 import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 export function useInvoiceQueryByUrlParam() {
   const { invoiceId } = useParams()
@@ -64,6 +66,7 @@ export const InvoiceDetail = ({
   invoice: SelectInvoiceType & { items: InsertInvoiceItemType[] }
 }) => {
   const params = useParams()
+  const isLocalUser = localStorage.getItem('auth_token')?.startsWith('local_')
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
   const [searchParams] = useSearchParams()
@@ -157,7 +160,82 @@ export const InvoiceDetail = ({
             <Button variant={'default'}>Stáhnout {pdfName}</Button>
           </PDFDownloadLink>
         </div>
+
+        {/* Share controls */}
+        {!isLocalUser && <ShareControls invoiceId={invoice.id} />}
       </div>
     </>
+  )
+}
+
+function ShareControls({ invoiceId }: { invoiceId: string }) {
+  const qc = useQueryClient()
+  const listQuery = trpcClient.invoices.listShares.useQuery({ invoiceId })
+  const createShare = trpcClient.invoices.createShare.useMutation({
+    onSuccess: () => {
+      qc.invalidateQueries()
+    }
+  })
+  const revokeShare = trpcClient.invoices.revokeShare.useMutation({
+    onSuccess: () => qc.invalidateQueries()
+  })
+
+  const publicBase =
+    import.meta.env.VITE_PUBLIC_API_URL ??
+    'https://faktorio-public-api.capaj.workers.dev'
+
+  return (
+    <div className="mb-4 border rounded p-3">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-semibold">Sdílení faktury</h3>
+        <Button
+          size="sm"
+          onClick={() => createShare.mutate({ invoiceId })}
+          disabled={createShare.isPending}
+        >
+          Vytvořit odkaz
+        </Button>
+      </div>
+      {listQuery.data && listQuery.data.length > 0 ? (
+        <ul className="space-y-2">
+          {listQuery.data.map((s) => {
+            const link = `${publicBase}/shared-invoice/${s.id}`
+            return (
+              <li key={s.id} className="flex items-center gap-2">
+                <a
+                  className="text-blue-600 underline break-all"
+                  href={link}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {link}
+                </a>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(link)
+                    toast.success('Odkaz zkopírován')
+                  }}
+                >
+                  Kopírovat
+                </Button>
+                {!s.disabled_at && (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => revokeShare.mutate({ shareId: s.id })}
+                  >
+                    Zneplatnit
+                  </Button>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      ) : (
+        <div className="text-sm text-muted-foreground">Zatím žádné odkazy</div>
+      )}
+    </div>
   )
 }

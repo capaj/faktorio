@@ -13,6 +13,7 @@ import { djs } from 'faktorio-shared/src/djs'
 import { invoiceItemFormSchema } from '../../zodDbSchemas'
 import { getInvoiceSums } from './getInvoiceSums'
 import { getCNBExchangeRate } from './getCNBExchangeRate'
+import { invoiceShareEventTb, invoiceShareTb } from 'faktorio-db/schema'
 
 const invoiceSchema = getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001')
 
@@ -40,6 +41,96 @@ const updateInvoiceInput = z.object({
 })
 
 export const invoiceRouter = trpcContext.router({
+  createShare: protectedProc
+    .input(
+      z.object({
+        invoiceId: z.string(),
+        // ISO date-time string or YYYY-MM-DD
+        expiresAt: z.string().nullish()
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // ensure invoice belongs to user
+      const inv = await ctx.db.query.invoicesTb.findFirst({
+        where: and(
+          eq(invoicesTb.id, input.invoiceId),
+          eq(invoicesTb.user_id, ctx.user!.id)
+        ),
+        columns: { id: true }
+      })
+      if (!inv) throw new Error('Invoice not found')
+
+      const [share] = await ctx.db
+        .insert(invoiceShareTb)
+        .values({
+          invoice_id: input.invoiceId,
+          user_id: ctx.user!.id,
+          expires_at: input.expiresAt ?? null
+        })
+        .returning()
+        .execute()
+
+      return share
+    }),
+  revokeShare: protectedProc
+    .input(z.object({ shareId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // ensure share belongs to user
+      const share = await ctx.db.query.invoiceShareTb.findFirst({
+        where: and(
+          eq(invoiceShareTb.id, input.shareId),
+          eq(invoiceShareTb.user_id, ctx.user!.id)
+        ),
+        columns: { id: true, disabled_at: true }
+      })
+      if (!share) throw new Error('Share not found')
+
+      const [updated] = await ctx.db
+        .update(invoiceShareTb)
+        .set({ disabled_at: djs().toISOString() })
+        .where(eq(invoiceShareTb.id, input.shareId))
+        .returning()
+        .execute()
+      return updated
+    }),
+  listShares: protectedProc
+    .input(z.object({ invoiceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      // verify ownership
+      const inv = await ctx.db.query.invoicesTb.findFirst({
+        where: and(
+          eq(invoicesTb.id, input.invoiceId),
+          eq(invoicesTb.user_id, ctx.user!.id)
+        ),
+        columns: { id: true }
+      })
+      if (!inv) throw new Error('Invoice not found')
+
+      const shares = await ctx.db.query.invoiceShareTb.findMany({
+        where: eq(invoiceShareTb.invoice_id, input.invoiceId),
+        orderBy: desc(invoiceShareTb.created_at)
+      })
+      return shares
+    }),
+  getShareStats: protectedProc
+    .input(z.object({ shareId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const share = await ctx.db.query.invoiceShareTb.findFirst({
+        where: and(
+          eq(invoiceShareTb.id, input.shareId),
+          eq(invoiceShareTb.user_id, ctx.user!.id)
+        )
+      })
+      if (!share) throw new Error('Share not found')
+
+      const events = await ctx.db.query.invoiceShareEventTb.findMany({
+        where: eq(invoiceShareEventTb.share_id, input.shareId),
+        orderBy: desc(invoiceShareEventTb.created_at),
+        limit: 200
+      })
+
+      return { share, events }
+    }),
   create: protectedProc
     .input(createInvoiceInput)
     .mutation(async ({ input, ctx }) => {

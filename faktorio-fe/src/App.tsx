@@ -24,6 +24,7 @@ import { SignedInRoutes } from './SignedInRoutes'
 import { LocalDbManagementPage } from './pages'
 import { UserSelectType } from 'faktorio-db/schema'
 import { useAutoUpdate } from './lib/autoUpdateService'
+import { SharedInvoicePage } from '@/pages/SharedInvoicePage'
 
 interface BlogPost {
   slug: string
@@ -89,6 +90,8 @@ function AppContent() {
                   <Route path="/terms-of-service">
                     {() => <TermsOfServicePage />}
                   </Route>
+                  {/* public shared invoice route */}
+                  <Route path="/shared-invoice/:shareId" component={SharedInvoicePage} />
 
                   {isSignedIn && <SignedInRoutes />}
 
