@@ -9,6 +9,7 @@ import {
 import { createId, init } from '@paralleldrive/cuid2'
 import { sql } from 'drizzle-orm'
 import { djs } from 'faktorio-shared/src/djs'
+import z from 'zod'
 // always add postfix Tb to table names
 
 export const invoicesTb = sqliteTable(
@@ -484,6 +485,8 @@ export const invoiceShareTb = sqliteTable(
     }
   }
 )
+
+export const SharedInvoiceEventType = z.enum(['view', 'download', 'copy'])
 
 export const invoiceShareEventTb = sqliteTable(
   'invoice_share_event',

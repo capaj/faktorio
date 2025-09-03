@@ -2,7 +2,12 @@ import { trpcContext } from './trpcContext'
 import { invoiceRouter } from './routers/invoices/invoiceRouter'
 import { contactRouter } from './routers/contactRouter'
 import { protectedProc } from './isAuthorizedMiddleware'
-import { userInvoicingDetailsTb, systemStatsTb } from 'faktorio-db/schema'
+import {
+  userInvoicingDetailsTb,
+  systemStatsTb,
+  invoiceShareEventTb,
+  SharedInvoiceEventType
+} from 'faktorio-db/schema'
 import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
 import { eq, desc } from 'drizzle-orm'
 
@@ -67,6 +72,26 @@ export const appRouter = trpcContext.router({
         })
 
       console.log('upserted invoicing details', input)
+    }),
+  sharedInvoiceEvent: trpcContext.procedure
+    .input(z.object({ shareId: z.string(), type: SharedInvoiceEventType }))
+    .mutation(async ({ ctx, input }) => {
+      const { shareId, type } = input
+      const agent = ctx.req.headers.get('user-agent') ?? ''
+      const ip = ctx.req.headers.get('cf-connecting-ip') ?? ''
+      const country = ctx.req.headers.get('cf-ipcountry') ?? ''
+      const referer = ctx.req.headers.get('referer') ?? ''
+      const path = ctx.req.url ?? ''
+      await ctx.db
+        .insert(invoiceShareEventTb)
+        .values({
+          share_id: shareId,
+          event_type: type,
+          ip_address: ip,
+          user_agent: agent,
+          referer,
+          path
+        })
     })
 })
 

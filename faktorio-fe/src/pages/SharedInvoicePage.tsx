@@ -4,8 +4,11 @@ import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 import { CzechInvoicePDF } from './InvoiceDetail/CzechInvoicePDF'
 import { EnglishInvoicePDF } from './InvoiceDetail/EnglishInvoicePDF'
 import { Button } from '@/components/ui/button'
+import { trpcClient } from '@/lib/trpcClient'
 
-const PUBLIC_API_BASE = (import.meta as any).env.VITE_PUBLIC_API_URL as string | undefined
+const PUBLIC_API_BASE = (import.meta as any).env.VITE_PUBLIC_API_URL as
+  | string
+  | undefined
 
 export function SharedInvoicePage() {
   const { shareId } = useParams()
@@ -13,10 +16,12 @@ export function SharedInvoicePage() {
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<any | null>(null)
   const [language, setLanguage] = useState<'cs' | 'en'>('cs')
+  const sharedInvoiceEvent = trpcClient.sharedInvoiceEvent.useMutation()
 
   useEffect(() => {
     if (!shareId) return
-    const base = PUBLIC_API_BASE ?? 'https://faktorio-public-api.capaj.workers.dev'
+    const base =
+      PUBLIC_API_BASE ?? 'https://faktorio-public-api.capaj.workers.dev'
     const url = `${base}/shared-invoice/${shareId}`
 
     fetch(url)
@@ -42,23 +47,25 @@ export function SharedInvoicePage() {
   const invoice = data.invoice
   const items = data.items
 
-  const docProps = { invoiceData: { ...invoice, items }, qrCodeBase64: '', vatPayer: true }
+  const pdfName = `${invoice.your_name}-${invoice.number}.pdf`
 
-  const onDownload = async () => {
-    try {
-      const base = PUBLIC_API_BASE ?? 'https://faktorio-public-api.capaj.workers.dev'
-      await fetch(`${base}/shared-invoice/${shareId}/event`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ type: 'download' })
-      })
-    } catch {}
+  const docProps = {
+    invoiceData: { ...invoice, items },
+    qrCodeBase64: '',
+    vatPayer: true
+  }
+
+  const onDownload = () => {
+    if (!shareId) return
+    sharedInvoiceEvent.mutate({ shareId, type: 'download' })
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Sdílená faktura {invoice.number}</h1>
+        <h1 className="text-2xl font-semibold">
+          Sdílená faktura {invoice.number}
+        </h1>
         <select
           className="border rounded px-2 py-1"
           value={language}
@@ -70,14 +77,21 @@ export function SharedInvoicePage() {
       </div>
 
       <div className="flex justify-center">
-        <PDFViewer style={{ width: '70vw', height: '1100px' }} showToolbar={false}>
+        <PDFViewer
+          style={{ width: '70vw', height: '1100px' }}
+          showToolbar={false}
+        >
           <PdfComponent {...docProps} />
         </PDFViewer>
       </div>
 
       <div className="flex justify-center">
-        <PDFDownloadLink document={<PdfComponent {...docProps} />} fileName={`${invoice.number}.pdf`}>
-          <Button onClick={onDownload}>Stáhnout PDF</Button>
+        <PDFDownloadLink
+          document={<PdfComponent {...docProps} />}
+          onClick={onDownload}
+          fileName={pdfName}
+        >
+          <Button>Stáhnout {pdfName}</Button>
         </PDFDownloadLink>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { CzechInvoicePDF } from './CzechInvoicePDF'
 import { Button } from '@/components/ui/button'
 import { snakeCase } from 'lodash-es'
 import { useLocation, useParams, useSearchParams } from 'wouter'
+import { useState } from 'react'
 import { trpcClient } from '@/lib/trpcClient'
 import { EnglishInvoicePDF } from './EnglishInvoicePDF'
 import {
@@ -21,11 +22,32 @@ import {
   SelectInvoiceType,
   InsertInvoiceItemType
 } from 'faktorio-api/src/zodDbSchemas'
-import { LucideEdit } from 'lucide-react'
+import {
+  LucideEdit,
+  Copy as CopyIcon,
+  Trash2,
+  Eye,
+  Download
+} from 'lucide-react'
 import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
 import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
 
 export function useInvoiceQueryByUrlParam() {
   const { invoiceId } = useParams()
@@ -171,6 +193,11 @@ export const InvoiceDetail = ({
 function ShareControls({ invoiceId }: { invoiceId: string }) {
   const qc = useQueryClient()
   const listQuery = trpcClient.invoices.listShares.useQuery({ invoiceId })
+  const [selectedShareId, setSelectedShareId] = useState<string | null>(null)
+  const shareStatsQuery = trpcClient.invoices.getShareStats.useQuery(
+    { shareId: selectedShareId ?? '' },
+    { enabled: !!selectedShareId }
+  )
   const createShare = trpcClient.invoices.createShare.useMutation({
     onSuccess: () => {
       qc.invalidateQueries()
@@ -180,16 +207,23 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
     onSuccess: () => qc.invalidateQueries()
   })
 
-  const publicBase =
-    import.meta.env.VITE_PUBLIC_API_URL ??
-    'https://faktorio-public-api.capaj.workers.dev'
+  const publicBase = location.origin
 
+  const getCount = (
+    share: unknown,
+    key: 'view_count' | 'download_count'
+  ): number => {
+    const rec = share as Record<string, unknown>
+    const val = rec[key]
+    return typeof val === 'number' ? val : 0
+  }
   return (
     <div className="mb-4 border rounded p-3">
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-semibold">Sdílení faktury</h3>
         <Button
           size="sm"
+          className="text-xs"
           onClick={() => createShare.mutate({ invoiceId })}
           disabled={createShare.isPending}
         >
@@ -210,23 +244,41 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
                 >
                   {link}
                 </a>
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <Eye className="w-3 h-3" /> {getCount(s, 'view_count')}
+                </span>
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <Download className="w-3 h-3" />{' '}
+                  {getCount(s, 'download_count')}
+                </span>
                 <Button
                   size="sm"
                   variant="outline"
+                  className="text-xs"
                   onClick={async () => {
                     await navigator.clipboard.writeText(link)
                     toast.success('Odkaz zkopírován')
                   }}
                 >
-                  Kopírovat
+                  <CopyIcon className="w-4 h-4 mr-1" /> Kopírovat
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="text-xs"
+                  onClick={() => setSelectedShareId(s.id)}
+                >
+                  Detaily
                 </Button>
                 {!s.disabled_at && (
                   <Button
                     size="sm"
                     variant="destructive"
+                    className="text-xs"
                     onClick={() => revokeShare.mutate({ shareId: s.id })}
+                    disabled={revokeShare.isPending}
                   >
-                    Zneplatnit
+                    <Trash2 className="w-4 h-4 mr-1" /> Zneplatnit
                   </Button>
                 )}
               </li>
@@ -236,6 +288,71 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
       ) : (
         <div className="text-sm text-muted-foreground">Zatím žádné odkazy</div>
       )}
+
+      {/* Events modal */}
+      <Dialog
+        open={!!selectedShareId}
+        onOpenChange={(open) => !open && setSelectedShareId(null)}
+      >
+        <DialogContent className="max-w-7xl">
+          <DialogHeader>
+            <DialogTitle>Události sdílení</DialogTitle>
+            <DialogDescription>
+              Zobrazení, stažení a další akce pro tento odkaz
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto pr-2">
+            {!shareStatsQuery.data ? (
+              <div className="text-sm text-muted-foreground">Načítání…</div>
+            ) : (
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  Zobrazení:{' '}
+                  {
+                    shareStatsQuery.data.events.filter(
+                      (e) => e.event_type === 'view'
+                    ).length
+                  }{' '}
+                  · Stažení:{' '}
+                  {
+                    shareStatsQuery.data.events.filter(
+                      (e) => e.event_type === 'download'
+                    ).length
+                  }
+                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Čas</TableHead>
+                      <TableHead>Typ</TableHead>
+                      <TableHead>IP</TableHead>
+                      <TableHead>Země</TableHead>
+                      <TableHead>User-Agent</TableHead>
+                      <TableHead>Referer</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {shareStatsQuery.data.events.map((ev) => (
+                      <TableRow key={ev.id}>
+                        <TableCell>{ev.created_at}</TableCell>
+                        <TableCell>{ev.event_type}</TableCell>
+                        <TableCell>{ev.ip_address ?? ''}</TableCell>
+                        <TableCell>{ev.country ?? ''}</TableCell>
+                        <TableCell className="max-w-[280px] truncate">
+                          {ev.user_agent ?? ''}
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {ev.referer ?? ''}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -6,7 +6,19 @@ import {
   userInvoicingDetailsTb
 } from 'faktorio-db/schema'
 import { trpcContext } from '../../trpcContext'
-import { SQL, and, count, desc, eq, gte, like, lte, or, sql } from 'drizzle-orm'
+import {
+  SQL,
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  like,
+  lte,
+  or,
+  sql,
+  inArray
+} from 'drizzle-orm'
 import { protectedProc } from '../../isAuthorizedMiddleware'
 import { getInvoiceCreateSchema, stringDateSchema } from '../zodSchemas'
 import { djs } from 'faktorio-shared/src/djs'
@@ -110,7 +122,46 @@ export const invoiceRouter = trpcContext.router({
         where: eq(invoiceShareTb.invoice_id, input.invoiceId),
         orderBy: desc(invoiceShareTb.created_at)
       })
-      return shares
+
+      if (shares.length === 0) return shares
+
+      const counts = await ctx.db
+        .select({
+          share_id: invoiceShareEventTb.share_id,
+          view_count: sql<number>`SUM(CASE WHEN ${invoiceShareEventTb.event_type} = 'view' THEN 1 ELSE 0 END)`,
+          download_count: sql<number>`SUM(CASE WHEN ${invoiceShareEventTb.event_type} = 'download' THEN 1 ELSE 0 END)`,
+          copy_count: sql<number>`SUM(CASE WHEN ${invoiceShareEventTb.event_type} = 'copy' THEN 1 ELSE 0 END)`
+        })
+        .from(invoiceShareEventTb)
+        .where(
+          inArray(
+            invoiceShareEventTb.share_id,
+            shares.map((s) => s.id)
+          )
+        )
+        .groupBy(invoiceShareEventTb.share_id)
+        .execute()
+
+      const countsByShareId = new Map<
+        string,
+        { view_count: number; download_count: number; copy_count: number }
+      >()
+      for (const row of counts) {
+        countsByShareId.set(row.share_id, {
+          view_count: row.view_count ?? 0,
+          download_count: row.download_count ?? 0,
+          copy_count: row.copy_count ?? 0
+        })
+      }
+
+      return shares.map((s) => {
+        const c = countsByShareId.get(s.id) ?? {
+          view_count: 0,
+          download_count: 0,
+          copy_count: 0
+        }
+        return { ...s, ...c }
+      })
     }),
   getShareStats: protectedProc
     .input(z.object({ shareId: z.string() }))
