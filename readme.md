@@ -7,6 +7,7 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 ## Features
 
 - generate invoice PDF
+
 ## Shared invoices
 
 Public URL format: https://faktorio.cz/shared-invoice/:invoiceShareId
@@ -41,7 +42,7 @@ Frontend env:
 | English UI                                                |     ❌      |      ❌       |      ✅      |     ✅     |
 | English invoices                                          |     ✅      |      ❌       |      ✅      |     ✅     |
 | Support reverse charge invoices(both domestic and abroad) |     ✅      |      ❌       |      ✅      |     ✅     |
-| Integration API                                           |     ❌      |      ❌       |      ✅      |     ✅     |
+| Share invoice publicly through a public link              |     ✅      |      ❌       |      ✅      |     ✅     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
 
