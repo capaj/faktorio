@@ -235,52 +235,60 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
           {listQuery.data.map((s) => {
             const link = `${publicBase}/shared-invoice/${s.id}`
             return (
-              <li key={s.id} className="flex items-center gap-2">
-                <a
-                  className="text-blue-600 underline break-all"
-                  href={link}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {link}
-                </a>
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <Eye className="w-3 h-3" /> {getCount(s, 'view_count')}
-                </span>
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <Download className="w-3 h-3" />{' '}
-                  {getCount(s, 'download_count')}
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-xs"
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(link)
-                    toast.success('Odkaz zkopírován')
-                  }}
-                >
-                  <CopyIcon className="w-4 h-4 mr-1" /> Kopírovat
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="text-xs"
-                  onClick={() => setSelectedShareId(s.id)}
-                >
-                  Detaily
-                </Button>
-                {!s.disabled_at && (
+              <li
+                key={s.id}
+                className="flex items-center gap-2 justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <a
+                    className="text-blue-600 underline break-all"
+                    href={link}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {link}
+                  </a>
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                    <Eye className="w-3 h-3" /> {getCount(s, 'view_count')}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                    <Download className="w-3 h-3" />{' '}
+                    {getCount(s, 'download_count')}
+                  </span>
                   <Button
                     size="sm"
-                    variant="destructive"
+                    variant="secondary"
                     className="text-xs"
-                    onClick={() => revokeShare.mutate({ shareId: s.id })}
-                    disabled={revokeShare.isPending}
+                    onClick={() => setSelectedShareId(s.id)}
                   >
-                    <Trash2 className="w-4 h-4 mr-1" /> Zneplatnit
+                    Detaily
                   </Button>
-                )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(link)
+                      toast.success('Odkaz zkopírován')
+                    }}
+                  >
+                    <CopyIcon className="w-4 h-4 mr-1" /> Kopírovat
+                  </Button>
+
+                  {!s.disabled_at && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="text-xs"
+                      onClick={() => revokeShare.mutate({ shareId: s.id })}
+                      disabled={revokeShare.isPending}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" /> Zneplatnit
+                    </Button>
+                  )}
+                </div>
               </li>
             )
           })}
