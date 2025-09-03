@@ -455,3 +455,60 @@ export const systemStatsTb = sqliteTable('system_stats', {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`)
 })
+
+// Public sharing of invoices and tracking
+export const invoiceShareTb = sqliteTable(
+  'invoice_share',
+  {
+    id: text('id')
+      .$defaultFn(() => createId())
+      .primaryKey()
+      .notNull(), // uuid2 used in public URL
+    invoice_id: text('invoice_id')
+      .notNull()
+      .references(() => invoicesTb.id, { onDelete: 'cascade' }),
+    user_id: text('user_id')
+      .notNull()
+      .references(() => userT.id, { onDelete: 'cascade' }),
+    created_at: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    expires_at: text('expires_at'), // YYYY-MM-DD or ISO timestamp
+    disabled_at: text('disabled_at'),
+    last_accessed_at: text('last_accessed_at')
+  },
+  (share) => {
+    return {
+      invoiceIdx: index('invoice_share_invoice_idx').on(share.invoice_id),
+      userIdx: index('invoice_share_user_idx').on(share.user_id)
+    }
+  }
+)
+
+export const invoiceShareEventTb = sqliteTable(
+  'invoice_share_event',
+  {
+    id: text('id')
+      .$defaultFn(() => createId())
+      .primaryKey()
+      .notNull(),
+    share_id: text('share_id')
+      .notNull()
+      .references(() => invoiceShareTb.id, { onDelete: 'cascade' }),
+    event_type: text('event_type').$type<'view' | 'download' | 'copy'>(),
+    ip_address: text('ip_address'),
+    country: text('country'),
+    user_agent: text('user_agent'),
+    referer: text('referer'),
+    path: text('path'),
+    created_at: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+  },
+  (evt) => {
+    return {
+      shareIdx: index('invoice_share_event_share_idx').on(evt.share_id),
+      typeIdx: index('invoice_share_event_type_idx').on(evt.event_type)
+    }
+  }
+)

@@ -7,6 +7,15 @@ Monorepo containing BE and FE for faktorio.cz app. A free open source app for in
 ## Features
 
 - generate invoice PDF
+## Shared invoices
+
+Public URL format: https://faktorio.cz/shared-invoice/:invoiceShareId
+
+Backend stores share records and tracks events (view, download, copy) including IP, UA, and country when available.
+
+Frontend env:
+
+- VITE_PUBLIC_API_URL points to the public API worker (defaults to production when missing).
 - extract entire invoice from any JPG/PNG/BMP or PDF
 - search through invoices
 - contact management(integrated with [ARES](https://ares.gov.cz/))
