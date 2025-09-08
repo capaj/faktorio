@@ -9,8 +9,8 @@
   ],
   "devDependencies": {
     "@playwright/test": "^1.55.0",
-    "@types/node": "^24.3.0",
-    "npm-check-updates": "^18.0.3",
+    "@types/node": "^24.3.1",
+    "npm-check-updates": "^18.1.0",
     "oxlint": "^1.14.0",
     "prettier": "^3.6.2",
     "turbo": "^2.5.6",

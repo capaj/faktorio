@@ -36,10 +36,10 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-oauth/google": "^0.12.2",
     "@react-pdf/renderer": "^4.3.0",
-    "@tanstack/react-query": "^5.85.9",
-    "@trpc/client": "^11.5.0",
-    "@trpc/react-query": "^11.5.0",
-    "@trpc/server": "^11.5.0",
+    "@tanstack/react-query": "^5.87.1",
+    "@trpc/client": "^11.5.1",
+    "@trpc/react-query": "^11.5.1",
+    "@trpc/server": "^11.5.1",
     "@types/lodash-es": "^4.17.12",
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19.1.12",
@@ -77,7 +77,7 @@
     "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.12",
+    "@tailwindcss/vite": "^4.1.13",
     "@types/qrcode": "^1.5.5",
     "@types/sql.js": "^1.4.9",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
@@ -85,18 +85,18 @@
     "@vitejs/plugin-react-swc": "^4.0.1",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.4",
-    "eslint": "^9.34.0",
+    "eslint": "^9.35.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "gray-matter": "^4.0.3",
     "marked": "^16.2.1",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.12",
+    "tailwindcss": "^4.1.13",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "vite": "^7.1.4",
     "vite-plugin-pwa": "^1.0.3",
     "vitest": "^3.2.4",
-    "wrangler": "^4.33.2"
+    "wrangler": "^4.34.0"
   }
 }
