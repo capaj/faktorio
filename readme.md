@@ -21,7 +21,7 @@ Frontend env:
 - search through invoices
 - contact management(integrated with [ARES](https://ares.gov.cz/))
 - support for foreign currencies
-- export invoices to Excel, CSV
+- export invoices to Excel, CSV, ISDOC
 - export invoices to XML for Czech tax authorities
 
 ## Feature Comparison
@@ -33,7 +33,7 @@ Frontend env:
 | Search through invoices                                   |     ✅      |      ✅       |      ✅      |     ✅     |
 | Contact management (integrated with ARES)                 |     ✅      |      ✅       |      ✅      |     ✅     |
 | Support for foreign currencies                            |     ✅      |      ❌       |      ✅      |     ✅     |
-| Export invoices to Excel, CSV                             |     ✅      |      ✅       |      ✅      |     ✅     |
+| Export invoices to Excel, CSV, ISDOC                             |     ✅      |      ✅       |      ✅      |     ✅     |
 | Export invoices to XML for tax authorities                |     ✅      |      ✅       |      ✅      |     ✅     |
 | Send invoices to an email from the app                    |     ❌      |      ✅       |      ✅      |     ✅     |
 | API for integrations                                      |     ✅      |      ❌       |      ✅      |     ✅     |
