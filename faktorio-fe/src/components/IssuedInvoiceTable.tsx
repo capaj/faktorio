@@ -27,6 +27,7 @@ import {
 import { Link } from 'wouter'
 import { formatNumberWithSpaces } from '@/pages/formatNumberWithSpaces' // Adjust path if needed
 import { InvoicesDownloadButton } from '@/pages/InvoiceList/InvoicesDownloadButton' // Adjust path if needed
+import { IsdocDownloadButton } from '@/components/IsdocDownloadButton'
 
 // Define the shape of an invoice - adjust based on your actual data structure
 // This might need refinement based on the exact structure from your tRPC query
@@ -223,6 +224,34 @@ export function IssuedInvoiceTable({
                         <Eye size={16} strokeWidth="1.5" />
                         <span className="ml-2">Zobrazit PDF</span>
                       </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <div className="flex w-full">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                          <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
+                          <path d="M10 13v4" />
+                          <path d="M14 13v4" />
+                        </svg>
+                        <IsdocDownloadButton 
+                          invoiceId={invoice.id} 
+                          variant="ghost" 
+                          size="sm" 
+                          className="ml-2 p-0 h-auto hover:bg-transparent"
+                        >
+                          Stáhnout ISDOC
+                        </IsdocDownloadButton>
+                      </div>
                     </DropdownMenuItem>
 
                     {!invoice.paid_on && onMarkAsPaid && (
