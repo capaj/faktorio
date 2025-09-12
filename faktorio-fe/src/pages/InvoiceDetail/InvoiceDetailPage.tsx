@@ -7,7 +7,7 @@ import { useLocation, useParams, useSearchParams } from 'wouter'
 import { useState } from 'react'
 import { trpcClient } from '@/lib/trpcClient'
 import { EnglishInvoicePDF } from './EnglishInvoicePDF'
-import { IsdocDownloadButton } from '@/components/IsdocDownloadButton'
+import { generateIsdocXml } from '@/lib/isdoc/generateIsdocXml'
 import {
   Select,
   SelectTrigger,
@@ -96,6 +96,30 @@ export const InvoiceDetail = ({
   const language = searchParams.get('language') ?? invoice.language
   const [_location, navigate] = useLocation()
 
+  const handleIsdocDownload = () => {
+    try {
+      const isVatPayer = Boolean(invoicingDetails?.vat_payer)
+      const xml = generateIsdocXml(invoice, isVatPayer)
+      
+      // Create filename for download
+      const baseFileName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}`
+      const fileName = `${baseFileName}.isdoc`
+      
+      // Create a blob and trigger download
+      const blob = new Blob([xml], { type: 'application/xml' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Error downloading ISDOC:', error)
+    }
+  }
+
   const invoiceTotal = invoice.items.reduce(
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
     0
@@ -142,12 +166,6 @@ export const InvoiceDetail = ({
             </Select>
           </div>
           <div className="flex gap-2">
-            <IsdocDownloadButton
-              invoiceId={params.invoiceId || ''}
-              variant={'outline'}
-            >
-              Stáhnout ISDOC
-            </IsdocDownloadButton>
             <Button
               variant={'outline'}
               onClick={() => {
@@ -178,18 +196,31 @@ export const InvoiceDetail = ({
         </div>
 
         <div className="flex content-center justify-center m-4">
-          <PDFDownloadLink
-            document={
-              <PdfContent
-                invoiceData={invoice}
-                qrCodeBase64={qrCodeBase64 ?? ''}
-                vatPayer={invoicingDetails?.vat_payer}
-              />
-            }
-            fileName={pdfName ?? ''}
-          >
-            <Button variant={'default'}>Stáhnout {pdfName}</Button>
-          </PDFDownloadLink>
+          <div className="flex flex-col gap-3 items-center">
+            <h4 className="text-lg font-medium">Stažení faktury</h4>
+            <div className="flex gap-3">
+              <PDFDownloadLink
+                document={
+                  <PdfContent
+                    invoiceData={invoice}
+                    qrCodeBase64={qrCodeBase64 ?? ''}
+                    vatPayer={invoicingDetails?.vat_payer}
+                  />
+                }
+                fileName={pdfName ?? ''}
+              >
+                <Button variant={'default'}>
+                  <Download className="w-4 h-4 mr-2" />
+                  PDF
+                </Button>
+              </PDFDownloadLink>
+              
+              <Button variant={'outline'} onClick={handleIsdocDownload}>
+                <Download className="w-4 h-4 mr-2" />
+                ISDOC
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Share controls */}
