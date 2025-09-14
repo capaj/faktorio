@@ -10,9 +10,9 @@
     "local-migrations-generate": "tsx ./scripts/update-fe-migrations.ts",
     "dup": "drizzle-kit up"
   },
-  "packageManager": "pnpm@10.15.1",
+  "packageManager": "pnpm@10.16.1",
   "dependencies": {
-    "@libsql/client": "^0.15.14",
+    "@libsql/client": "^0.15.15",
     "@paralleldrive/cuid2": "^2.2.2",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",
