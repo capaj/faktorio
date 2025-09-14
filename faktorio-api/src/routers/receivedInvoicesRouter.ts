@@ -1,13 +1,13 @@
 import { z } from 'zod/v4'
 
-import { receivedInvoiceTb, contactTb } from 'faktorio-db/schema'
+import { receivedInvoiceTb } from 'faktorio-db/schema'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { trpcContext } from '../trpcContext'
 import { eq, desc, and, gte, lt, SQL } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
 import schema from '../json-schema/receivedInvoicesSchema.json'
-import { GoogleGenAI, Schema } from '@google/genai'
+import { Schema } from '@google/genai'
 import { stringDateSchema, paymentMethodEnum } from './zodSchemas'
 
 // Define Zod schema based on Drizzle schema, making fields optional/required as needed for creation
@@ -168,7 +168,7 @@ export const receivedInvoicesRouter = trpcContext.router({
   create: protectedProc
     .input(receivedInvoiceCreateSchema)
     .mutation(async ({ ctx, input }) => {
-      const { attachment_data, ...invoiceData } = input
+      const { attachment_data: _attachment_data, ...invoiceData } = input
 
       // Basic check for duplicate invoice for the same supplier/number
       const existing = await ctx.db
@@ -213,7 +213,7 @@ export const receivedInvoicesRouter = trpcContext.router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, attachment_data, ...updateData } = input
+      const { id, attachment_data: _attachment_data, ...updateData } = input
 
       // Check if invoice exists and belongs to user
       const existing = await ctx.db
@@ -314,33 +314,53 @@ The text that is partially unreadable, leave the "?" for each unreadable charact
 
         // TODO use https://googleapis.github.io/js-genai/main/classes/files.Files.html to allow uploading files bigger than 7MB
 
-        // Generate content with the vision model
-        const result = await ctx.googleGenAI.models.generateContent({
-          model: 'gemini-2.5-flash-preview-05-20',
-          contents: [
-            {
-              parts: [
-                { text: prompt },
-                {
-                  inlineData: {
-                    mimeType: input.mimeType,
-                    data: base64Data
+        const makeGeminiRequest = (model: string) =>
+          ctx.googleGenAI.models.generateContent({
+            model,
+            contents: [
+              {
+                parts: [
+                  { text: prompt },
+                  {
+                    inlineData: {
+                      mimeType: input.mimeType,
+                      data: base64Data
+                    }
                   }
-                }
-              ]
+                ]
+              }
+            ],
+            config: {
+              systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from an image of a czech invoice. Most likely the invoice is in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency field is ISO 4217.`,
+              // @ts-expect-error types are not correct
+              responseSchema: schema as Schema,
+              temperature: 0.2,
+              thinkingConfig: {
+                includeThoughts: false,
+                thinkingBudget: 0
+              }
             }
-          ],
-          config: {
-            systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from images of czech invoices. Most invoices are in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency is ISO 4217.`,
-            // @ts-expect-error types are not correct
-            responseSchema: schema as Schema,
-            temperature: 0.2,
-            thinkingConfig: {
-              includeThoughts: false,
-              thinkingBudget: 0
-            }
+          })
+
+        let result
+        try {
+          result = await makeGeminiRequest('gemini-2.5-flash')
+        } catch (err) {
+          const message = (err as Error)?.message ?? ''
+          const status =
+            (err as any)?.status ??
+            (err as any)?.response?.status ??
+            (err as any)?.code
+          const isOverloaded =
+            status === 503 ||
+            /UNAVAILABLE/i.test(String(message)) ||
+            /model is overloaded/i.test(String(message))
+          if (isOverloaded) {
+            result = await makeGeminiRequest('gemini-2.5-flash-lite')
+          } else {
+            throw err
           }
-        })
+        }
 
         const textContent = result.text ?? ''
 
