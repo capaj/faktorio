@@ -59,9 +59,7 @@ export const invoicesTb = sqliteTable(
     bank_account: text('bank_account'),
     iban: text('iban'),
     swift_bic: text('swift_bic'),
-    payment_method: text('payment_method')
-      .notNull()
-      .$type<'bank' | 'cash' | 'card' | 'cod' | 'crypto' | 'other'>(),
+    payment_method: text('payment_method').notNull().$type<PaymentMethodType>(),
     currency: text('currency').notNull(),
     exchange_rate: real('exchange_rate').notNull().default(1),
     language: text('language').notNull().default('cs'),
@@ -298,6 +296,14 @@ export const userApiTokensTb = sqliteTable('user_api_tokens', {
     .default(sql`CURRENT_TIMESTAMP`)
 })
 
+export type PaymentMethodType =
+  | 'bank'
+  | 'cash'
+  | 'card'
+  | 'cod'
+  | 'crypto'
+  | 'other'
+
 export const receivedInvoiceTb = sqliteTable(
   'received_invoice',
   {
@@ -356,9 +362,7 @@ export const receivedInvoiceTb = sqliteTable(
     vat_regime: text('vat_regime'), // Standard, non-VAT payer, special regime
 
     // Payment details
-    payment_method: text('payment_method').$type<
-      'bank' | 'cash' | 'card' | 'cod' | 'crypto' | 'other'
-    >(),
+    payment_method: text('payment_method').$type<PaymentMethodType>(),
     bank_account: text('bank_account'),
     iban: text('iban'),
     swift_bic: text('swift_bic'),

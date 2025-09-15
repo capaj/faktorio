@@ -3,6 +3,8 @@ import { swagger } from '@elysiajs/swagger'
 import { cors } from '@elysiajs/cors'
 import { createClient, type Client as LibsqlClient } from '@libsql/client'
 import { drizzle, LibSQLDatabase } from 'drizzle-orm/libsql'
+import type { Static } from '@sinclair/typebox'
+import { createSchemaFactory } from 'drizzle-typebox'
 import {
   invoicesTb,
   userApiTokensTb,
@@ -10,11 +12,35 @@ import {
   invoiceShareTb,
   invoiceShareEventTb,
   contactTb,
-  userInvoicingDetailsTb
+  userInvoicingDetailsTb,
+  PaymentMethodType,
+  receivedInvoiceTb
 } from 'faktorio-db/schema'
 import { eq, sql, and, gte, lte } from 'drizzle-orm'
 
 let dbInstance: LibSQLDatabase | undefined
+
+const { createInsertSchema, createUpdateSchema } = createSchemaFactory({
+  typeboxInstance: t
+})
+
+type ReceivedInvoiceInsert = typeof receivedInvoiceTb.$inferInsert
+
+const _paymentMethodSchema = t.Union([
+  t.Literal('bank'),
+  t.Literal('cash'),
+  t.Literal('card'),
+  t.Literal('cod'),
+  t.Literal('crypto'),
+  t.Literal('other')
+])
+
+const _receivedRowInsertSchema = createInsertSchema(receivedInvoiceTb)
+const _receivedRowUpdateSchema = createUpdateSchema(receivedInvoiceTb)
+
+const ReceivedInvoiceCreateSchema = _receivedRowInsertSchema
+
+const ReceivedInvoiceUpdateSchema = _receivedRowUpdateSchema
 
 type WorkerEnv = {
   TURSO_DATABASE_URL: string
@@ -60,7 +86,7 @@ export default {
 
     const app = new Elysia({ aot: false })
       .use(cors())
-      .onError(({ error, code, path }) => {
+      .onError(({ error, code: _code, path }) => {
         console.error(`Error in ${path}:`)
         console.error(error)
       })
@@ -91,13 +117,7 @@ export default {
               taxable_fulfillment_due: string
               issued_on: string
               due_in_days: number
-              payment_method:
-                | 'bank'
-                | 'cash'
-                | 'card'
-                | 'cod'
-                | 'crypto'
-                | 'other'
+              payment_method: PaymentMethodType
               currency: string
               exchange_rate?: number
               language?: string
@@ -482,7 +502,7 @@ export default {
       )
       .get(
         '/invoices',
-        async ({ set, query }) => {
+        async ({ query }) => {
           const { limit = 100, offset = 0, from, to } = query
 
           const rows = await dbInstance!
@@ -516,6 +536,228 @@ export default {
             from: t.Optional(t.String()),
             to: t.Optional(t.String())
           })
+        }
+      )
+      .post(
+        '/received-invoices',
+        async ({ body, set }) => {
+          const input = body as Static<typeof ReceivedInvoiceCreateSchema>
+
+          if (input.supplier_contact_id) {
+            const [supplier] = await dbInstance!
+              .select({ id: contactTb.id })
+              .from(contactTb)
+              .where(
+                and(
+                  eq(contactTb.id, input.supplier_contact_id),
+                  eq(contactTb.user_id, tokenRow.user_id)
+                )
+              )
+              .limit(1)
+              .all()
+            if (!supplier) {
+              set.status = 400
+              return 'Supplier not found'
+            }
+          }
+
+          const values: ReceivedInvoiceInsert = {
+            ...input,
+            payment_method: (input.payment_method ??
+              'bank') as PaymentMethodType,
+            user_id: tokenRow.user_id
+          }
+
+          const [created] = await dbInstance!
+            .insert(receivedInvoiceTb)
+            .values(values)
+            .returning({ id: receivedInvoiceTb.id })
+            .all()
+
+          set.status = 201
+          return { id: created.id }
+        },
+        {
+          detail: {
+            tags: ['ReceivedInvoices'],
+            security: [{ ApiKeyAuth: [] }]
+          },
+          body: ReceivedInvoiceCreateSchema as any
+        }
+      )
+      .get(
+        '/received-invoices/:id',
+        async ({ params, set }) => {
+          const { id } = params as { id: string }
+
+          const rows = await dbInstance!
+            .select()
+            .from(receivedInvoiceTb)
+            .where(
+              and(
+                eq(receivedInvoiceTb.id, id),
+                eq(receivedInvoiceTb.user_id, tokenRow.user_id)
+              )
+            )
+            .limit(1)
+            .all()
+
+          const invoice = rows[0]
+          if (!invoice) {
+            set.status = 404
+            return 'Not found'
+          }
+          return { invoice }
+        },
+        {
+          detail: {
+            tags: ['ReceivedInvoices'],
+            security: [{ ApiKeyAuth: [] }]
+          },
+          params: t.Object({ id: t.String() })
+        }
+      )
+      .get(
+        '/received-invoices',
+        async ({ query }) => {
+          const {
+            limit = 100,
+            offset = 0,
+            from,
+            to
+          } = query as {
+            limit?: number
+            offset?: number
+            from?: string
+            to?: string
+          }
+
+          const rows = await dbInstance!
+            .select()
+            .from(receivedInvoiceTb)
+            .where(
+              and(
+                eq(receivedInvoiceTb.user_id, tokenRow.user_id),
+                from
+                  ? gte(receivedInvoiceTb.taxable_supply_date, from)
+                  : undefined,
+                to ? lte(receivedInvoiceTb.taxable_supply_date, to) : undefined
+              )
+            )
+            .limit(limit)
+            .offset(offset)
+            .all()
+
+          return { invoices: rows }
+        },
+        {
+          detail: {
+            tags: ['ReceivedInvoices'],
+            security: [{ ApiKeyAuth: [] }]
+          },
+          query: t.Object({
+            limit: t.Optional(
+              t.Integer({ minimum: 1, maximum: 5000, default: 100 })
+            ),
+            offset: t.Optional(t.Integer({ minimum: 0, default: 0 })),
+            from: t.Optional(t.String()),
+            to: t.Optional(t.String())
+          })
+        }
+      )
+      .patch(
+        '/received-invoices/:id',
+        async ({ params, body, set }) => {
+          const { id } = params as { id: string }
+          const updates = body as Static<typeof ReceivedInvoiceUpdateSchema>
+
+          const [existing] = await dbInstance!
+            .select({ id: receivedInvoiceTb.id })
+            .from(receivedInvoiceTb)
+            .where(
+              and(
+                eq(receivedInvoiceTb.id, id),
+                eq(receivedInvoiceTb.user_id, tokenRow.user_id)
+              )
+            )
+            .limit(1)
+            .all()
+
+          if (!existing) {
+            set.status = 404
+            return 'Not found'
+          }
+
+          const updatesCoerced = {
+            ...updates,
+            payment_method: updates.payment_method as
+              | PaymentMethodType
+              | null
+              | undefined
+          }
+
+          await dbInstance!
+            .update(receivedInvoiceTb)
+            .set(updatesCoerced as any)
+            .where(
+              and(
+                eq(receivedInvoiceTb.id, id),
+                eq(receivedInvoiceTb.user_id, tokenRow.user_id)
+              )
+            )
+            .run()
+
+          return new Response(null, { status: 204 })
+        },
+        {
+          detail: {
+            tags: ['ReceivedInvoices'],
+            security: [{ ApiKeyAuth: [] }]
+          },
+          params: t.Object({ id: t.String() }),
+          body: ReceivedInvoiceUpdateSchema as any
+        }
+      )
+      .delete(
+        '/received-invoices/:id',
+        async ({ params, set }) => {
+          const { id } = params as { id: string }
+
+          const [row] = await dbInstance!
+            .select({ id: receivedInvoiceTb.id })
+            .from(receivedInvoiceTb)
+            .where(
+              and(
+                eq(receivedInvoiceTb.id, id),
+                eq(receivedInvoiceTb.user_id, tokenRow.user_id)
+              )
+            )
+            .limit(1)
+            .all()
+
+          if (!row) {
+            set.status = 404
+            return 'Not found'
+          }
+
+          await dbInstance!
+            .delete(receivedInvoiceTb)
+            .where(
+              and(
+                eq(receivedInvoiceTb.id, id),
+                eq(receivedInvoiceTb.user_id, tokenRow.user_id)
+              )
+            )
+            .run()
+
+          return new Response(null, { status: 204 })
+        },
+        {
+          detail: {
+            tags: ['ReceivedInvoices'],
+            security: [{ ApiKeyAuth: [] }]
+          },
+          params: t.Object({ id: t.String() })
         }
       )
 
