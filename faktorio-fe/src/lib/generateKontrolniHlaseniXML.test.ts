@@ -25,6 +25,7 @@ describe('generateKontrolniHlaseniXML', () => {
         taxable_fulfillment_due: '2024-07-15',
         issued_on: '2024-07-10',
         sent_at: '2024-07-11',
+        due_on: '2024-07-20',
         total: 12100,
         subtotal: 10000,
         native_subtotal: 10000, // Use native_subtotal for consistency
@@ -116,6 +117,7 @@ describe('generateKontrolniHlaseniXML', () => {
         taxable_fulfillment_due: '2024-07-15',
         issued_on: '2024-07-10',
         sent_at: '2024-07-11',
+        due_on: '2024-07-20',
         total: 12100,
         subtotal: 12100,
         native_subtotal: 12100, // Use native_subtotal for consistency
