@@ -82,8 +82,7 @@
     "taxable_supply_date": {
       "type": "string",
       "format": "date-time",
-      "nullable": true,
-      "description": "DUZP - Datum uskutečnění zdanitelného plnění (YYYY-MM-DD)"
+      "description": "DUZP - Datum uskutečnění zdanitelného plnění (YYYY-MM-DD). Same as issue_date if not specified otherwise."
     },
     "due_date": {
       "type": "string",

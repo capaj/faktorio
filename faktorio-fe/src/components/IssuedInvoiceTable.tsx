@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  TableCaption,
   TableHeader,
   TableRow,
   TableHead,
@@ -34,7 +33,6 @@ import { IsdocDownloadButton } from '@/components/IsdocDownloadButton'
 import { invoicesTb } from 'faktorio-db/schema'
 import { InferSelectModel } from 'drizzle-orm'
 import { toast } from 'sonner'
-import { describe } from 'vitest'
 
 export type Invoice = Pick<
   InferSelectModel<typeof invoicesTb>,
@@ -44,6 +42,7 @@ export type Invoice = Pick<
   | 'taxable_fulfillment_due'
   | 'issued_on'
   | 'sent_at'
+  | 'due_on'
   | 'total'
   | 'native_total'
   | 'native_subtotal'
@@ -177,7 +176,11 @@ export function IssuedInvoiceTable({
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                     invoice.paid_on
                       ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800'
+                      : invoice.due_on &&
+                          new Date(invoice.due_on) <
+                            new Date(new Date().toDateString())
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
                   }`}
                 >
                   {invoice.paid_on
@@ -243,10 +246,10 @@ export function IssuedInvoiceTable({
                           <path d="M10 13v4" />
                           <path d="M14 13v4" />
                         </svg>
-                        <IsdocDownloadButton 
-                          invoiceId={invoice.id} 
-                          variant="ghost" 
-                          size="sm" 
+                        <IsdocDownloadButton
+                          invoiceId={invoice.id}
+                          variant="ghost"
+                          size="sm"
                           className="ml-2 p-0 h-auto hover:bg-transparent"
                         >
                           Stáhnout ISDOC
