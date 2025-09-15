@@ -190,7 +190,6 @@ export default {
             .insert(invoicesTb)
             .values({
               number: input.invoice.number,
-              variable_symbol: null,
               your_name: user.name,
               your_street: user.street,
               your_street2: user.street2 ?? null,
@@ -207,10 +206,6 @@ export default {
               client_country: client.country ?? null,
               client_registration_no: client.registration_no ?? null,
               client_vat_no: client.vat_no ?? null,
-              subject_id: null,
-              generator_id: null,
-              related_id: null,
-              token: null,
               status: 'issued',
               order_number: null,
               issued_on: input.invoice.issued_on,
@@ -246,19 +241,8 @@ export default {
               vat_15: null,
               vat_base_12: vat_12 ? subtotal : null,
               vat_12: vat_12 || null,
-              vat_base_10: null,
-              vat_10: null,
-              vat_base_0: null,
-              private_note: null,
-              correction: null,
-              correction_id: null,
               client_email: client.email ?? client.main_email ?? null,
               client_phone: client.phone ?? client.phone_number ?? null,
-              custom_id: null,
-              oss: null,
-              tax_document: null,
-              payment_method_human: null,
-              published_at: null,
               client_contact_id: input.invoice.client_contact_id,
               user_id: tokenRow.user_id
             })
@@ -588,7 +572,7 @@ export default {
       .get(
         '/received-invoices/:id',
         async ({ params, set }) => {
-          const { id } = params as { id: string }
+          const { id } = params
 
           const rows = await dbInstance!
             .select()
@@ -620,17 +604,7 @@ export default {
       .get(
         '/received-invoices',
         async ({ query }) => {
-          const {
-            limit = 100,
-            offset = 0,
-            from,
-            to
-          } = query as {
-            limit?: number
-            offset?: number
-            from?: string
-            to?: string
-          }
+          const { limit = 100, offset = 0, from, to } = query
 
           const rows = await dbInstance!
             .select()
@@ -668,7 +642,7 @@ export default {
       .patch(
         '/received-invoices/:id',
         async ({ params, body, set }) => {
-          const { id } = params as { id: string }
+          const { id } = params
           const updates = body as Static<typeof ReceivedInvoiceUpdateSchema>
 
           const [existing] = await dbInstance!
@@ -721,7 +695,7 @@ export default {
       .delete(
         '/received-invoices/:id',
         async ({ params, set }) => {
-          const { id } = params as { id: string }
+          const { id } = params
 
           const [row] = await dbInstance!
             .select({ id: receivedInvoiceTb.id })
