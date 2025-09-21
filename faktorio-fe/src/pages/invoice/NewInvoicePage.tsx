@@ -34,6 +34,7 @@ import { useExchangeRate } from '@/hooks/useExchangeRate'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
 import { ButtonLink } from '@/components/ui/link'
+import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 
 const defaultInvoiceItem = {
   description: '',
@@ -47,6 +48,7 @@ export const NewInvoicePage = () => {
   const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
+  const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
 
   const invoiceOrdinal =
     parseInt(lastInvoice?.number?.split('-')[1] ?? '0', 10) + 1
@@ -68,9 +70,9 @@ export const NewInvoicePage = () => {
     defaultValues: {
       ...formSchema.parse({
         due_in_days: 14,
-        bank_account: invoicingDetails?.bank_account || '',
-        iban: invoicingDetails?.iban || '',
-        swift_bic: invoicingDetails?.swift_bic || '',
+        bank_account: primaryBankAccount.bank_account || '',
+        iban: primaryBankAccount.iban || '',
+        swift_bic: primaryBankAccount.swift_bic || '',
         language: 'cs'
       }),
       items: [defaultInvoiceItem]

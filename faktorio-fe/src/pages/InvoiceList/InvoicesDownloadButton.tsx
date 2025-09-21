@@ -19,6 +19,7 @@ import { EnglishInvoicePDF } from '../InvoiceDetail/EnglishInvoicePDF'
 import { trpcClient } from '@/lib/trpcClient'
 import QRCode from 'qrcode'
 import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
+import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 import { snakeCase } from 'lodash-es'
 import { useState } from 'react'
 
@@ -58,7 +59,10 @@ export function InvoicesDownloadButton({
           return acc + total * (vat / 100)
         }, 0)
 
-        const qrPaymentString = generateQrPaymentString({
+        const invoicingDetails = await utils.invoicingDetails.fetch()
+        const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
+
+        const generatedQrString = generateQrPaymentString({
           accountNumber:
             invoiceWithItems.iban?.replace(/\s/g, '') ??
             invoiceWithItems.bank_account ??
@@ -68,6 +72,13 @@ export function InvoicesDownloadButton({
           variableSymbol: invoiceWithItems.number.replace('-', ''),
           message: 'Faktura ' + invoiceWithItems.number
         })
+
+        const qrPaymentString =
+          primaryBankAccount.qrcode_decoded &&
+          primaryBankAccount.qrcode_decoded.length > 0
+            ? primaryBankAccount.qrcode_decoded
+            : generatedQrString
+
         const qrCodeBase64 = qrPaymentString
           ? await QRCode.toDataURL(qrPaymentString)
           : undefined
@@ -76,8 +87,6 @@ export function InvoicesDownloadButton({
           invoiceWithItems.language === 'en'
             ? EnglishInvoicePDF
             : CzechInvoicePDF
-
-        const invoicingDetails = await utils.invoicingDetails.fetch()
 
         const PdfDoc = (
           <PdfComponent

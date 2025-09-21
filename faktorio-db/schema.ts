@@ -189,7 +189,6 @@ export const userInvoicingDetailsTb = sqliteTable(
     zip: text('zip').notNull(),
     country: text('country').notNull(),
     main_email: text('main_email'),
-    bank_account: text('bank_account'),
     iban: text('iban'),
     swift_bic: text('swift_bic'),
     vat_no: text('vat_no'),
@@ -200,6 +199,9 @@ export const userInvoicingDetailsTb = sqliteTable(
     updated_at: text('updated_at'),
     phone_number: text('phone_number'),
     web_url: text('web_url'),
+    default_bank_account_id: text('default_bank_account_id').references(
+      () => userBankAccountsTb.id
+    ),
     vat_payer: integer('vat_payer', { mode: 'boolean' }).notNull().default(true)
   },
   (userInvoicingDetails) => {
@@ -215,7 +217,7 @@ export const invoiceItemsTb = sqliteTable(
   'invoice_item',
   {
     id: integer('id').primaryKey().notNull(),
-    order: integer('order'),
+    order: integer('order').notNull().default(0),
     invoice_id: text('invoice_id')
       .notNull()
       .references(() => invoicesTb.id, {
@@ -295,6 +297,32 @@ export const userApiTokensTb = sqliteTable('user_api_tokens', {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`)
 })
+
+export const userBankAccountsTb = sqliteTable(
+  'user_bank_account',
+  {
+    id: text('id')
+      .$defaultFn(() => createId())
+      .primaryKey()
+      .notNull(),
+    user_id: text('user_id')
+      .notNull()
+      .references(() => userT.id, { onDelete: 'cascade' }),
+    label: text('label'),
+    bank_account: text('bank_account'),
+    iban: text('iban'),
+    swift_bic: text('swift_bic'),
+    qrcode_decoded: text('qrcode_decoded'),
+    order: integer('order').notNull().default(0),
+    created_at: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updated_at: text('updated_at').$onUpdate(() => sql`CURRENT_TIMESTAMP`)
+  },
+  (userBankAccounts) => ({
+    userIndex: index('user_bank_account_user_idx').on(userBankAccounts.user_id)
+  })
+)
 
 export type PaymentMethodType =
   | 'bank'
