@@ -14,7 +14,13 @@ import {
   useMemo,
   useState
 } from 'react'
-import { useForm, useFieldArray, UseFormRegister } from 'react-hook-form'
+import {
+  useForm,
+  useFieldArray,
+  useWatch,
+  Control,
+  Controller
+} from 'react-hook-form'
 import { zodResolver } from '@/lib/zodResolver'
 import { z } from 'zod/v4'
 import { Input } from '@/components/ui/input'
@@ -244,7 +250,7 @@ type BankAccountCardProps = {
   index: number
   account: BankAccountFormValues
   fieldId: string
-  register: UseFormRegister<InvoicingDetailsFormSchema>
+  control: Control<InvoicingDetailsFormSchema>
   onRemove: () => void
   onSetDefault: () => void
   onQrUpload: (file: File) => Promise<void>
@@ -256,7 +262,7 @@ const BankAccountCard = ({
   index,
   account,
   fieldId,
-  register,
+  control,
   onRemove,
   onSetDefault,
   onQrUpload,
@@ -308,63 +314,67 @@ const BankAccountCard = ({
         </div>
       </div>
 
-      <input
-        type="hidden"
-        {...register(`bank_accounts.${index}.id`)}
-        defaultValue={account.id ?? ''}
-      />
-      <input
-        type="hidden"
-        {...register(`bank_accounts.${index}.order`)}
-        defaultValue={String(account.order ?? index)}
-      />
-      <input
-        type="hidden"
-        {...register(`bank_accounts.${index}.is_default`)}
-        defaultValue={account.is_default ? 'true' : 'false'}
-      />
-
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-1">
           <Label htmlFor={`${fieldId}-label`}>Popis / název</Label>
-          <Input
-            id={`${fieldId}-label`}
-            placeholder="Např. Revolut CZ"
-            disabled={disableActions}
-            {...register(`bank_accounts.${index}.label`)}
-            defaultValue={account.label ?? ''}
+          <Controller
+            control={control}
+            name={`bank_accounts.${index}.label`}
+            render={({ field }) => (
+              <Input
+                id={`${fieldId}-label`}
+                placeholder="Např. Revolut CZ"
+                disabled={disableActions}
+                {...field}
+              />
+            )}
           />
         </div>
         <div className="space-y-1">
           <Label htmlFor={`${fieldId}-bank-account`}>
             Číslo bankovního účtu
           </Label>
-          <Input
-            id={`${fieldId}-bank-account`}
-            placeholder="123456789/0100"
-            disabled={disableActions}
-            {...register(`bank_accounts.${index}.bank_account`)}
-            defaultValue={account.bank_account ?? ''}
+          <Controller
+            control={control}
+            name={`bank_accounts.${index}.bank_account`}
+            render={({ field }) => (
+              <Input
+                id={`${fieldId}-bank-account`}
+                placeholder="123456789/0100"
+                disabled={disableActions}
+                {...field}
+              />
+            )}
           />
         </div>
         <div className="space-y-1">
           <Label htmlFor={`${fieldId}-iban`}>IBAN</Label>
-          <Input
-            id={`${fieldId}-iban`}
-            placeholder="CZ..."
-            disabled={disableActions}
-            {...register(`bank_accounts.${index}.iban`)}
-            defaultValue={account.iban ?? ''}
+          <Controller
+            control={control}
+            name={`bank_accounts.${index}.iban`}
+            render={({ field }) => (
+              <Input
+                id={`${fieldId}-iban`}
+                placeholder="CZ..."
+                disabled={disableActions}
+                {...field}
+              />
+            )}
           />
         </div>
         <div className="space-y-1">
           <Label htmlFor={`${fieldId}-swift`}>SWIFT / BIC</Label>
-          <Input
-            id={`${fieldId}-swift`}
-            placeholder="REVOLT21"
-            disabled={disableActions}
-            {...register(`bank_accounts.${index}.swift_bic`)}
-            defaultValue={account.swift_bic ?? ''}
+          <Controller
+            control={control}
+            name={`bank_accounts.${index}.swift_bic`}
+            render={({ field }) => (
+              <Input
+                id={`${fieldId}-swift`}
+                placeholder="REVOLT21"
+                disabled={disableActions}
+                {...field}
+              />
+            )}
           />
         </div>
       </div>
@@ -373,13 +383,18 @@ const BankAccountCard = ({
         <Label htmlFor={`${fieldId}-qr-text`}>
           Načtený text z QR kódu (je možné upravit)
         </Label>
-        <Textarea
-          id={`${fieldId}-qr-text`}
-          rows={4}
-          disabled={disableActions}
-          placeholder="Text, který je uložen v QR kódu"
-          {...register(`bank_accounts.${index}.qrcode_decoded`)}
-          defaultValue={account.qrcode_decoded ?? ''}
+        <Controller
+          control={control}
+          name={`bank_accounts.${index}.qrcode_decoded`}
+          render={({ field }) => (
+            <Textarea
+              id={`${fieldId}-qr-text`}
+              rows={4}
+              disabled={disableActions}
+              placeholder="Text, který je uložen v QR kódu"
+              {...field}
+            />
+          )}
         />
       </div>
 
@@ -592,7 +607,8 @@ export const UserInvoicingDetails = () => {
   }
 
   const isDirty = form.formState.isDirty
-  const bankAccounts = form.watch('bank_accounts') ?? []
+  const bankAccounts =
+    useWatch({ control: form.control, name: 'bank_accounts' }) ?? []
 
   const copyDetailsToClipboard = async () => {
     const currentValues = form.getValues()
@@ -688,7 +704,7 @@ export const UserInvoicingDetails = () => {
                           bankAccounts[index] ?? createEmptyBankAccount(index)
                         }
                         fieldId={field.id}
-                        register={form.register}
+                        control={form.control}
                         onRemove={() => handleRemoveAccount(index)}
                         onSetDefault={() => handleSetDefaultAccount(index)}
                         onQrUpload={(file) => handleQrUpload(index, file)}
