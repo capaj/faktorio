@@ -10,7 +10,7 @@ import {
   userBankAccountsTb
 } from 'faktorio-db/schema'
 import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
-import { eq, desc, asc } from 'drizzle-orm'
+import { eq, desc, asc, and, notInArray } from 'drizzle-orm'
 
 import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
 import { authRouter } from './routers/authRouter'
@@ -157,6 +157,60 @@ export const appRouter = trpcContext.router({
         const defaultAccountId = defaultAccountEntry?.dbValues.id ?? null
         const defaultAccountValues = defaultAccountEntry?.dbValues ?? null
 
+        // Upsert each bank account individually
+        const accountIds = new Set<string>()
+        for (const { dbValues } of normalizedAccounts) {
+          accountIds.add(dbValues.id!)
+
+          // Upsert without touching the reserved column "order" in the ON CONFLICT SET
+          await tx
+            .insert(userBankAccountsTb)
+            .values(dbValues)
+            .onConflictDoUpdate({
+              target: [userBankAccountsTb.id],
+              set: {
+                // Only update mutable, non-reserved columns here
+                user_id: dbValues.user_id,
+                label: dbValues.label ?? null,
+                bank_account: dbValues.bank_account ?? null,
+                iban: dbValues.iban ?? null,
+                swift_bic: dbValues.swift_bic ?? null,
+                qrcode_decoded: dbValues.qrcode_decoded ?? null
+              }
+            })
+        }
+
+        // Apply ordering in a separate UPDATE to avoid ON CONFLICT parsing issues around "order"
+        for (const { dbValues } of normalizedAccounts) {
+          await tx
+            .update(userBankAccountsTb)
+            .set({ order: dbValues.order })
+            .where(
+              and(
+                eq(userBankAccountsTb.user_id, ctx.user.id),
+                eq(userBankAccountsTb.id, dbValues.id!)
+              )
+            )
+        }
+
+        // Delete bank accounts that are no longer in the input
+        if (accountIds.size > 0) {
+          await tx
+            .delete(userBankAccountsTb)
+            .where(
+              and(
+                eq(userBankAccountsTb.user_id, ctx.user.id),
+                notInArray(userBankAccountsTb.id, Array.from(accountIds))
+              )
+            )
+        } else {
+          // If no accounts provided, delete all
+          await tx
+            .delete(userBankAccountsTb)
+            .where(eq(userBankAccountsTb.user_id, ctx.user.id))
+        }
+
+        // Update invoicing details with the correct default bank account
         await tx
           .insert(userInvoicingDetailsTb)
           .values({
@@ -170,16 +224,6 @@ export const appRouter = trpcContext.router({
             target: [userInvoicingDetailsTb.user_id],
             set: conflictUpdateSetAll(userInvoicingDetailsTb)
           })
-
-        await tx
-          .delete(userBankAccountsTb)
-          .where(eq(userBankAccountsTb.user_id, ctx.user.id))
-
-        if (normalizedAccounts.length > 0) {
-          await tx
-            .insert(userBankAccountsTb)
-            .values(normalizedAccounts.map((entry) => entry.dbValues))
-        }
       })
     }),
   sharedInvoiceEvent: trpcContext.procedure
