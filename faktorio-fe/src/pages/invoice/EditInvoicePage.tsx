@@ -83,7 +83,7 @@ export const EditInvoicePage = () => {
     return null
   }
 
-  const defaultInvoiceItem = {
+  const createDefaultInvoiceItem = (order: number) => ({
     description: '',
     unit: 'manday',
     quantity: 1,
@@ -92,9 +92,9 @@ export const EditInvoicePage = () => {
     id: 0,
     created_at: '',
     updated_at: null,
-    order: null,
+    order,
     invoice_id: ''
-  }
+  })
 
   useEffect(() => {
     const invoiceCompleteForPreview = {
@@ -319,7 +319,7 @@ export const EditInvoicePage = () => {
                 type="button"
                 className="flex items-center gap-2 bg-green-500 text-white"
                 onClick={() => {
-                  append(defaultInvoiceItem)
+                  append(createDefaultInvoiceItem(fields.length))
                 }}
               >
                 <LucidePlus className="text-white" />

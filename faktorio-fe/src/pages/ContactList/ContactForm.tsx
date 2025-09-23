@@ -64,7 +64,8 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
   onFetchAres,
   showInvoicingFields = false,
   showDialogFooter = true,
-  customFooter
+  customFooter,
+  showBankingFields = true
 }: {
   displayVatPayer?: boolean
   form: UseFormReturn<T>
@@ -77,6 +78,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
   showInvoicingFields?: boolean
   showDialogFooter?: boolean
   customFooter?: React.ReactNode
+  showBankingFields?: boolean
 }) => {
   const asPath = <K extends keyof ContactFormValues & string>(k: K) =>
     k as unknown as FieldPath<T>
@@ -318,48 +320,6 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
           <>
             <FormField
               control={form.control}
-              name={asPath('iban')}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{fieldLabels.iban}</FormLabel>
-                  <FormControl>
-                    <Input autoComplete="off" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name={asPath('swift_bic')}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{fieldLabels.swift_bic}</FormLabel>
-                  <FormControl>
-                    <Input autoComplete="off" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name={asPath('bank_account')}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{fieldLabels.bank_account}</FormLabel>
-                  <FormControl>
-                    <Input autoComplete="off" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name={asPath('web_url')}
               render={({ field }) => (
                 <FormItem>
@@ -371,6 +331,52 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                 </FormItem>
               )}
             />
+
+            {showBankingFields && (
+              <>
+                <FormField
+                  control={form.control}
+                  name={asPath('iban')}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{fieldLabels.iban}</FormLabel>
+                      <FormControl>
+                        <Input autoComplete="off" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={asPath('swift_bic')}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{fieldLabels.swift_bic}</FormLabel>
+                      <FormControl>
+                        <Input autoComplete="off" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={asPath('bank_account')}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{fieldLabels.bank_account}</FormLabel>
+                      <FormControl>
+                        <Input autoComplete="off" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
           </>
         )}
 

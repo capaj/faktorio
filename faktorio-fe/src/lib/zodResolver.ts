@@ -141,14 +141,18 @@ export function zodResolver<Input extends FieldValues, Context, Output>(
 
       options.shouldUseNativeValidation && validateFieldsNatively({}, options)
 
-      return {
-        errors: {} as FieldErrors,
-        values: resolverOptions.raw ? Object.assign({}, values) : data
-      } satisfies ResolverSuccess<Output | Input>
+      const resolverResult: ResolverSuccess<Output | Input> = {
+        errors: {} as ResolverSuccess<Output | Input>['errors'],
+        values: (resolverOptions.raw
+          ? Object.assign({}, values)
+          : data) as ResolverSuccess<Output | Input>['values']
+      }
+
+      return resolverResult
     } catch (error) {
       if (isZodError(error)) {
-        return {
-          values: {},
+        const resolverError: ResolverError<Input> = {
+          values: {} as ResolverError<Input>['values'],
           errors: toNestErrors(
             parseErrorSchema(
               error.issues,
@@ -156,8 +160,10 @@ export function zodResolver<Input extends FieldValues, Context, Output>(
                 options.criteriaMode === 'all'
             ),
             options
-          )
-        } satisfies ResolverError<Input>
+          ) as ResolverError<Input>['errors']
+        }
+
+        return resolverError
       }
 
       throw error

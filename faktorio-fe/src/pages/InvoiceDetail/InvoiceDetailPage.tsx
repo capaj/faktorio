@@ -34,6 +34,7 @@ import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
 import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 import {
   Dialog,
   DialogContent,
@@ -91,6 +92,7 @@ export const InvoiceDetail = ({
   const params = useParams()
   const isLocalUser = localStorage.getItem('auth_token')?.startsWith('local_')
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
+  const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
   const [searchParams] = useSearchParams()
   const language = searchParams.get('language') ?? invoice.language
@@ -131,16 +133,22 @@ export const InvoiceDetail = ({
     return acc + total * (vat / 100)
   }, 0)
 
-  const qrCodeBase64 = useQRCodeBase64(
-    generateQrPaymentString({
-      accountNumber:
-        invoice.iban?.replace(/\s/g, '') ?? invoice.bank_account ?? null,
-      amount: invoiceTotal + taxTotal,
-      currency: invoice.currency,
-      variableSymbol: invoice.number?.replace('-', ''),
-      message: 'Faktura ' + invoice.number
-    })
-  )
+  const generatedQrString = generateQrPaymentString({
+    accountNumber:
+      invoice.iban?.replace(/\s/g, '') ?? invoice.bank_account ?? null,
+    amount: invoiceTotal + taxTotal,
+    currency: invoice.currency,
+    variableSymbol: invoice.number?.replace('-', ''),
+    message: 'Faktura ' + invoice.number
+  })
+
+  const qrPayload =
+    (primaryBankAccount.qrcode_decoded &&
+      primaryBankAccount.qrcode_decoded.length > 0
+      ? primaryBankAccount.qrcode_decoded
+      : generatedQrString) || null
+
+  const qrCodeBase64 = useQRCodeBase64(qrPayload)
 
   const PdfContent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
 

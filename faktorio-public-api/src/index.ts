@@ -13,10 +13,11 @@ import {
   invoiceShareEventTb,
   contactTb,
   userInvoicingDetailsTb,
+  userBankAccountsTb,
   PaymentMethodType,
   receivedInvoiceTb
 } from 'faktorio-db/schema'
-import { eq, sql, and, gte, lte } from 'drizzle-orm'
+import { eq, sql, and, gte, lte, asc } from 'drizzle-orm'
 
 let dbInstance: LibSQLDatabase | undefined
 
@@ -161,6 +162,36 @@ export default {
             return 'User invoicing details not found'
           }
 
+          let defaultAccount:
+            | (typeof userBankAccountsTb.$inferSelect)
+            | undefined
+
+          if (user.default_bank_account_id) {
+            const [explicitAccount] = await dbInstance!
+              .select()
+              .from(userBankAccountsTb)
+              .where(eq(userBankAccountsTb.id, user.default_bank_account_id))
+              .limit(1)
+              .all()
+
+            defaultAccount = explicitAccount
+          }
+
+          if (!defaultAccount) {
+            const [fallbackAccount] = await dbInstance!
+              .select()
+              .from(userBankAccountsTb)
+              .where(eq(userBankAccountsTb.user_id, tokenRow.user_id))
+              .orderBy(
+                asc(userBankAccountsTb.order),
+                asc(userBankAccountsTb.created_at)
+              )
+              .limit(1)
+              .all()
+
+            defaultAccount = fallbackAccount
+          }
+
           const items = input.items ?? []
           const exRate = input.invoice.exchange_rate ?? 1
           let subtotal = 0
@@ -216,9 +247,9 @@ export default {
               paid_on: null,
               reminder_sent_at: null,
               cancelled_at: null,
-              bank_account: user.bank_account ?? null,
-              iban: user.iban ?? null,
-              swift_bic: user.swift_bic ?? null,
+              bank_account: defaultAccount?.bank_account ?? null,
+              iban: defaultAccount?.iban ?? user.iban ?? null,
+              swift_bic: defaultAccount?.swift_bic ?? user.swift_bic ?? null,
               payment_method: input.invoice.payment_method,
               currency: input.invoice.currency,
               exchange_rate: exRate,

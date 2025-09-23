@@ -3,13 +3,15 @@ import {
   contactTb,
   invoiceItemsTb,
   invoicesTb,
-  userInvoicingDetailsTb
+  userInvoicingDetailsTb,
+  userBankAccountsTb
 } from 'faktorio-db/schema'
 import { trpcContext } from '../../trpcContext'
 import {
   SQL,
   and,
   count,
+  asc,
   desc,
   eq,
   gte,
@@ -212,6 +214,28 @@ export const invoiceRouter = trpcContext.router({
       }
       console.log('user:', user)
 
+      let defaultAccount = null
+
+      if (user.default_bank_account_id) {
+        defaultAccount = await ctx.db.query.userBankAccountsTb
+          .findFirst({
+            where: eq(userBankAccountsTb.id, user.default_bank_account_id)
+          })
+          .execute()
+      }
+
+      if (!defaultAccount) {
+        defaultAccount = await ctx.db.query.userBankAccountsTb
+          .findFirst({
+            where: eq(userBankAccountsTb.user_id, ctx.user.id),
+            orderBy: (accounts, { asc }) => [
+              asc(accounts.order),
+              asc(accounts.created_at)
+            ]
+          })
+          .execute()
+      }
+
       return await ctx.db.transaction(async (tx) => {
         // Handle date fields consistently like in the update mutation
 
@@ -240,9 +264,9 @@ export const invoiceRouter = trpcContext.router({
             your_country: user.country,
             your_registration_no: user.registration_no ?? '',
             your_vat_no: user.vat_no ?? '',
-            bank_account: user.bank_account,
-            iban: user.iban,
-            swift_bic: user.swift_bic,
+            bank_account: defaultAccount?.bank_account ?? null,
+            iban: defaultAccount?.iban ?? user.iban,
+            swift_bic: defaultAccount?.swift_bic ?? user.swift_bic,
 
             // client
             client_name: client.name,

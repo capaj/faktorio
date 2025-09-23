@@ -33,7 +33,7 @@ Frontend env:
 | Search through invoices                                   |     ✅      |      ✅       |      ✅      |     ✅     |
 | Contact management (integrated with ARES)                 |     ✅      |      ✅       |      ✅      |     ✅     |
 | Support for foreign currencies                            |     ✅      |      ❌       |      ✅      |     ✅     |
-| Export invoices to Excel, CSV, ISDOC                             |     ✅      |      ✅       |      ✅      |     ✅     |
+| Export invoices to Excel, CSV, ISDOC                      |     ✅      |      ✅       |      ✅      |     ✅     |
 | Export invoices to XML for tax authorities                |     ✅      |      ✅       |      ✅      |     ✅     |
 | Send invoices to an email from the app                    |     ❌      |      ✅       |      ✅      |     ✅     |
 | API for integrations                                      |     ✅      |      ❌       |      ✅      |     ✅     |
@@ -43,6 +43,7 @@ Frontend env:
 | English invoices                                          |     ✅      |      ❌       |      ✅      |     ✅     |
 | Support reverse charge invoices(both domestic and abroad) |     ✅      |      ❌       |      ✅      |     ✅     |
 | Share invoice publicly through a public link              |     ✅      |      ❌       |      ✅      |     ✅     |
+| Multiple bank accounts                                    |     ✅      |      ✅       |      ✅      |     ✅     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
 

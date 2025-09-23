@@ -19,6 +19,10 @@ Mailjet you only need if you want to send emails.
 5. run migrations
 6. `pnpm dev`
 
+## Database
+
+use turso cloud for database to develop locally. You can also use local sqlite database, but it's not recommended as some features are not supported for local database.
+
 ## How to run migrations
 
 1. `cd faktorio-db`
@@ -30,3 +34,12 @@ Mailjet you only need if you want to send emails.
 2. `pnpm generate`
 
 Migration do not run on CI. They must be run manually for now.
+
+## DB branching
+
+This assumes your default db is named `faktorio-prod`.
+
+## How to branch Turso database
+
+1. `cd faktorio-api`
+2. `pnpm switch-to-prod-turso-db`
