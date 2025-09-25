@@ -8,8 +8,11 @@ import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
 import { djs } from 'faktorio-shared/src/djs'
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form'
 import { z } from 'zod/v4'
-import { invoiceItemFormSchema } from 'faktorio-api/src/zodDbSchemas'
-import { useEffect, useState } from 'react'
+import {
+  invoiceItemFormSchema,
+  type UserBankAccountSelectType
+} from 'faktorio-api/src/zodDbSchemas'
+import { useCallback, useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
 import {
@@ -49,6 +52,7 @@ export const NewInvoicePage = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
   const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
+  const bankAccounts = (invoicingDetails?.bankAccounts ?? []) as UserBankAccountSelectType[]
 
   const invoiceOrdinal =
     parseInt(lastInvoice?.number?.split('-')[1] ?? '0', 10) + 1
@@ -78,6 +82,68 @@ export const NewInvoicePage = () => {
       items: [defaultInvoiceItem]
     }
   })
+
+  const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>(() => {
+    if (
+      primaryBankAccount.id &&
+      bankAccounts.some((account) => account?.id === primaryBankAccount.id)
+    ) {
+      return primaryBankAccount.id
+    }
+
+    const firstAccountWithId = bankAccounts.find((account) => account?.id)
+    return firstAccountWithId?.id ?? 'custom'
+  })
+
+  const handleBankAccountChange = useCallback(
+    (accountId: string) => {
+      if (accountId === 'custom') {
+        setSelectedBankAccountId('custom')
+        return
+      }
+
+      const account = bankAccounts.find((item) => item?.id === accountId)
+
+      if (!account) {
+        setSelectedBankAccountId('custom')
+        return
+      }
+
+      setSelectedBankAccountId(accountId)
+
+      const ensureString = (value?: string | null) => value ?? ''
+      const maybeUpdateField = (
+        field: 'bank_account' | 'iban' | 'swift_bic',
+        newValue: string
+      ) => {
+        if (form.getValues(field) !== newValue) {
+          form.setValue(field, newValue, { shouldDirty: true })
+        }
+      }
+
+      maybeUpdateField('bank_account', ensureString(account.bank_account))
+      maybeUpdateField('iban', ensureString(account.iban))
+      maybeUpdateField('swift_bic', ensureString(account.swift_bic))
+    },
+    [bankAccounts, form]
+  )
+
+  useEffect(() => {
+    if (
+      selectedBankAccountId !== 'custom' &&
+      !bankAccounts.some((account) => account?.id === selectedBankAccountId)
+    ) {
+      if (
+        primaryBankAccount.id &&
+        bankAccounts.some((account) => account?.id === primaryBankAccount.id)
+      ) {
+        setSelectedBankAccountId(primaryBankAccount.id)
+        return
+      }
+
+      setSelectedBankAccountId('custom')
+    }
+  }, [bankAccounts, primaryBankAccount.id, selectedBankAccountId])
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -350,7 +416,12 @@ export const NewInvoicePage = () => {
             />
           </div>
 
-          <BankDetailsAccordion control={form.control} />
+          <BankDetailsAccordion
+            control={form.control}
+            bankAccounts={bankAccounts}
+            selectedBankAccountId={selectedBankAccountId}
+            onBankAccountChange={handleBankAccountChange}
+          />
 
           <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
             <h3 className="flex items-center gap-2">Položky</h3>

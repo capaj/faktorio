@@ -11,6 +11,9 @@ export const userInvoicingDetailsInsertSchema = createInsertSchema(
 export const userBankAccountInsertSchema = createInsertSchema(
   schemas.userBankAccountsTb
 )
+export const userBankAccountSelectSchema = createSelectSchema(
+  schemas.userBankAccountsTb
+)
 export const bankAccountInputSchema = z.object({
   id: z.string().optional(),
   label: z.string().optional(),
@@ -30,6 +33,9 @@ export type InsertUserInvoicingDetailsType = z.infer<
 >
 export type InsertUserBankAccountType = z.infer<
   typeof userBankAccountInsertSchema
+>
+export type UserBankAccountSelectType = z.infer<
+  typeof userBankAccountSelectSchema
 >
 export type BankAccountInputType = z.infer<typeof bankAccountInputSchema>
 export type InsertInvoiceType = z.infer<typeof invoiceInsertSchema>
