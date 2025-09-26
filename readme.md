@@ -40,10 +40,11 @@ Frontend env:
 | Push notifications in web app                             |     ✅      |      ❌       |      ❌      |     ❌     |
 | Mobile app                                                |     ❌      |      ❌       |      ✅      |     ✅     |
 | English UI                                                |     ❌      |      ❌       |      ✅      |     ✅     |
-| English invoices                                          |     ✅      |      ❌       |      ✅      |     ✅     |
+| Render invoices in english                                |     ✅      |      ❌       |      ✅      |     ✅     |
 | Support reverse charge invoices(both domestic and abroad) |     ✅      |      ❌       |      ✅      |     ✅     |
 | Share invoice publicly through a public link              |     ✅      |      ❌       |      ✅      |     ✅     |
 | Multiple bank accounts                                    |     ✅      |      ✅       |      ✅      |     ✅     |
+| Run locally without sending data to the cloud             |     ✅      |      ❌       |      ❌      |     ❌     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
 
