@@ -19,7 +19,7 @@
     "faktorio-shared": "workspace:*"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.4",
-    "tsx": "^4.20.5"
+    "drizzle-kit": "^0.31.5",
+    "tsx": "^4.20.6"
   }
 }
