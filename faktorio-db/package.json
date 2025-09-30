@@ -14,7 +14,7 @@
   "dependencies": {
     "@libsql/client": "^0.15.15",
     "@paralleldrive/cuid2": "^2.2.2",
-    "dotenv": "^17.2.2",
+    "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.5",
     "faktorio-shared": "workspace:*"
   },
