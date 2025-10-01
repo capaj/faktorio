@@ -1,7 +1,7 @@
 import { trpcClient } from '@/lib/trpcClient'
 
 import { ContactComboBox } from './ContactComboBox'
-import { LucidePlus, LucideTrash2 } from 'lucide-react'
+import { LucidePlus, LucideTrash2, LucideClock } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button, ButtonWithLoader } from '@/components/ui/button'
 import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
@@ -38,6 +38,7 @@ import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
 import { ButtonLink } from '@/components/ui/link'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
+import { getCurrentMonthWorkingDays } from '@/lib/czechWorkingDays'
 
 const defaultInvoiceItem = {
   description: '',
@@ -225,9 +226,40 @@ export const NewInvoicePage = () => {
   )
   const isCzkInvoice = formValues.currency !== 'CZK'
   const exchangeRate = formValues.exchange_rate ?? 1
+  const { workingDays, hours, month } = getCurrentMonthWorkingDays()
   return (
     <div>
-      <h2 className="mb-5">Nová faktura</h2>
+      <div className="mb-5 flex justify-between items-start">
+        <h2>Nová faktura</h2>
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <LucideClock className="w-4 h-4" />
+          <span>
+            {month}:{' '}
+            <button
+              type="button"
+              onClick={() => {
+                form.setValue('items.0.quantity', workingDays)
+                form.setValue('items.0.unit', 'manday')
+              }}
+              className="hover:text-blue-600 hover:underline cursor-pointer"
+            >
+              {workingDays} pracovních dní
+            </button>{' '}
+            (
+            <button
+              type="button"
+              onClick={() => {
+                form.setValue('items.0.quantity', hours)
+                form.setValue('items.0.unit', 'hodin')
+              }}
+              className="hover:text-blue-600 hover:underline cursor-pointer"
+            >
+              {hours} hodin
+            </button>
+            )
+          </span>
+        </div>
+      </div>
 
       <Form {...form}>
         <form
