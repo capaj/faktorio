@@ -11,16 +11,17 @@ export function useQueryParamState(name: string, defaultValue: string = '') {
   useEffect(() => {
     const locationWithoutSearch = location.split('?')[0]
 
-    const newUrl =
-      locationWithoutSearch +
-      '?' +
-      queryString.stringify({ ...query, [name]: search })
-    navigate(
-      newUrl,
+    const updatedQuery = { ...query }
+    if (search) {
+      updatedQuery[name] = search
+    } else {
+      delete updatedQuery[name]
+    }
 
-      { replace: true }
-    )
-    console.log({ newUrl })
+    const queryStr = queryString.stringify(updatedQuery)
+    const newUrl = locationWithoutSearch + (queryStr ? '?' + queryStr : '')
+    navigate(newUrl, { replace: true })
+
   }, [search])
 
   return [search, setSearch] as const
