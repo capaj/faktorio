@@ -43,6 +43,6 @@
     "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.9",
     "web-push": "^3.6.7",
-    "zod": "^4.1.11"
+    "zod": "^4.1.12"
   }
 }
