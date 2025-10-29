@@ -342,7 +342,7 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
           {listQuery.data.map((s) => {
             const link = `${publicBase}/shared-invoice/${s.id}`
             return (
-              <li
+              <div
                 key={s.id}
                 className="rounded-md border bg-muted/30 p-3 text-sm"
               >
@@ -396,7 +396,7 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
                     </Button>
                   </div>
                 </div>
-              </li>
+              </div>
             )
           })}
         </ul>
