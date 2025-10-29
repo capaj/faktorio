@@ -7,7 +7,7 @@ import { Button, ButtonWithLoader } from '@/components/ui/button'
 import { djs } from 'faktorio-shared/src/djs'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod/v4'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
 import { useLocation } from 'wouter'
 import {
@@ -30,12 +30,48 @@ import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
 // import removed: InvoicingDetailsFormSchema
 import { Label } from '@/components/ui/label'
+import type { UserBankAccountSelectType } from 'faktorio-api/src/zodDbSchemas'
 
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const contactsQuery = trpcClient.contacts.all.useQuery()
 
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
+  const bankAccounts = (invoicingDetails?.bankAccounts ??
+    []) as UserBankAccountSelectType[]
+  const normalizeValue = (value?: string | null) =>
+    (value ?? '').replace(/\s+/g, '').toUpperCase()
+  const matchesField = (
+    accountValue?: string | null,
+    fieldValue?: string | null
+  ) => {
+    const normalizedAccount = normalizeValue(accountValue)
+    const normalizedField = normalizeValue(fieldValue)
+    return normalizedAccount !== '' && normalizedAccount === normalizedField
+  }
+  const getMatchingAccountId = ({
+    bank_account,
+    iban,
+    swift_bic
+  }: {
+    bank_account?: string | null
+    iban?: string | null
+    swift_bic?: string | null
+  }) => {
+    const match = bankAccounts.find((account) => {
+      if (!account?.id) {
+        return false
+      }
+
+      return (
+        matchesField(account.bank_account, bank_account) ||
+        matchesField(account.iban, iban) ||
+        matchesField(account.swift_bic, swift_bic)
+      )
+    })
+
+    return match?.id ?? 'custom'
+  }
   const [_previewInvoice, setPreviewInvoice] = useDebounceValue<z.infer<
     typeof invoiceForRenderSchema
   > | null>(null, 3000)
@@ -44,6 +80,10 @@ export const EditInvoicePage = () => {
     // resolver: zodResolver(formSchema),
     defaultValues: invoice
   })
+
+  const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>(
+    () => getMatchingAccountId(invoice)
+  )
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -60,8 +100,111 @@ export const EditInvoicePage = () => {
   const invoiceItems = form.watch('items')
   const currency = form.watch('currency')
   const taxableFulfillmentDue = form.watch('taxable_fulfillment_due')
+  const bankAccountValue = form.watch('bank_account')
+  const ibanValue = form.watch('iban')
+  const swiftBicValue = form.watch('swift_bic')
+  const isDirty = form.formState.isDirty
 
   useExchangeRate({ currency, taxableFulfillmentDue, form })
+
+  useEffect(() => {
+    if (selectedBankAccountId === 'custom') {
+      return
+    }
+
+    const account = bankAccounts.find(
+      (item) => item?.id === selectedBankAccountId
+    )
+
+    if (!account) {
+      setSelectedBankAccountId('custom')
+      return
+    }
+
+    const stillMatches =
+      matchesField(account.bank_account, bankAccountValue) ||
+      matchesField(account.iban, ibanValue) ||
+      matchesField(account.swift_bic, swiftBicValue)
+
+    if (!stillMatches) {
+      setSelectedBankAccountId('custom')
+    }
+  }, [
+    bankAccounts,
+    selectedBankAccountId,
+    bankAccountValue,
+    ibanValue,
+    swiftBicValue
+  ])
+
+  useEffect(() => {
+    if (selectedBankAccountId !== 'custom') {
+      return
+    }
+
+    if (isDirty) {
+      return
+    }
+
+    const matchId = getMatchingAccountId({
+      bank_account: bankAccountValue,
+      iban: ibanValue,
+      swift_bic: swiftBicValue
+    })
+
+    if (matchId !== 'custom') {
+      setSelectedBankAccountId(matchId)
+    }
+  }, [
+    selectedBankAccountId,
+    isDirty,
+    bankAccountValue,
+    ibanValue,
+    swiftBicValue,
+    bankAccounts
+  ])
+
+  useEffect(() => {
+    if (selectedBankAccountId === 'custom') {
+      return
+    }
+
+    if (bankAccounts.some((account) => account?.id === selectedBankAccountId)) {
+      return
+    }
+
+    setSelectedBankAccountId('custom')
+  }, [bankAccounts, selectedBankAccountId])
+
+  const handleBankAccountChange = (accountId: string) => {
+    if (accountId === 'custom') {
+      setSelectedBankAccountId('custom')
+      return
+    }
+
+    const account = bankAccounts.find((item) => item?.id === accountId)
+
+    if (!account) {
+      setSelectedBankAccountId('custom')
+      return
+    }
+
+    setSelectedBankAccountId(accountId)
+
+    const ensureString = (value?: string | null) => value ?? ''
+    const maybeUpdate = (
+      field: 'bank_account' | 'iban' | 'swift_bic',
+      nextValue: string
+    ) => {
+      if (form.getValues(field) !== nextValue) {
+        form.setValue(field, nextValue, { shouldDirty: true })
+      }
+    }
+
+    maybeUpdate('bank_account', ensureString(account.bank_account))
+    maybeUpdate('iban', ensureString(account.iban))
+    maybeUpdate('swift_bic', ensureString(account.swift_bic))
+  }
 
   const total = invoiceItems.reduce(
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
@@ -298,7 +441,12 @@ export const EditInvoicePage = () => {
             />
           </div>
 
-          <BankDetailsAccordion control={form.control} />
+          <BankDetailsAccordion
+            control={form.control}
+            bankAccounts={bankAccounts}
+            selectedBankAccountId={selectedBankAccountId}
+            onBankAccountChange={handleBankAccountChange}
+          />
 
           <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
             <h3 className="flex items-center gap-2">Položky</h3>
@@ -393,7 +541,7 @@ const InvoiceItemForm = ({
 }) => {
   return (
     <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 align-baseline items-end">
-      <div className="sm:flex sm:flex-row gap-4 flex-grow grid grid-cols-2 flex-wrap items-end">
+      <div className="sm:flex sm:flex-row gap-4 grow grid grid-cols-2 flex-wrap items-end">
         <div>
           <Label
             className="text-xs text-gray-500 mb-1 block md:block"
@@ -443,7 +591,7 @@ const InvoiceItemForm = ({
           name={`items.${index}.description`}
           render={({ field }) => (
             <Input
-              className="w-full sm:w-96 md:flex-grow col-span-2"
+              className="w-full sm:w-96 md:grow col-span-2"
               placeholder="Popis položky"
               type="text"
               {...field}
@@ -453,7 +601,7 @@ const InvoiceItemForm = ({
         />
       </div>
       <div className="flex gap-4 items-end">
-        <div className="flex-grow sm:flex-grow-0">
+        <div className="grow sm:grow-0">
           <Label
             className="text-xs text-gray-500 mb-1 block md:block"
             htmlFor={`items.${index}.unit_price`}
@@ -476,7 +624,7 @@ const InvoiceItemForm = ({
           />
         </div>
         {invoicingDetails?.vat_payer && (
-          <div className="flex-grow sm:flex-grow-0">
+          <div className="grow sm:grow-0">
             <Label
               className="text-xs text-gray-500 mb-1 block md:block"
               htmlFor={`items.${index}.vat_rate`}
@@ -502,7 +650,7 @@ const InvoiceItemForm = ({
         <div>
           <button
             type="button"
-            className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300 flex-shrink-0"
+            className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300 shrink-0"
             onClick={onDelete}
           >
             <LucideTrash2 className="text-gray-600" />
