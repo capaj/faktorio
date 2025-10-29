@@ -28,7 +28,7 @@
     "@google/genai": "^1.27.0",
     "@google/generative-ai": "^0.24.1",
     "@libsql/client": "^0.15.15",
-    "@paralleldrive/cuid2": "^3.0.4",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
     "@tanstack/react-query": "^5.90.5",
     "@trpc/client": "^11.7.1",
