@@ -6,7 +6,7 @@ import { userT, passwordResetTokenT } from 'faktorio-db/schema'
 import { TRPCError } from '@trpc/server'
 import jwt from '@tsndr/cloudflare-worker-jwt'
 
-import cuid2 from '@paralleldrive/cuid2'
+import { createId } from '@paralleldrive/cuid2'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { verifyPassword, hashPassword } from '../lib/crypto'
 import { sendEmail } from '../sendEmail'
@@ -114,7 +114,7 @@ export const authRouter = trpcContext.router({
           message: `User ${email} already exists`
         })
       }
-      const userId = cuid2.createId()
+      const userId = createId()
       // Pass only the password, bcrypt handles salt
       const hashedPassword = await hashPassword(password)
 
@@ -273,7 +273,7 @@ export const authRouter = trpcContext.router({
         return { success: true }
       }
 
-      const token = cuid2.createId()
+      const token = createId()
       const expiresAt = new Date()
       expiresAt.setHours(expiresAt.getHours() + 1) // Token expires in 1 hour
       const requestedFromIp =
