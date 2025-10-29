@@ -279,13 +279,13 @@ export const passwordResetTokenT = sqliteTable('password_reset_tokens', {
 })
 
 const apiTokenCreateId = init({
-  length: 48,
+  length: 32,
   fingerprint: 'faktorio'
 }) // double the length just to be safe
 
 export const userApiTokensTb = sqliteTable('user_api_tokens', {
   token: text('id', {
-    length: 48
+    length: 48 // we used to have 48 for some time. Keep 48 for backwards compatibility
   })
     .$defaultFn(() => apiTokenCreateId())
     .primaryKey()
