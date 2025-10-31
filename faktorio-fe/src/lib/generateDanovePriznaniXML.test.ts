@@ -90,6 +90,83 @@ describe('generateDanovePriznaniXML', () => {
     expect(xmlString).toMatchSnapshot()
   })
 
+  it('should subtract received credit notes from totals and VAT deductions', () => {
+    const submitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    const issuedInvoices: Invoice[] = [
+      {
+        id: '1',
+        number: 'INV001',
+        client_name: 'Client A',
+        client_vat_no: 'CZ87654321',
+        due_on: new Date('2024-07-20').toISOString(),
+        issued_on: new Date('2024-07-10').toISOString(),
+        sent_at: null,
+        paid_on: new Date('2024-07-20').toISOString(),
+        exchange_rate: 1,
+        taxable_fulfillment_due: new Date('2024-07-15').toISOString(),
+        subtotal: 10000,
+        native_subtotal: 10000,
+        native_total: 12100,
+        total: 12100,
+        currency: 'CZK'
+      }
+    ]
+
+    const receivedInvoices: ReceivedInvoice[] = [
+      {
+        id: 'rec1',
+        invoice_number: 'REC001',
+        supplier_name: 'Supplier X',
+        supplier_vat_no: 'CZ99887766',
+        issue_date: new Date('2024-07-20').toISOString(),
+        due_date: '2024-08-05',
+        status: 'received',
+        total_without_vat: 2000,
+        total_with_vat: 2420,
+        currency: 'CZK'
+      },
+      {
+        id: 'rec2',
+        invoice_number: 'REC002',
+        supplier_name: 'Supplier X',
+        supplier_vat_no: 'CZ99887766',
+        issue_date: new Date('2024-07-25').toISOString(),
+        due_date: '2024-08-10',
+        status: 'received',
+        total_without_vat: -1500,
+        total_with_vat: -1815,
+        currency: 'CZK'
+      }
+    ]
+
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices,
+      receivedInvoices,
+      submitterData,
+      year: 2024,
+      quarter: 3,
+      czkSumEurServices: 0
+    })
+
+    expect(xmlString).toMatch(
+      /<Veta4[\s\S]*pln23="500" odp_tuz23_nar="105"[\s\S]*odp_sum_nar="105"/
+    )
+    expect(xmlString).toMatch(
+      /<Veta6[\s\S]*dan_zocelk="2100" odp_zocelk="105" dano_da="1995"/
+    )
+  })
+
   // Restore real timers after tests
   afterAll(() => {
     vi.useRealTimers()

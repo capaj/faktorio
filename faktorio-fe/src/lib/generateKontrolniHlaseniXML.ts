@@ -107,7 +107,8 @@ export function generateKontrolniHlaseniXML({
 
   receivedInvoices.forEach((inv) => {
     const supplierVatId = inv.supplier_vat_no || 'MISSING_DIC_DOD'
-    const taxableDate = formatCzechDate(inv.issue_date)
+    const taxableSupplyDate = inv.taxable_supply_date || inv.issue_date
+    const taxableDate = formatCzechDate(taxableSupplyDate)
     const subtotal = inv.total_without_vat ?? 0
     const totalWithVat = inv.total_with_vat ?? 0
     const vatAmount = totalWithVat - subtotal
@@ -115,7 +116,7 @@ export function generateKontrolniHlaseniXML({
 
     if (
       !inv.invoice_number ||
-      !taxableDate ||
+      !taxableSupplyDate ||
       !supplierVatId ||
       supplierVatId === 'MISSING_DIC_DOD'
     ) {
@@ -126,12 +127,19 @@ export function generateKontrolniHlaseniXML({
       return
     }
 
-    if (totalWithVat > VAT_THRESHOLD && inv.currency === 'CZK') {
+    const sanitizedSupplierVatId = supplierVatId.startsWith('CZ')
+      ? supplierVatId.replace('CZ', '')
+      : supplierVatId
+
+    const shouldReportInB2 =
+      inv.currency === 'CZK' && Math.abs(subtotal) > VAT_THRESHOLD
+
+    if (shouldReportInB2) {
       b2Index++
       vetaB2Xml += `
     <VetaB2
       c_radku="${b2Index}"
-      dic_dod="${supplierVatId.replace('CZ', '')}"
+      dic_dod="${sanitizedSupplierVatId}"
       c_evid_dd="${inv.invoice_number}"
       dppd="${taxableDate}"
       zakl_dane1="${toInt(subtotal)}"

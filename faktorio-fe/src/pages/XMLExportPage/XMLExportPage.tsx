@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -10,7 +10,10 @@ import {
 import { trpcClient } from '@/lib/trpcClient'
 import { AlertCircleIcon, DownloadIcon } from 'lucide-react'
 import { IssuedInvoiceTable } from '@/components/IssuedInvoiceTable'
-import { ReceivedInvoiceTable } from '@/components/ReceivedInvoiceTable'
+import {
+  ReceivedInvoiceTable,
+  type ReceivedInvoice
+} from '@/components/ReceivedInvoiceTable'
 import {
   generateKontrolniHlaseniXML,
   type SubmitterData
@@ -173,6 +176,27 @@ export function XMLExportPage() {
     from: startDate,
     to: endDate
   })
+
+  const { regularReceivedInvoices, receivedCreditNotes } = useMemo(() => {
+    const creditNotes: ReceivedInvoice[] = []
+    const regular: ReceivedInvoice[] = []
+
+    receivedInvoices.forEach((invoice) => {
+      const subtotal = invoice.total_without_vat ?? 0
+      const totalWithVat = invoice.total_with_vat ?? 0
+
+      if (subtotal < 0 || totalWithVat < 0) {
+        creditNotes.push(invoice)
+      } else {
+        regular.push(invoice)
+      }
+    })
+
+    return {
+      regularReceivedInvoices: regular,
+      receivedCreditNotes: creditNotes
+    }
+  }, [receivedInvoices])
 
   // Fetch submitter data
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
@@ -432,7 +456,20 @@ export function XMLExportPage() {
       {/* Placeholder for Received Invoices Table */}
       <h4 className="text-lg font-semibold mt-6 mb-2">Přijaté faktury</h4>
 
-      <ReceivedInvoiceTable invoices={receivedInvoices} />
+      <ReceivedInvoiceTable invoices={regularReceivedInvoices} />
+
+      {receivedCreditNotes.length > 0 && (
+        <div className="mt-6">
+          <h4 className="text-lg font-semibold mb-2">
+            Dobropisy (opravné daňové doklady)
+          </h4>
+          <p className="text-sm text-muted-foreground mb-3">
+            Dobropisy jsou započítány se zápornými částkami a v kontrolním
+            hlášení sníží nárok na odpočet DPH v období, kdy byly obdrženy.
+          </p>
+          <ReceivedInvoiceTable invoices={receivedCreditNotes} />
+        </div>
+      )}
 
       {/* XML Download Section with Alert and Checkbox */}
       <div className="m-4 mt-6 space-y-4">

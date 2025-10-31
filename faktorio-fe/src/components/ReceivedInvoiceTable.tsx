@@ -22,6 +22,7 @@ export type ReceivedInvoice = Pick<
   | 'supplier_vat_no'
   | 'invoice_number'
   | 'issue_date'
+  | 'taxable_supply_date'
   | 'due_date'
   | 'total_without_vat'
   | 'total_with_vat'
