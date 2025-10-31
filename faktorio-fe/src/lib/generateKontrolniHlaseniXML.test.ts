@@ -238,7 +238,7 @@ describe('generateKontrolniHlaseniXML', () => {
     expect(xmlString).toContain('pln23="26000"')
   })
 
-  it('reports received invoices in VetaB2 when only the VAT-inclusive total exceeds the threshold', () => {
+  it('reports received invoices in VetaB2 when only the VAT-inclusive total exceeds the CZK 1 000 threshold', () => {
     const mockReceivedInvoices: ReceivedInvoice[] = [
       {
         id: 'rec-threshold',
