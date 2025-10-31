@@ -308,6 +308,7 @@ ${JSON.stringify(schema)}
 
 Return ONLY the JSON object, nothing else. If you cannot extract some fields, leave them as null.
 For dates, use the format YYYY-MM-DD. If you can't determine the exact date, make your best guess.
+If the document is a credit note (dobropis), make sure all taxable amounts, VAT amounts, and totals are negative values.
 The text that is partially unreadable, leave the "?" for each unreadable character.`
 
         // Get the model

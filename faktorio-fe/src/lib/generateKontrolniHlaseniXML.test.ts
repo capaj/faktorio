@@ -43,6 +43,7 @@ describe('generateKontrolniHlaseniXML', () => {
         supplier_vat_no: 'CZ22222222', // Added mock VAT ID
         invoice_number: 'INV-B-100',
         issue_date: '2024-08-01',
+        taxable_supply_date: '2024-08-01',
         due_date: '2024-08-15',
         total_without_vat: 5000,
         total_with_vat: 6050, // Below threshold
@@ -55,6 +56,7 @@ describe('generateKontrolniHlaseniXML', () => {
         supplier_vat_no: 'CZ33333333', // Added mock VAT ID
         invoice_number: 'INV-C-200',
         issue_date: '2024-08-05',
+        taxable_supply_date: '2024-08-05',
         due_date: '2024-08-20',
         total_without_vat: 15000,
         total_with_vat: 18150, // Above threshold
@@ -67,6 +69,7 @@ describe('generateKontrolniHlaseniXML', () => {
         supplier_vat_no: 'DE44444444', // Added mock VAT ID
         invoice_number: 'INV-D-300',
         issue_date: '2024-08-10',
+        taxable_supply_date: '2024-08-10',
         due_date: '2024-08-25',
         total_without_vat: 100,
         total_with_vat: 121, // EUR invoice, should go to B3 regardless of amount
@@ -135,6 +138,7 @@ describe('generateKontrolniHlaseniXML', () => {
         supplier_vat_no: 'CZ22222222', //
         invoice_number: 'INV-B-100',
         issue_date: '2024-08-01',
+        taxable_supply_date: '2024-08-01',
         due_date: '2024-08-15',
         total_without_vat: 5000,
         total_with_vat: 6050, // Below threshold
@@ -166,5 +170,111 @@ describe('generateKontrolniHlaseniXML', () => {
     })
 
     expect(xmlString).toMatchSnapshot()
+  })
+
+  it('should include credit notes (dobropisy) with negative values in VetaB2 when above the threshold', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-02-15'))
+
+    const mockIssuedInvoices: Invoice[] = []
+
+    const mockReceivedInvoices: ReceivedInvoice[] = [
+      {
+        id: 'rec-positive',
+        supplier_name: 'Dodavatel s.r.o.',
+        supplier_vat_no: 'CZ11111111',
+        invoice_number: 'F2025-0001',
+        issue_date: '2025-01-15',
+        taxable_supply_date: '2025-01-15',
+        due_date: '2025-01-29',
+        total_without_vat: 52000,
+        total_with_vat: 62920,
+        currency: 'CZK',
+        status: 'paid'
+      },
+      {
+        id: 'rec-credit-note',
+        supplier_name: 'Dodavatel s.r.o.',
+        supplier_vat_no: 'CZ11111111',
+        invoice_number: 'DN2025-0001',
+        issue_date: '2025-02-10',
+        taxable_supply_date: '2025-02-10',
+        due_date: '2025-02-24',
+        total_without_vat: -26000,
+        total_with_vat: -31460,
+        currency: 'CZK',
+        status: 'received'
+      }
+    ]
+
+    const mockSubmitterData: SubmitterData = {
+      dic: 'CZ76543210',
+      naz_obce: 'Praha',
+      typ_ds: 'F',
+      jmeno: 'Jan',
+      prijmeni: 'Novák',
+      ulice: 'Hlavní 1',
+      psc: '11000',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'jan.novak@example.com'
+    }
+
+    const xmlString = generateKontrolniHlaseniXML({
+      issuedInvoices: mockIssuedInvoices,
+      receivedInvoices: mockReceivedInvoices,
+      submitterData: mockSubmitterData,
+      year: 2025,
+      month: 2
+    })
+
+    expect(xmlString).toContain(
+      'c_evid_dd="F2025-0001"\n      dppd="15.01.2025"\n      zakl_dane1="52000"\n      dan1="10920"'
+    )
+
+    expect(xmlString).toContain(
+      'c_evid_dd="DN2025-0001"\n      dppd="10.02.2025"\n      zakl_dane1="-26000"\n      dan1="-5460"'
+    )
+
+    expect(xmlString).toContain('pln23="26000"')
+  })
+
+  it('reports received invoices in VetaB2 when only the VAT-inclusive total exceeds the CZK 1 000 threshold', () => {
+    const mockReceivedInvoices: ReceivedInvoice[] = [
+      {
+        id: 'rec-threshold',
+        supplier_name: 'Dodavatel s.r.o.',
+        supplier_vat_no: 'CZ11112222',
+        invoice_number: 'F2025-0002',
+        issue_date: '2025-02-01',
+        taxable_supply_date: '2025-02-01',
+        due_date: '2025-02-15',
+        total_without_vat: 9000,
+        total_with_vat: 10890,
+        currency: 'CZK',
+        status: 'paid'
+      }
+    ]
+
+    const xmlString = generateKontrolniHlaseniXML({
+      issuedInvoices: [],
+      receivedInvoices: mockReceivedInvoices,
+      submitterData: {
+        dic: 'CZ76543210',
+        naz_obce: 'Praha',
+        typ_ds: 'F',
+        jmeno: 'Jan',
+        prijmeni: 'Novák',
+        ulice: 'Hlavní 1',
+        psc: '11000',
+        stat: 'ČESKÁ REPUBLIKA',
+        email: 'jan.novak@example.com'
+      },
+      year: 2025,
+      month: 2
+    })
+
+    expect(xmlString).toContain(
+      'dic_dod="11112222"\n      c_evid_dd="F2025-0002"\n      dppd="01.02.2025"\n      zakl_dane1="9000"\n      dan1="1890"'
+    )
   })
 })
