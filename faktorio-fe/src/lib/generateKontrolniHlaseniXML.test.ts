@@ -72,7 +72,7 @@ describe('generateKontrolniHlaseniXML', () => {
         taxable_supply_date: '2024-08-10',
         due_date: '2024-08-25',
         total_without_vat: 100,
-        total_with_vat: 121, // EUR invoice, should go to B3 regardless of amount
+        total_with_vat: 121,
         currency: 'EUR',
         status: 'received'
       }
@@ -238,7 +238,7 @@ describe('generateKontrolniHlaseniXML', () => {
     expect(xmlString).toContain('pln23="26000"')
   })
 
-  it('reports received invoices in VetaB2 when only the VAT-inclusive total exceeds the CZK 1 000 threshold', () => {
+  it('reports received invoices in VetaB2 when only the VAT-inclusive total exceeds the CZK 10 000 threshold', () => {
     const mockReceivedInvoices: ReceivedInvoice[] = [
       {
         id: 'rec-threshold',
