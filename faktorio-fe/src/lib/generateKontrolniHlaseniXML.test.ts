@@ -237,4 +237,44 @@ describe('generateKontrolniHlaseniXML', () => {
 
     expect(xmlString).toContain('pln23="26000"')
   })
+
+  it('reports received invoices in VetaB2 when only the VAT-inclusive total exceeds the threshold', () => {
+    const mockReceivedInvoices: ReceivedInvoice[] = [
+      {
+        id: 'rec-threshold',
+        supplier_name: 'Dodavatel s.r.o.',
+        supplier_vat_no: 'CZ11112222',
+        invoice_number: 'F2025-0002',
+        issue_date: '2025-02-01',
+        taxable_supply_date: '2025-02-01',
+        due_date: '2025-02-15',
+        total_without_vat: 9000,
+        total_with_vat: 10890,
+        currency: 'CZK',
+        status: 'paid'
+      }
+    ]
+
+    const xmlString = generateKontrolniHlaseniXML({
+      issuedInvoices: [],
+      receivedInvoices: mockReceivedInvoices,
+      submitterData: {
+        dic: 'CZ76543210',
+        naz_obce: 'Praha',
+        typ_ds: 'F',
+        jmeno: 'Jan',
+        prijmeni: 'Novák',
+        ulice: 'Hlavní 1',
+        psc: '11000',
+        stat: 'ČESKÁ REPUBLIKA',
+        email: 'jan.novak@example.com'
+      },
+      year: 2025,
+      month: 2
+    })
+
+    expect(xmlString).toContain(
+      'dic_dod="11112222"\n      c_evid_dd="F2025-0002"\n      dppd="01.02.2025"\n      zakl_dane1="9000"\n      dan1="1890"'
+    )
+  })
 })

@@ -132,7 +132,7 @@ export function generateKontrolniHlaseniXML({
       : supplierVatId
 
     const shouldReportInB2 =
-      inv.currency === 'CZK' && Math.abs(subtotal) > VAT_THRESHOLD
+      inv.currency === 'CZK' && Math.abs(totalWithVat) > VAT_THRESHOLD
 
     if (shouldReportInB2) {
       b2Index++
