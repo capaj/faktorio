@@ -98,14 +98,14 @@ const czechMonths = [
   'prosinec'
 ]
 
-export const getCurrentMonthWorkingDays = (): {
+export const getMonthWorkingDays = (
+  month: number,
+  year: number
+): {
   workingDays: number
   hours: number
   month: string
 } => {
-  const now = djs()
-  const year = now.year()
-  const month = now.month()
   const workingDays = getWorkingDaysInMonth(year, month)
   const hours = workingDays * 8
 

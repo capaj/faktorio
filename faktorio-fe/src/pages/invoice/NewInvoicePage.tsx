@@ -38,7 +38,7 @@ import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
 import { ButtonLink } from '@/components/ui/link'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
-import { getCurrentMonthWorkingDays } from '@/lib/czechWorkingDays'
+import { getMonthWorkingDays } from '@/lib/czechWorkingDays'
 
 const defaultInvoiceItem = {
   description: '',
@@ -53,7 +53,8 @@ export const NewInvoicePage = () => {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
   const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
-  const bankAccounts = (invoicingDetails?.bankAccounts ?? []) as UserBankAccountSelectType[]
+  const bankAccounts = (invoicingDetails?.bankAccounts ??
+    []) as UserBankAccountSelectType[]
 
   const invoiceOrdinal =
     parseInt(lastInvoice?.number?.split('-')[1] ?? '0', 10) + 1
@@ -84,17 +85,19 @@ export const NewInvoicePage = () => {
     }
   })
 
-  const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>(() => {
-    if (
-      primaryBankAccount.id &&
-      bankAccounts.some((account) => account?.id === primaryBankAccount.id)
-    ) {
-      return primaryBankAccount.id
-    }
+  const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>(
+    () => {
+      if (
+        primaryBankAccount.id &&
+        bankAccounts.some((account) => account?.id === primaryBankAccount.id)
+      ) {
+        return primaryBankAccount.id
+      }
 
-    const firstAccountWithId = bankAccounts.find((account) => account?.id)
-    return firstAccountWithId?.id ?? 'custom'
-  })
+      const firstAccountWithId = bankAccounts.find((account) => account?.id)
+      return firstAccountWithId?.id ?? 'custom'
+    }
+  )
 
   const handleBankAccountChange = useCallback(
     (accountId: string) => {
@@ -226,7 +229,11 @@ export const NewInvoicePage = () => {
   )
   const isCzkInvoice = formValues.currency !== 'CZK'
   const exchangeRate = formValues.exchange_rate ?? 1
-  const { workingDays, hours, month } = getCurrentMonthWorkingDays()
+  const dueDate = djs(formValues.taxable_fulfillment_due)
+  const { workingDays, hours, month } = getMonthWorkingDays(
+    dueDate.month(),
+    dueDate.year()
+  )
   return (
     <div>
       <div className="mb-5 flex justify-between items-start">
