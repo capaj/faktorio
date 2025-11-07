@@ -22,7 +22,79 @@ test('smoke', async ({ page }) => {
   await expect(page.getByText('Žádné faktury k zobrazení.')).toBeVisible({
     timeout: 30000
   })
-  // Verify we are on the MyInvoicingDetails page
+
+  // Step 1: Add invoicing details
+  await page.goto(url + '/my-details')
+  await expect(
+    page.getByRole('heading', { name: 'Moje fakturační údaje' })
+  ).toBeVisible()
+
+  // Fill required invoicing details
+  await page.getByLabel('Jméno *').fill('Test Company s.r.o.')
+  await page.getByLabel('Ulice *').fill('Test Street 123')
+  await page.getByLabel('Město *').fill('Praha')
+  await page.getByLabel('Poštovní směrovací číslo *').fill('11000')
+  await page.getByLabel('IČO').fill('12345678')
+
+  // Save invoicing details
+  await page.getByRole('button', { name: 'Uložit změny' }).click()
+  await expect(page.getByText('Fakturační údaje uloženy')).toBeVisible({
+    timeout: 10000
+  })
+
+  // Step 2: Add a contact
+  await page.goto(url + '/contacts')
+  await page.getByRole('button', { name: 'Přidat klienta' }).click()
+
+  // Fill contact details
+  await page.getByLabel('Jméno *').fill('Test Client Ltd.')
+  await page.getByLabel('Ulice').fill('Client Street 456')
+  await page.getByLabel('Město').fill('Brno')
+  await page.getByLabel('PSČ').fill('60200')
+  await page.getByLabel('Email').fill('client@test.com')
+
+  // Save contact
+  await page.getByRole('button', { name: 'Přidat kontakt' }).click()
+  await expect(page.getByText('Kontakt vytvořen')).toBeVisible({
+    timeout: 10000
+  })
+
+  // Verify contact appears in the list
+  await expect(page.getByText('Test Client Ltd.')).toBeVisible()
+
+  // Step 3: Create a new invoice for the contact
+  await page.goto(url + '/new-invoice')
+  await expect(
+    page.getByRole('heading', { name: 'Nová faktura' })
+  ).toBeVisible()
+
+  // Select the contact (should be auto-selected since it's newly created)
+  // If not auto-selected, we'll need to select it manually
+  const contactCombobox = page.getByLabel('Odběratel')
+  const currentValue = await contactCombobox.inputValue()
+  if (!currentValue || !currentValue.includes('Test Client Ltd.')) {
+    await contactCombobox.click()
+    await page.getByRole('option', { name: 'Test Client Ltd.' }).click()
+  }
+
+  // Fill invoice details
+  await page.getByLabel('Číslo faktury').fill('2025-001')
+
+  // Fill invoice item details
+  await page.getByLabel('Popis položky').first().fill('Consulting services')
+  await page.getByLabel('Množství').first().fill('1')
+  await page.getByLabel('Cena/jedn.').first().fill('10000')
+
+  // Save the invoice
+  await page.getByRole('button', { name: 'Vytvořit fakturu' }).click()
+
+  // Verify invoice was created successfully
+  await expect(page.getByText('Faktura vytvořena')).toBeVisible({
+    timeout: 10000
+  })
+
+  // Verify we're on the invoice detail page
+  await expect(page.getByText('2025-001')).toBeVisible()
 })
 
 test.afterEach(async ({ page }) => {

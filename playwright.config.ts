@@ -33,9 +33,17 @@ export default defineConfig({
     trace: 'on-first-retry',
     headless: isCI,
     screenshot: 'only-on-failure',
-    video: 'on-first-retry'
+    video: 'on-first-retry',
+    launchOptions: {
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu'
+      ]
+    }
   },
-  timeout: isCI ? 30000 : 5000,
+  timeout: isCI ? 60000 : 10000,
   // You can optionally use a global setup file instead of fixtures approach
   // globalSetup: './e2e/global-setup.ts',
 
