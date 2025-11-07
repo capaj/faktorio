@@ -29,11 +29,11 @@ test('smoke', async ({ page }) => {
     page.getByRole('heading', { name: 'Moje fakturační údaje' })
   ).toBeVisible()
 
-  // Fill required invoicing details
-  await page.getByLabel('Jméno *').fill('Test Company s.r.o.')
-  await page.getByLabel('Ulice *').fill('Test Street 123')
-  await page.getByLabel('Město *').fill('Praha')
-  await page.getByLabel('Poštovní směrovací číslo *').fill('11000')
+  // Fill required invoicing details (note: labels don't include asterisks)
+  await page.getByLabel('Jméno').fill('Test Company s.r.o.')
+  await page.getByLabel('Ulice').fill('Test Street 123')
+  await page.getByLabel('Město').fill('Praha')
+  await page.getByLabel('Poštovní směrovací číslo').fill('11000')
   await page.getByLabel('IČO').fill('12345678')
 
   // Save invoicing details
@@ -46,11 +46,11 @@ test('smoke', async ({ page }) => {
   await page.goto(url + '/contacts')
   await page.getByRole('button', { name: 'Přidat klienta' }).click()
 
-  // Fill contact details
-  await page.getByLabel('Jméno *').fill('Test Client Ltd.')
+  // Fill contact details (note: labels don't include asterisks)
+  await page.getByLabel('Jméno').fill('Test Client Ltd.')
   await page.getByLabel('Ulice').fill('Client Street 456')
   await page.getByLabel('Město').fill('Brno')
-  await page.getByLabel('PSČ').fill('60200')
+  await page.getByLabel('Poštovní směrovací číslo').fill('60200')
   await page.getByLabel('Email').fill('client@test.com')
 
   // Save contact
