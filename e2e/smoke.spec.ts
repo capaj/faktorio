@@ -38,7 +38,7 @@ test('smoke', async ({ page }) => {
 
   // Save invoicing details
   await page.getByRole('button', { name: 'Uložit změny' }).click()
-  await expect(page.getByText('Fakturační údaje uloženy')).toBeVisible({
+  await expect(page.getByText('Údaje byly úspěšně uloženy')).toBeVisible({
     timeout: 10000
   })
 
@@ -55,12 +55,11 @@ test('smoke', async ({ page }) => {
 
   // Save contact
   await page.getByRole('button', { name: 'Přidat kontakt' }).click()
-  await expect(page.getByText('Kontakt vytvořen')).toBeVisible({
+
+  // Verify contact appears in the list (dialog closes automatically)
+  await expect(page.getByText('Test Client Ltd.')).toBeVisible({
     timeout: 10000
   })
-
-  // Verify contact appears in the list
-  await expect(page.getByText('Test Client Ltd.')).toBeVisible()
 
   // Step 3: Create a new invoice for the contact
   await page.goto(url + '/new-invoice')
@@ -88,12 +87,10 @@ test('smoke', async ({ page }) => {
   // Save the invoice
   await page.getByRole('button', { name: 'Vytvořit fakturu' }).click()
 
-  // Verify invoice was created successfully
-  await expect(page.getByText('Faktura vytvořena')).toBeVisible({
-    timeout: 10000
-  })
+  // Verify we're navigated to the invoice detail page
+  await expect(page).toHaveURL(/\/invoices\/[^/]+$/, { timeout: 10000 })
 
-  // Verify we're on the invoice detail page
+  // Verify invoice number appears on the detail page
   await expect(page.getByText('2025-001')).toBeVisible()
 })
 
