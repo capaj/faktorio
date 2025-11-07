@@ -30,11 +30,11 @@ test('smoke', async ({ page }) => {
   ).toBeVisible()
 
   // Fill required invoicing details (note: labels don't include asterisks)
-  await page.getByLabel('Jméno').fill('Test Company s.r.o.')
-  await page.getByLabel('Ulice').fill('Test Street 123')
-  await page.getByLabel('Město').fill('Praha')
-  await page.getByLabel('Poštovní směrovací číslo').fill('11000')
-  await page.getByLabel('IČO').fill('12345678')
+  await page.getByLabel('Jméno', { exact: true }).fill('Test Company s.r.o.')
+  await page.getByLabel('Ulice', { exact: true }).fill('Test Street 123')
+  await page.getByLabel('Město', { exact: true }).fill('Praha')
+  await page.getByLabel('Poštovní směrovací číslo', { exact: true }).fill('11000')
+  await page.getByLabel('IČO', { exact: true }).fill('12345678')
 
   // Save invoicing details
   await page.getByRole('button', { name: 'Uložit změny' }).click()
@@ -47,11 +47,11 @@ test('smoke', async ({ page }) => {
   await page.getByRole('button', { name: 'Přidat klienta' }).click()
 
   // Fill contact details (note: labels don't include asterisks)
-  await page.getByLabel('Jméno').fill('Test Client Ltd.')
-  await page.getByLabel('Ulice').fill('Client Street 456')
-  await page.getByLabel('Město').fill('Brno')
-  await page.getByLabel('Poštovní směrovací číslo').fill('60200')
-  await page.getByLabel('Email').fill('client@test.com')
+  await page.getByLabel('Jméno', { exact: true }).fill('Test Client Ltd.')
+  await page.getByLabel('Ulice', { exact: true }).fill('Client Street 456')
+  await page.getByLabel('Město', { exact: true }).fill('Brno')
+  await page.getByLabel('Poštovní směrovací číslo', { exact: true }).fill('60200')
+  await page.getByLabel('Email', { exact: true }).fill('client@test.com')
 
   // Save contact
   await page.getByRole('button', { name: 'Přidat kontakt' }).click()
@@ -70,7 +70,7 @@ test('smoke', async ({ page }) => {
 
   // Select the contact (should be auto-selected since it's newly created)
   // If not auto-selected, we'll need to select it manually
-  const contactCombobox = page.getByLabel('Odběratel')
+  const contactCombobox = page.getByLabel('Odběratel', { exact: true })
   const currentValue = await contactCombobox.inputValue()
   if (!currentValue || !currentValue.includes('Test Client Ltd.')) {
     await contactCombobox.click()
@@ -78,12 +78,12 @@ test('smoke', async ({ page }) => {
   }
 
   // Fill invoice details
-  await page.getByLabel('Číslo faktury').fill('2025-001')
+  await page.getByLabel('Číslo faktury', { exact: true }).fill('2025-001')
 
   // Fill invoice item details
-  await page.getByLabel('Popis položky').first().fill('Consulting services')
-  await page.getByLabel('Množství').first().fill('1')
-  await page.getByLabel('Cena/jedn.').first().fill('10000')
+  await page.getByLabel('Popis položky', { exact: true }).first().fill('Consulting services')
+  await page.getByLabel('Množství', { exact: true }).first().fill('1')
+  await page.getByLabel('Cena/jedn.', { exact: true }).first().fill('10000')
 
   // Save the invoice
   await page.getByRole('button', { name: 'Vytvořit fakturu' }).click()
