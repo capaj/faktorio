@@ -13,7 +13,7 @@
   "packageManager": "pnpm@10.20.0",
   "dependencies": {
     "@libsql/client": "^0.15.15",
-    "@paralleldrive/cuid2": "^2.2.2",
+    "@paralleldrive/cuid2": "^3.0.4",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.7",
     "faktorio-shared": "workspace:*"
