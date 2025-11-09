@@ -32,7 +32,7 @@
     "bump": "turbo bump && npm-check-updates -u && pnpm i",
     "typecheck": "turbo tsc",
     "test": "turbo test",
-    "test:e2e": "pnpm exec playwright test"
+    "test:e2e": "pnpm exec playwright test --max-failures=1"
   },
   "dependencies": {
     "dayjs": "^1.11.19",

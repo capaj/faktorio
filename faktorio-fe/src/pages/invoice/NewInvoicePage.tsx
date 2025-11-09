@@ -555,6 +555,7 @@ const InvoiceItemForm = ({
             name={`items.${index}.quantity`}
             render={({ field }) => (
               <Input
+                id={`items.${index}.quantity`}
                 className="w-full sm:w-24"
                 type="number"
                 min={0}
@@ -576,30 +577,40 @@ const InvoiceItemForm = ({
           <FormField
             control={control}
             name={`items.${index}.unit`}
+              render={({ field }) => (
+                <Input
+                  id={`items.${index}.unit`}
+                  placeholder="Jednotka"
+                  type="text"
+                  className="w-full sm:w-32"
+                  {...field}
+                  value={field.value || ''}
+              />
+            )}
+          />
+        </div>
+        <div className="flex flex-col flex-1">
+          <Label
+            className="text-xs text-gray-500 mb-1 block md:block"
+            htmlFor={`items.${index}.description`}
+          >
+            Popis položky
+          </Label>
+          <FormField
+            control={control}
+            name={`items.${index}.description`}
             render={({ field }) => (
               <Input
-                placeholder="Jednotka"
+                id={`items.${index}.description`}
+                className="w-full sm:w-96 md:flex-grow col-span-2"
+                placeholder="Popis položky"
                 type="text"
-                className="w-full sm:w-32"
                 {...field}
                 value={field.value || ''}
               />
             )}
           />
         </div>
-        <FormField
-          control={control}
-          name={`items.${index}.description`}
-          render={({ field }) => (
-            <Input
-              className="w-full sm:w-96 md:flex-grow col-span-2"
-              placeholder="Popis položky"
-              type="text"
-              {...field}
-              value={field.value || ''}
-            />
-          )}
-        />
       </div>
       <div className="flex gap-4 items-end">
         <div className="flex-grow sm:flex-grow-0">
@@ -612,12 +623,13 @@ const InvoiceItemForm = ({
           <FormField
             control={control}
             name={`items.${index}.unit_price`}
-            render={({ field }) => (
-              <Input
-                className="w-full sm:w-32"
-                placeholder="Cena/jedn."
-                type="number"
-                step="0.01"
+              render={({ field }) => (
+                <Input
+                  id={`items.${index}.unit_price`}
+                  className="w-full sm:w-32"
+                  placeholder="Cena/jedn."
+                  type="number"
+                  step="0.01"
                 {...field}
                 value={field.value || ''}
               />
@@ -637,6 +649,7 @@ const InvoiceItemForm = ({
               name={`items.${index}.vat_rate`}
               render={({ field }) => (
                 <Input
+                  id={`items.${index}.vat_rate`}
                   className="w-full sm:w-20"
                   placeholder="DPH %"
                   type="number"

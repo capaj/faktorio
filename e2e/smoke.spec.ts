@@ -37,7 +37,7 @@ test('smoke', async ({ page }) => {
   await page.getByLabel('IČO', { exact: true }).fill('12345678')
 
   // Save invoicing details
-  await page.getByRole('button', { name: 'Uložit změny' }).click()
+  await page.getByRole('button', { name: 'Uložit' }).click()
   await expect(page.getByText('Údaje byly úspěšně uloženy')).toBeVisible({
     timeout: 10000
   })
@@ -69,9 +69,10 @@ test('smoke', async ({ page }) => {
 
   // Select the contact (should be auto-selected since it's newly created)
   // If not auto-selected, we'll need to select it manually
-  const contactCombobox = page.getByLabel('Odběratel', { exact: true })
-  const currentValue = await contactCombobox.inputValue()
-  if (!currentValue || !currentValue.includes('Test Client Ltd.')) {
+  const contactCombobox = page.getByTestId('contact-combobox')
+  await expect(contactCombobox).toBeVisible({ timeout: 10000 })
+  const currentValue = ((await contactCombobox.textContent()) ?? '').trim()
+  if (!currentValue.includes('Test Client Ltd.')) {
     await contactCombobox.click()
     await page.getByRole('option', { name: 'Test Client Ltd.' }).click()
   }

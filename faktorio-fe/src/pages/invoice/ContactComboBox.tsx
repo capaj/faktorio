@@ -80,6 +80,7 @@ export function ContactComboBox(props: {
             style={{
               opacity: props.disabled ? 0.7 : 1
             }}
+            data-testid="contact-combobox"
           >
             <span className="overflow-hidden text-ellipsis">
               {selectedContact ? selectedContact.name : 'Vyberte kontakt...'}
