@@ -23,7 +23,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [['html', { open: 'never' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -33,9 +33,17 @@ export default defineConfig({
     trace: 'on-first-retry',
     headless: isCI,
     screenshot: 'only-on-failure',
-    video: 'on-first-retry'
+    video: 'on-first-retry',
+    launchOptions: {
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu'
+      ]
+    }
   },
-  timeout: isCI ? 30000 : 5000,
+  timeout: isCI ? 60000 : 10000,
   // You can optionally use a global setup file instead of fixtures approach
   // globalSetup: './e2e/global-setup.ts',
 
