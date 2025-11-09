@@ -1,0 +1,5 @@
+upgrade: true
+reject:
+  - react ## cannot upgrade-breaks pdf rendering in react-pdf, can remove when https://github.com/diegomura/react-pdf/issues/3156 is fixed
+  - react-dom ## cannot upgrade-breaks pdf rendering in react-pdf, can remove when https://github.com/diegomura/react-pdf/issues/3156 is fixed
+  - "@paralleldrive/cuid2" ## cannot upgrade-v3 breaks CF workers 

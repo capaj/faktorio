@@ -89,10 +89,10 @@ importers:
         version: 17.2.3
       drizzle-orm:
         specifier: ^0.44.7
-        version: 0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       drizzle-zod:
         specifier: 0.8.3
-        version: 0.8.3(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@4.1.12)
+        version: 0.8.3(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@4.1.12)
       faktorio-shared:
         specifier: workspace:*
         version: link:../faktorio-shared
@@ -107,8 +107,8 @@ importers:
         version: 4.1.12
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20251107.0
-        version: 4.20251107.0
+        specifier: ^4.20251109.0
+        version: 4.20251109.0
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
@@ -132,7 +132,7 @@ importers:
         version: 4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)
       wrangler:
         specifier: ^4.46.0
-        version: 4.46.0(@cloudflare/workers-types@4.20251107.0)
+        version: 4.46.0(@cloudflare/workers-types@4.20251109.0)
 
   faktorio-db:
     dependencies:
@@ -147,7 +147,7 @@ importers:
         version: 17.2.3
       drizzle-orm:
         specifier: ^0.44.7
-        version: 0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       faktorio-shared:
         specifier: workspace:*
         version: link:../faktorio-shared
@@ -265,7 +265,7 @@ importers:
         version: 17.2.3
       drizzle-orm:
         specifier: ^0.44.7
-        version: 0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       faktorio-api:
         specifier: workspace:*
         version: link:../faktorio-api
@@ -386,7 +386,7 @@ importers:
         version: 4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)
       wrangler:
         specifier: ^4.46.0
-        version: 4.46.0(@cloudflare/workers-types@4.20251107.0)
+        version: 4.46.0(@cloudflare/workers-types@4.20251109.0)
 
   faktorio-public-api:
     dependencies:
@@ -404,10 +404,10 @@ importers:
         version: 0.34.41
       drizzle-orm:
         specifier: ^0.44.7
-        version: 0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+        version: 0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       drizzle-typebox:
         specifier: ^0.3.3
-        version: 0.3.3(@sinclair/typebox@0.34.41)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))
+        version: 0.3.3(@sinclair/typebox@0.34.41)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))
       elysia:
         specifier: ^1.4.15
         version: 1.4.15(@sinclair/typebox@0.34.41)(exact-mirror@0.2.0(@sinclair/typebox@0.34.41))(file-type@21.0.0)(openapi-types@12.1.3)(typescript@5.9.3)
@@ -417,7 +417,7 @@ importers:
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.10.5
-        version: 0.10.5(@cloudflare/workers-types@4.20251107.0)(@vitest/runner@4.0.8)(@vitest/snapshot@4.0.8)(vitest@4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6))
+        version: 0.10.5(@cloudflare/workers-types@4.20251109.0)(@vitest/runner@4.0.8)(@vitest/snapshot@4.0.8)(vitest@4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6))
       '@types/node':
         specifier: ^24.10.0
         version: 24.10.0
@@ -432,7 +432,7 @@ importers:
         version: 4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)
       wrangler:
         specifier: ^4.46.0
-        version: 4.46.0(@cloudflare/workers-types@4.20251107.0)
+        version: 4.46.0(@cloudflare/workers-types@4.20251109.0)
 
   faktorio-shared:
     dependencies:
@@ -990,8 +990,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20251107.0':
-    resolution: {integrity: sha512-4y3U2kDxzAMKthjx6iIlxY2oA3l5FVP1WR2Zkz1j0Cx0RI5P1DZknSV5WP86i2anE5eal+pmtzvCO4oZWgcgtA==}
+  '@cloudflare/workers-types@4.20251109.0':
+    resolution: {integrity: sha512-/wMfoS6NmoY0GgKVoRUp4x0yiZM0eNXwXTTzM7gFJKcm+0NtZmzUzgXj6xpShkfWSrmug0mX7BbyaFMAMHFlPA==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -5650,7 +5650,7 @@ snapshots:
     optionalDependencies:
       workerd: 1.20251105.0
 
-  '@cloudflare/vitest-pool-workers@0.10.5(@cloudflare/workers-types@4.20251107.0)(@vitest/runner@4.0.8)(@vitest/snapshot@4.0.8)(vitest@4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6))':
+  '@cloudflare/vitest-pool-workers@0.10.5(@cloudflare/workers-types@4.20251109.0)(@vitest/runner@4.0.8)(@vitest/snapshot@4.0.8)(vitest@4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6))':
     dependencies:
       '@vitest/runner': 4.0.8
       '@vitest/snapshot': 4.0.8
@@ -5660,7 +5660,7 @@ snapshots:
       miniflare: 4.20251105.0
       semver: 7.7.1
       vitest: 4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)
-      wrangler: 4.46.0(@cloudflare/workers-types@4.20251107.0)
+      wrangler: 4.46.0(@cloudflare/workers-types@4.20251109.0)
       zod: 3.25.76
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
@@ -5682,7 +5682,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20251105.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20251107.0': {}
+  '@cloudflare/workers-types@4.20251109.0': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -7537,22 +7537,22 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0):
+  drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0):
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20251107.0
+      '@cloudflare/workers-types': 4.20251109.0
       '@libsql/client': 0.15.15
       '@types/sql.js': 1.4.9
       gel: 2.0.0
       sql.js: 1.13.0
 
-  drizzle-typebox@0.3.3(@sinclair/typebox@0.34.41)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)):
+  drizzle-typebox@0.3.3(@sinclair/typebox@0.34.41)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)):
     dependencies:
       '@sinclair/typebox': 0.34.41
-      drizzle-orm: 0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+      drizzle-orm: 0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
 
-  drizzle-zod@0.8.3(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@4.1.12):
+  drizzle-zod@0.8.3(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0))(zod@4.1.12):
     dependencies:
-      drizzle-orm: 0.44.7(@cloudflare/workers-types@4.20251107.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
+      drizzle-orm: 0.44.7(@cloudflare/workers-types@4.20251109.0)(@libsql/client@0.15.15)(@types/sql.js@1.4.9)(gel@2.0.0)(sql.js@1.13.0)
       zod: 4.1.12
 
   dunder-proto@1.0.1:
@@ -9536,7 +9536,7 @@ snapshots:
       regexparam: 3.0.0
       use-sync-external-store: 1.4.0(react@18.3.1)
 
-  wrangler@4.46.0(@cloudflare/workers-types@4.20251107.0):
+  wrangler@4.46.0(@cloudflare/workers-types@4.20251109.0):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.0
       '@cloudflare/unenv-preset': 2.7.9(unenv@2.0.0-rc.24)(workerd@1.20251105.0)
@@ -9547,7 +9547,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       workerd: 1.20251105.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20251107.0
+      '@cloudflare/workers-types': 4.20251109.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil
