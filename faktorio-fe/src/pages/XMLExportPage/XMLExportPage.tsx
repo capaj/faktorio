@@ -21,8 +21,6 @@ import {
 import { generateDanovePriznaniXML } from '@/lib/generateDanovePriznaniXML'
 import { generateSouhrnneHlaseniXML } from '@/lib/generateSouhrnneHlaseniXML'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 import { formatCzechDate } from '@/lib/utils'
 
 // EU country codes
@@ -133,8 +131,6 @@ export function XMLExportPage() {
     () => new Date().getMonth() + 1 // Default to current month
   )
   const [cadence, setCadence] = useState<'quarterly' | 'monthly'>('quarterly')
-  const [isAcknowledgementChecked, setIsAcknowledgementChecked] =
-    useState(false)
 
   const { startDate, endDate } =
     cadence === 'quarterly'
@@ -142,7 +138,7 @@ export function XMLExportPage() {
       : getMonthlyDateRange(selectedYear, selectedMonth)
 
   // Fetch issued invoices for the selected period
-  const [issuedInvoicesWithVat, { refetch: refetchIssuedInvoices }] =
+  const [issuedInvoicesWithVat] =
     trpcClient.invoices.listInvoices.useSuspenseQuery({
       from: startDate,
       to: endDate,
@@ -482,24 +478,11 @@ export function XMLExportPage() {
             zkontrolujte.
           </AlertDescription>
         </Alert>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="acknowledgement"
-            checked={isAcknowledgementChecked}
-            onCheckedChange={(checked) =>
-              setIsAcknowledgementChecked(checked === true)
-            }
-          />
-          <Label htmlFor="acknowledgement" className="text-sm font-medium">
-            Beru na vědomí, že tato funkce je experimentální
-          </Label>
-        </div>
         <div className="flex justify-end space-x-2 flex-wrap gap-y-2">
           <Button
             disabled={
               reverseChargeAbroadInvoices.length === 0 ||
-              cadence !== 'quarterly' ||
-              !isAcknowledgementChecked
+              cadence !== 'quarterly'
             }
             onClick={handleDownloadSHVXML}
             title={
@@ -515,9 +498,8 @@ export function XMLExportPage() {
           </Button>
           <Button
             disabled={
-              (receivedInvoices.length === 0 &&
-                issuedInvoicesWithVat.length === 0) ||
-              !isAcknowledgementChecked
+              receivedInvoices.length === 0 &&
+              issuedInvoicesWithVat.length === 0
             }
             onClick={handleDownloadKHXML}
           >
@@ -526,9 +508,8 @@ export function XMLExportPage() {
           </Button>
           <Button
             disabled={
-              (receivedInvoices.length === 0 &&
-                issuedInvoicesWithVat.length === 0) ||
-              !isAcknowledgementChecked
+              receivedInvoices.length === 0 &&
+              issuedInvoicesWithVat.length === 0
             }
             onClick={handleDownloadDanovePriznaniXML}
           >
