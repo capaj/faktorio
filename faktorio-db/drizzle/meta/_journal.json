@@ -141,6 +141,13 @@
       "when": 1758473058594,
       "tag": "0019_nifty_pepper_potts",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1763527541012,
+      "tag": "0020_flippant_iron_lad",
+      "breakpoints": true
     }
   ]
 }
