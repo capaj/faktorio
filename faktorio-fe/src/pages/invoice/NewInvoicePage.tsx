@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button, ButtonWithLoader } from '@/components/ui/button'
 import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
 import { djs } from 'faktorio-shared/src/djs'
-import { useFieldArray, useForm, useFormContext } from 'react-hook-form'
+import { useFieldArray, useForm, useFormContext, Control } from 'react-hook-form'
 import { z } from 'zod/v4'
 import {
   invoiceItemFormSchema,
@@ -50,7 +50,7 @@ const defaultInvoiceItem = {
 
 export const NewInvoicePage = () => {
   const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
-  const contactsQuery = trpcClient.contacts.all.useQuery()
+  const [contacts] = trpcClient.contacts.all.useSuspenseQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
   const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
   const bankAccounts = (invoicingDetails?.bankAccounts ??
@@ -166,8 +166,8 @@ export const NewInvoicePage = () => {
   useExchangeRate({ currency, taxableFulfillmentDue, form })
 
   useEffect(() => {
-    if (clientContactId && contactsQuery.data) {
-      const selectedContact = contactsQuery.data.find(
+    if (clientContactId && contacts) {
+      const selectedContact = contacts.find(
         (contact) => contact.id === clientContactId
       )
 
@@ -176,7 +176,7 @@ export const NewInvoicePage = () => {
         form.setValue('currency', selectedContact.currency)
       }
     }
-  }, [clientContactId, contactsQuery.data, form])
+  }, [clientContactId, contacts, form])
 
   const total = invoiceItems.reduce(
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
@@ -208,7 +208,7 @@ export const NewInvoicePage = () => {
     )
   }
 
-  if (contactsQuery.data?.length === 0) {
+  if (contacts.length === 0) {
     return (
       <div>
         <p>Ještě si musíte vytvořit aspoň jeden kontakt</p>
@@ -224,7 +224,7 @@ export const NewInvoicePage = () => {
     )
   }
 
-  const contact = contactsQuery.data?.find(
+  const contact = contacts.find(
     (contact) => contact.id === formValues.client_contact_id
   )
   const isCzkInvoice = formValues.currency !== 'CZK'
@@ -472,7 +472,7 @@ export const NewInvoicePage = () => {
                   control={form.control}
                   index={index}
                   onDelete={() => remove(index)}
-                  contactsQuery={contactsQuery}
+                  contacts={contacts}
                   selectedContactId={formValues.client_contact_id}
                 />
               )
@@ -516,19 +516,23 @@ export const NewInvoicePage = () => {
   )
 }
 
+import { RouterOutputs } from '@/lib/trpcClient'
+
+type Contact = RouterOutputs['contacts']['all'][number]
+
 const InvoiceItemForm = ({
   control,
   index,
   onDelete,
   vatPayer,
-  contactsQuery,
+  contacts,
   selectedContactId
 }: {
-  control: any
+  control: Control<any>
   index: number
   onDelete: () => void
   vatPayer?: boolean
-  contactsQuery: any
+  contacts: Contact[]
   selectedContactId?: string
 }) => {
   const { setValue } = useFormContext()
@@ -577,14 +581,14 @@ const InvoiceItemForm = ({
           <FormField
             control={control}
             name={`items.${index}.unit`}
-              render={({ field }) => (
-                <Input
-                  id={`items.${index}.unit`}
-                  placeholder="Jednotka"
-                  type="text"
-                  className="w-full sm:w-32"
-                  {...field}
-                  value={field.value || ''}
+            render={({ field }) => (
+              <Input
+                id={`items.${index}.unit`}
+                placeholder="Jednotka"
+                type="text"
+                className="w-full sm:w-32"
+                {...field}
+                value={field.value || ''}
               />
             )}
           />
@@ -623,13 +627,13 @@ const InvoiceItemForm = ({
           <FormField
             control={control}
             name={`items.${index}.unit_price`}
-              render={({ field }) => (
-                <Input
-                  id={`items.${index}.unit_price`}
-                  className="w-full sm:w-32"
-                  placeholder="Cena/jedn."
-                  type="number"
-                  step="0.01"
+            render={({ field }) => (
+              <Input
+                id={`items.${index}.unit_price`}
+                className="w-full sm:w-32"
+                placeholder="Cena/jedn."
+                type="number"
+                step="0.01"
                 {...field}
                 value={field.value || ''}
               />
@@ -662,8 +666,8 @@ const InvoiceItemForm = ({
                       vatRate === 0 &&
                       field.value > 0 &&
                       selectedContactId &&
-                      contactsQuery.data
-                        ?.find((c: any) => c.id === selectedContactId)
+                      contacts
+                        .find((c) => c.id === selectedContactId)
                         ?.vat_no?.startsWith('CZ') &&
                       showVatWarning !== false
                     ) {
