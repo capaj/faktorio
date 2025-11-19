@@ -51,6 +51,22 @@ export async function checkAndNotifyDueInvoices(
   }
 
   // Group invoices by user
+  interface GroupedInvoices {
+    user: {
+      id: string
+      name: string | null
+      email: string | null
+    }
+    invoices: {
+      id: string
+      number: string
+      clientName: string
+      dueOn: string
+      total: number
+      currency: string
+    }[]
+  }
+
   const invoicesByUser = dueInvoicesWithUsers.reduce(
     (acc, invoice) => {
       if (!acc[invoice.userId]) {
@@ -75,7 +91,7 @@ export async function checkAndNotifyDueInvoices(
 
       return acc
     },
-    {} as Record<string, any>
+    {} as Record<string, GroupedInvoices>
   )
 
   console.log(
@@ -84,11 +100,11 @@ export async function checkAndNotifyDueInvoices(
 
   // Send notifications for each user
   for (const [userId, userData] of Object.entries(invoicesByUser)) {
-    const { user, invoices } = userData as any
+    const { user, invoices } = userData
 
     try {
-      const dueToday = invoices.filter((inv: any) => inv.dueOn === today)
-      const dueTomorrow = invoices.filter((inv: any) => inv.dueOn === tomorrow)
+      const dueToday = invoices.filter((inv) => inv.dueOn === today)
+      const dueTomorrow = invoices.filter((inv) => inv.dueOn === tomorrow)
 
       let title = ''
       let body = ''
@@ -105,7 +121,7 @@ export async function checkAndNotifyDueInvoices(
           dueToday.length === 1
             ? `Faktura ${dueToday[0].number} pro ${dueToday[0].clientName}`
             : dueToday
-                .map((inv: any) => `${inv.number} (${inv.clientName})`)
+                .map((inv) => `${inv.number} (${inv.clientName})`)
                 .join(', ')
       } else if (dueTomorrow.length > 0) {
         title =
@@ -116,7 +132,7 @@ export async function checkAndNotifyDueInvoices(
           dueTomorrow.length === 1
             ? `Faktura ${dueTomorrow[0].number} pro ${dueTomorrow[0].clientName}`
             : dueTomorrow
-                .map((inv: any) => `${inv.number} (${inv.clientName})`)
+                .map((inv) => `${inv.number} (${inv.clientName})`)
                 .join(', ')
       }
 
@@ -127,7 +143,7 @@ export async function checkAndNotifyDueInvoices(
         badge: '/faktura.png',
         data: {
           type: 'due_invoices',
-          invoices: invoices.map((inv: any) => ({
+          invoices: invoices.map((inv) => ({
             id: inv.id,
             number: inv.number
           })),

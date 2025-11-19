@@ -18,7 +18,7 @@ import { sendEmail } from './sendEmail'
 
 // Add ExecutionContext type from Cloudflare Workers
 type ExecutionContext = {
-  waitUntil(promise: Promise<any>): void
+  waitUntil(promise: Promise<unknown>): void
   passThroughOnException(): void
 }
 
@@ -106,22 +106,15 @@ export default {
           }
         }
       },
-      onError: (errCtx: any) => {
-        const { path, input, ctx, type } = errCtx as {
-          error: any
-          type: string
-          path: string
-          input: any
-          ctx: TrpcContext
-          req: any
-        }
-        console.error(errCtx.error)
+      onError: (errCtx) => {
+        const { path, input, ctx, type, error } = errCtx
+        console.error(error)
         console.error(`${type} ${path} failed for:`)
 
         const inputLength = input ? JSON.stringify(input).length : 0
         if (inputLength < 1000) {
           console.error(
-            colorize(JSON.stringify({ errCtx: input, userId: ctx.user?.id }), {
+            colorize(JSON.stringify({ errCtx: input, userId: ctx?.user?.id }), {
               pretty: true
             })
           )
@@ -130,7 +123,7 @@ export default {
             colorize(
               JSON.stringify({
                 errCtx: 'Input too long',
-                userId: ctx.user?.id
+                userId: ctx?.user?.id
               }),
               {
                 pretty: true

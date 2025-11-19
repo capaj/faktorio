@@ -1,10 +1,19 @@
 import { FormControl, FormItem, FormLabel } from '@/components/ui/form'
 import { DatePicker } from '@/components/ui/date-picker'
 import { djs } from 'faktorio-shared/src/djs'
+import { ControllerRenderProps } from 'react-hook-form'
 
 export const createDateFieldConfig = (label: string) => ({
   label,
-  fieldType: ({ label, isRequired, field }: any) => (
+  fieldType: ({
+    label,
+    isRequired,
+    field
+  }: {
+    label: string
+    isRequired: boolean
+    field: ControllerRenderProps<any, any>
+  }) => (
     <FormItem className="flex flex-col">
       <FormLabel>
         {label}

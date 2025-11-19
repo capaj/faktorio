@@ -400,7 +400,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
             }
 
             // Remove system fields that shouldn't be in the create schema
-            const cleanContact: any = { ...mappedContact }
+            const cleanContact: Record<string, unknown> = { ...mappedContact }
 
             delete cleanContact.created_at
             delete cleanContact.updated_at
@@ -598,7 +598,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
       {/* Edit Contact Dialog - Conditionally rendered */}
       {editDialogOpen && (
         <Dialog open={editDialogOpen} onOpenChange={handleEditModalClose}>
-          <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
+          <DialogContent className="max-w-5xl overflow-y-auto max-h-screen">
             <DialogHeader>
               <DialogTitle>Editace kontaktu</DialogTitle>
             </DialogHeader>
@@ -656,7 +656,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
       {/* New Contact Dialog - Conditionally rendered */}
       {newDialogOpen && (
         <Dialog open={newDialogOpen} onOpenChange={handleNewModalClose}>
-          <DialogContent className="max-w-screen-lg overflow-y-auto max-h-screen">
+          <DialogContent className="max-w-5xl overflow-y-auto max-h-screen">
             <DialogHeader>
               <DialogTitle>Nový kontakt</DialogTitle>
             </DialogHeader>

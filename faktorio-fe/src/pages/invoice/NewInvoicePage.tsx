@@ -315,10 +315,10 @@ export const NewInvoicePage = () => {
               control={form.control}
               name="client_contact_id"
               render={({ field }) => (
-                <FormItem className="flex flex-col flew-grow col-span-2">
+                <FormItem className="flex flex-col grow col-span-2">
                   <FormLabel>Odběratel</FormLabel>
                   <div className="flex flex-row justify-between">
-                    <div className="flex-grow flex flex-col flew-grow">
+                    <div className="grow flex flex-col grow">
                       <FormControl>
                         <ContactComboBox
                           value={field.value ?? ''}
@@ -546,7 +546,7 @@ const InvoiceItemForm = ({
 
   return (
     <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 align-baseline items-end">
-      <div className="sm:flex sm:flex-row gap-4 flex-grow grid grid-cols-2 flex-wrap items-end">
+      <div className="sm:flex sm:flex-row gap-4 grow grid grid-cols-2 flex-wrap items-end">
         <div>
           <Label
             className="text-xs text-gray-500 mb-1 block md:block"

@@ -528,13 +528,15 @@ export const EditInvoicePage = () => {
   )
 }
 
+import { Control } from 'react-hook-form'
+
 const InvoiceItemForm = ({
   control,
   index,
   onDelete,
   invoicingDetails
 }: {
-  control: any
+  control: Control<any>
   index: number
   invoicingDetails: { vat_payer?: boolean } | null
   onDelete: () => void

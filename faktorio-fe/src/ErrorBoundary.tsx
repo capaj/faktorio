@@ -1,19 +1,22 @@
 import React from 'react'
 
-export class ErrorBoundary extends React.Component {
-  state: Readonly<{ error: any }> = { error: null }
+export class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  state: Readonly<{ error: Error | null }> = { error: null }
   // @ts-expect-error
   props: Readonly<{ children: React.ReactNode }>
 
-  constructor(props: any) {
+  constructor(props: { children: React.ReactNode }) {
     super(props)
 
     this.state = { error: null }
   }
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(error: Error) {
     return { error: error }
   }
-  componentDidCatch(error: any, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // logErrorToMyService(error, errorInfo) // TODO
   }
   render() {

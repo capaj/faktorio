@@ -28,8 +28,8 @@ async function generateMigrationsFile() {
   let allFiles: string[]
   try {
     allFiles = await fs.readdir(MIGRATIONS_SOURCE_DIR)
-  } catch (error: any) {
-    if (error.code === 'ENOENT') {
+  } catch (error: unknown) {
+    if ((error as { code?: string }).code === 'ENOENT') {
       console.error(
         `Error: Migrations source directory not found: ${MIGRATIONS_SOURCE_DIR}`
       )

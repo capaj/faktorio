@@ -14,7 +14,11 @@ import {
 } from '../components/ui/card'
 import { toast } from 'sonner'
 import { ButtonLink } from '../components/ui/link'
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
+import {
+  GoogleLogin,
+  GoogleOAuthProvider,
+  CredentialResponse
+} from '@react-oauth/google'
 
 export function SignupPage() {
   const [email, setEmail] = useState('')
@@ -44,8 +48,11 @@ export function SignupPage() {
       await signup(email, fullName, password)
       toast.success('Registrace úspěšná')
       navigate('/')
-    } catch (error: any) {
-      if (error.message?.endsWith(' already exists')) {
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        error.message?.endsWith(' already exists')
+      ) {
         toast.error('Uživatel s tímto emailem již existuje')
       } else {
         toast.error('Registrace selhala. Zkuste to prosím znovu.')
@@ -56,7 +63,9 @@ export function SignupPage() {
     }
   }
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleSuccess = async (
+    credentialResponse: CredentialResponse
+  ) => {
     try {
       setIsLoading(true)
       if (credentialResponse.credential) {
@@ -64,8 +73,8 @@ export function SignupPage() {
         toast.success('Registrace úspěšná')
         navigate('/')
       }
-    } catch (error: any) {
-      if (error.message?.includes('already exists')) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message?.includes('already exists')) {
         toast.error('Uživatel s tímto emailem již existuje')
       } else {
         toast.error('Registrace pomocí Google selhala.')

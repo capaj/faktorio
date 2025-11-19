@@ -23,7 +23,7 @@ describe('Public API', () => {
     })
 
     expect(response.status).toBe(200)
-    const body = (await response.json()) as { invoices: any[] }
+    const body = (await response.json()) as { invoices: unknown[] }
     expect(body).toHaveProperty('invoices')
     expect(Array.isArray(body.invoices)).toBe(true)
     expect(body.invoices.length).toBe(0)
@@ -76,8 +76,8 @@ describe('Public API', () => {
     })
     expect(getRes.status).toBe(200)
     const getBody = (await getRes.json()) as {
-      invoice: any
-      items: any[]
+      invoice: { id: string }
+      items: unknown[]
     }
     expect(getBody.invoice.id).toBe(createBody.id)
     expect(getBody.items.length).toBe(1)

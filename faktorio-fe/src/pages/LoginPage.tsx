@@ -13,7 +13,7 @@ import {
 } from '../components/ui/card'
 import { toast } from 'sonner'
 import { ButtonLink } from '../components/ui/link'
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
+import { GoogleLogin, GoogleOAuthProvider, CredentialResponse } from '@react-oauth/google'
 import { PasswordInput } from '@/components/ui/password-input'
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
@@ -55,7 +55,7 @@ export function LoginPage() {
     }
   }
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     try {
       setIsLoading(true)
       if (credentialResponse.credential) {
