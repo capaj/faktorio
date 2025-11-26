@@ -554,7 +554,7 @@ export function ReceivedInvoicesPage() {
                         <FormItem>
                           <FormLabel>Ulice</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input autoComplete="off" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -568,7 +568,7 @@ export function ReceivedInvoicesPage() {
                           <FormItem>
                             <FormLabel>Město</FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input autoComplete="off" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -581,7 +581,7 @@ export function ReceivedInvoicesPage() {
                           <FormItem>
                             <FormLabel>PSČ</FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input autoComplete="off" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -595,7 +595,7 @@ export function ReceivedInvoicesPage() {
                         <FormItem>
                           <FormLabel>Země</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input autoComplete="off" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
