@@ -139,21 +139,23 @@ export const FeatureComparison = () => {
           Srovnání funkcí
         </CardTitle>
       </CardHeader>
-      <CardContent className="overflow-x-auto">
+      <CardContent className="p-0 sm:p-6 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[300px]">Funkce</TableHead>
-              <TableHead className="text-center font-bold text-primary">
+              <TableHead className="w-[150px] sm:w-[300px] sticky left-0 bg-card z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] px-2 sm:px-4">
+                Funkce
+              </TableHead>
+              <TableHead className="text-center font-bold text-primary min-w-[100px] sm:min-w-[120px] px-2 sm:px-4">
                 Faktorio.cz
               </TableHead>
-              <TableHead className="text-center text-muted-foreground">
+              <TableHead className="text-center text-muted-foreground min-w-[100px] sm:min-w-[120px] px-2 sm:px-4">
                 Fakturovac.cz
               </TableHead>
-              <TableHead className="text-center text-muted-foreground">
+              <TableHead className="text-center text-muted-foreground min-w-[100px] sm:min-w-[120px] px-2 sm:px-4">
                 Fakturoid.cz
               </TableHead>
-              <TableHead className="text-center text-muted-foreground">
+              <TableHead className="text-center text-muted-foreground min-w-[100px] sm:min-w-[120px] px-2 sm:px-4">
                 iDoklad.cz
               </TableHead>
             </TableRow>
@@ -161,40 +163,42 @@ export const FeatureComparison = () => {
           <TableBody>
             {features.map((feature, index) => (
               <TableRow key={index}>
-                <TableCell className="font-medium">{feature.name}</TableCell>
-                <TableCell className="text-center bg-primary/5">
+                <TableCell className="font-medium sticky left-0 bg-card z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] p-2 sm:p-4 text-xs sm:text-sm">
+                  {feature.name}
+                </TableCell>
+                <TableCell className="text-center bg-primary/5 p-2 sm:p-4">
                   {feature.faktorio ? (
-                    <Check className="mx-auto h-5 w-5 text-green-600" />
+                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                   ) : (
-                    <X className="mx-auto h-5 w-5 text-red-400 opacity-50" />
+                    <X className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-red-400 opacity-50" />
                   )}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center p-2 sm:p-4">
                   {feature.fakturovac ? (
-                    <Check className="mx-auto h-5 w-5 text-green-600 opacity-70" />
+                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-green-600 opacity-70" />
                   ) : (
-                    <X className="mx-auto h-5 w-5 text-red-400 opacity-30" />
+                    <X className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-red-400 opacity-30" />
                   )}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center p-2 sm:p-4">
                   {feature.fakturoid ? (
-                    <Check className="mx-auto h-5 w-5 text-green-600 opacity-70" />
+                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-green-600 opacity-70" />
                   ) : (
-                    <X className="mx-auto h-5 w-5 text-red-400 opacity-30" />
+                    <X className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-red-400 opacity-30" />
                   )}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center p-2 sm:p-4">
                   {feature.idoklad ? (
-                    <Check className="mx-auto h-5 w-5 text-green-600 opacity-70" />
+                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-green-600 opacity-70" />
                   ) : (
-                    <X className="mx-auto h-5 w-5 text-red-400 opacity-30" />
+                    <X className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-red-400 opacity-30" />
                   )}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        <p className="text-xs text-muted-foreground mt-4 text-center">
+        <p className="text-xs text-muted-foreground mt-4 text-center px-4 pb-4 sm:px-0 sm:pb-0">
           Poznámka: Informace o funkcích Fakturoid.cz a iDoklad.cz vycházejí z
           běžných komerčních nabídek a mohou vyžadovat ověření.
         </p>

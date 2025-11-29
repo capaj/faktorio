@@ -25,7 +25,7 @@ export const LandingPage = () => {
     <>
       <div>
         <section className="w-full py-6 md:py-12 lg:py-16 xl:py-24 animate-in fade-in zoom-in-95 duration-700">
-          <div className="container flex flex-col items-center justify-center space-y-4 px-4 md:px-6 text-center">
+          <div className="container flex flex-col items-center justify-center space-y-4 px-2 md:px-6 text-center">
             <div className="space-y-4">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 pb-2">
                 Fakturace bez zbytečností.
@@ -68,7 +68,7 @@ export const LandingPage = () => {
           </div>
         </section>
         <section className="w-full py-12 md:py-24">
-          <div className="container grid items-start gap-8 px-4 md:px-6 lg:grid-cols-5">
+          <div className="container grid items-start gap-8 px-2 md:px-6 lg:grid-cols-5">
             <Dialog>
               <DialogTrigger asChild>
                 <div className="relative group animate-in slide-in-from-left-8 duration-700 delay-200 lg:col-span-3 cursor-zoom-in">
@@ -233,7 +233,7 @@ export const LandingPage = () => {
           </div>
         </section>
         <section className="w-full py-12 md:py-24 bg-muted/30">
-          <div className="container px-4 md:px-6">
+          <div className="container px-2 md:px-6">
             <FeatureComparison />
           </div>
         </section>

@@ -64,7 +64,7 @@ function AppContent() {
         <div className="flex flex-col min-h-[100dvh]">
           <Header />
           <main className="flex-1">
-            <div className="container mx-auto p-4">
+            <div className="container mx-auto px-2 py-4 md:p-4">
               <Suspense fallback={<SpinnerContainer loading={true} />}>
                 <Switch>
                   <Route
