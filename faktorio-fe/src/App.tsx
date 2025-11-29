@@ -40,7 +40,7 @@ function AppContent() {
   const { token, isSignedIn } = useAuth()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  
+
   // Initialize auto-update service
   useAutoUpdate()
 
@@ -116,18 +116,18 @@ function AppWithLocalDb() {
   const localRunConfig =
     drizzleDb && localUser
       ? {
-          user: {
-            id: localUser.id,
-            email: localUser.email,
-            name: localUser.name,
-            passwordHash: null,
-            pictureUrl: null,
-            googleId: null,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          } as UserSelectType,
-          db: drizzleDb
-        }
+        user: {
+          id: localUser.id,
+          email: localUser.email,
+          name: localUser.name,
+          passwordHash: null,
+          pictureUrl: null,
+          googleId: null,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        } as UserSelectType,
+        db: drizzleDb
+      }
       : undefined
 
   if (isLoading) {
