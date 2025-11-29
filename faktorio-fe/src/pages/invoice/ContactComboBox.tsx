@@ -21,7 +21,7 @@ import { useEffect } from 'react'
 
 export function ContactComboBox(props: {
   onChange?: (value: string) => void
-  value: string
+  value: string | undefined
   onBlur?: () => void
   disabled?: boolean
 }) {
