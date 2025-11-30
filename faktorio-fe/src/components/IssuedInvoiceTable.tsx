@@ -466,7 +466,7 @@ export function IssuedInvoiceTable({
         )}
         {!isLoading && invoices.length === 0 && (
           <div className="rounded-lg border border-gray-200 bg-white p-4 text-center text-sm text-gray-600">
-            Žádné faktury k zobrazení.
+            Žádné faktury v seznamu.
           </div>
         )}
 
