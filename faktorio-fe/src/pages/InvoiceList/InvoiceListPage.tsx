@@ -67,10 +67,10 @@ export function InvoiceListPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between m-4">
+      <div className="m-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Input
           value={search}
-          className="max-w-[50%]"
+          className="w-full sm:max-w-[60%]"
           onChange={(e) => {
             return setSearch(e.target.value)
           }}
@@ -87,7 +87,7 @@ export function InvoiceListPage() {
             }
           }}
         >
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="w-full sm:w-[140px]">
             <SelectValue placeholder="Rok" />
           </SelectTrigger>
           <SelectContent>
