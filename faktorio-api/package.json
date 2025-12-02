@@ -14,14 +14,14 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251128.0",
+    "@cloudflare/workers-types": "^4.20251202.0",
     "@types/debug": "^4.1.12",
     "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.31.7",
     "faktorio-db": "workspace:*",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.14",
+    "vitest": "^4.0.15",
     "wrangler": "^4.51.0"
   },
   "dependencies": {
