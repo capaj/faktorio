@@ -464,10 +464,8 @@ export const invoiceRouter = trpcContext.router({
           input.items,
           input.invoice.exchange_rate ?? 1
         )
-        console.log(
-          'Update invoice input - taxable_fulfillment_due:',
-          input.invoice.taxable_fulfillment_due
-        )
+        console.log('Update invoice - items count:', input.items.length)
+        console.log('Update invoice - items:', JSON.stringify(input.items, null, 2))
 
         // No need for additional conversion - client now sends a string in YYYY-MM-DD format
 
@@ -492,16 +490,26 @@ export const invoiceRouter = trpcContext.router({
           .where(eq(invoiceItemsTb.invoice_id, input.id))
           .execute()
 
+        // Insert items, omitting database-managed fields for new items
+        // SQLite will auto-generate IDs for items without an explicit id
         await tx
           .insert(invoiceItemsTb)
           .values(
             input.items.map((item) => {
               const { id, created_at: _created_at, updated_at: _updated_at, invoice_id: _invoice_id, ...itemData } = item as any
-              return {
-                ...(id ? { id } : {}),
+              // For new items (no id or id === 0), omit the id to let SQLite auto-generate
+              // For existing items, keep their id
+              const itemToInsert: any = {
                 ...itemData,
                 invoice_id: input.id
               }
+
+              // Only include id if it's a valid positive integer
+              if (id && typeof id === 'number' && id > 0) {
+                itemToInsert.id = id
+              }
+
+              return itemToInsert
             })
           )
           .execute()

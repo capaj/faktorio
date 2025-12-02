@@ -11,11 +11,11 @@
     "@playwright/test": "^1.57.0",
     "@types/node": "^24.10.1",
     "npm-check-updates": "^19.1.2",
-    "oxlint": "^1.30.0",
+    "oxlint": "^1.31.0",
     "prettier": "^3.7.3",
     "turbo": "^2.6.1",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.14"
+    "vitest": "^4.0.15"
   },
   "packageManager": "pnpm@10.24.0",
   "scripts": {
