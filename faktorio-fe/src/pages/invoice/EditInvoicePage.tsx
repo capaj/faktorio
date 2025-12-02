@@ -212,32 +212,32 @@ export const EditInvoicePage = () => {
   )
   const totalVat = invoicingDetails?.vat_payer
     ? invoiceItems.reduce(
-        (acc, item) =>
-          acc +
-          ((item.quantity ?? 0) *
-            (item.unit_price ?? 0) *
-            (item.vat_rate ?? 0)) /
-            100,
-        0
-      )
+      (acc, item) =>
+        acc +
+        ((item.quantity ?? 0) *
+          (item.unit_price ?? 0) *
+          (item.vat_rate ?? 0)) /
+        100,
+      0
+    )
     : 0
 
   if (contactsQuery.data?.length === 0) {
     return null
   }
 
-  const createDefaultInvoiceItem = (order: number) => ({
-    description: '',
-    unit: 'manday',
-    quantity: 1,
-    unit_price: 0,
-    vat_rate: formValues.currency === 'CZK' ? 21 : 0,
-    id: 0,
-    created_at: '',
-    updated_at: null,
-    order,
-    invoice_id: ''
-  })
+  const createDefaultInvoiceItem = (order: number) => {
+    // New items don't have id, created_at, updated_at, or invoice_id yet
+    // The backend will handle these fields when inserting
+    return {
+      description: '',
+      unit: 'manday',
+      quantity: 1,
+      unit_price: 0,
+      vat_rate: formValues.currency === 'CZK' ? 21 : 0,
+      order
+    } as typeof invoice.items[0]
+  }
 
   useEffect(() => {
     const invoiceCompleteForPreview = {

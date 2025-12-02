@@ -93,6 +93,38 @@ test('smoke', async ({ page }) => {
 
   // Verify invoice number appears on the detail page
   await expect(page.getByText('2025-001')).toBeVisible()
+
+  // Step 4: Edit the invoice
+  const currentUrl = page.url()
+  const invoiceId = currentUrl.match(/\/invoices\/([^/]+)/)?.[1]
+  await page.goto(`${url}/invoices/${invoiceId}/edit`)
+
+  await expect(
+    page.getByRole('heading', { name: 'Upravit fakturu 2025-001' })
+  ).toBeVisible({ timeout: 10000 })
+
+  // Add a second invoice item
+  await page.getByRole('button', { name: 'Další položka' }).click()
+
+  // Fill the second item details
+  const descriptionInputs = page.getByPlaceholder('Popis položky')
+  await descriptionInputs.nth(1).fill('Additional service')
+
+  const quantityInputs = page.getByPlaceholder('Množství')
+  await quantityInputs.nth(1).fill('2')
+
+  const priceInputs = page.getByPlaceholder('Cena/jedn.')
+  await priceInputs.nth(1).fill('5000')
+
+  // Save the changes
+  await page.getByRole('button', { name: 'Uložit změny na faktuře' }).click()
+
+  // Verify we're navigated back to the invoice detail page
+  await expect(page).toHaveURL(/\/invoices\/[^/]+$/, { timeout: 10000 })
+
+  // Verify both items are visible on the invoice
+  await expect(page.getByText('Consulting services')).toBeVisible()
+  await expect(page.getByText('Additional service')).toBeVisible()
 })
 
 test.afterEach(async ({ page }) => {

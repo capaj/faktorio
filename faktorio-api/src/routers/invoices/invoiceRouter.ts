@@ -495,10 +495,14 @@ export const invoiceRouter = trpcContext.router({
         await tx
           .insert(invoiceItemsTb)
           .values(
-            input.items.map((item) => ({
-              ...item,
-              invoice_id: input.id
-            }))
+            input.items.map((item) => {
+              const { id, created_at: _created_at, updated_at: _updated_at, invoice_id: _invoice_id, ...itemData } = item as any
+              return {
+                ...(id ? { id } : {}),
+                ...itemData,
+                invoice_id: input.id
+              }
+            })
           )
           .execute()
       })
