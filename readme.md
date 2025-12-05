@@ -74,7 +74,7 @@ You will need accounts/keys for these services before deploying your own instanc
 - [Cloudflare Workers](https://developers.cloudflare.com/workers/) for `faktorio-api` (tRPC backend, cron) and `faktorio-public-api` (public/shared invoice endpoints)
 - [Cloudflare Pages](https://developers.cloudflare.com/pages/) (or another static host) for the `faktorio-fe` Vite build
 - [Turso / libSQL](https://turso.tech/) for the primary database
-- [Google Gemini API](https://ai.google.dev/gemini-api/docs/get-started) for invoice extraction and AI features
+- [Google Gemini API](https://aistudio.google.com/api-keys) for invoice extraction and AI features
 - [Mailjet](https://www.mailjet.com/) for transactional emails (password reset, notifications)
 - [Google Cloud OAuth Client](https://console.cloud.google.com/apis/credentials) to obtain `VITE_GOOGLE_CLIENT_ID` for Google sign-in
 - Web Push VAPID keys (generate locally with `pnpm --filter faktorio-api tsx scripts/generate-vapid-keys.ts`; no external service required)
