@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  formatStreetAddress,
-  AresBusinessInformationSchema
-} from './ContactList'
+import { formatStreetAddress, AresBusinessInformationSchema } from '@/lib/ares'
 import { z } from 'zod/v4'
 
 // Helper to create minimal mock data satisfying the function's needs

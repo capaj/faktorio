@@ -22,6 +22,12 @@ import {
 import { UseFormReturn, FieldPath } from 'react-hook-form'
 import { ContactFormSchema } from './ContactList'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  CompanyRegistry,
+  companyRegistryOptions,
+  isValidRegistrationNo,
+  registryLabels
+} from '@/lib/companyRegistries'
 
 export const fieldLabels = {
   registration_no: 'IČO',
@@ -60,8 +66,10 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
   onSubmit,
   isEdit = false,
   handleShowDeleteDialog,
-  isLoadingAres,
-  onFetchAres,
+  isLoadingRegistry,
+  onFetchRegistry,
+  registrySource = 'ares',
+  onRegistrySourceChange,
   showInvoicingFields = false,
   showDialogFooter = true,
   customFooter,
@@ -73,8 +81,10 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
   isEdit?: boolean
   invoiceCount?: number
   handleShowDeleteDialog?: (e: React.MouseEvent) => void
-  isLoadingAres?: boolean
-  onFetchAres?: () => void
+  isLoadingRegistry?: boolean
+  onFetchRegistry?: () => void
+  registrySource?: CompanyRegistry
+  onRegistrySourceChange?: (value: CompanyRegistry) => void
   showInvoicingFields?: boolean
   showDialogFooter?: boolean
   customFooter?: React.ReactNode
@@ -85,6 +95,10 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
   const registrationNo = form.watch(asPath('registration_no')) as
     | string
     | undefined
+  const isRegistrationNoValid = isValidRegistrationNo(
+    registrySource,
+    registrationNo ?? ''
+  )
 
   return (
     <Form {...form}>
@@ -102,27 +116,42 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                 <div className="flex-1">
                   <FormControl>
                     <Input
-                      placeholder="8 čísel"
+                      placeholder="IČO"
                       autoComplete="off"
                       {...field}
                     />
                   </FormControl>
                 </div>
-                {onFetchAres && (
-                  <FkButton
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={onFetchAres}
-                    disabled={
-                      !registrationNo ||
-                      registrationNo.length !== 8 ||
-                      isLoadingAres
-                    }
-                    isLoading={isLoadingAres}
-                  >
-                    Načíst z ARESU
-                  </FkButton>
+                {onFetchRegistry && (
+                  <div className="flex items-center space-x-2">
+                    <Select
+                      value={registrySource}
+                      onValueChange={(value) =>
+                        onRegistrySourceChange?.(value as CompanyRegistry)
+                      }
+                    >
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Vyberte registr" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companyRegistryOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FkButton
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={onFetchRegistry}
+                      disabled={!isRegistrationNoValid || isLoadingRegistry}
+                      isLoading={isLoadingRegistry}
+                    >
+                      {`Načíst z ${registryLabels[registrySource]}`}
+                    </FkButton>
+                  </div>
                 )}
               </div>
               <FormMessage />

@@ -18,6 +18,13 @@ import {
 } from '@/components/ui/table'
 import { trpcClient } from '@/lib/trpcClient'
 import { zodResolver } from '@/lib/zodResolver'
+import {
+  CompanyRegistry,
+  fetchCompanyFromRegistry,
+  isValidRegistrationNo,
+  registryLabels,
+  RegistryCompanyData
+} from '@/lib/companyRegistries'
 
 import { Link, useParams, useLocation } from 'wouter'
 import { useEffect, useState, useRef, useMemo } from 'react'
@@ -47,69 +54,6 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { useForm, UseFormReturn } from 'react-hook-form'
 import { ContactForm } from './ContactForm'
-
-const AddressSchema = z.object({
-  kodStatu: z.string(),
-  nazevStatu: z.string(),
-  kodKraje: z.number(),
-  nazevKraje: z.string(),
-  kodOkresu: z.number().optional(),
-  nazevOkresu: z.string().optional(),
-  kodObce: z.number(),
-  nazevObce: z.string(),
-  kodUlice: z.number().optional(),
-  nazevUlice: z.string().optional(),
-  cisloDomovni: z.number(),
-  kodCastiObce: z.number(),
-  nazevCastiObce: z.string(),
-  kodAdresnihoMista: z.number(),
-  psc: z.number(),
-  textovaAdresa: z.string(),
-  typCisloDomovni: z.number(),
-  standardizaceAdresy: z.boolean(),
-  kodSpravnihoObvodu: z.number().optional(),
-  nazevSpravnihoObvodu: z.string().optional(),
-  kodMestskehoObvodu: z.number().optional(),
-  nazevMestskehoObvodu: z.string().optional(),
-  kodMestskeCastiObvodu: z.number().optional(),
-  nazevMestskeCastiObvodu: z.string().optional(),
-  cisloOrientacni: z.number().optional()
-})
-
-const DeliveryAddressSchema = z.object({
-  radekAdresy1: z.string(),
-  radekAdresy2: z.string().optional(),
-  radekAdresy3: z.string().optional() // Added optional third line
-})
-
-export const AresBusinessInformationSchema = z.object({
-  ico: z.string(),
-  obchodniJmeno: z.string(),
-  sidlo: AddressSchema,
-  pravniForma: z.string(),
-  financniUrad: z.string().nullish(),
-  datumVzniku: z.string(),
-  datumAktualizace: z.string(),
-  dic: z.string().optional(), // Made optional to ensure compatibility with future data that might not include this
-  icoId: z.string(),
-  adresaDorucovaci: DeliveryAddressSchema,
-  primarniZdroj: z.string(),
-  czNace: z.array(z.string())
-  // seznamRegistraci is omitted
-})
-
-export const formatStreetAddress = (
-  aresData: z.infer<typeof AresBusinessInformationSchema>
-) => {
-  const streetName =
-    aresData.sidlo.nazevUlice ?? aresData.sidlo.nazevCastiObce ?? ''
-  const houseNumber = aresData.sidlo.cisloDomovni
-  const orientationNumber = aresData.sidlo.cisloOrientacni
-    ? `/${aresData.sidlo.cisloOrientacni}`
-    : ''
-
-  return `${streetName} ${houseNumber}${orientationNumber}`
-}
 
 // Define base schema for reuse
 const baseContactSchema = z.object({
@@ -157,7 +101,8 @@ export const ContactList = () => {
   const [isImporting, setIsImporting] = useState(false)
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [isLoadingAres, setIsLoadingAres] = useState(false)
+  const [isLoadingRegistry, setIsLoadingRegistry] = useState(false)
+  const [registrySource, setRegistrySource] = useState<CompanyRegistry>('ares')
   const [_location, navigate] = useLocation()
 
   // Memoize schema to prevent unnecessary re-computation
@@ -212,47 +157,42 @@ export const ContactList = () => {
     defaultValues: defaults
   })
 
-  const handleAresDataFetched = (
-    aresData: z.infer<typeof AresBusinessInformationSchema>,
+  const handleCompanyDataFetched = (
+    data: RegistryCompanyData,
     form: UseFormReturn<ContactFormSchema>
   ) => {
-    form.setValue('name', aresData.obchodniJmeno)
-    form.setValue('street', formatStreetAddress(aresData))
-    form.setValue('street2', aresData.sidlo.nazevCastiObce)
-    form.setValue('city', aresData.sidlo.nazevObce)
-    form.setValue('zip', String(aresData.sidlo.psc))
-    form.setValue('vat_no', aresData.dic ?? '')
-    form.setValue('country', aresData.sidlo.nazevStatu)
+    if (data.name !== undefined) form.setValue('name', data.name ?? '')
+    if (data.street !== undefined) form.setValue('street', data.street ?? '')
+    if (data.street2 !== undefined) form.setValue('street2', data.street2 ?? '')
+    if (data.city !== undefined) form.setValue('city', data.city ?? '')
+    if (data.zip !== undefined) form.setValue('zip', data.zip ?? '')
+    if (data.vat_no !== undefined) form.setValue('vat_no', data.vat_no ?? '')
+    if (data.country !== undefined)
+      form.setValue('country', data.country ?? 'Česká Republika')
   }
 
-  const fetchAresData = async (form: UseFormReturn<ContactFormSchema>) => {
+  const fetchRegistryData = async (form: UseFormReturn<ContactFormSchema>) => {
     const registrationNo = form.getValues('registration_no')
-    if (!registrationNo || registrationNo.length !== 8) return
+    if (!isValidRegistrationNo(registrySource, registrationNo)) return
+    const normalizedRegistrationNo = registrationNo?.trim() ?? ''
 
-    setIsLoadingAres(true)
+    setIsLoadingRegistry(true)
     try {
-      console.log('Fetching ARES data...', registrationNo)
-      const aresResponse = await fetch(
-        `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/${registrationNo}`
+      const registryData = await fetchCompanyFromRegistry(
+        registrySource,
+        normalizedRegistrationNo
       )
-      const parse = AresBusinessInformationSchema.safeParse(
-        await aresResponse.json()
+      handleCompanyDataFetched(registryData, form)
+      toast.success(
+        `Údaje z ${registryLabels[registrySource]} byly úspěšně načteny`
       )
-      console.log('parse', parse)
-      if (parse.success) {
-        const aresData = parse.data
-        console.log('aresData', aresData)
-        handleAresDataFetched(aresData, form)
-        toast.success('Údaje z ARESU byly úspěšně načteny')
-      } else {
-        console.error(parse.error)
-        toast.error('Nepodařilo se načíst údaje z ARESU')
-      }
     } catch (error) {
-      console.error('ARES fetch error:', error)
-      toast.error('Chyba při načítání údajů z ARESU')
+      console.error('Registry fetch error:', error)
+      toast.error(
+        `Nepodařilo se načíst údaje z ${registryLabels[registrySource]}`
+      )
     } finally {
-      setIsLoadingAres(false)
+      setIsLoadingRegistry(false)
     }
   }
 
@@ -490,9 +430,9 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
     navigate('/contacts')
   }
 
-  // Wrapper functions for ARES fetching
-  const handleFetchAresEdit = () => fetchAresData(editForm)
-  const handleFetchAresNew = () => fetchAresData(newForm)
+  // Wrapper functions for registry fetching
+  const handleFetchRegistryEdit = () => fetchRegistryData(editForm)
+  const handleFetchRegistryNew = () => fetchRegistryData(newForm)
 
   // Handle contact deletion
   const handleDeleteContact = async () => {
@@ -608,8 +548,10 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
               onSubmit={handleUpdateSubmit}
               isEdit={true}
               handleShowDeleteDialog={handleShowDeleteDialog}
-              isLoadingAres={isLoadingAres}
-              onFetchAres={handleFetchAresEdit}
+              isLoadingRegistry={isLoadingRegistry}
+              onFetchRegistry={handleFetchRegistryEdit}
+              registrySource={registrySource}
+              onRegistrySourceChange={setRegistrySource}
             />
           </DialogContent>
         </Dialog>
@@ -665,8 +607,10 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
               form={newForm}
               onSubmit={handleCreateSubmit}
               isEdit={false}
-              isLoadingAres={isLoadingAres}
-              onFetchAres={handleFetchAresNew}
+              isLoadingRegistry={isLoadingRegistry}
+              onFetchRegistry={handleFetchRegistryNew}
+              registrySource={registrySource}
+              onRegistrySourceChange={setRegistrySource}
             />
           </DialogContent>
         </Dialog>

@@ -1,7 +1,3 @@
-import {
-  AresBusinessInformationSchema,
-  formatStreetAddress
-} from './ContactList/ContactList'
 import { ContactForm } from './ContactList/ContactForm'
 import { trpcClient, RouterInputs, RouterOutputs } from '@/lib/trpcClient'
 import { bankAccountInputSchema } from 'faktorio-api/src/zodDbSchemas'
@@ -14,6 +10,13 @@ import {
   useMemo,
   useState
 } from 'react'
+import {
+  CompanyRegistry,
+  fetchCompanyFromRegistry,
+  isValidRegistrationNo,
+  registryLabels,
+  RegistryCompanyData
+} from '@/lib/companyRegistries'
 import {
   useForm,
   useFieldArray,
@@ -430,7 +433,8 @@ export const UserInvoicingDetails = () => {
   const [data, { refetch }] = trpcClient.invoicingDetails.useSuspenseQuery()
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()
 
-  const [isLoadingAres, setIsLoadingAres] = useState(false)
+  const [isLoadingRegistry, setIsLoadingRegistry] = useState(false)
+  const [registrySource, setRegistrySource] = useState<CompanyRegistry>('ares')
 
   const accountsFromServer = useMemo(() => {
     const accounts = data?.bankAccounts ?? []
@@ -561,37 +565,39 @@ export const UserInvoicingDetails = () => {
     [form]
   )
 
-  const fetchAresData = async () => {
-    const registrationNo = form.getValues('registration_no')
-    if (!registrationNo || registrationNo.length !== 8) return
+  const handleCompanyDataFetched = (data: RegistryCompanyData) => {
+    if (data.name !== undefined) form.setValue('name', data.name ?? '')
+    if (data.street !== undefined) form.setValue('street', data.street ?? '')
+    if (data.street2 !== undefined) form.setValue('street2', data.street2 ?? '')
+    if (data.city !== undefined) form.setValue('city', data.city ?? '')
+    if (data.zip !== undefined) form.setValue('zip', data.zip ?? '')
+    if (data.vat_no !== undefined) form.setValue('vat_no', data.vat_no ?? '')
+    if (data.country !== undefined)
+      form.setValue('country', data.country ?? 'Česká Republika')
+  }
 
-    setIsLoadingAres(true)
+  const fetchRegistryData = async () => {
+    const registrationNo = form.getValues('registration_no')
+    if (!isValidRegistrationNo(registrySource, registrationNo)) return
+    const normalizedRegistrationNo = registrationNo?.trim() ?? ''
+
+    setIsLoadingRegistry(true)
     try {
-      const aresResponse = await fetch(
-        `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/${registrationNo}`
+      const registryData = await fetchCompanyFromRegistry(
+        registrySource,
+        normalizedRegistrationNo
       )
-      const parse = AresBusinessInformationSchema.safeParse(
-        await aresResponse.json()
+      handleCompanyDataFetched(registryData)
+      toast.success(
+        `Údaje z ${registryLabels[registrySource]} byly úspěšně načteny`
       )
-      if (parse.success) {
-        const aresData = parse.data
-        form.setValue('name', aresData.obchodniJmeno)
-        form.setValue('street', formatStreetAddress(aresData))
-        form.setValue('street2', aresData.sidlo.nazevCastiObce)
-        form.setValue('city', aresData.sidlo.nazevObce)
-        form.setValue('zip', String(aresData.sidlo.psc))
-        form.setValue('vat_no', aresData.dic ?? '')
-        form.setValue('country', aresData.sidlo.nazevStatu)
-        toast.success('Údaje z ARESU byly úspěšně načteny')
-      } else {
-        console.error(parse.error)
-        toast.error('Nepodařilo se načíst údaje z ARESU')
-      }
     } catch (error) {
-      console.error('ARES fetch error:', error)
-      toast.error('Chyba při načítání údajů z ARESU')
+      console.error('Registry fetch error:', error)
+      toast.error(
+        `Nepodařilo se načíst údaje z ${registryLabels[registrySource]}`
+      )
     } finally {
-      setIsLoadingAres(false)
+      setIsLoadingRegistry(false)
     }
   }
 
@@ -677,8 +683,10 @@ export const UserInvoicingDetails = () => {
           showInvoicingFields
           showBankingFields={false}
           showDialogFooter={false}
-          isLoadingAres={isLoadingAres}
-          onFetchAres={fetchAresData}
+          isLoadingRegistry={isLoadingRegistry}
+          onFetchRegistry={fetchRegistryData}
+          registrySource={registrySource}
+          onRegistrySourceChange={setRegistrySource}
           customFooter={
             <div className="col-span-2 space-y-6">
               <section className="space-y-4">
