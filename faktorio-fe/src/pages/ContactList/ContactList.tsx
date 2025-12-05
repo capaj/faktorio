@@ -174,12 +174,13 @@ export const ContactList = () => {
   const fetchRegistryData = async (form: UseFormReturn<ContactFormSchema>) => {
     const registrationNo = form.getValues('registration_no')
     if (!isValidRegistrationNo(registrySource, registrationNo)) return
+    const normalizedRegistrationNo = registrationNo?.trim() ?? ''
 
     setIsLoadingRegistry(true)
     try {
       const registryData = await fetchCompanyFromRegistry(
         registrySource,
-        registrationNo
+        normalizedRegistrationNo
       )
       handleCompanyDataFetched(registryData, form)
       toast.success(

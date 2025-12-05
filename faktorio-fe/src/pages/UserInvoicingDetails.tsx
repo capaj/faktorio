@@ -579,12 +579,13 @@ export const UserInvoicingDetails = () => {
   const fetchRegistryData = async () => {
     const registrationNo = form.getValues('registration_no')
     if (!isValidRegistrationNo(registrySource, registrationNo)) return
+    const normalizedRegistrationNo = registrationNo?.trim() ?? ''
 
     setIsLoadingRegistry(true)
     try {
       const registryData = await fetchCompanyFromRegistry(
         registrySource,
-        registrationNo
+        normalizedRegistrationNo
       )
       handleCompanyDataFetched(registryData)
       toast.success(
