@@ -21,6 +21,7 @@ import { zodResolver } from '@/lib/zodResolver'
 import {
   CompanyRegistry,
   fetchCompanyFromRegistry,
+  isValidRegistrationNo,
   registryLabels,
   RegistryCompanyData
 } from '@/lib/companyRegistries'
@@ -172,7 +173,7 @@ export const ContactList = () => {
 
   const fetchRegistryData = async (form: UseFormReturn<ContactFormSchema>) => {
     const registrationNo = form.getValues('registration_no')
-    if (!registrationNo || registrationNo.length !== 8) return
+    if (!isValidRegistrationNo(registrySource, registrationNo)) return
 
     setIsLoadingRegistry(true)
     try {

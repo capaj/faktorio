@@ -20,6 +20,18 @@ export const registryLabels: Record<CompanyRegistry, string> = {
   rpo: 'RPO (SR)'
 }
 
+export const isValidRegistrationNo = (
+  registry: CompanyRegistry,
+  registrationNo?: string | null
+) => {
+  const normalized = registrationNo?.trim() ?? ''
+  if (!normalized) return false
+
+  return registry === 'ares'
+    ? /^\d{8}$/.test(normalized)
+    : /^\d{6,8}$/.test(normalized)
+}
+
 export type RegistryCompanyData = Partial<{
   name: string
   street: string
@@ -36,6 +48,10 @@ export const fetchCompanyFromRegistry = async (
 ): Promise<RegistryCompanyData> => {
   const normalizedRegistrationNo = registrationNo.trim()
   if (!normalizedRegistrationNo) throw new Error('Chybí IČO')
+
+  if (!isValidRegistrationNo(registry, registrationNo)) {
+    throw new Error('Neplatný formát IČO pro zvolený registr')
+  }
 
   if (registry === 'ares') {
     const aresResponse = await fetch(

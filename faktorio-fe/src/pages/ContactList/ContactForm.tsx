@@ -25,6 +25,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import {
   CompanyRegistry,
   companyRegistryOptions,
+  isValidRegistrationNo,
   registryLabels
 } from '@/lib/companyRegistries'
 
@@ -94,6 +95,10 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
   const registrationNo = form.watch(asPath('registration_no')) as
     | string
     | undefined
+  const isRegistrationNoValid = isValidRegistrationNo(
+    registrySource,
+    registrationNo ?? ''
+  )
 
   return (
     <Form {...form}>
@@ -111,7 +116,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                 <div className="flex-1">
                   <FormControl>
                     <Input
-                      placeholder="8 čísel"
+                      placeholder="IČO"
                       autoComplete="off"
                       {...field}
                     />
@@ -141,11 +146,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                       variant="secondary"
                       size="sm"
                       onClick={onFetchRegistry}
-                      disabled={
-                        !registrationNo ||
-                        registrationNo.length !== 8 ||
-                        isLoadingRegistry
-                      }
+                      disabled={!isRegistrationNoValid || isLoadingRegistry}
                       isLoading={isLoadingRegistry}
                     >
                       {`Načíst z ${registryLabels[registrySource]}`}

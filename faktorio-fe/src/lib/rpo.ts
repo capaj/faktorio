@@ -59,12 +59,27 @@ export async function getRpoOrganizationById(
   return res.json() as Promise<RpoOrganization>
 }
 
+type TemporalEntry = { effective_from: string; effective_to: string | null }
+
+const getLatestEffective = <T extends TemporalEntry>(
+  entries: T[]
+): T | undefined => {
+  if (!entries?.length) return undefined
+
+  const currentEntries = entries.filter((entry) => entry.effective_to === null)
+  const candidates = currentEntries.length ? currentEntries : entries
+
+  return [...candidates].sort(
+    (a, b) => new Date(b.effective_from).getTime() - new Date(a.effective_from).getTime()
+  )[0]
+}
+
 export function getCurrentName(org: RpoOrganization): string | undefined {
-  return org.name_entries[0]?.name
+  return getLatestEffective(org.name_entries)?.name
 }
 
 export function getCurrentIco(org: RpoOrganization): string | undefined {
-  const entry = org.identifier_entries[0]
+  const entry = getLatestEffective(org.identifier_entries)
   return entry ? String(entry.ipo) : undefined
 }
 
@@ -77,7 +92,7 @@ export function getCurrentAddress(
   zip: string
   country: string
 }> {
-  const address = org.address_entries[0]
+  const address = getLatestEffective(org.address_entries)
   if (!address) return {}
 
   const regNumber =

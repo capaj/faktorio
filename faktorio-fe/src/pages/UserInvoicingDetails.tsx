@@ -13,6 +13,7 @@ import {
 import {
   CompanyRegistry,
   fetchCompanyFromRegistry,
+  isValidRegistrationNo,
   registryLabels,
   RegistryCompanyData
 } from '@/lib/companyRegistries'
@@ -577,7 +578,7 @@ export const UserInvoicingDetails = () => {
 
   const fetchRegistryData = async () => {
     const registrationNo = form.getValues('registration_no')
-    if (!registrationNo || registrationNo.length !== 8) return
+    if (!isValidRegistrationNo(registrySource, registrationNo)) return
 
     setIsLoadingRegistry(true)
     try {
