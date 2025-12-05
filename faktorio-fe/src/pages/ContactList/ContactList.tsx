@@ -59,7 +59,7 @@ import { ContactForm } from './ContactForm'
 const baseContactSchema = z.object({
   registration_no: z.string().max(16).optional(),
   vat_no: z.string().optional(),
-  name: z.string(),
+  name: z.string().min(1, 'Jméno je povinné'),
   street: z.string().optional(),
   street2: z.string().optional(),
   city: z.string().optional(),
