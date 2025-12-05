@@ -98,10 +98,11 @@ export function getCurrentAddress(
   const regNumber =
     address.building_number ?? (address.reg_number ? String(address.reg_number) : '')
   const street = [address.street, regNumber].filter(Boolean).join(' ').trim()
+  const formatted = address.formatted_address ?? ''
 
   return {
-    street: street || address.formatted_address || '',
-    street2: address.formatted_address ?? '',
+    street: street || formatted,
+    street2: street && formatted && formatted !== street ? formatted : '',
     city: address.municipality ?? '',
     zip: address.postal_code ?? '',
     country: address.country ?? 'Slovensko'

@@ -79,6 +79,7 @@ export const fetchCompanyFromRegistry = async (
   const rpoData = await getRpoOrganizationById(normalizedRegistrationNo)
   return {
     name: getCurrentName(rpoData),
-    ...getCurrentAddress(rpoData)
+    ...getCurrentAddress(rpoData),
+    vat_no: ''
   }
 }
