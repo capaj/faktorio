@@ -1,12 +1,6 @@
-import {
-  AresBusinessInformationSchema,
-  formatStreetAddress
-} from '@/lib/ares'
-import {
-  getCurrentAddress,
-  getCurrentName,
-  getRpoOrganizationById
-} from '@/lib/rpo'
+import { AresBusinessInformationSchema, formatStreetAddress } from '@/lib/ares'
+import { getCurrentAddress, getCurrentName, RpoOrganization } from '@/lib/rpo'
+import { vanillaTrpcClient } from './trpcClient'
 
 export const companyRegistryOptions = [
   { value: 'ares', label: 'ARES (ČR)' },
@@ -40,6 +34,8 @@ export type RegistryCompanyData = Partial<{
   zip: string
   vat_no: string
   country: string
+  main_email: string
+  phone_number: string
 }>
 
 export const fetchCompanyFromRegistry = async (
@@ -60,7 +56,9 @@ export const fetchCompanyFromRegistry = async (
     if (!aresResponse.ok) {
       throw new Error(`ARES request failed: ${aresResponse.status}`)
     }
-    const parse = AresBusinessInformationSchema.safeParse(await aresResponse.json())
+    const parse = AresBusinessInformationSchema.safeParse(
+      await aresResponse.json()
+    )
     if (!parse.success) {
       throw new Error('Nepodařilo se zpracovat data z ARESU')
     }
@@ -72,14 +70,20 @@ export const fetchCompanyFromRegistry = async (
       city: aresData.sidlo.nazevObce,
       zip: String(aresData.sidlo.psc),
       vat_no: aresData.dic ?? '',
-      country: aresData.sidlo.nazevStatu
+      country: aresData.sidlo.nazevStatu,
+      main_email: '',
+      phone_number: ''
     }
   }
 
-  const rpoData = await getRpoOrganizationById(normalizedRegistrationNo)
+  const rpoData = (await vanillaTrpcClient.contacts.getRpoOrganization.query(
+    normalizedRegistrationNo
+  )) as RpoOrganization
   return {
     name: getCurrentName(rpoData),
     ...getCurrentAddress(rpoData),
-    vat_no: ''
+    vat_no: '',
+    main_email: '',
+    phone_number: ''
   }
 }

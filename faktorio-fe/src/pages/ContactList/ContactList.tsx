@@ -169,6 +169,10 @@ export const ContactList = () => {
     if (data.vat_no !== undefined) form.setValue('vat_no', data.vat_no ?? '')
     if (data.country !== undefined)
       form.setValue('country', data.country ?? 'Česká Republika')
+    if (data.main_email !== undefined)
+      form.setValue('main_email', data.main_email ?? '')
+    if (data.phone_number !== undefined)
+      form.setValue('phone_number', data.phone_number ?? '')
   }
 
   const fetchRegistryData = async (form: UseFormReturn<ContactFormSchema>) => {

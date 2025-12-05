@@ -206,5 +206,19 @@ export const contactRouter = trpcContext.router({
       .delete(contactTb)
       .where(and(eq(contactTb.id, input), eq(contactTb.user_id, ctx.user.id)))
       .execute()
-  })
+  }),
+  getRpoOrganization: protectedProc
+    .input(z.string())
+    .query(async ({ input }) => {
+      const RPO_BASE_URL =
+        'https://datahub.ekosystem.slovensko.digital/api/data/rpo'
+      const res = await fetch(`${RPO_BASE_URL}/organizations/${input}`)
+      if (!res.ok) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `RPO request failed: ${res.status} ${res.statusText}`
+        })
+      }
+      return res.json()
+    })
 })
