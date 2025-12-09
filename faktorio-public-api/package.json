@@ -27,7 +27,7 @@
     "@sinclair/typebox": "^0.34.41",
     "drizzle-orm": "^0.44.7",
     "drizzle-typebox": "^0.3.3",
-    "elysia": "^1.4.17",
+    "elysia": "^1.4.18",
     "faktorio-db": "workspace:*"
   }
 }
