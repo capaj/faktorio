@@ -52,7 +52,7 @@ export function SharedInvoicePage() {
   const docProps = {
     invoiceData: { ...invoice, items },
     qrCodeBase64: '',
-    vatPayer: true
+    vatPayer: data.vatPayer ?? false
   }
 
   const onDownload = () => {

@@ -412,6 +412,16 @@ export default {
           .where(eq(invoiceItemsTb.invoice_id, invoice.id))
           .all()
 
+        // fetch user's vat_payer setting
+        const [userDetails] = await dbInstance!
+          .select({ vat_payer: userInvoicingDetailsTb.vat_payer })
+          .from(userInvoicingDetailsTb)
+          .where(eq(userInvoicingDetailsTb.user_id, invoice.user_id))
+          .limit(1)
+          .all()
+
+        const vatPayer = userDetails?.vat_payer ?? false
+
         // track view event
         const ip =
           request.headers.get('cf-connecting-ip') ||
@@ -444,11 +454,14 @@ export default {
           .where(eq(invoiceShareTb.id, share.id))
           .run()
 
-        return new Response(JSON.stringify({ invoice, items, share }), {
-          headers: {
-            'content-type': 'application/json'
+        return new Response(
+          JSON.stringify({ invoice, items, share, vatPayer }),
+          {
+            headers: {
+              'content-type': 'application/json'
+            }
           }
-        })
+        )
       })
       // Public event logging (e.g., download)
       .post(
