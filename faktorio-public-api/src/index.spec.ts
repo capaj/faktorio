@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import worker from './index'
-import { seedDb, TEST_API_TOKEN } from '../scripts/seed'
+import { seedDb, TEST_API_TOKEN, TEST_SHARE_ID } from '../scripts/seed'
 
 // For now, you'll need to do something like this to get a correctly-typed `Request`.
 const IncomingRequest = Request<unknown, IncomingRequestCfProperties>
@@ -9,7 +9,7 @@ describe('Public API', () => {
   beforeAll(async () => {
     await seedDb()
   })
-  it('GET /invoices returns empty list for seeded user', async () => {
+  it('GET /invoices returns invoices for seeded user', async () => {
     const url = new URL('http://faktorio.cz/invoices')
     url.searchParams.set('limit', '10')
     const request = new IncomingRequest(url.toString(), {
@@ -26,7 +26,8 @@ describe('Public API', () => {
     const body = (await response.json()) as { invoices: unknown[] }
     expect(body).toHaveProperty('invoices')
     expect(Array.isArray(body.invoices)).toBe(true)
-    expect(body.invoices.length).toBe(0)
+    // We have 1 seeded invoice for shared invoice testing
+    expect(body.invoices.length).toBeGreaterThanOrEqual(1)
   })
 
   it('POST /invoices creates invoice and GET returns it', async () => {
@@ -81,5 +82,38 @@ describe('Public API', () => {
     }
     expect(getBody.invoice.id).toBe(createBody.id)
     expect(getBody.items.length).toBe(1)
+  })
+
+  it('GET /shared-invoice/:shareId returns invoice with vatPayer', async () => {
+    const url = new URL(`http://faktorio.cz/shared-invoice/${TEST_SHARE_ID}`)
+    const request = new IncomingRequest(url.toString())
+
+    const response = await worker.fetch(request, {
+      TURSO_DATABASE_URL: 'file:test.sqlite'
+    })
+
+    expect(response.status).toBe(200)
+    const body = (await response.json()) as {
+      invoice: { id: string; number: string }
+      items: unknown[]
+      share: { id: string }
+      vatPayer: boolean
+    }
+    expect(body.invoice.number).toBe('2024-SHARE-001')
+    expect(body.share.id).toBe(TEST_SHARE_ID)
+    expect(typeof body.vatPayer).toBe('boolean')
+    // Default vat_payer in seed is true
+    expect(body.vatPayer).toBe(true)
+  })
+
+  it('GET /shared-invoice/:shareId returns 404 for non-existent share', async () => {
+    const url = new URL('http://faktorio.cz/shared-invoice/non_existent_share')
+    const request = new IncomingRequest(url.toString())
+
+    const response = await worker.fetch(request, {
+      TURSO_DATABASE_URL: 'file:test.sqlite'
+    })
+
+    expect(response.status).toBe(404)
   })
 })
