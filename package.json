@@ -9,13 +9,13 @@
   ],
   "devDependencies": {
     "@playwright/test": "^1.57.0",
-    "@types/node": "^25.0.2",
+    "@types/node": "^25.0.3",
     "npm-check-updates": "^19.2.0",
     "oxlint": "^1.33.0",
     "prettier": "^3.7.4",
     "turbo": "^2.6.3",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.16"
   },
   "packageManager": "pnpm@10.26.0",
   "scripts": {
