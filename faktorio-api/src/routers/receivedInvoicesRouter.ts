@@ -345,7 +345,7 @@ The text that is partially unreadable, leave the "?" for each unreadable charact
 
         let result
         try {
-          result = await makeGeminiRequest('gemini-2.5-flash')
+          result = await makeGeminiRequest('gemini-3-flash-preview')
         } catch (err) {
           const message = (err as Error)?.message ?? ''
           const status =
