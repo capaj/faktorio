@@ -104,7 +104,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="grid grid-cols-2 gap-4"
+        className="grid grid-cols-1 gap-4 md:grid-cols-2"
       >
         <FormField
           control={form.control}
@@ -112,7 +112,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{fieldLabels.registration_no}</FormLabel>
-              <div className="flex items-end space-x-2">
+              <div className="flex flex-col gap-2 md:flex-row md:items-end md:space-x-2">
                 <div className="flex-1">
                   <FormControl>
                     <Input
@@ -123,14 +123,14 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                   </FormControl>
                 </div>
                 {onFetchRegistry && (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-center md:space-x-2">
                     <Select
                       value={registrySource}
                       onValueChange={(value) =>
                         onRegistrySourceChange?.(value as CompanyRegistry)
                       }
                     >
-                      <SelectTrigger className="w-[150px]">
+                      <SelectTrigger className="w-full md:w-[150px]">
                         <SelectValue placeholder="Vyberte registr" />
                       </SelectTrigger>
                       <SelectContent>
@@ -145,6 +145,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                       type="button"
                       variant="secondary"
                       size="sm"
+                      className="w-full md:w-auto"
                       onClick={onFetchRegistry}
                       disabled={!isRegistrationNoValid || isLoadingRegistry}
                       isLoading={isLoadingRegistry}
@@ -303,7 +304,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
           )}
         />
 
-        <div className="flex flex-row gap-2">
+        <div className="col-span-2 flex flex-col gap-4 md:flex-row md:gap-2">
           <FormField
             control={form.control}
             name={asPath('country')}
@@ -321,7 +322,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
             control={form.control}
             name={asPath('language')}
             render={({ field }) => (
-              <FormItem className="flex-1/2 max-w-1/3">
+              <FormItem className="w-full md:w-1/3">
                 <FormLabel>{fieldLabels.language}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
