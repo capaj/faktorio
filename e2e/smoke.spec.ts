@@ -92,6 +92,13 @@ test('smoke', async ({ page }) => {
   await page.getByLabel('Množství', { exact: true }).first().fill('1')
   await page.getByLabel('Cena/jedn.', { exact: true }).first().fill('10000')
 
+  // Add a second invoice item to catch unique constraint bugs on (invoice_id, order)
+  await page.getByRole('button', { name: 'Další položka' }).click()
+
+  await page.getByPlaceholder('Popis položky').nth(1).fill('Support services')
+  await page.getByPlaceholder('Množství').nth(1).fill('2')
+  await page.getByPlaceholder('Cena/jedn.').nth(1).fill('5000')
+
   // Save the invoice
   await page.getByRole('button', { name: 'Vytvořit fakturu' }).click()
 
