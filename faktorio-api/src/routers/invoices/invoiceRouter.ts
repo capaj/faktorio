@@ -287,8 +287,9 @@ export const invoiceRouter = trpcContext.router({
         await tx
           .insert(invoiceItemsTb)
           .values(
-            input.items.map((item) => ({
+            input.items.map((item, index) => ({
               ...item,
+              order: index,
               invoice_id: invoice.id
             }))
           )
@@ -495,12 +496,13 @@ export const invoiceRouter = trpcContext.router({
         await tx
           .insert(invoiceItemsTb)
           .values(
-            input.items.map((item) => {
-              const { id, created_at: _created_at, updated_at: _updated_at, invoice_id: _invoice_id, ...itemData } = item as any
+            input.items.map((item, index) => {
+              const { id, created_at: _created_at, updated_at: _updated_at, invoice_id: _invoice_id, order: _order, ...itemData } = item as any
               // For new items (no id or id === 0), omit the id to let SQLite auto-generate
               // For existing items, keep their id
               const itemToInsert: any = {
                 ...itemData,
+                order: index,
                 invoice_id: input.id
               }
 
