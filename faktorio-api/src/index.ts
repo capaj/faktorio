@@ -106,9 +106,18 @@ export default {
           }
         }
       },
+      /**
+       * main error handling logic for tRPC requests. This logs errors to the console so that we can inspect them in Cloudflare workers dashboard
+       */
       onError: (errCtx) => {
         const { path, input, ctx, type, error } = errCtx
         console.error(error)
+        // Log the full error cause chain for database errors
+        let cause = (error as unknown as { cause?: Error }).cause
+        while (cause) {
+          console.error(`${type} cause:`, cause.message, cause)
+          cause = (cause as unknown as { cause?: Error }).cause
+        }
         console.error(`${type} ${path} failed for:`)
 
         const inputLength = input ? JSON.stringify(input).length : 0
