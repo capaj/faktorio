@@ -162,7 +162,6 @@ export function SignupPage() {
                   theme="outline"
                   text="signup_with"
                   shape="rectangular"
-                  locale="cs_CZ"
                 />
               </GoogleOAuthProvider>
             </div>

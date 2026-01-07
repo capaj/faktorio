@@ -92,7 +92,6 @@ export function LoginPage() {
                   theme="outline"
                   text="signin_with"
                   shape="rectangular"
-                  locale="cs_CZ"
                   type="standard"
                   width="280"
                 />

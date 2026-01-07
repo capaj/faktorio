@@ -10,14 +10,14 @@
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@types/node": "^25.0.3",
-    "npm-check-updates": "^19.2.0",
-    "oxlint": "^1.33.0",
+    "npm-check-updates": "^19.3.1",
+    "oxlint": "^1.38.0",
     "prettier": "^3.7.4",
-    "turbo": "^2.6.3",
+    "turbo": "^2.7.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   },
-  "packageManager": "pnpm@10.26.0",
+  "packageManager": "pnpm@10.27.0",
   "scripts": {
     "dev:fe": "cd faktorio-fe && pnpm dev",
     "dev:api": "cd faktorio-api && pnpm dev",
@@ -38,6 +38,6 @@
     "dayjs": "^1.11.19",
     "npm-run-all": "^4.1.5",
     "superjson": "^2.2.6",
-    "zod": "^4.2.1"
+    "zod": "^4.3.5"
   }
 }
