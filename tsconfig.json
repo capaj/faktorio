@@ -17,6 +17,8 @@
 
     /* Linting */
     "strict": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true

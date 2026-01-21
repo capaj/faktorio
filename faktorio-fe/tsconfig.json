@@ -17,6 +17,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "composite": true,
+    "incremental": true,
     /* Linting */
     "strict": true,
     // "noUnusedLocals": true,
