@@ -14,17 +14,17 @@
   },
   "devDependencies": {
     "@types/node": "^25.0.10",
-    "@cloudflare/vitest-pool-workers": "^0.12.5",
+    "@cloudflare/vitest-pool-workers": "^0.12.6",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "vitest": "~4.0.17",
-    "wrangler": "^4.59.3"
+    "vitest": "~4.0.18",
+    "wrangler": "^4.60.0"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/swagger": "^1.3.1",
     "@libsql/client": "^0.17.0",
-    "@sinclair/typebox": "^0.34.47",
+    "@sinclair/typebox": "^0.34.48",
     "drizzle-orm": "^0.45.1",
     "drizzle-typebox": "^0.3.3",
     "elysia": "^1.4.22",
