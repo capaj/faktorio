@@ -3,6 +3,7 @@ import { trpcClient } from '@/lib/trpcClient'
 import { ContactComboBox } from './ContactComboBox'
 import { LucidePlus, LucideTrash2, LucideClock } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Button, ButtonWithLoader } from '@/components/ui/button'
 import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
 import { djs } from 'faktorio-shared/src/djs'
@@ -604,11 +605,11 @@ const InvoiceItemForm = ({
             control={control}
             name={`items.${index}.description`}
             render={({ field }) => (
-              <Input
+              <Textarea
                 id={`items.${index}.description`}
-                className="w-full sm:w-96 md:flex-grow col-span-2"
+                className="w-full sm:w-96 md:flex-grow col-span-2 min-h-20"
                 placeholder="Popis položky"
-                type="text"
+                rows={2}
                 {...field}
                 value={field.value || ''}
               />
