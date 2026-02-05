@@ -3,6 +3,7 @@ import {
   contactTb,
   invoiceItemsTb,
   invoicesTb,
+  invoiceTemplatesTb,
   userInvoicingDetailsTb,
   userBankAccountsTb
 } from 'faktorio-db/schema'
@@ -39,6 +40,25 @@ const createInvoiceInput = z.object({
       unit_price: z.coerce.number().optional(),
       vat_rate: z.coerce.number().optional()
     })
+  )
+})
+
+const invoiceTemplateDataSchema = z.object({
+  invoice: invoiceSchema
+    .omit({ client_contact_id: true })
+    .extend({
+      client_contact_id: z.string().optional(),
+      language: z.string().optional(),
+      number: z.string().optional()
+    }),
+  items: z.array(
+    invoiceItemFormSchema
+      .extend({
+        quantity: z.coerce.number().optional(),
+        unit_price: z.coerce.number().optional(),
+        vat_rate: z.coerce.number().optional()
+      })
+      .partial({ order: true })
   )
 })
 
@@ -426,6 +446,59 @@ export const invoiceRouter = trpcContext.router({
         ...res,
         items
       }
+    }),
+  listTemplates: protectedProc.query(async ({ ctx }) => {
+    const templates = await ctx.db.query.invoiceTemplatesTb.findMany({
+      where: eq(invoiceTemplatesTb.user_id, ctx.user.id),
+      orderBy: desc(invoiceTemplatesTb.created_at)
+    })
+
+    const parsedTemplates: {
+      id: string
+      user_id: string
+      name: string
+      created_at: string
+      updated_at: string | null
+      data: z.infer<typeof invoiceTemplateDataSchema>
+    }[] = []
+
+    for (const template of templates) {
+      const parsed = invoiceTemplateDataSchema.safeParse(template.data)
+      if (!parsed.success) {
+        console.warn('Skipping invalid invoice template', template.id)
+        continue
+      }
+
+      parsedTemplates.push({ ...template, data: parsed.data })
+    }
+
+    return parsedTemplates
+  }),
+  saveTemplateFromInvoice: protectedProc
+    .input(
+      z.object({
+        name: z.string().min(1).max(200),
+        data: invoiceTemplateDataSchema
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const templateData = invoiceTemplateDataSchema.parse(input.data)
+
+      const [template] = await ctx.db
+        .insert(invoiceTemplatesTb)
+        .values({
+          name: input.name.trim(),
+          user_id: ctx.user.id,
+          data: templateData
+        })
+        .onConflictDoUpdate({
+          target: [invoiceTemplatesTb.user_id, invoiceTemplatesTb.name],
+          set: { data: templateData, updated_at: sql`CURRENT_TIMESTAMP` }
+        })
+        .returning()
+        .execute()
+
+      return template
     }),
   delete: protectedProc
     .input(

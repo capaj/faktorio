@@ -12,6 +12,7 @@ import {
   User,
   BookOpen,
   Plus,
+  Copy,
   FileText,
   Download,
   Users,
@@ -182,6 +183,13 @@ export const Header = () => {
                   </ButtonLink>
                   <ButtonLink
                     className={mobileMenuButtonClass}
+                    href="/new-invoice?fromTemplate=true"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Vystavit ze šablony
+                  </ButtonLink>
+                  <ButtonLink
+                    className={mobileMenuButtonClass}
                     href="/invoices"
                   >
                     <Receipt className="mr-2 h-4 w-4" />
@@ -244,6 +252,13 @@ export const Header = () => {
               >
                 <Plus className="h-4 w-4" />
                 Vystavit fakturu
+              </ButtonLink>
+              <ButtonLink
+                href="/new-invoice?fromTemplate=true"
+                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+              >
+                <Copy className="h-4 w-4" />
+                Vystavit ze šablony
               </ButtonLink>
               <ButtonLink
                 href="/invoices"
