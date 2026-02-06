@@ -13,12 +13,12 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@types/node": "^25.0.10",
-    "@cloudflare/vitest-pool-workers": "^0.12.6",
+    "@types/node": "^25.2.1",
+    "@cloudflare/vitest-pool-workers": "^0.12.10",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "~4.0.18",
-    "wrangler": "^4.60.0"
+    "wrangler": "^4.63.0"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",

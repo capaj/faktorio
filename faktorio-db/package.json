@@ -10,11 +10,11 @@
     "local-migrations-generate": "tsx ./scripts/update-fe-migrations.ts",
     "dup": "drizzle-kit up"
   },
-  "packageManager": "pnpm@10.28.1",
+  "packageManager": "pnpm@10.28.2",
   "dependencies": {
     "@libsql/client": "^0.17.0",
     "@paralleldrive/cuid2": "^2.2.2",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.2.4",
     "drizzle-orm": "^0.45.1",
     "faktorio-shared": "workspace:*"
   },
