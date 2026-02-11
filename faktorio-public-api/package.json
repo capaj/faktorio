@@ -13,12 +13,12 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@types/node": "^25.2.1",
-    "@cloudflare/vitest-pool-workers": "^0.12.10",
+    "@types/node": "^25.2.3",
+    "@cloudflare/vitest-pool-workers": "^0.12.11",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "~4.0.18",
-    "wrangler": "^4.63.0"
+    "wrangler": "^4.64.0"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
@@ -27,7 +27,7 @@
     "@sinclair/typebox": "^0.34.48",
     "drizzle-orm": "^0.45.1",
     "drizzle-typebox": "^0.3.3",
-    "elysia": "^1.4.22",
+    "elysia": "^1.4.24",
     "faktorio-db": "workspace:*"
   }
 }
