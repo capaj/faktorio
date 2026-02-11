@@ -49,6 +49,17 @@ const defaultInvoiceItem = {
   vat_rate: 21
 }
 
+const parseLocalizedFloat = (value: string) => {
+  const normalizedValue = value.replace(',', '.').trim()
+
+  if (normalizedValue === '') {
+    return undefined
+  }
+
+  const parsedValue = Number.parseFloat(normalizedValue)
+  return Number.isNaN(parsedValue) ? undefined : parsedValue
+}
+
 export const NewInvoicePage = () => {
   const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
   const [contacts] = trpcClient.contacts.all.useSuspenseQuery()
@@ -427,14 +438,16 @@ export const NewInvoicePage = () => {
                     <FormLabel>Kurz</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        min={0}
-                        step={0.01}
+                        type="text"
+                        inputMode="decimal"
                         {...field}
                         value={field.value ?? ''}
                         onChange={(e) => {
-                          const v = e.target.value
-                          field.onChange(v === '' ? null : Number(v))
+                          const parsedValue = parseLocalizedFloat(
+                            e.target.value
+                          )
+
+                          field.onChange(parsedValue ?? null)
                         }}
                       />
                     </FormControl>
@@ -562,11 +575,14 @@ const InvoiceItemForm = ({
               <Input
                 id={`items.${index}.quantity`}
                 className="w-full sm:w-24"
-                type="number"
-                min={0}
+                type="text"
+                inputMode="decimal"
                 placeholder="Množství"
                 {...field}
                 value={field.value || ''}
+                onChange={(e) => {
+                  field.onChange(parseLocalizedFloat(e.target.value))
+                }}
               />
             )}
           />
@@ -633,10 +649,13 @@ const InvoiceItemForm = ({
                 id={`items.${index}.unit_price`}
                 className="w-full sm:w-32"
                 placeholder="Cena/jedn."
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 {...field}
                 value={field.value || ''}
+                onChange={(e) => {
+                  field.onChange(parseLocalizedFloat(e.target.value))
+                }}
               />
             )}
           />
@@ -657,15 +676,21 @@ const InvoiceItemForm = ({
                   id={`items.${index}.vat_rate`}
                   className="w-full sm:w-20"
                   placeholder="DPH %"
-                  type="number"
-                  min={0}
+                  type="text"
+                  inputMode="decimal"
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => {
-                    const vatRate = parseFloat(e.target.value)
+                    const vatRate = parseLocalizedFloat(e.target.value)
+
+                    if (vatRate === undefined) {
+                      field.onChange(undefined)
+                      return
+                    }
+
                     if (
                       vatRate === 0 &&
-                      field.value > 0 &&
+                      (field.value ?? 0) > 0 &&
                       selectedContactId &&
                       contacts
                         .find((c) => c.id === selectedContactId)
@@ -674,7 +699,7 @@ const InvoiceItemForm = ({
                     ) {
                       setShowVatWarning(true)
                     } else {
-                      field.onChange(e)
+                      field.onChange(vatRate)
                     }
                   }}
                 />
