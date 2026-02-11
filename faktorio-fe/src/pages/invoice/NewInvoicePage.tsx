@@ -60,6 +60,44 @@ const parseLocalizedFloat = (value: string) => {
   return Number.isNaN(parsedValue) ? undefined : parsedValue
 }
 
+const LocalizedNumberInput = ({
+  value,
+  onChange,
+  ...props
+}: Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange'> & {
+  value: number | undefined
+  onChange: (value: number | undefined) => void
+}) => {
+  const [localValue, setLocalValue] = useState(() =>
+    value !== undefined ? String(value) : ''
+  )
+
+  useEffect(() => {
+    if (value !== undefined && parseLocalizedFloat(localValue) !== value) {
+      setLocalValue(String(value))
+    } else if (value === undefined && localValue !== '' && parseLocalizedFloat(localValue) !== undefined) {
+      setLocalValue('')
+    }
+  }, [value])
+
+  return (
+    <Input
+      type="text"
+      inputMode="decimal"
+      {...props}
+      value={localValue}
+      onChange={(e) => {
+        const raw = e.target.value
+        if (raw === '' || /^-?\d*[,.]?\d*$/.test(raw)) {
+          setLocalValue(raw)
+          const parsed = parseLocalizedFloat(raw)
+          onChange(parsed)
+        }
+      }}
+    />
+  )
+}
+
 export const NewInvoicePage = () => {
   const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
   const [contacts] = trpcClient.contacts.all.useSuspenseQuery()
@@ -572,17 +610,12 @@ const InvoiceItemForm = ({
             control={control}
             name={`items.${index}.quantity`}
             render={({ field }) => (
-              <Input
+              <LocalizedNumberInput
                 id={`items.${index}.quantity`}
                 className="w-full sm:w-24"
-                type="text"
-                inputMode="decimal"
                 placeholder="Množství"
-                {...field}
-                value={field.value || ''}
-                onChange={(e) => {
-                  field.onChange(parseLocalizedFloat(e.target.value))
-                }}
+                value={field.value}
+                onChange={field.onChange}
               />
             )}
           />
@@ -645,17 +678,12 @@ const InvoiceItemForm = ({
             control={control}
             name={`items.${index}.unit_price`}
             render={({ field }) => (
-              <Input
+              <LocalizedNumberInput
                 id={`items.${index}.unit_price`}
                 className="w-full sm:w-32"
                 placeholder="Cena/jedn."
-                type="text"
-                inputMode="decimal"
-                {...field}
-                value={field.value || ''}
-                onChange={(e) => {
-                  field.onChange(parseLocalizedFloat(e.target.value))
-                }}
+                value={field.value}
+                onChange={field.onChange}
               />
             )}
           />
@@ -672,17 +700,12 @@ const InvoiceItemForm = ({
               control={control}
               name={`items.${index}.vat_rate`}
               render={({ field }) => (
-                <Input
+                <LocalizedNumberInput
                   id={`items.${index}.vat_rate`}
                   className="w-full sm:w-20"
                   placeholder="DPH %"
-                  type="text"
-                  inputMode="decimal"
-                  {...field}
-                  value={field.value || ''}
-                  onChange={(e) => {
-                    const vatRate = parseLocalizedFloat(e.target.value)
-
+                  value={field.value}
+                  onChange={(vatRate) => {
                     if (vatRate === undefined) {
                       field.onChange(undefined)
                       return
