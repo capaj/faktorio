@@ -295,9 +295,9 @@ export const receivedInvoicesRouter = trpcContext.router({
           })
         }
 
-        // Clean the image data (remove data:image/jpeg;base64, prefix if present)
+        // Clean the base64 data (remove any data URI prefix, e.g. data:image/jpeg;base64, or data:application/pdf;base64,)
         const base64Data = input.imageData.replace(
-          /^data:image\/\w+;base64,/,
+          /^data:[^;]+;base64,/,
           ''
         )
         // yes it's weird that we need to put the json schema in the prompt
