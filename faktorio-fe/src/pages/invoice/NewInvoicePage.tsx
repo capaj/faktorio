@@ -7,7 +7,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button, ButtonWithLoader } from '@/components/ui/button'
 import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
 import { djs } from 'faktorio-shared/src/djs'
-import { useFieldArray, useForm, useFormContext, Control } from 'react-hook-form'
+import {
+  useFieldArray,
+  useForm,
+  useFormContext,
+  Control
+} from 'react-hook-form'
 import { z } from 'zod/v4'
 import {
   invoiceItemFormSchema,
@@ -75,7 +80,11 @@ const LocalizedNumberInput = ({
   useEffect(() => {
     if (value !== undefined && parseLocalizedFloat(localValue) !== value) {
       setLocalValue(String(value))
-    } else if (value === undefined && localValue !== '' && parseLocalizedFloat(localValue) !== undefined) {
+    } else if (
+      value === undefined &&
+      localValue !== '' &&
+      parseLocalizedFloat(localValue) !== undefined
+    ) {
       setLocalValue('')
     }
   }, [value])
@@ -712,6 +721,7 @@ const InvoiceItemForm = ({
                     }
 
                     if (
+                      vatPayer &&
                       vatRate === 0 &&
                       (field.value ?? 0) > 0 &&
                       selectedContactId &&

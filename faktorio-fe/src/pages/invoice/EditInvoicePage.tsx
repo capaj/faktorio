@@ -33,6 +33,58 @@ import { InvoiceTotals } from './InvoiceTotals'
 import { Label } from '@/components/ui/label'
 import type { UserBankAccountSelectType } from 'faktorio-api/src/zodDbSchemas'
 
+const parseLocalizedFloat = (value: string) => {
+  const normalizedValue = value.replace(',', '.').trim()
+
+  if (normalizedValue === '') {
+    return undefined
+  }
+
+  const parsedValue = Number.parseFloat(normalizedValue)
+  return Number.isNaN(parsedValue) ? undefined : parsedValue
+}
+
+const LocalizedNumberInput = ({
+  value,
+  onChange,
+  ...props
+}: Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange'> & {
+  value: number | undefined
+  onChange: (value: number | undefined) => void
+}) => {
+  const [localValue, setLocalValue] = useState(() =>
+    value !== undefined ? String(value) : ''
+  )
+
+  useEffect(() => {
+    if (value !== undefined && parseLocalizedFloat(localValue) !== value) {
+      setLocalValue(String(value))
+    } else if (
+      value === undefined &&
+      localValue !== '' &&
+      parseLocalizedFloat(localValue) !== undefined
+    ) {
+      setLocalValue('')
+    }
+  }, [value])
+
+  return (
+    <Input
+      type="text"
+      inputMode="decimal"
+      {...props}
+      value={localValue}
+      onChange={(e) => {
+        const raw = e.target.value
+        if (raw === '' || /^-?\d*[,.]?\d*$/.test(raw)) {
+          setLocalValue(raw)
+          onChange(parseLocalizedFloat(raw))
+        }
+      }}
+    />
+  )
+}
+
 export const EditInvoicePage = () => {
   const [invoice] = useInvoiceQueryByUrlParam()
   const contactsQuery = trpcClient.contacts.all.useQuery()
@@ -213,14 +265,14 @@ export const EditInvoicePage = () => {
   )
   const totalVat = invoicingDetails?.vat_payer
     ? invoiceItems.reduce(
-      (acc, item) =>
-        acc +
-        ((item.quantity ?? 0) *
-          (item.unit_price ?? 0) *
-          (item.vat_rate ?? 0)) /
-        100,
-      0
-    )
+        (acc, item) =>
+          acc +
+          ((item.quantity ?? 0) *
+            (item.unit_price ?? 0) *
+            (item.vat_rate ?? 0)) /
+            100,
+        0
+      )
     : 0
 
   if (contactsQuery.data?.length === 0) {
@@ -237,7 +289,7 @@ export const EditInvoicePage = () => {
       unit_price: 0,
       vat_rate: formValues.currency === 'CZK' ? 21 : 0,
       order
-    } as typeof invoice.items[0]
+    } as (typeof invoice.items)[0]
   }
 
   useEffect(() => {
@@ -638,13 +690,11 @@ const InvoiceItemForm = ({
               control={control}
               name={`items.${index}.vat_rate`}
               render={({ field }) => (
-                <Input
+                <LocalizedNumberInput
                   className="w-full sm:w-20"
                   placeholder="DPH %"
-                  type="number"
-                  min={0}
-                  {...field}
-                  value={field.value || ''}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               )}
             />
