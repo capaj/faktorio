@@ -76,28 +76,28 @@
     },
     "issue_date": {
       "type": "string",
-      "format": "date-time",
+      "format": "date",
       "description": "Date when invoice was issued (YYYY-MM-DD)"
     },
     "taxable_supply_date": {
       "type": "string",
-      "format": "date-time",
+      "format": "date",
       "description": "DUZP - Datum uskutečnění zdanitelného plnění (YYYY-MM-DD). Same as issue_date if not specified otherwise."
     },
     "due_date": {
       "type": "string",
-      "format": "date-time",
+      "format": "date",
       "description": "Payment due date (YYYY-MM-DD)"
     },
     "receipt_date": {
       "type": "string",
-      "format": "date-time",
+      "format": "date",
       "nullable": true,
       "description": "Date when invoice was received (YYYY-MM-DD)"
     },
     "payment_date": {
       "type": "string",
-      "format": "date-time",
+      "format": "date",
       "nullable": true,
       "description": "Date when invoice was paid (YYYY-MM-DD)"
     },

@@ -46,6 +46,8 @@ import { trpcClient } from '@/lib/trpcClient'
 import { cn } from '@/lib/utils'
 import Papa from 'papaparse'
 
+const MAX_UPLOAD_SIZE_BYTES = 7 * 1024 * 1024
+
 // Define validation schema for the form
 const receivedInvoiceFormSchema = z.object({
   supplier_name: z.string().min(1, 'Jméno dodavatele je povinné'),
@@ -227,11 +229,11 @@ export function ReceivedInvoicesPage() {
 
       const handleProcessedFile = (processedFile: File) => {
         // Check file size (max 7MB)
-        const maxSize = 7 * 1024 * 1024 // 7MB in bytes
-        if (processedFile.size > maxSize) {
+        if (processedFile.size > MAX_UPLOAD_SIZE_BYTES) {
           toast.error(
             'Soubor je příliš velký. Maximální povolená velikost je 7 MB.'
           )
+          setIsProcessingImage(false)
           return
         }
 

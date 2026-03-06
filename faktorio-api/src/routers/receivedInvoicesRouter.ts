@@ -2,12 +2,11 @@ import { z } from 'zod/v4'
 
 import { receivedInvoiceTb } from 'faktorio-db/schema'
 import { protectedProc } from '../isAuthorizedMiddleware'
-import { trpcContext } from '../trpcContext'
+import { trpcContext, TrpcContext } from '../trpcContext'
 import { eq, desc, and, gte, lt, SQL } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
 import schema from '../json-schema/receivedInvoicesSchema.json'
-import { Schema } from '@google/genai'
 import { stringDateSchema, paymentMethodEnum } from './zodSchemas'
 
 // Define Zod schema based on Drizzle schema, making fields optional/required as needed for creation
@@ -114,6 +113,177 @@ const ocrResponseSchema = z.object({
   status: z.enum(['received', 'verified', 'disputed', 'paid']).optional(),
   line_items_summary: z.string().optional().nullable()
 })
+
+const GEMINI_REQUEST_TIMEOUT_MS = 45_000
+const PDF_TOTAL_REQUEST_TIMEOUT_MS = 60_000
+const PDF_FULL_ATTEMPT_TIMEOUT_MS = 25_000
+const PDF_FALLBACK_ATTEMPT_TIMEOUT_MS = 15_000
+
+const pdfFallbackSchema = {
+  type: 'object',
+  required: [
+    'supplier_name',
+    'invoice_number',
+    'issue_date',
+    'due_date',
+    'total_with_vat'
+  ],
+  properties: {
+    supplier_name: {
+      type: 'string'
+    },
+    supplier_registration_no: {
+      type: 'string',
+      nullable: true
+    },
+    supplier_vat_no: {
+      type: 'string',
+      nullable: true
+    },
+    invoice_number: {
+      type: 'string'
+    },
+    variable_symbol: {
+      type: 'string',
+      nullable: true
+    },
+    issue_date: {
+      type: 'string',
+      format: 'date'
+    },
+    taxable_supply_date: {
+      type: 'string',
+      format: 'date',
+      nullable: true
+    },
+    due_date: {
+      type: 'string',
+      format: 'date'
+    },
+    total_without_vat: {
+      type: 'number',
+      nullable: true
+    },
+    total_with_vat: {
+      type: 'number'
+    },
+    currency: {
+      type: 'string',
+      minLength: 3,
+      maxLength: 3
+    },
+    vat_base_21: {
+      type: 'number',
+      nullable: true
+    },
+    vat_21: {
+      type: 'number',
+      nullable: true
+    },
+    payment_method: {
+      type: 'string',
+      enum: ['bank', 'cash', 'card', 'cod', 'crypto', 'other'],
+      nullable: true
+    },
+    line_items_summary: {
+      type: 'string',
+      nullable: true,
+      maxLength: 90
+    }
+  }
+} as const
+
+const fullExtractionPrompt = `Extract invoice data from this invoice document.
+Return ONLY a JSON object.
+If you cannot extract some fields, leave them as null.
+For dates, use the format YYYY-MM-DD.
+If the document is a credit note (dobropis), make all taxable amounts, VAT amounts, and totals negative.
+If text is partially unreadable, leave "?" for each unreadable character.`
+
+const pdfFallbackPrompt = `Extract only the essential invoice metadata needed to create a received invoice quickly from this PDF.
+Do not extract line items unless they are trivial to identify.
+Prefer the main invoice totals and dates over detailed breakdowns.
+Return ONLY a JSON object.
+If you cannot extract some fields, leave them as null.
+For dates, use the format YYYY-MM-DD.
+If the document is a credit note (dobropis), make all taxable amounts, VAT amounts, and totals negative.`
+
+function isRetryableGeminiError(error: unknown) {
+  const message = (error as Error)?.message ?? ''
+  const status =
+    (error as any)?.status ??
+    (error as any)?.response?.status ??
+    (error as any)?.code
+
+  return (
+    status === 408 ||
+    status === 503 ||
+    status === 504 ||
+    status === 524 ||
+    (error as Error)?.name === 'AbortError' ||
+    /DEADLINE_EXCEEDED/i.test(String(message)) ||
+    /UNAVAILABLE/i.test(String(message)) ||
+    /model is overloaded/i.test(String(message)) ||
+    /timed out/i.test(String(message)) ||
+    /timeout/i.test(String(message)) ||
+    /aborted/i.test(String(message)) ||
+    /error code: 524/i.test(String(message))
+  )
+}
+
+function isInvalidGeminiApiKeyError(error: unknown) {
+  const message = (error as Error)?.message ?? ''
+  const details = (error as any)?.errorDetails
+
+  return (
+    /API key not valid/i.test(String(message)) ||
+    /API_KEY_INVALID/i.test(String(message)) ||
+    (Array.isArray(details) &&
+      details.some(
+        (detail) =>
+          detail?.reason === 'API_KEY_INVALID' ||
+          /API key not valid/i.test(String(detail?.message ?? ''))
+      ))
+  )
+}
+
+async function withAbortTimeout<T>(
+  timeoutMs: number,
+  fn: (abortSignal: AbortSignal) => Promise<T>
+) {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    return await fn(controller.signal)
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+async function waitForGeminiFileActive(
+  ctx: Pick<TrpcContext, 'googleGenAIFileManager'>,
+  fileName: string,
+  abortSignal: AbortSignal
+) {
+  while (true) {
+    if (abortSignal.aborted) {
+      throw new Error('Gemini file activation timed out')
+    }
+
+    const file = await ctx.googleGenAIFileManager.getFile(fileName)
+
+    if (file.state === 'ACTIVE') {
+      return file
+    }
+
+    if (file.state === 'FAILED') {
+      throw new Error('Gemini failed to process uploaded PDF')
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+  }
+}
 
 export const receivedInvoicesRouter = trpcContext.router({
   list: protectedProc
@@ -300,86 +470,154 @@ export const receivedInvoicesRouter = trpcContext.router({
           /^data:[^;]+;base64,/,
           ''
         )
-        // yes it's weird that we need to put the json schema in the prompt
-        const prompt = `Extract invoice data from this image. Respond with valid JSON according to the following schema:
-\`\`\`json
-${JSON.stringify(schema)}
-\`\`\`
-
-Return ONLY the JSON object, nothing else. If you cannot extract some fields, leave them as null.
-For dates, use the format YYYY-MM-DD. If you can't determine the exact date, make your best guess.
-If the document is a credit note (dobropis), make sure all taxable amounts, VAT amounts, and totals are negative values.
-The text that is partially unreadable, leave the "?" for each unreadable character.`
-
         // Get the model
 
         // TODO use https://googleapis.github.io/js-genai/main/classes/files.Files.html to allow uploading files bigger than 7MB
 
-        const makeGeminiRequest = (model: string) =>
-          ctx.googleGenAI.models.generateContent({
-            model,
-            contents: [
-              {
-                parts: [
-                  { text: prompt },
-                  {
+        const requestPlan =
+          input.mimeType === 'application/pdf'
+            ? [
+                {
+                  model: 'gemini-3-flash-preview',
+                  timeoutMs: PDF_FULL_ATTEMPT_TIMEOUT_MS,
+                  prompt: fullExtractionPrompt,
+                  responseSchema: schema as any,
+                  maxOutputTokens: 2048
+                },
+                {
+                  model: 'gemini-3-flash-preview',
+                  timeoutMs: PDF_FALLBACK_ATTEMPT_TIMEOUT_MS,
+                  prompt: pdfFallbackPrompt,
+                  responseSchema: pdfFallbackSchema as any,
+                  maxOutputTokens: 768
+                }
+              ]
+            : [
+                {
+                  model: 'gemini-3-flash-preview',
+                  timeoutMs: GEMINI_REQUEST_TIMEOUT_MS,
+                  prompt: fullExtractionPrompt,
+                  responseSchema: schema as any,
+                  maxOutputTokens: 2048
+                }
+              ]
+
+        const totalTimeoutMs =
+          input.mimeType === 'application/pdf'
+            ? PDF_TOTAL_REQUEST_TIMEOUT_MS
+            : GEMINI_REQUEST_TIMEOUT_MS
+
+        const result = await withAbortTimeout(totalTimeoutMs, async (
+          abortSignal
+        ) => {
+          let uploadedFileName: string | undefined
+          let lastError: unknown
+
+          try {
+            const filePart =
+              input.mimeType === 'application/pdf'
+                ? await (async () => {
+                    const uploadedFile =
+                      await ctx.googleGenAIFileManager.uploadFile(
+                        Buffer.from(base64Data, 'base64'),
+                        {
+                          mimeType: input.mimeType,
+                          displayName: 'invoice.pdf'
+                        }
+                      )
+
+                    uploadedFileName = uploadedFile.file.name
+
+                    const activeFile =
+                      uploadedFile.file.name &&
+                      uploadedFile.file.state !== 'ACTIVE'
+                        ? await waitForGeminiFileActive(
+                            ctx,
+                            uploadedFile.file.name,
+                            abortSignal
+                          )
+                        : uploadedFile.file
+
+                    return {
+                      fileData: {
+                        fileUri: activeFile.uri,
+                        mimeType: activeFile.mimeType ?? input.mimeType
+                      }
+                    }
+                  })()
+                : {
                     inlineData: {
                       mimeType: input.mimeType,
                       data: base64Data
                     }
                   }
-                ]
-              }
-            ],
-            config: {
-              systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from an image of a czech invoice. Most likely the invoice is in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency field is ISO 4217.`,
-              // @ts-expect-error types are not correct
-              responseSchema: schema as Schema,
-              temperature: 0.2,
-              thinkingConfig: {
-                includeThoughts: false,
-                thinkingBudget: 0
+
+            for (const attempt of requestPlan) {
+              try {
+                return await ctx.googleGenAI.models.generateContent({
+                  model: attempt.model,
+                  contents: [
+                    {
+                      parts: [{ text: attempt.prompt }, filePart]
+                    }
+                  ],
+                  config: {
+                    httpOptions: {
+                      timeout: attempt.timeoutMs
+                    },
+                    abortSignal,
+                    systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from a czech invoice document. Most likely the invoice is in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency field is ISO 4217.`,
+                    responseMimeType: 'application/json',
+                    responseSchema: attempt.responseSchema,
+                    maxOutputTokens: attempt.maxOutputTokens,
+                    temperature: 0.2,
+                    thinkingConfig: {
+                      includeThoughts: false,
+                      thinkingBudget: 0
+                    }
+                  }
+                })
+              } catch (err) {
+                lastError = err
+                if (!isRetryableGeminiError(err)) {
+                  throw err
+                }
               }
             }
-          })
 
-        let result
-        try {
-          result = await makeGeminiRequest('gemini-3-flash-preview')
-        } catch (err) {
-          const message = (err as Error)?.message ?? ''
-          const status =
-            (err as any)?.status ??
-            (err as any)?.response?.status ??
-            (err as any)?.code
-          const isOverloaded =
-            status === 503 ||
-            /UNAVAILABLE/i.test(String(message)) ||
-            /model is overloaded/i.test(String(message))
-          if (isOverloaded) {
-            result = await makeGeminiRequest('gemini-2.5-flash-lite')
-          } else {
-            throw err
+            throw lastError
+          } finally {
+            if (uploadedFileName) {
+              void ctx.googleGenAIFileManager
+                .deleteFile(uploadedFileName)
+                .catch((error) => {
+                  console.error('Failed to delete uploaded Gemini file:', error)
+                })
+            }
           }
-        }
+        })
 
-        const textContent = result.text ?? ''
+        const textContent = result.text?.trim() ?? ''
 
         // Try to find JSON object in the response
         let extractedData
         try {
-          const jsonMatch = textContent.match(/\{[\s\S]*\}/)
-          if (jsonMatch) {
-            extractedData = JSON.parse(jsonMatch[0])
-          } else {
-            throw new Error('No valid JSON found in response')
-          }
+          extractedData = JSON.parse(textContent)
         } catch (error) {
-          console.error('Error parsing Gemini response:', error)
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Failed to parse OCR results'
-          })
+          try {
+            const jsonMatch = textContent.match(/\{[\s\S]*\}/)
+            if (jsonMatch) {
+              extractedData = JSON.parse(jsonMatch[0])
+            } else {
+              throw new Error('No valid JSON found in response')
+            }
+          } catch (fallbackError) {
+            console.error('Error parsing Gemini response:', error, fallbackError)
+            throw new TRPCError({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'Failed to parse OCR results'
+            })
+          }
         }
 
         console.log('extractedData for invoice:', extractedData)
@@ -398,6 +636,13 @@ The text that is partially unreadable, leave the "?" for each unreadable charact
         console.error('OCR processing error:', error)
         if (error instanceof TRPCError) {
           throw error
+        }
+        if (isInvalidGeminiApiKeyError(error)) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message:
+              'Gemini API key is invalid in backend configuration. Update GEMINI_API_KEY.'
+          })
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',

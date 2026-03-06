@@ -83,7 +83,7 @@ export default {
     const createTrpcContext = async (): Promise<TrpcContext> => {
       const authHeader = request.headers.get('authorization')
       const user = await extractUserFromAuthHeader(authHeader, env.JWT_SECRET)
-      const fileManager = new GoogleAIFileManager(env.GEMINI_API_KEY)
+      const fileManager = new GoogleAIFileManager(apiKey)
 
       return {
         db: drizzle(turso, { schema }),
