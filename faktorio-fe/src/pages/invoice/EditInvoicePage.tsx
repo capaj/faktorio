@@ -287,7 +287,8 @@ export const EditInvoicePage = () => {
       unit: 'manday',
       quantity: 1,
       unit_price: 0,
-      vat_rate: formValues.currency === 'CZK' ? 21 : 0,
+      vat_rate:
+        invoicingDetails?.vat_payer && formValues.currency === 'CZK' ? 21 : 0,
       order
     } as (typeof invoice.items)[0]
   }
@@ -595,7 +596,7 @@ const InvoiceItemForm = ({
   onDelete: () => void
 }) => {
   return (
-    <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 align-baseline items-end">
+    <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 items-end md:items-start">
       <div className="sm:flex sm:flex-row gap-4 grow grid grid-cols-2 flex-wrap items-end">
         <div>
           <Label

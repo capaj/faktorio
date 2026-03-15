@@ -46,13 +46,19 @@ import { ButtonLink } from '@/components/ui/link'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 import { getMonthWorkingDays } from '@/lib/czechWorkingDays'
 
-const defaultInvoiceItem = {
+const getDefaultInvoiceItem = ({
+  isVatPayer,
+  currency
+}: {
+  isVatPayer?: boolean
+  currency: string
+}) => ({
   description: '',
   unit: 'manday',
   quantity: 1,
   unit_price: 0,
-  vat_rate: 21
-}
+  vat_rate: isVatPayer && currency === 'CZK' ? 21 : 0
+})
 
 const parseLocalizedFloat = (value: string) => {
   const normalizedValue = value.replace(',', '.').trim()
@@ -127,20 +133,27 @@ export const NewInvoicePage = () => {
       language: z.string().default('cs')
     })
 
+  const formDefaultValues = formSchema.parse({
+    due_in_days: 14,
+    bank_account: primaryBankAccount.bank_account || '',
+    iban: primaryBankAccount.iban || '',
+    swift_bic: primaryBankAccount.swift_bic || '',
+    language: 'cs'
+  })
+
   const form = useForm<
     z.infer<typeof formSchema> & {
       items: z.infer<typeof invoiceItemFormSchema>[]
     }
   >({
     defaultValues: {
-      ...formSchema.parse({
-        due_in_days: 14,
-        bank_account: primaryBankAccount.bank_account || '',
-        iban: primaryBankAccount.iban || '',
-        swift_bic: primaryBankAccount.swift_bic || '',
-        language: 'cs'
-      }),
-      items: [defaultInvoiceItem]
+      ...formDefaultValues,
+      items: [
+        getDefaultInvoiceItem({
+          isVatPayer: invoicingDetails?.vat_payer,
+          currency: formDefaultValues.currency
+        })
+      ]
     }
   })
 
@@ -544,7 +557,12 @@ export const NewInvoicePage = () => {
                 type="button"
                 className="flex items-center gap-2 bg-green-500 text-white"
                 onClick={() => {
-                  append(defaultInvoiceItem)
+                  append(
+                    getDefaultInvoiceItem({
+                      isVatPayer: invoicingDetails?.vat_payer,
+                      currency: form.getValues('currency')
+                    })
+                  )
                 }}
               >
                 <LucidePlus className="text-white" />
@@ -606,7 +624,7 @@ const InvoiceItemForm = ({
   }
 
   return (
-    <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 align-baseline items-end">
+    <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 items-end md:items-start">
       <div className="sm:flex sm:flex-row gap-4 grow grid grid-cols-2 flex-wrap items-end">
         <div>
           <Label
