@@ -2,9 +2,10 @@ import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 
 import { CzechInvoicePDF } from './CzechInvoicePDF'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { snakeCase } from 'lodash-es'
 import { useLocation, useParams, useSearchParams } from 'wouter'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { trpcClient } from '@/lib/trpcClient'
 import { EnglishInvoicePDF } from './EnglishInvoicePDF'
 import { generateIsdocXml } from '@/lib/isdoc/generateIsdocXml'
@@ -16,7 +17,10 @@ import {
   SelectItem
 } from '@/components/ui/select'
 import { djs } from 'faktorio-shared/src/djs'
-import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
+import {
+  getInvoiceCreateSchema,
+  paymentMethodEnum
+} from 'faktorio-api/src/routers/zodSchemas'
 import { z } from 'zod/v4'
 import {
   invoiceItemFormSchema,
@@ -28,7 +32,8 @@ import {
   Copy as CopyIcon,
   Trash2,
   Eye,
-  Download
+  Download,
+  BookmarkPlus
 } from 'lucide-react'
 import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
 import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
@@ -39,9 +44,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -97,6 +104,19 @@ export const InvoiceDetail = ({
   const [searchParams] = useSearchParams()
   const language = searchParams.get('language') ?? invoice.language
   const [_location, navigate] = useLocation()
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const saveTemplate = trpcClient.invoices.saveTemplateFromInvoice.useMutation({
+    onSuccess: () => {
+      toast.success('Šablona byla uložena')
+      setIsTemplateDialogOpen(false)
+    },
+    onError: () => toast.error('Nepodařilo se uložit šablonu')
+  })
+
+  useEffect(() => {
+    setTemplateName(`Šablona ${invoice.number}`)
+  }, [invoice.number])
 
   const handleIsdocDownload = () => {
     try {
@@ -166,6 +186,82 @@ export const InvoiceDetail = ({
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-muted/20 py-6">
+      <Dialog
+        open={isTemplateDialogOpen}
+        onOpenChange={(open) => {
+          if (!saveTemplate.isPending) {
+            setIsTemplateDialogOpen(open)
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Uložit jako šablonu</DialogTitle>
+            <DialogDescription>
+              Uložte tuto fakturu jako vzor pro budoucí vystavené doklady.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 py-2">
+            <Label htmlFor="template-name">Název šablony</Label>
+            <Input
+              id="template-name"
+              value={templateName}
+              onChange={(event) => setTemplateName(event.target.value)}
+              placeholder={`Šablona ${invoice.number}`}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsTemplateDialogOpen(false)}
+              disabled={saveTemplate.isPending}
+            >
+              Zrušit
+            </Button>
+            <Button
+              onClick={() => {
+                const nameToSave =
+                  templateName.trim() || `Šablona ${invoice.number}`
+                saveTemplate.mutate({
+                  name: nameToSave,
+                  data: {
+                    invoice: {
+                      number: invoice.number ?? undefined,
+                      currency: invoice.currency,
+                      issued_on: invoice.issued_on,
+                      payment_method: paymentMethodEnum.parse(
+                        invoice.payment_method ?? 'bank'
+                      ),
+                      footer_note: invoice.footer_note,
+                      taxable_fulfillment_due: invoice.taxable_fulfillment_due,
+                      due_in_days: invoice.due_in_days,
+                      client_contact_id: invoice.client_contact_id ?? undefined,
+                      exchange_rate: invoice.exchange_rate,
+                      bank_account: invoice.bank_account,
+                      iban: invoice.iban,
+                      swift_bic: invoice.swift_bic,
+                      language: invoice.language
+                    },
+                    items: invoice.items.map((item) => ({
+                      description: item.description,
+                      quantity: item.quantity,
+                      unit_price: item.unit_price,
+                      unit: item.unit,
+                      vat_rate: item.vat_rate,
+                      order: item.order ?? undefined
+                    }))
+                  }
+                })
+              }}
+              disabled={saveTemplate.isPending}
+            >
+              {saveTemplate.isPending ? 'Ukládám…' : 'Uložit šablonu'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4">
         <div className="rounded-lg border bg-background p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -222,6 +318,14 @@ export const InvoiceDetail = ({
                 >
                   <LucideEdit />
                   Upravit
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsTemplateDialogOpen(true)}
+                  disabled={saveTemplate.isPending}
+                >
+                  <BookmarkPlus className="mr-2 h-4 w-4" />
+                  Uložit jako šablonu
                 </Button>
               </div>
             </div>
