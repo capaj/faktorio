@@ -215,9 +215,13 @@ export const invoiceRouter = trpcContext.router({
     }),
 
   lastInvoice: protectedProc.query(async ({ ctx }) => {
+    const currentYear = djs().format('YYYY')
     const lastInvoice = await ctx.db.query.invoicesTb.findFirst({
-      where: eq(invoicesTb.user_id, ctx.user.id),
-      orderBy: desc(invoicesTb.created_at)
+      where: and(
+        eq(invoicesTb.user_id, ctx.user.id),
+        like(invoicesTb.number, `${currentYear}-%`)
+      ),
+      orderBy: desc(invoicesTb.number)
     })
 
     return lastInvoice ?? null
