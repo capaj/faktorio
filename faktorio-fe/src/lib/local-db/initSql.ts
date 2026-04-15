@@ -81,10 +81,9 @@ export function removeTrackedDbFile(filename: string): void {
 export async function listOpfsFiles(): Promise<string[]> {
   const root = await getOpfsRoot()
   const files: string[] = []
-  // @ts-expect-error - entries() is valid but TS might complain
-  for await (const entry of root.entries()) {
-    if (entry.kind === 'file') {
-      files.push(entry.name)
+  for await (const [name, handle] of root) {
+    if (handle.kind === 'file') {
+      files.push(name)
     }
   }
   return files

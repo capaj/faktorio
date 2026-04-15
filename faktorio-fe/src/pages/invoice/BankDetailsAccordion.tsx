@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/accordion'
 
 import { Input } from '@/components/ui/input'
-import { Control } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import {
   FormControl,
   FormField,
@@ -28,7 +28,6 @@ type BankAccountOption = Pick<
 >
 
 interface BankDetailsAccordionProps {
-  control: Control<any>
   bankAccounts?: BankAccountOption[]
   selectedBankAccountId?: string
   onBankAccountChange?: (accountId: string) => void
@@ -46,11 +45,11 @@ const formatAccountLabel = (account: BankAccountOption) => {
 }
 
 export const BankDetailsAccordion = ({
-  control,
   bankAccounts,
   selectedBankAccountId,
   onBankAccountChange
 }: BankDetailsAccordionProps) => {
+  const { control } = useFormContext()
   const accountsWithId = (bankAccounts ?? []).filter(
     (account): account is BankAccountOption & { id: string } =>
       Boolean(account?.id)

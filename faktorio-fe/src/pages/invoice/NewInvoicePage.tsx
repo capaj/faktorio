@@ -10,8 +10,7 @@ import { djs } from 'faktorio-shared/src/djs'
 import {
   useFieldArray,
   useForm,
-  useFormContext,
-  Control
+  useFormContext
 } from 'react-hook-form'
 import { z } from 'zod/v4'
 import {
@@ -530,7 +529,6 @@ export const NewInvoicePage = () => {
           </div>
 
           <BankDetailsAccordion
-            control={form.control}
             bankAccounts={bankAccounts}
             selectedBankAccountId={selectedBankAccountId}
             onBankAccountChange={handleBankAccountChange}
@@ -543,7 +541,6 @@ export const NewInvoicePage = () => {
                 <InvoiceItemForm
                   key={item.id}
                   vatPayer={invoicingDetails?.vat_payer}
-                  control={form.control}
                   index={index}
                   onDelete={() => remove(index)}
                   contacts={contacts}
@@ -600,21 +597,19 @@ import { RouterOutputs } from '@/lib/trpcClient'
 type Contact = RouterOutputs['contacts']['all'][number]
 
 const InvoiceItemForm = ({
-  control,
   index,
   onDelete,
   vatPayer,
   contacts,
   selectedContactId
 }: {
-  control: Control<any>
   index: number
   onDelete: () => void
   vatPayer?: boolean
   contacts: Contact[]
   selectedContactId?: string
 }) => {
-  const { setValue } = useFormContext()
+  const { setValue, control } = useFormContext()
   const [showVatWarning, setShowVatWarning] = useState<boolean | null>(null)
 
   const handleConfirmZeroVat = () => {

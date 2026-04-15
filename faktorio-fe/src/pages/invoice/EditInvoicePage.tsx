@@ -496,7 +496,6 @@ export const EditInvoicePage = () => {
           </div>
 
           <BankDetailsAccordion
-            control={form.control}
             bankAccounts={bankAccounts}
             selectedBankAccountId={selectedBankAccountId}
             onBankAccountChange={handleBankAccountChange}
@@ -508,7 +507,6 @@ export const EditInvoicePage = () => {
               return (
                 <InvoiceItemForm
                   key={item.id}
-                  control={form.control}
                   invoicingDetails={invoicingDetails}
                   index={index}
                   onDelete={() => remove(index)}
@@ -582,19 +580,18 @@ export const EditInvoicePage = () => {
   )
 }
 
-import { Control } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
 const InvoiceItemForm = ({
-  control,
   index,
   onDelete,
   invoicingDetails
 }: {
-  control: Control<any>
   index: number
   invoicingDetails: { vat_payer?: boolean } | null
   onDelete: () => void
 }) => {
+  const { control } = useFormContext()
   return (
     <div className="flex flex-col md:flex-row justify-between gap-4 border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0 items-end md:items-start">
       <div className="sm:flex sm:flex-row gap-4 grow grid grid-cols-2 flex-wrap items-end">
