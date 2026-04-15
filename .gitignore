@@ -19,3 +19,4 @@ tsconfig.tsbuildinfo
 dev.sqlite
 test.sqlite
 dump.rdb
+fixtures/*.xml

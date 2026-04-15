@@ -1,13 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { Link } from 'wouter'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  LucidePiggyBank,
-  LucideTwitter,
-  Users,
-  FileText,
-  LucideGithub
-} from 'lucide-react'
+import { LucidePiggyBank, Users, FileText } from 'lucide-react'
+
 import { MountainIcon } from '@/components/MountainIcon'
 import { Footer } from './PageShell'
 import { ButtonLink } from '@/components/ui/link'
@@ -15,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { trpcClient } from '@/lib/trpcClient'
 import { FeatureComparison } from '@/components/FeatureComparison'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { GithubIcon, TwitterIcon } from './Icons'
 
 export const LandingPage = () => {
   const { data: systemStats } = trpcClient.systemStats.useQuery(undefined, {
@@ -212,7 +208,7 @@ export const LandingPage = () => {
                       rel="noreferrer"
                     >
                       <Button variant="outline" className="gap-2">
-                        <LucideGithub className="h-4 w-4" />
+                        <GithubIcon className="h-4 w-4" />
                         GitHub repozitář
                       </Button>
                     </a>
@@ -222,7 +218,7 @@ export const LandingPage = () => {
                       rel="noreferrer"
                     >
                       <Button variant="outline" className="gap-2">
-                        <LucideTwitter className="h-4 w-4 text-blue-400" />
+                        <TwitterIcon className="h-4 w-4 text-blue-400" />
                         @capajj
                       </Button>
                     </a>
