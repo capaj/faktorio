@@ -4,6 +4,49 @@ import { observable } from '@trpc/server/observable'
 import { toast } from 'sonner'
 import { AppRouter } from 'faktorio-api/src/trpcRouter'
 
+let unauthorizedHandled = false
+
+/**
+ * Logs the user out when the server returns 401 / UNAUTHORIZED for an
+ * authenticated request. Swallows the error so downstream links (e.g. the
+ * toast link) don't surface it — the full-page redirect replaces the UI.
+ */
+export const unauthorizedLink: TRPCLink<AppRouter> = () => {
+  return ({ next, op }) => {
+    return observable((observer) => {
+      const unsubscribe = next(op).subscribe({
+        error(err) {
+          const isUnauthorized =
+            err.data?.code === 'UNAUTHORIZED' || err.data?.httpStatus === 401
+          const hadToken = localStorage.getItem('auth_token')
+
+          if (isUnauthorized && hadToken) {
+            if (!unauthorizedHandled) {
+              unauthorizedHandled = true
+              localStorage.removeItem('auth_token')
+              localStorage.removeItem('auth_user')
+              toast.error('Session expired. Please log in again.')
+              if (window.location.pathname !== '/login') {
+                window.location.href = '/login'
+              }
+            }
+            return
+          }
+
+          observer.error(err)
+        },
+        next(value) {
+          observer.next(value)
+        },
+        complete() {
+          observer.complete()
+        }
+      })
+      return unsubscribe
+    })
+  }
+}
+
 /**
  * this displays a toast every time a mutation/query fails
  */
@@ -55,6 +98,7 @@ export const errorToastLink: TRPCLink<AppRouter> = () => {
 
 export const trpcLinks: TRPCLink<any>[] = [
   errorToastLink,
+  unauthorizedLink,
   loggerLink({
     enabled: (opts) =>
       process.env.NODE_ENV === 'development' ||
