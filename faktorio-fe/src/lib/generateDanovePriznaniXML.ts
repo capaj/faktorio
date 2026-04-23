@@ -13,6 +13,27 @@ interface GenerateDanovePriznaniParams {
   month?: number
 }
 
+const VAT_RATE_21 = 0.21
+
+/**
+ * ADIS validates VAT amount against the tax base (rounded to whole CZK in XML).
+ * To avoid cumulative floating point drift (or mixed per-invoice rounding),
+ * we calculate VAT from the summed base in haléře and then convert back to CZK.
+ */
+function calculateVatFromBase(base: number, rate: number): number {
+  const baseInHalers = Math.round(base * 100)
+  const vatInHalers = Math.round(baseInHalers * rate)
+  return vatInHalers / 100
+}
+
+function hasIssuedVatBreakdown(invoice: Invoice): boolean {
+  return invoice.vat_base_21 !== null && invoice.vat_base_21 !== undefined
+}
+
+function hasReceivedVatBreakdown(invoice: ReceivedInvoice): boolean {
+  return invoice.vat_base_21 !== null && invoice.vat_base_21 !== undefined
+}
+
 export function generateDanovePriznaniXML({
   issuedInvoices,
   receivedInvoices,
@@ -25,25 +46,28 @@ export function generateDanovePriznaniXML({
   const todayCzech = formatCzechDate(new Date())
 
   // Calculate sums for <Veta1>
-  let obrat23 = 0
-  let dan23 = 0
-  issuedInvoices.forEach((inv) => {
-    const subtotal = inv.native_subtotal ?? 0
-    const vatAmount = (inv.native_total ?? 0) - subtotal
-    obrat23 += subtotal
-    dan23 += vatAmount
-  })
+  const hasIssuedBreakdown = issuedInvoices.some(hasIssuedVatBreakdown)
+  const obrat23 = issuedInvoices.reduce((sum, inv) => {
+    if (hasIssuedBreakdown) {
+      return sum + (inv.vat_base_21 ?? 0)
+    }
+
+    return sum + (inv.native_subtotal ?? 0)
+  }, 0)
+
+  const dan23 = calculateVatFromBase(obrat23, VAT_RATE_21)
 
   // Calculate sums for <Veta4>
-  let pln23 = 0
-  let odp_tuz23_nar = 0
-  receivedInvoices.forEach((inv) => {
-    const subtotal = inv.total_without_vat ?? 0
-    const totalWithVat = inv.total_with_vat ?? 0
-    const vatAmount = totalWithVat - subtotal
-    pln23 += subtotal
-    odp_tuz23_nar += vatAmount
-  })
+  const hasReceivedBreakdown = receivedInvoices.some(hasReceivedVatBreakdown)
+  const pln23 = receivedInvoices.reduce((sum, inv) => {
+    if (hasReceivedBreakdown) {
+      return sum + (inv.vat_base_21 ?? 0)
+    }
+
+    return sum + (inv.total_without_vat ?? 0)
+  }, 0)
+
+  const odp_tuz23_nar = calculateVatFromBase(pln23, VAT_RATE_21)
   const odp_sum_nar = odp_tuz23_nar // In this simplified case, they are the same
 
   // Calculate sums for <Veta6>

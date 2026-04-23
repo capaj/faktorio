@@ -28,7 +28,13 @@ export type ReceivedInvoice = Pick<
   | 'total_with_vat'
   | 'currency'
   | 'status'
->
+> &
+  Partial<
+    Pick<
+      InferSelectModel<typeof receivedInvoiceTb>,
+      'vat_base_21' | 'vat_21' | 'vat_base_12' | 'vat_12'
+    >
+  >
 
 interface ReceivedInvoiceTableProps {
   invoices: ReceivedInvoice[]
