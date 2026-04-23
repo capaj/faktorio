@@ -170,6 +170,68 @@ describe('generateDanovePriznaniXML', () => {
     )
   })
 
+  it('calculates row 1 VAT directly from the summed base to match ADIS validation', () => {
+    const submitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    const issuedInvoices: Invoice[] = [
+      {
+        id: '1',
+        number: 'INV001',
+        client_name: 'Client A',
+        client_vat_no: 'CZ87654321',
+        due_on: new Date('2024-07-20').toISOString(),
+        issued_on: new Date('2024-07-10').toISOString(),
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: new Date('2024-07-15').toISOString(),
+        subtotal: 100000,
+        native_subtotal: 100000,
+        native_total: 120940,
+        total: 120940,
+        currency: 'CZK'
+      },
+      {
+        id: '2',
+        number: 'INV002',
+        client_name: 'Client B',
+        client_vat_no: 'CZ11223344',
+        due_on: new Date('2024-07-25').toISOString(),
+        issued_on: new Date('2024-07-15').toISOString(),
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: new Date('2024-07-15').toISOString(),
+        subtotal: 256756,
+        native_subtotal: 256756,
+        native_total: 310515,
+        total: 310515,
+        currency: 'CZK'
+      }
+    ]
+
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices,
+      receivedInvoices: [],
+      submitterData,
+      year: 2024,
+      quarter: 3,
+      czkSumEurServices: 0
+    })
+
+    expect(xmlString).toMatch(/<Veta1[\s\S]*obrat23="356756" dan23="74919"/)
+  })
+
   // Restore real timers after tests
   afterAll(() => {
     vi.useRealTimers()
