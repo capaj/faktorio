@@ -26,6 +26,10 @@ export type ReceivedInvoice = Pick<
   | 'due_date'
   | 'total_without_vat'
   | 'total_with_vat'
+  | 'vat_base_21'
+  | 'vat_21'
+  | 'vat_base_12'
+  | 'vat_12'
   | 'currency'
   | 'status'
 >

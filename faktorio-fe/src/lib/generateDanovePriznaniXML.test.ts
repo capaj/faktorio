@@ -232,6 +232,78 @@ describe('generateDanovePriznaniXML', () => {
     expect(xmlString).toMatch(/<Veta1[\s\S]*obrat23="356756" dan23="74919"/)
   })
 
+  it('uses 21% VAT breakdown fields when invoices contain multiple VAT rates', () => {
+    const submitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    const issuedInvoices: Invoice[] = [
+      {
+        id: '1',
+        number: 'INV001',
+        client_name: 'Client A',
+        client_vat_no: 'CZ87654321',
+        due_on: new Date('2024-07-20').toISOString(),
+        issued_on: new Date('2024-07-10').toISOString(),
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: new Date('2024-07-15').toISOString(),
+        subtotal: 1120,
+        native_subtotal: 1120,
+        native_total: 1316,
+        vat_base_21: 800,
+        vat_21: 168,
+        vat_base_12: 320,
+        vat_12: 38.4,
+        total: 1316,
+        currency: 'CZK'
+      }
+    ]
+
+    const receivedInvoices: ReceivedInvoice[] = [
+      {
+        id: 'rec1',
+        invoice_number: 'REC001',
+        supplier_name: 'Supplier X',
+        supplier_vat_no: 'CZ99887766',
+        issue_date: new Date('2024-07-20').toISOString(),
+        taxable_supply_date: new Date('2024-07-20').toISOString(),
+        due_date: '2024-08-05',
+        status: 'received',
+        total_without_vat: 560,
+        total_with_vat: 658,
+        vat_base_21: 400,
+        vat_21: 84,
+        vat_base_12: 160,
+        vat_12: 19.2,
+        currency: 'CZK'
+      }
+    ]
+
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices,
+      receivedInvoices,
+      submitterData,
+      year: 2024,
+      quarter: 3,
+      czkSumEurServices: 0
+    })
+
+    expect(xmlString).toMatch(/<Veta1[\s\S]*obrat23="800" dan23="168"/)
+    expect(xmlString).toMatch(
+      /<Veta4[\s\S]*pln23="400" odp_tuz23_nar="84"[\s\S]*odp_sum_nar="84"/
+    )
+  })
+
   // Restore real timers after tests
   afterAll(() => {
     vi.useRealTimers()
