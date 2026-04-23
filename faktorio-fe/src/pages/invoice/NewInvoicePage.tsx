@@ -113,7 +113,7 @@ const LocalizedNumberInput = ({
 }
 
 export const NewInvoicePage = () => {
-  const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
+  const [lastInvoice] = trpcClient.invoices.lastInvoiceThisYear.useSuspenseQuery()
   const [contacts] = trpcClient.contacts.all.useSuspenseQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
   const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
@@ -259,7 +259,7 @@ export const NewInvoicePage = () => {
       ((item.quantity ?? 0) *
         (item.unit_price ?? 0) *
         (!invoicingDetails?.vat_payer ? 0 : (item.vat_rate ?? 0))) /
-        100,
+      100,
     0
   )
 

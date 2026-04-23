@@ -381,6 +381,21 @@ export const invoiceRouter = trpcContext.router({
       return invoicesForUser
     }),
 
+    /**
+   * used to get the last invoice number for the current year, to suggest the next invoice number when creating a new invoice
+   */
+  lastInvoiceThisYear: protectedProc.query(async ({ ctx }) => {
+    const currentYear = djs().format('YYYY')
+    const lastInvoice = await ctx.db.query.invoicesTb.findFirst({
+      where: and(
+        eq(invoicesTb.user_id, ctx.user.id),
+        like(invoicesTb.number, `${currentYear}-%`)
+      ),
+      orderBy: desc(invoicesTb.number)
+    })
+
+    return lastInvoice ?? null
+  }),
   lastInvoice: protectedProc.query(async ({ ctx }) => {
     const currentYear = djs().format('YYYY')
     const lastInvoice = await ctx.db.query.invoicesTb.findFirst({
