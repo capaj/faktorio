@@ -4,7 +4,7 @@ import { CzechInvoicePDF } from './CzechInvoicePDF'
 import { Button } from '@/components/ui/button'
 import { snakeCase } from 'lodash-es'
 import { useLocation, useParams, useSearchParams } from 'wouter'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { trpcClient } from '@/lib/trpcClient'
 import { EnglishInvoicePDF } from './EnglishInvoicePDF'
 import { generateIsdocXml } from '@/lib/isdoc/generateIsdocXml'
@@ -35,6 +35,7 @@ import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
+import { resolveLogoForDisplay } from '@/lib/invoiceLogoStorage'
 import {
   Dialog,
   DialogContent,
@@ -92,6 +93,7 @@ export const InvoiceDetail = ({
   const params = useParams()
   const isLocalUser = localStorage.getItem('auth_token')?.startsWith('local_')
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
+  const [resolvedLogoUrl, setResolvedLogoUrl] = useState<string | null>(null)
   const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
   const pdfName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}.pdf`
   const [searchParams] = useSearchParams()
@@ -149,6 +151,26 @@ export const InvoiceDetail = ({
       : generatedQrString) || null
 
   const qrCodeBase64 = useQRCodeBase64(qrPayload)
+  useEffect(() => {
+    let cancelled = false
+    const run = async () => {
+      try {
+        const logo = await resolveLogoForDisplay(invoicingDetails?.logo_url)
+        if (!cancelled) {
+          setResolvedLogoUrl(logo)
+        }
+      } catch (error) {
+        console.error('Unable to resolve invoice logo', error)
+        if (!cancelled) {
+          setResolvedLogoUrl(null)
+        }
+      }
+    }
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [invoicingDetails?.logo_url])
 
   const PdfContent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
   const formattedIssuedOn = djs(invoice.issued_on).format('D. M. YYYY')
@@ -249,6 +271,7 @@ export const InvoiceDetail = ({
                 invoiceData={invoice}
                 qrCodeBase64={qrCodeBase64}
                 vatPayer={invoicingDetails?.vat_payer}
+                logoUrl={resolvedLogoUrl}
               />
             </PDFViewer>
           </div>
@@ -268,6 +291,7 @@ export const InvoiceDetail = ({
                   invoiceData={invoice}
                   qrCodeBase64={qrCodeBase64 ?? ''}
                   vatPayer={invoicingDetails?.vat_payer}
+                  logoUrl={resolvedLogoUrl}
                 />
               }
               fileName={pdfName ?? ''}

@@ -71,11 +71,13 @@ Font.register({
 export const EnglishInvoicePDF = ({
   invoiceData,
   qrCodeBase64,
-  vatPayer
+  vatPayer,
+  logoUrl
 }: {
   invoiceData: SelectInvoiceType & { items: InsertInvoiceItemType[] }
   qrCodeBase64?: string
   vatPayer?: boolean
+  logoUrl?: string | null
 }) => {
   const inferredInvoiceVatRate =
     invoiceData.items.find((i) => i.vat_rate != null)?.vat_rate ?? 0
@@ -131,6 +133,23 @@ export const EnglishInvoicePDF = ({
                   width: '50%'
                 }}
               >
+                {logoUrl && (
+                  <View
+                    style={{
+                      marginLeft: 20,
+                      marginBottom: 10
+                    }}
+                  >
+                    <Image
+                      style={{
+                        width: 180,
+                        maxHeight: 70,
+                        objectFit: 'contain'
+                      }}
+                      source={logoUrl}
+                    ></Image>
+                  </View>
+                )}
                 {qrCodeBase64 && (
                   <View
                     style={{

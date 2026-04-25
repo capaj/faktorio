@@ -162,9 +162,7 @@ export default {
             return 'User invoicing details not found'
           }
 
-          let defaultAccount:
-            | (typeof userBankAccountsTb.$inferSelect)
-            | undefined
+          let defaultAccount: typeof userBankAccountsTb.$inferSelect | undefined
 
           if (user.default_bank_account_id) {
             const [explicitAccount] = await dbInstance!
@@ -414,13 +412,17 @@ export default {
 
         // fetch user's vat_payer setting
         const [userDetails] = await dbInstance!
-          .select({ vat_payer: userInvoicingDetailsTb.vat_payer })
+          .select({
+            vat_payer: userInvoicingDetailsTb.vat_payer,
+            logo_url: userInvoicingDetailsTb.logo_url
+          })
           .from(userInvoicingDetailsTb)
           .where(eq(userInvoicingDetailsTb.user_id, invoice.user_id))
           .limit(1)
           .all()
 
         const vatPayer = userDetails?.vat_payer ?? false
+        const logoUrl = userDetails?.logo_url ?? null
 
         // track view event
         const ip =
@@ -455,7 +457,7 @@ export default {
           .run()
 
         return new Response(
-          JSON.stringify({ invoice, items, share, vatPayer }),
+          JSON.stringify({ invoice, items, share, vatPayer, logoUrl }),
           {
             headers: {
               'content-type': 'application/json'
