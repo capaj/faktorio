@@ -14,7 +14,7 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260423.1",
+    "@cloudflare/workers-types": "^4.20260425.1",
     "@types/debug": "^4.1.13",
     "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.31.10",
@@ -22,7 +22,7 @@
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.5",
-    "wrangler": "^4.84.1"
+    "wrangler": "^4.85.0"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",
