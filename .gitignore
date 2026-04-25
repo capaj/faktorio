@@ -18,5 +18,9 @@ dist
 tsconfig.tsbuildinfo
 dev.sqlite
 test.sqlite
+e2e.sqlite
+e2e-data/
+.dev.vars
+!.dev.vars.e2e
 dump.rdb
 fixtures/*.xml

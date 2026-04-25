@@ -44,8 +44,7 @@ export default defineConfig({
     }
   },
   timeout: isCI ? 60000 : 10000,
-  // You can optionally use a global setup file instead of fixtures approach
-  // globalSetup: './e2e/global-setup.ts',
+  globalSetup: './e2e/global-setup.ts',
 
   /* Configure projects for major browsers */
   projects: [
@@ -86,7 +85,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'pnpm run dev',
+    command: 'pnpm run dev:e2e',
     port: 5173,
     reuseExistingServer: !process.env.CI,
     timeout: isCI ? 60000 : 30000, // Increased timeout for CI, and slightly for local

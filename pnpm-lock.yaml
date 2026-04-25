@@ -158,6 +158,9 @@ importers:
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
+      sqld:
+        specifier: 0.24.1-pre.42
+        version: 0.24.1-pre.42
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -2816,6 +2819,30 @@ packages:
   '@speed-highlight/core@1.2.7':
     resolution: {integrity: sha512-0dxmVj4gxg3Jg879kvFS/msl4s9F3T9UXC1InxgOf7t5NvcPD97u/WTA5vL/IxWHMn7qSxBozqrnnE2wvl1m8g==}
 
+  '@sqld/darwin-arm64@0.24.1-pre.42':
+    resolution: {integrity: sha512-jdkw1prkhU2ALF7j62NzL3XWVCnxQ0nbJOLb9oHwLAkb6OHvhVynjfVZFSajyEAyqv5YYWqRm/Kyi1u/wfy5gA==}
+    cpu: [arm64]
+    os: [darwin]
+    hasBin: true
+
+  '@sqld/darwin-x64@0.24.1-pre.42':
+    resolution: {integrity: sha512-lOl2mN0Dm8GpoM+7BfodORwN+wdccxEWchmYeavFjm5403Y51myECjlfj3zBwv3wGGMjJHxF+Z00EjzAOJfHEA==}
+    cpu: [x64]
+    os: [darwin]
+    hasBin: true
+
+  '@sqld/linux-arm64@0.24.1-pre.42':
+    resolution: {integrity: sha512-5FIZJvrJfVvEj1Z6jUQdUZHRtEIKbH0ZHWf7tYC2qiNXSh+nX+r6yxXugGsPYYjWGHO5rwjSyyzQJjdbxHp0Hw==}
+    cpu: [arm64]
+    os: [linux]
+    hasBin: true
+
+  '@sqld/linux-x64@0.24.1-pre.42':
+    resolution: {integrity: sha512-e9irTAj9+IsOa9394ydo2dHgo8MqnPSy79rpSP1B1gj+ikP5IWEJK6IfJV5H/FSBlxCniasri0t2VPIwbgn9rg==}
+    cpu: [x64]
+    os: [linux]
+    hasBin: true
+
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
@@ -4933,6 +4960,11 @@ packages:
 
   sql.js@1.14.1:
     resolution: {integrity: sha512-gcj8zBWU5cFsi9WUP+4bFNXAyF1iRpA3LLyS/DP5xlrNzGmPIizUeBggKa8DbDwdqaKwUcTEnChtd2grWo/x/A==}
+
+  sqld@0.24.1-pre.42:
+    resolution: {integrity: sha512-stdOIFb3xKBe077caVpyIOHRorPSu0cTnOrxkTC160Fbv0YRCkcZ2xPXyskpuMQ/R1A15NDlqEYTV8/m39sv5Q==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
@@ -7628,6 +7660,18 @@ snapshots:
 
   '@speed-highlight/core@1.2.7': {}
 
+  '@sqld/darwin-arm64@0.24.1-pre.42':
+    optional: true
+
+  '@sqld/darwin-x64@0.24.1-pre.42':
+    optional: true
+
+  '@sqld/linux-arm64@0.24.1-pre.42':
+    optional: true
+
+  '@sqld/linux-x64@0.24.1-pre.42':
+    optional: true
+
   '@standard-schema/spec@1.1.0': {}
 
   '@standard-schema/utils@0.3.0': {}
@@ -9782,6 +9826,13 @@ snapshots:
   sprintf-js@1.0.3: {}
 
   sql.js@1.14.1: {}
+
+  sqld@0.24.1-pre.42:
+    optionalDependencies:
+      '@sqld/darwin-arm64': 0.24.1-pre.42
+      '@sqld/darwin-x64': 0.24.1-pre.42
+      '@sqld/linux-arm64': 0.24.1-pre.42
+      '@sqld/linux-x64': 0.24.1-pre.42
 
   stackback@0.0.2: {}
 

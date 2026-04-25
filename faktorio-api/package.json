@@ -5,6 +5,7 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --port 9189",
+    "dev:e2e": "wrangler dev --port 9189 --env e2e",
     "start": "wrangler dev",
     "kill": "kill -9 $(lsof -t -i:9189)",
     "test": "vitest run",

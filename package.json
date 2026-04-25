@@ -21,7 +21,10 @@
   "scripts": {
     "dev:fe": "cd faktorio-fe && pnpm dev",
     "dev:api": "cd faktorio-api && pnpm dev",
-    "dev": "npm-run-all --parallel dev:*",
+    "dev:e2e:api": "cd faktorio-api && pnpm dev:e2e",
+    "dev:e2e:sqld": "cd faktorio-db && pnpm start-sqld",
+    "dev": "npm-run-all --parallel dev:fe dev:api",
+    "dev:e2e": "npm-run-all --parallel dev:e2e:sqld dev:fe dev:e2e:api",
     "kill": "kill -9 $(lsof -t -i:9189)",
     "lint": "oxlint",
     "format": "prettier --write .",

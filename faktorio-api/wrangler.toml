@@ -10,6 +10,10 @@ crons = ["0 12 * * *"]
 [observability.logs]
 enabled = true
 
+# E2E environment: uses .dev.vars.e2e via `wrangler dev --env e2e`.
+# Inherits all top-level config; only exists so `--env e2e` is valid.
+[env.e2e]
+
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables

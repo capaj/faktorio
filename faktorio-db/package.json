@@ -6,6 +6,8 @@
   "scripts": {
     "bump": "npm-check-updates -u",
     "migrate": "tsx migrate.ts",
+    "migrate-e2e": "tsx scripts/migrate-e2e.ts",
+    "start-sqld": "tsx scripts/start-sqld.ts",
     "generate": "drizzle-kit generate && pnpm local-migrations-generate",
     "local-migrations-generate": "tsx ./scripts/update-fe-migrations.ts",
     "dup": "drizzle-kit up"
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.10",
+    "sqld": "0.24.1-pre.42",
     "tsx": "^4.21.0"
   }
 }
