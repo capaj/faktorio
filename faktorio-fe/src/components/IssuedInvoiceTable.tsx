@@ -53,7 +53,13 @@ export type Invoice = Pick<
   | 'paid_on'
   | 'client_vat_no'
   | 'exchange_rate'
->
+> &
+  Partial<
+    Pick<
+      InferSelectModel<typeof invoicesTb>,
+      'vat_base_21' | 'vat_21' | 'vat_base_12' | 'vat_12'
+    >
+  >
 
 // Helper type for currency totals
 type CurrencyTotals = {
