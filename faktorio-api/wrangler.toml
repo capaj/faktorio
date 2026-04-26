@@ -17,7 +17,8 @@ enabled = true
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
-# [vars]
+[vars]
+INVOICE_LOGO_PUBLIC_BASE_URL = "https://uploads.faktorio.cz"
 
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
@@ -28,9 +29,10 @@ enabled = true
 
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
+[[r2_buckets]]
+binding = "INVOICE_LOGO_BUCKET"
+bucket_name = "faktorio"
+jurisdiction = "eu"
 
 # Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
 # Docs: https://developers.cloudflare.com/queues/get-started
