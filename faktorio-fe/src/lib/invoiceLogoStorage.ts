@@ -13,6 +13,22 @@ const readFileAsDataUrl = async (file: File): Promise<string> => {
   })
 }
 
+const readFileAsText = async (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result ?? ''))
+    reader.onerror = () => reject(new Error('Unable to read logo file'))
+    reader.readAsText(file)
+  })
+}
+
+const isSvgLogo = (logoUrl: string) =>
+  logoUrl.split('?')[0]?.toLowerCase().endsWith('.svg') ||
+  logoUrl.startsWith('data:image/svg+xml')
+
+const svgTextToDataUrl = (svgText: string) =>
+  `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`
+
 const getLogoFileName = (logoUrl: string): string | null => {
   if (!logoUrl.startsWith(LOCAL_LOGO_PREFIX)) {
     return null
@@ -71,6 +87,10 @@ export const resolveLogoForDisplay = async (
 
   const fileName = getLogoFileName(logoUrl)
   if (!fileName) {
+    if (isSvgLogo(logoUrl)) {
+      const svgText = await fetch(logoUrl).then((response) => response.text())
+      return svgTextToDataUrl(svgText)
+    }
     return logoUrl
   }
 
@@ -80,6 +100,10 @@ export const resolveLogoForDisplay = async (
   })
   const fileHandle = await logosDir.getFileHandle(fileName)
   const file = await fileHandle.getFile()
+
+  if (isSvgLogo(file.name)) {
+    return svgTextToDataUrl(await readFileAsText(file))
+  }
 
   return readFileAsDataUrl(file)
 }

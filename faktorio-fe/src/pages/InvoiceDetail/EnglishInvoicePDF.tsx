@@ -25,6 +25,7 @@ import {
   TextLabel,
   ThirdWidthColumnRight
 } from './pdfStyles'
+import { InvoiceLogo } from './InvoiceLogo'
 
 Font.register({
   family: 'Inter',
@@ -133,65 +134,43 @@ export const EnglishInvoicePDF = ({
                   width: '50%'
                 }}
               >
-                {logoUrl && (
-                  <View
+                <Flex
+                  style={{
+                    flexDirection: 'column',
+                    marginLeft: 20
+                  }}
+                >
+                  <Text>Invoice</Text>
+                  <Text>
+                    <Text>{invoiceData.number}</Text>
+                  </Text>
+                  <Text
                     style={{
-                      marginLeft: 20,
-                      marginBottom: 10
+                      marginTop: 10,
+                      fontSize: 11
                     }}
                   >
-                    <Image
-                      style={{
-                        width: 180,
-                        maxHeight: 70,
-                        objectFit: 'contain'
-                      }}
-                      source={logoUrl}
-                    ></Image>
-                  </View>
-                )}
-                {qrCodeBase64 && (
-                  <View
-                    style={{
-                      margin: 20
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 13
-                      }}
-                    >
-                      QR Payment:
-                    </Text>
-
-                    <Image
-                      style={{
-                        width: 100,
-                        height: 100
-                      }}
-                      source={qrCodeBase64}
-                    ></Image>
-                  </View>
-                )}
+                    Tax Document
+                  </Text>
+                </Flex>
               </View>
               <Flex
                 style={{
                   flexDirection: 'column',
-                  marginLeft: 20
+                  alignItems: 'flex-end',
+                  width: '50%'
                 }}
               >
-                <Text>Invoice</Text>
-                <Text>
-                  <Text>{invoiceData.number}</Text>
-                </Text>
-                <Text
-                  style={{
-                    marginTop: 10,
-                    fontSize: 11
-                  }}
-                >
-                  Tax Document
-                </Text>
+                {logoUrl && (
+                  <View
+                    style={{
+                      marginRight: 20,
+                      marginBottom: 10
+                    }}
+                  >
+                    <InvoiceLogo logoUrl={logoUrl} />
+                  </View>
+                )}
               </Flex>
             </Flex>
           </Flex>
@@ -232,6 +211,14 @@ export const EnglishInvoicePDF = ({
                 <Text>
                   {invoiceData.your_zip} {invoiceData.your_city}
                 </Text>
+                <Text
+                  style={{
+                    fontSize: 8,
+                    marginTop: 8
+                  }}
+                >
+                  Fyzická osoba zapsaná v živnostenském rejstříku.
+                </Text>
               </View>
 
               <Flex
@@ -240,14 +227,24 @@ export const EnglishInvoicePDF = ({
                   paddingRight: 40
                 }}
               >
-                <FlexRow>
-                  <TextLabel>Reg. No. </TextLabel>
+                <Flex
+                  style={{
+                    flexDirection: 'row',
+                    fontSize: 10
+                  }}
+                >
+                  <TextLabel style={{ width: 56 }}>Reg. No.</TextLabel>
                   <Text>{invoiceData.your_registration_no}</Text>
-                </FlexRow>
-                <FlexRow>
-                  <TextLabel>VAT No. </TextLabel>
+                </Flex>
+                <Flex
+                  style={{
+                    flexDirection: 'row',
+                    fontSize: 10
+                  }}
+                >
+                  <TextLabel style={{ width: 56 }}>VAT No.</TextLabel>
                   <Text>{invoiceData.your_vat_no}</Text>
-                </FlexRow>
+                </Flex>
               </Flex>
               <View
                 style={{
@@ -447,9 +444,32 @@ export const EnglishInvoicePDF = ({
         >
           <Flex
             style={{
-              width: '60%'
+              width: '60%',
+              flexDirection: 'column',
+              paddingLeft: 20
             }}
-          ></Flex>
+          >
+            {qrCodeBase64 && (
+              <View>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    marginBottom: 8
+                  }}
+                >
+                  QR Payment:
+                </Text>
+
+                <Image
+                  style={{
+                    width: 100,
+                    height: 100
+                  }}
+                  source={qrCodeBase64}
+                ></Image>
+              </View>
+            )}
+          </Flex>
           <Flex
             style={{
               flexDirection: 'column',
@@ -587,8 +607,6 @@ export const EnglishInvoicePDF = ({
             fontSize: 8
           }}
         >
-          {/* This text is required by law to be on each invoice */}
-          <Text>Fyzická osoba zapsaná v živnostenském rejstříku.</Text>
           <Text>
             Invoice issued on <Link href="faktorio.cz">faktorio.cz</Link>
           </Text>

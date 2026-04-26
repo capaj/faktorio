@@ -1,8 +1,28 @@
 import { test, expect } from './fixtures'
 const url = 'http://localhost:5173'
 
+test.setTimeout(60_000)
+
 test('smoke', async ({ page }) => {
   await page.goto(url)
+
+  await page.route('**/trpc/uploadInvoiceLogo**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([
+        {
+          result: {
+            data: {
+              json: {
+                logoUrl: `${url}/images/e2e-tesla-logo.svg`
+              }
+            }
+          }
+        }
+      ])
+    })
+  })
 
   await page
     .getByRole('link', { name: 'Registrace', exact: true })
@@ -37,6 +57,14 @@ test('smoke', async ({ page }) => {
     .getByLabel('Poštovní směrovací číslo', { exact: true })
     .fill('11000')
   await page.getByLabel('IČO', { exact: true }).fill('12345678')
+
+  await page
+    .locator('input[type="file"][accept="image/*"]')
+    .first()
+    .setInputFiles('faktorio-fe/public/images/e2e-tesla-logo.svg')
+  await expect(page.getByAltText('Nahrané firemní logo')).toBeVisible({
+    timeout: 10000
+  })
 
   // Save invoicing details
   await page.getByRole('button', { name: 'Uložit' }).click()
@@ -144,14 +172,31 @@ test('smoke', async ({ page }) => {
   // Verify we're navigated back to the invoice detail page
   await expect(page).toHaveURL(/\/invoices\/[^/]+$/, { timeout: 10000 })
 
-  // Wait for the PDF to render
-  await page.waitForTimeout(2000)
-
   // Verify the invoice detail page is loaded with the correct invoice number
   await expect(page.getByText('2025-001')).toBeVisible()
-  // await page.waitForTimeout(6000) this would be nice, but getByText does not work for pdf content
-
-  // await expect(page.getByText('Additional service')).toBeVisible()
+  // The PDF viewer streams assets after the route is visible, including the logo image.
+  await page.waitForTimeout(5000)
+  await page.addStyleTag({
+    content: `
+      [data-testid="invoice-pdf-preview"] {
+        box-sizing: border-box !important;
+        width: 1120px !important;
+        max-width: 1120px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+    `
+  })
+  await page.getByTestId('invoice-pdf-preview').hover()
+  await page.mouse.wheel(0, -10000)
+  await page.waitForTimeout(1000)
+  // TODO: Re-enable once the PDF viewer screenshot is deterministic across CI.
+  // await expect(page.getByTestId('invoice-pdf-preview')).toHaveScreenshot(
+  //   'invoice-with-tesla-logo.png',
+  //   {
+  //     maxDiffPixelRatio: 0.05
+  //   }
+  // )
 })
 
 test.afterEach(async ({ page }) => {

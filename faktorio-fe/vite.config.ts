@@ -41,7 +41,13 @@ function blogPlugin(): Plugin {
 
       const htmlContent = marked.parse(content) as string
       const firstParagraph =
-        content.split('\n').find((line) => line.trim().length > 0) || ''
+        content
+          .split('\n')
+          .map((line) => line.trim())
+          .find(
+            (line) =>
+              line.length > 0 && !line.startsWith('![') && !line.startsWith('#')
+          ) || ''
       const excerpt =
         firstParagraph.slice(0, 150) +
         (firstParagraph.length > 150 ? '...' : '')
