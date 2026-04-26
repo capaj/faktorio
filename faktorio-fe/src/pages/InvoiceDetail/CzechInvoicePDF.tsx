@@ -24,6 +24,7 @@ import {
 } from './pdfStyles'
 
 import { reactMainRender } from '@/main'
+import { InvoiceLogo } from './InvoiceLogo'
 
 Font.register({
   family: 'Inter',
@@ -142,23 +143,25 @@ export const CzechInvoicePDF = ({
                   width: '50%'
                 }}
               >
-                {logoUrl && (
-                  <View
+                <Flex
+                  style={{
+                    flexDirection: 'column',
+                    marginLeft: 20
+                  }}
+                >
+                  <Text>Faktura</Text>
+                  <Text>
+                    <Text>{invoiceData.number}</Text>
+                  </Text>
+                  <Text
                     style={{
-                      marginLeft: 20,
-                      marginBottom: 10
+                      marginTop: 10,
+                      fontSize: 11
                     }}
                   >
-                    <Image
-                      style={{
-                        width: 180,
-                        maxHeight: 70,
-                        objectFit: 'contain'
-                      }}
-                      source={logoUrl}
-                    ></Image>
-                  </View>
-                )}
+                    Daňový doklad
+                  </Text>
+                </Flex>
                 {qrCodeBase64 && (
                   <View
                     style={{
@@ -188,21 +191,20 @@ export const CzechInvoicePDF = ({
               <Flex
                 style={{
                   flexDirection: 'column',
-                  marginLeft: 20
+                  alignItems: 'flex-end',
+                  width: '50%'
                 }}
               >
-                <Text>Faktura</Text>
-                <Text>
-                  <Text>{invoiceData.number}</Text>
-                </Text>
-                <Text
-                  style={{
-                    marginTop: 10,
-                    fontSize: 11
-                  }}
-                >
-                  Daňový doklad
-                </Text>
+                {logoUrl && (
+                  <View
+                    style={{
+                      marginRight: 20,
+                      marginBottom: 10
+                    }}
+                  >
+                    <InvoiceLogo logoUrl={logoUrl} />
+                  </View>
+                )}
               </Flex>
             </Flex>
           </Flex>

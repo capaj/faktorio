@@ -250,7 +250,10 @@ export const InvoiceDetail = ({
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border bg-background shadow-sm">
+        <div
+          data-testid="invoice-pdf-preview"
+          className="overflow-hidden rounded-lg border bg-background shadow-sm"
+        >
           <div
             className="flex items-stretch justify-center bg-muted"
             style={{
@@ -259,7 +262,7 @@ export const InvoiceDetail = ({
             }}
           >
             <PDFViewer
-              key={`${invoice.id}-${language}-${!!qrCodeBase64}`}
+              key={`${invoice.id}-${language}-${!!qrCodeBase64}-${resolvedLogoUrl ?? ''}`}
               showToolbar={false}
               style={{
                 width: '100%',
