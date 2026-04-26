@@ -15,7 +15,7 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260425.1",
+    "@cloudflare/workers-types": "^4.20260426.1",
     "@types/debug": "^4.1.13",
     "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.31.10",
@@ -31,7 +31,7 @@
     "@libsql/client": "^0.17.3",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
-    "@tanstack/react-query": "^5.100.1",
+    "@tanstack/react-query": "^5.100.5",
     "@trpc/client": "^11.16.0",
     "@trpc/react-query": "^11.16.0",
     "@trpc/server": "^11.16.0",
