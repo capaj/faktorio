@@ -202,7 +202,10 @@ export const userInvoicingDetailsTb = sqliteTable(
     default_bank_account_id: text('default_bank_account_id').references(
       () => userBankAccountsTb.id
     ),
-    vat_payer: integer('vat_payer', { mode: 'boolean' }).notNull().default(true)
+    vat_payer: integer('vat_payer', { mode: 'boolean' })
+      .notNull()
+      .default(true),
+    logo_url: text('logo_url')
   },
   (userInvoicingDetails) => {
     return {

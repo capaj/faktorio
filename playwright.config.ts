@@ -9,6 +9,7 @@ import { defineConfig, devices } from '@playwright/test'
 // dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const isCI = !!process.env.CI
+const useSystemChrome = process.env.PLAYWRIGHT_USE_SYSTEM_CHROME === '1'
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -44,14 +45,16 @@ export default defineConfig({
     }
   },
   timeout: isCI ? 60000 : 10000,
-  // You can optionally use a global setup file instead of fixtures approach
-  // globalSetup: './e2e/global-setup.ts',
+  globalSetup: './e2e/global-setup.ts',
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] }
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(useSystemChrome ? { channel: 'chrome' } : {})
+      }
     }
 
     // {
@@ -86,7 +89,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'pnpm run dev',
+    command: 'pnpm run dev:e2e',
     port: 5173,
     reuseExistingServer: !process.env.CI,
     timeout: isCI ? 60000 : 30000, // Increased timeout for CI, and slightly for local

@@ -21,6 +21,7 @@ import {
   bankAccountInputSchema
 } from './zodDbSchemas'
 import { createId } from '@paralleldrive/cuid2'
+import { TRPCError } from '@trpc/server'
 
 type UserBankAccountInsert = typeof userBankAccountsTb.$inferInsert
 import { z } from 'zod/v4'
@@ -90,6 +91,63 @@ export const appRouter = trpcContext.router({
       bankAccounts: enrichedAccounts
     }
   }),
+  uploadInvoiceLogo: protectedProc
+    .input(
+      z.object({
+        fileName: z.string().min(1),
+        contentType: z.string().min(1),
+        base64Data: z.string().min(1)
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!input.contentType.startsWith('image/')) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Only image uploads are supported for invoice logos.'
+        })
+      }
+
+      const logoBuffer = Uint8Array.from(atob(input.base64Data), (char) =>
+        char.charCodeAt(0)
+      )
+
+      if (logoBuffer.byteLength > 2 * 1024 * 1024) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Logo must be 2 MB or smaller.'
+        })
+      }
+
+      const extension = input.fileName.split('.').pop()?.toLowerCase() ?? 'png'
+      const safeExtension = extension.replace(/[^a-z0-9]/g, '') || 'png'
+      const objectKey = `invoice-logos/${ctx.user.id}/${createId()}.${safeExtension}`
+
+      const logoBucket = ctx.env.INVOICE_LOGO_BUCKET
+      if (!logoBucket) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Missing INVOICE_LOGO_BUCKET binding.'
+        })
+      }
+
+      await logoBucket.put(objectKey, logoBuffer, {
+        httpMetadata: {
+          contentType: input.contentType
+        }
+      })
+
+      const baseUrl = ctx.env.INVOICE_LOGO_PUBLIC_BASE_URL
+      if (!baseUrl) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Missing INVOICE_LOGO_PUBLIC_BASE_URL.'
+        })
+      }
+
+      return {
+        logoUrl: `${baseUrl.replace(/\/$/, '')}/${objectKey}`
+      }
+    }),
   upsertInvoicingDetails: protectedProc
     .input(upsertInvoicingDetailsSchema)
     .mutation(async ({ ctx, input }) => {
@@ -106,7 +164,8 @@ export const appRouter = trpcContext.router({
           { dbValues: UserBankAccountInsert; isDefault: boolean }[]
         >((acc, account, index) => {
           const trimmedId = account.id?.trim()
-          const accountId = trimmedId && trimmedId.length ? trimmedId : createId()
+          const accountId =
+            trimmedId && trimmedId.length ? trimmedId : createId()
 
           const dbValues: UserBankAccountInsert = {
             id: accountId,
@@ -117,16 +176,17 @@ export const appRouter = trpcContext.router({
             swift_bic: normalizeValue(account.swift_bic),
             qrcode_decoded: normalizeValue(account.qrcode_decoded),
             order:
-              typeof account.order === 'number' && Number.isFinite(account.order)
+              typeof account.order === 'number' &&
+              Number.isFinite(account.order)
                 ? account.order
                 : index
           }
 
           const hasContent = Boolean(
             dbValues.bank_account ||
-              dbValues.iban ||
-              dbValues.swift_bic ||
-              dbValues.qrcode_decoded
+            dbValues.iban ||
+            dbValues.swift_bic ||
+            dbValues.qrcode_decoded
           )
 
           if (!hasContent) {
@@ -235,16 +295,14 @@ export const appRouter = trpcContext.router({
       const country = ctx.req.headers.get('cf-ipcountry') ?? ''
       const referer = ctx.req.headers.get('referer') ?? ''
       const path = ctx.req.url ?? ''
-      await ctx.db
-        .insert(invoiceShareEventTb)
-        .values({
-          share_id: shareId,
-          event_type: type,
-          ip_address: ip,
-          user_agent: agent,
-          referer,
-          path
-        })
+      await ctx.db.insert(invoiceShareEventTb).values({
+        share_id: shareId,
+        event_type: type,
+        ip_address: ip,
+        user_agent: agent,
+        referer,
+        path
+      })
     })
 })
 

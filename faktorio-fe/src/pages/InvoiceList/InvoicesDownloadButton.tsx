@@ -22,6 +22,7 @@ import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 import { snakeCase } from 'lodash-es'
 import { useState } from 'react'
+import { resolveLogoForDisplay } from '@/lib/invoiceLogoStorage'
 
 export function InvoicesDownloadButton({
   year,
@@ -61,6 +62,9 @@ export function InvoicesDownloadButton({
 
         const invoicingDetails = await utils.invoicingDetails.fetch()
         const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
+        const resolvedLogoUrl = await resolveLogoForDisplay(
+          invoicingDetails?.logo_url
+        )
 
         const generatedQrString = generateQrPaymentString({
           accountNumber:
@@ -93,6 +97,7 @@ export function InvoicesDownloadButton({
             invoiceData={invoiceWithItems}
             qrCodeBase64={qrCodeBase64}
             vatPayer={invoicingDetails?.vat_payer}
+            logoUrl={resolvedLogoUrl}
           />
         )
 

@@ -24,6 +24,7 @@ import {
 } from './pdfStyles'
 
 import { reactMainRender } from '@/main'
+import { InvoiceLogo } from './InvoiceLogo'
 
 Font.register({
   family: 'Inter',
@@ -84,11 +85,13 @@ function reformatDateToCzech(dateString: string) {
 export const CzechInvoicePDF = ({
   invoiceData,
   qrCodeBase64,
-  vatPayer
+  vatPayer,
+  logoUrl
 }: {
   invoiceData: SelectInvoiceType & { items: InsertInvoiceItemType[] }
   qrCodeBase64?: string
   vatPayer?: boolean
+  logoUrl?: string | null
 }) => {
   const taxPaidByRate: Record<number, number> = invoiceData.items.reduce(
     (acc, item) => {
@@ -140,6 +143,25 @@ export const CzechInvoicePDF = ({
                   width: '50%'
                 }}
               >
+                <Flex
+                  style={{
+                    flexDirection: 'column',
+                    marginLeft: 20
+                  }}
+                >
+                  <Text>Faktura</Text>
+                  <Text>
+                    <Text>{invoiceData.number}</Text>
+                  </Text>
+                  <Text
+                    style={{
+                      marginTop: 10,
+                      fontSize: 11
+                    }}
+                  >
+                    Daňový doklad
+                  </Text>
+                </Flex>
                 {qrCodeBase64 && (
                   <View
                     style={{
@@ -169,21 +191,20 @@ export const CzechInvoicePDF = ({
               <Flex
                 style={{
                   flexDirection: 'column',
-                  marginLeft: 20
+                  alignItems: 'flex-end',
+                  width: '50%'
                 }}
               >
-                <Text>Faktura</Text>
-                <Text>
-                  <Text>{invoiceData.number}</Text>
-                </Text>
-                <Text
-                  style={{
-                    marginTop: 10,
-                    fontSize: 11
-                  }}
-                >
-                  Daňový doklad
-                </Text>
+                {logoUrl && (
+                  <View
+                    style={{
+                      marginRight: 20,
+                      marginBottom: 10
+                    }}
+                  >
+                    <InvoiceLogo logoUrl={logoUrl} />
+                  </View>
+                )}
               </Flex>
             </Flex>
           </Flex>

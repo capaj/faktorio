@@ -3,13 +3,7 @@ import { trpcClient, RouterInputs, RouterOutputs } from '@/lib/trpcClient'
 import { bankAccountInputSchema } from 'faktorio-api/src/zodDbSchemas'
 import { FkButton } from '@/components/FkButton'
 import { toast } from 'sonner'
-import {
-  ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState
-} from 'react'
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   CompanyRegistry,
   fetchCompanyFromRegistry,
@@ -32,6 +26,13 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import jsQR from 'jsqr-es6'
 import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
+import { useAuth } from '@/lib/AuthContext'
+import {
+  deleteLocalLogo,
+  isLocalLogoUrl,
+  resolveLogoForDisplay,
+  saveLogoToLocalFs
+} from '@/lib/invoiceLogoStorage'
 
 const bankAccountFormSchema = bankAccountInputSchema.extend({
   is_default: z.union([z.boolean(), z.string(), z.number()]).optional(),
@@ -50,6 +51,7 @@ const invoicingDetailsFormSchema = z.object({
   main_email: z.string().optional(),
   phone_number: z.string().optional(),
   web_url: z.string().optional(),
+  logo_url: z.string().optional(),
   language: z.string().optional(),
   vat_payer: z.boolean().optional().default(true),
   bank_accounts: z.array(bankAccountFormSchema)
@@ -91,7 +93,9 @@ const createEmptyBankAccount = (order: number): BankAccountFormValues => ({
   order
 })
 
-const mapAccountFromServer = (account: BankAccountServer): BankAccountFormValues => ({
+const mapAccountFromServer = (
+  account: BankAccountServer
+): BankAccountFormValues => ({
   id: toOptionalString(account.id),
   label: account.label ?? '',
   bank_account: account.bank_account ?? '',
@@ -113,7 +117,9 @@ const ensureConsistentBankAccounts = (
     is_default: toBoolean(account.is_default)
   }))
 
-  let defaultIndex = normalized.findIndex((account) => toBoolean(account.is_default))
+  let defaultIndex = normalized.findIndex((account) =>
+    toBoolean(account.is_default)
+  )
   if (defaultIndex === -1) {
     defaultIndex = 0
   }
@@ -169,9 +175,7 @@ type BarcodeDetectorResult = {
   rawValue?: string
 }
 
-type BarcodeDetectorConstructor = new (
-  options?: { formats?: string[] }
-) => {
+type BarcodeDetectorConstructor = new (options?: { formats?: string[] }) => {
   detect: (source: ImageBitmap) => Promise<BarcodeDetectorResult[]>
 }
 
@@ -179,9 +183,11 @@ const tryDecodeUsingBarcodeDetector = async (
   file: File
 ): Promise<string | null> => {
   if (typeof window === 'undefined') return null
-  const barcodeDetectorCtor = (window as typeof window & {
-    BarcodeDetector?: BarcodeDetectorConstructor
-  }).BarcodeDetector
+  const barcodeDetectorCtor = (
+    window as typeof window & {
+      BarcodeDetector?: BarcodeDetectorConstructor
+    }
+  ).BarcodeDetector
   if (!barcodeDetectorCtor) return null
 
   let bitmap: ImageBitmap | null = null
@@ -430,8 +436,11 @@ const BankAccountCard = ({
 }
 
 export const UserInvoicingDetails = () => {
+  const { user } = useAuth()
   const [data, { refetch }] = trpcClient.invoicingDetails.useSuspenseQuery()
   const upsert = trpcClient.upsertInvoicingDetails.useMutation()
+  const uploadInvoiceLogo = trpcClient.uploadInvoiceLogo.useMutation()
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null)
 
   const [isLoadingRegistry, setIsLoadingRegistry] = useState(false)
   const [registrySource, setRegistrySource] = useState<CompanyRegistry>('ares')
@@ -466,6 +475,7 @@ export const UserInvoicingDetails = () => {
       main_email: data?.main_email ?? '',
       phone_number: data?.phone_number ?? '',
       web_url: data?.web_url ?? '',
+      logo_url: data?.logo_url ?? '',
       vat_payer: data?.vat_payer ?? true,
       language: 'cs',
       bank_accounts: defaultBankAccounts
@@ -495,6 +505,7 @@ export const UserInvoicingDetails = () => {
       main_email: data?.main_email ?? '',
       phone_number: data?.phone_number ?? '',
       web_url: data?.web_url ?? '',
+      logo_url: data?.logo_url ?? '',
       vat_payer: data?.vat_payer ?? true,
       language: 'cs',
       bank_accounts: preparedAccounts
@@ -548,7 +559,9 @@ export const UserInvoicingDetails = () => {
       try {
         const decoded = await decodeQrFromFile(file)
         if (!decoded) {
-          toast.error('Nepodařilo se načíst QR kód. Zkuste prosím jiný obrázek.')
+          toast.error(
+            'Nepodařilo se načíst QR kód. Zkuste prosím jiný obrázek.'
+          )
           return
         }
 
@@ -615,6 +628,7 @@ export const UserInvoicingDetails = () => {
   const isDirty = form.formState.isDirty
   const bankAccounts =
     useWatch({ control: form.control, name: 'bank_accounts' }) ?? []
+  const logoUrlValue = useWatch({ control: form.control, name: 'logo_url' })
 
   const copyDetailsToClipboard = async () => {
     const currentValues = form.getValues()
@@ -668,6 +682,99 @@ export const UserInvoicingDetails = () => {
     toast.success('Údaje zkopírovány do schránky')
   }
 
+  const handleLogoUpload = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
+      if (!file) {
+        return
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast.error('Nahrát můžete pouze obrázek.')
+        event.target.value = ''
+        return
+      }
+
+      try {
+        const previousLogoUrl = form.getValues('logo_url')
+        const isLocalUser = localStorage
+          .getItem('auth_token')
+          ?.startsWith('local_')
+
+        let nextLogoUrl: string
+        if (isLocalUser && user?.id) {
+          nextLogoUrl = await saveLogoToLocalFs(file, user.id)
+        } else {
+          const base64Data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => {
+              const result = String(reader.result ?? '')
+              const parts = result.split(',')
+              if (parts.length < 2) {
+                reject(new Error('Failed to read image data'))
+                return
+              }
+              resolve(parts[1]!)
+            }
+            reader.onerror = () => reject(new Error('Failed to read image'))
+            reader.readAsDataURL(file)
+          })
+
+          const uploaded = await uploadInvoiceLogo.mutateAsync({
+            fileName: file.name,
+            contentType: file.type,
+            base64Data
+          })
+          nextLogoUrl = uploaded.logoUrl
+        }
+
+        if (
+          isLocalLogoUrl(previousLogoUrl) &&
+          previousLogoUrl !== nextLogoUrl
+        ) {
+          await deleteLocalLogo(previousLogoUrl)
+        }
+
+        form.setValue('logo_url', nextLogoUrl, {
+          shouldDirty: true,
+          shouldTouch: true
+        })
+        toast.success('Logo bylo úspěšně nahráno')
+      } catch (error) {
+        console.error('Invoice logo upload error:', error)
+        toast.error('Nepodařilo se nahrát logo')
+      } finally {
+        event.target.value = ''
+      }
+    },
+    [form, uploadInvoiceLogo, user?.id]
+  )
+
+  useEffect(() => {
+    let cancelled = false
+    const resolvePreview = async () => {
+      if (!logoUrlValue) {
+        setLogoPreviewUrl(null)
+        return
+      }
+      try {
+        const resolved = await resolveLogoForDisplay(logoUrlValue)
+        if (!cancelled) {
+          setLogoPreviewUrl(resolved)
+        }
+      } catch (error) {
+        console.error('Failed to resolve logo preview', error)
+        if (!cancelled) {
+          setLogoPreviewUrl(null)
+        }
+      }
+    }
+    void resolvePreview()
+    return () => {
+      cancelled = true
+    }
+  }, [logoUrlValue])
+
   return (
     <>
       <h2>Moje fakturační údaje</h2>
@@ -690,17 +797,64 @@ export const UserInvoicingDetails = () => {
           customFooter={
             <div className="col-span-2 space-y-6">
               <section className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Logo na faktuře</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Nahrajte logo, které se bude zobrazovat v hlavičce PDF
+                    faktury.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      disabled={uploadInvoiceLogo.isPending}
+                    />
+                    {logoPreviewUrl && (
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={logoPreviewUrl}
+                          alt="Nahrané firemní logo"
+                          className="h-14 max-w-56 rounded border bg-white object-contain p-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={async () => {
+                            const currentLogoUrl = form.getValues('logo_url')
+                            if (isLocalLogoUrl(currentLogoUrl)) {
+                              await deleteLocalLogo(currentLogoUrl)
+                            }
+                            form.setValue('logo_url', '', {
+                              shouldDirty: true,
+                              shouldTouch: true
+                            })
+                          }}
+                        >
+                          Odebrat logo
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              <section className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-lg font-semibold">Bankovní účty</h3>
-                  <FkButton type="button" variant="secondary" onClick={handleAddAccount}>
+                  <FkButton
+                    type="button"
+                    variant="secondary"
+                    onClick={handleAddAccount}
+                  >
                     Přidat bankovní účet
                   </FkButton>
                 </div>
 
                 {bankAccounts.length === 0 ? (
                   <div className="rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
-                    Zatím nemáte žádný bankovní účet. Přidejte ho pomocí tlačítka
-                    výše.
+                    Zatím nemáte žádný bankovní účet. Přidejte ho pomocí
+                    tlačítka výše.
                   </div>
                 ) : (
                   <div className="space-y-4">

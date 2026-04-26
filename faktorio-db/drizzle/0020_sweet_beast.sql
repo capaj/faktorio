@@ -1,0 +1,1 @@
+ALTER TABLE `user_invoicing_detail` ADD `logo_url` text;
