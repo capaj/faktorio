@@ -30,6 +30,10 @@ describe('generateKontrolniHlaseniXML', () => {
         subtotal: 10000,
         native_subtotal: 10000, // Use native_subtotal for consistency
         native_total: 12100, // 21% VAT
+        vat_base_21: 10000,
+        vat_21: 2100,
+        vat_base_12: 0,
+        vat_12: 0,
         currency: 'CZK',
         exchange_rate: 1,
         paid_on: '2024-07-20'
@@ -47,6 +51,10 @@ describe('generateKontrolniHlaseniXML', () => {
         due_date: '2024-08-15',
         total_without_vat: 5000,
         total_with_vat: 6050, // Below threshold
+        vat_base_21: 5000,
+        vat_21: 1050,
+        vat_base_12: 0,
+        vat_12: 0,
         currency: 'CZK',
         status: 'paid'
       },
@@ -60,6 +68,10 @@ describe('generateKontrolniHlaseniXML', () => {
         due_date: '2024-08-20',
         total_without_vat: 15000,
         total_with_vat: 18150, // Above threshold
+        vat_base_21: 15000,
+        vat_21: 3150,
+        vat_base_12: 0,
+        vat_12: 0,
         currency: 'CZK',
         status: 'received'
       },
@@ -73,6 +85,10 @@ describe('generateKontrolniHlaseniXML', () => {
         due_date: '2024-08-25',
         total_without_vat: 100,
         total_with_vat: 121,
+        vat_base_21: 100,
+        vat_21: 21,
+        vat_base_12: 0,
+        vat_12: 0,
         currency: 'EUR',
         status: 'received'
       }
@@ -125,6 +141,10 @@ describe('generateKontrolniHlaseniXML', () => {
         subtotal: 12100,
         native_subtotal: 12100, // Use native_subtotal for consistency
         native_total: 12100, // 0% VAT for reverse charge
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK',
         exchange_rate: 1,
         paid_on: '2024-07-20'
@@ -142,6 +162,10 @@ describe('generateKontrolniHlaseniXML', () => {
         due_date: '2024-08-15',
         total_without_vat: 5000,
         total_with_vat: 6050, // Below threshold
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK',
         status: 'paid'
       }
@@ -189,6 +213,10 @@ describe('generateKontrolniHlaseniXML', () => {
         due_date: '2025-01-29',
         total_without_vat: 52000,
         total_with_vat: 62920,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK',
         status: 'paid'
       },
@@ -202,6 +230,10 @@ describe('generateKontrolniHlaseniXML', () => {
         due_date: '2025-02-24',
         total_without_vat: -26000,
         total_with_vat: -31460,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK',
         status: 'received'
       }
@@ -250,6 +282,10 @@ describe('generateKontrolniHlaseniXML', () => {
         due_date: '2025-02-15',
         total_without_vat: 9000,
         total_with_vat: 10890,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK',
         status: 'paid'
       }

@@ -38,6 +38,10 @@ describe('generateDanovePriznaniXML', () => {
         native_subtotal: 10000, // Use native_subtotal for consistency
         native_total: 12100, // 21% VAT
         total: 12100, // 21% VAT
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       },
       {
@@ -55,6 +59,10 @@ describe('generateDanovePriznaniXML', () => {
         total: 6050, // 21% VAT
         native_subtotal: 5000, // Use native_subtotal for consistency
         native_total: 6050, // 21% VAT
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       }
     ]
@@ -71,6 +79,10 @@ describe('generateDanovePriznaniXML', () => {
         status: 'received',
         total_without_vat: 2000,
         total_with_vat: 2420, // 21% VAT
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       }
     ]
@@ -120,6 +132,10 @@ describe('generateDanovePriznaniXML', () => {
         native_subtotal: 10000,
         native_total: 12100,
         total: 12100,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       }
     ]
@@ -136,6 +152,10 @@ describe('generateDanovePriznaniXML', () => {
         status: 'received',
         total_without_vat: 2000,
         total_with_vat: 2420,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       },
       {
@@ -149,6 +169,10 @@ describe('generateDanovePriznaniXML', () => {
         status: 'received',
         total_without_vat: -1500,
         total_with_vat: -1815,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       }
     ]
@@ -167,6 +191,148 @@ describe('generateDanovePriznaniXML', () => {
     )
     expect(xmlString).toMatch(
       /<Veta6[\s\S]*dan_zocelk="2100" odp_zocelk="105" dano_da="1995"/
+    )
+  })
+
+  it('calculates row 1 VAT directly from the summed base to match ADIS validation', () => {
+    const submitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    const issuedInvoices: Invoice[] = [
+      {
+        id: '1',
+        number: 'INV001',
+        client_name: 'Client A',
+        client_vat_no: 'CZ87654321',
+        due_on: new Date('2024-07-20').toISOString(),
+        issued_on: new Date('2024-07-10').toISOString(),
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: new Date('2024-07-15').toISOString(),
+        subtotal: 100000,
+        native_subtotal: 100000,
+        native_total: 120940,
+        total: 120940,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
+        currency: 'CZK'
+      },
+      {
+        id: '2',
+        number: 'INV002',
+        client_name: 'Client B',
+        client_vat_no: 'CZ11223344',
+        due_on: new Date('2024-07-25').toISOString(),
+        issued_on: new Date('2024-07-15').toISOString(),
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: new Date('2024-07-15').toISOString(),
+        subtotal: 256756,
+        native_subtotal: 256756,
+        native_total: 310515,
+        total: 310515,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
+        currency: 'CZK'
+      }
+    ]
+
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices,
+      receivedInvoices: [],
+      submitterData,
+      year: 2024,
+      quarter: 3,
+      czkSumEurServices: 0
+    })
+
+    expect(xmlString).toMatch(/<Veta1[\s\S]*obrat23="356756" dan23="74919"/)
+  })
+
+  it('uses 21% VAT breakdown fields when invoices contain multiple VAT rates', () => {
+    const submitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    const issuedInvoices: Invoice[] = [
+      {
+        id: '1',
+        number: 'INV001',
+        client_name: 'Client A',
+        client_vat_no: 'CZ87654321',
+        due_on: new Date('2024-07-20').toISOString(),
+        issued_on: new Date('2024-07-10').toISOString(),
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: new Date('2024-07-15').toISOString(),
+        subtotal: 1120,
+        native_subtotal: 1120,
+        native_total: 1316,
+        vat_base_21: 800,
+        vat_21: 168,
+        vat_base_12: 320,
+        vat_12: 38.4,
+        total: 1316,
+        currency: 'CZK'
+      }
+    ]
+
+    const receivedInvoices: ReceivedInvoice[] = [
+      {
+        id: 'rec1',
+        invoice_number: 'REC001',
+        supplier_name: 'Supplier X',
+        supplier_vat_no: 'CZ99887766',
+        issue_date: new Date('2024-07-20').toISOString(),
+        taxable_supply_date: new Date('2024-07-20').toISOString(),
+        due_date: '2024-08-05',
+        status: 'received',
+        total_without_vat: 560,
+        total_with_vat: 658,
+        vat_base_21: 400,
+        vat_21: 84,
+        vat_base_12: 160,
+        vat_12: 19.2,
+        currency: 'CZK'
+      }
+    ]
+
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices,
+      receivedInvoices,
+      submitterData,
+      year: 2024,
+      quarter: 3,
+      czkSumEurServices: 0
+    })
+
+    expect(xmlString).toMatch(/<Veta1[\s\S]*obrat23="800" dan23="168"/)
+    expect(xmlString).toMatch(
+      /<Veta4[\s\S]*pln23="400" odp_tuz23_nar="84"[\s\S]*odp_sum_nar="84"/
     )
   })
 
