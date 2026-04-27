@@ -31,6 +31,7 @@ export type ReceivedInvoice = Pick<
   | 'vat_base_12'
   | 'vat_12'
   | 'currency'
+  | 'exchange_rate'
   | 'status'
 > &
   Partial<

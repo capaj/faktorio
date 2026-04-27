@@ -32,17 +32,17 @@ exports[`generateKontrolniHlaseniXML > should generate correct XML for a simple 
       dppd="05.08.2024"
       zakl_dane1="15000"
       dan1="3150"
-      zdph_44="N" 
+      zdph_44="N"
       pomer="N"
     />
   
     <VetaB3
-      zakl_dane1="5100"
-      dan1="1071"
+      zakl_dane1="7500"
+      dan1="1575"
     />
   <VetaC
     obrat23="10000"
-    pln23="20100"
+    pln23="22500"
   />
 </DPHKH1>
 </Pisemnost>"

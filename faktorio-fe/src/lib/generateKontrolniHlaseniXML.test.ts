@@ -56,6 +56,7 @@ describe('generateKontrolniHlaseniXML', () => {
         vat_base_12: 0,
         vat_12: 0,
         currency: 'CZK',
+        exchange_rate: 1,
         status: 'paid'
       },
       {
@@ -73,6 +74,7 @@ describe('generateKontrolniHlaseniXML', () => {
         vat_base_12: 0,
         vat_12: 0,
         currency: 'CZK',
+        exchange_rate: 1,
         status: 'received'
       },
       {
@@ -90,6 +92,7 @@ describe('generateKontrolniHlaseniXML', () => {
         vat_base_12: 0,
         vat_12: 0,
         currency: 'EUR',
+        exchange_rate: 25,
         status: 'received'
       }
     ]
@@ -119,6 +122,67 @@ describe('generateKontrolniHlaseniXML', () => {
     })
 
     expect(xmlString).toMatchSnapshot()
+  })
+
+  it('reports only the 21% base in zakl_dane1 when an invoice mixes a 21% line with a non-VATable line (§ 36 odst. 11)', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-04-21'))
+
+    // Reproduces invoice 2026-023:
+    //   - 91 hodin × 875 Kč = 79,625 Kč at 21%
+    //   - 1 ks Anthropic subscription přeúčtování = 489 Kč (není předmětem DPH)
+    //   - Subtotal: 80,114 Kč; VAT 21%: 16,721.25 Kč; Total: 96,835.25 Kč
+    // KH must report only the 21% portion for this supplier line.
+    const mockIssuedInvoices: Invoice[] = [
+      {
+        id: 'iss1',
+        number: '2026-023',
+        client_name: 'Greenometer s.r.o.',
+        client_vat_no: 'CZ11111111',
+        taxable_fulfillment_due: '2026-03-21',
+        issued_on: '2026-03-21',
+        sent_at: null,
+        due_on: '2026-03-30',
+        total: 96835.25,
+        subtotal: 80114,
+        native_subtotal: 80114,
+        native_total: 96835.25,
+        vat_base_21: 79625,
+        vat_21: 16721.25,
+        vat_base_12: 0,
+        vat_12: 0,
+        currency: 'CZK',
+        exchange_rate: 1,
+        paid_on: '2026-03-30'
+      }
+    ]
+
+    const mockSubmitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    const xmlString = generateKontrolniHlaseniXML({
+      issuedInvoices: mockIssuedInvoices,
+      receivedInvoices: [],
+      submitterData: mockSubmitterData,
+      year: 2026,
+      quarter: 1
+    })
+
+    // VetaA4 must report the 21% base and VAT only — the 489 Kč non-VATable
+    // line must NOT be included in zakl_dane1; otherwise ADIS rejects the row
+    // because zakl_dane1 * 0.21 != dan1.
+    expect(xmlString).toMatch(
+      /<VetaA4[\s\S]*c_evid_dd="2026-023"[\s\S]*zakl_dane1="79625"[\s\S]*dan1="16721"/
+    )
   })
 
   it('should handle reverse charge invoice inside czechia-czech contractor invoicing a czech company', () => {
@@ -167,6 +231,7 @@ describe('generateKontrolniHlaseniXML', () => {
         vat_base_12: null,
         vat_12: null,
         currency: 'CZK',
+        exchange_rate: 1,
         status: 'paid'
       }
     ]
@@ -218,6 +283,7 @@ describe('generateKontrolniHlaseniXML', () => {
         vat_base_12: null,
         vat_12: null,
         currency: 'CZK',
+        exchange_rate: 1,
         status: 'paid'
       },
       {
@@ -235,6 +301,7 @@ describe('generateKontrolniHlaseniXML', () => {
         vat_base_12: null,
         vat_12: null,
         currency: 'CZK',
+        exchange_rate: 1,
         status: 'received'
       }
     ]
@@ -287,6 +354,7 @@ describe('generateKontrolniHlaseniXML', () => {
         vat_base_12: null,
         vat_12: null,
         currency: 'CZK',
+        exchange_rate: 1,
         status: 'paid'
       }
     ]

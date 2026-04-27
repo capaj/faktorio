@@ -473,7 +473,7 @@ export function XMLExportPage() {
           <AlertCircleIcon className="h-4 w-4" />
           <AlertTitle>Upozornění!</AlertTitle>
           <AlertDescription>
-            Tato funkce je prozatím experimentální. Vygenerované XML může
+            Faktorio nijak neručí za správnost vygenerovaného XML. Vygenerované XML může
             obsahovat chyby a nemusí být kompletní. Vždy si jej před odesláním
             zkontrolujte.
           </AlertDescription>

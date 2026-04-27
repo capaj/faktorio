@@ -33,6 +33,40 @@ interface GenerateXmlParams {
   month?: number
 }
 
+// vat_base_21 / vat_21 are stored in the invoice's original currency, so they
+// must be converted to CZK with exchange_rate. When the breakdown is missing
+// (legacy invoice), fall back to the full subtotal/vat — assumes the whole
+// invoice is at 21%, which is the best approximation pre-breakdown.
+function getCzkBase21Issued(invoice: Invoice): number {
+  if (invoice.vat_base_21 !== null && invoice.vat_base_21 !== undefined) {
+    return invoice.vat_base_21 * (invoice.exchange_rate ?? 1)
+  }
+  return invoice.native_subtotal ?? 0
+}
+
+function getCzkVat21Issued(invoice: Invoice): number {
+  if (invoice.vat_21 !== null && invoice.vat_21 !== undefined) {
+    return invoice.vat_21 * (invoice.exchange_rate ?? 1)
+  }
+  return (invoice.native_total ?? 0) - (invoice.native_subtotal ?? 0)
+}
+
+function getCzkBase21Received(invoice: ReceivedInvoice): number {
+  const exchangeRate = invoice.exchange_rate ?? 1
+  if (invoice.vat_base_21 !== null && invoice.vat_base_21 !== undefined) {
+    return invoice.vat_base_21 * exchangeRate
+  }
+  return (invoice.total_without_vat ?? 0) * exchangeRate
+}
+
+function getCzkVat21Received(invoice: ReceivedInvoice): number {
+  const exchangeRate = invoice.exchange_rate ?? 1
+  if (invoice.vat_21 !== null && invoice.vat_21 !== undefined) {
+    return invoice.vat_21 * exchangeRate
+  }
+  return ((invoice.total_with_vat ?? 0) - (invoice.total_without_vat ?? 0)) * exchangeRate
+}
+
 export function generateKontrolniHlaseniXML({
   issuedInvoices,
   receivedInvoices,
@@ -57,7 +91,9 @@ export function generateKontrolniHlaseniXML({
     const subtotalAmount = inv.native_subtotal ?? 0
     const totalAmount = inv.native_total ?? 0
     const vatAmount = totalAmount - subtotalAmount
-    issuedInvoiceSubtotalSum += subtotalAmount
+    const base21Czk = getCzkBase21Issued(inv)
+    const vat21Czk = getCzkVat21Issued(inv)
+    issuedInvoiceSubtotalSum += base21Czk
 
     if (!clientVatId) {
       console.warn('Skipping issued invoice due to missing client VAT ID:', inv)
@@ -90,8 +126,8 @@ export function generateKontrolniHlaseniXML({
       dic_odb="${clientVatId.replace('CZ', '')}"
       c_evid_dd="${inv.number}"
       dppd="${taxableDate}"
-      zakl_dane1="${toInt(subtotalAmount)}"
-      dan1="${toInt(vatAmount)}"
+      zakl_dane1="${toInt(base21Czk)}"
+      dan1="${toInt(vat21Czk)}"
       kod_rezim_pl="0"
       zdph_44="N"
     />`
@@ -109,10 +145,10 @@ export function generateKontrolniHlaseniXML({
     const supplierVatId = inv.supplier_vat_no || 'MISSING_DIC_DOD'
     const taxableSupplyDate = inv.taxable_supply_date || inv.issue_date
     const taxableDate = formatCzechDate(taxableSupplyDate)
-    const subtotal = inv.total_without_vat ?? 0
     const totalWithVat = inv.total_with_vat ?? 0
-    const vatAmount = totalWithVat - subtotal
-    receivedInvoiceSubtotalSum += subtotal
+    const base21Czk = getCzkBase21Received(inv)
+    const vat21Czk = getCzkVat21Received(inv)
+    receivedInvoiceSubtotalSum += base21Czk
 
     if (
       !inv.invoice_number ||
@@ -142,14 +178,14 @@ export function generateKontrolniHlaseniXML({
       dic_dod="${sanitizedSupplierVatId}"
       c_evid_dd="${inv.invoice_number}"
       dppd="${taxableDate}"
-      zakl_dane1="${toInt(subtotal)}"
-      dan1="${toInt(vatAmount)}"
-      zdph_44="N" 
+      zakl_dane1="${toInt(base21Czk)}"
+      dan1="${toInt(vat21Czk)}"
+      zdph_44="N"
       pomer="N"
     />`
     } else {
-      b3TotalSubtotal += subtotal
-      b3TotalVat += vatAmount
+      b3TotalSubtotal += base21Czk
+      b3TotalVat += vat21Czk
     }
   })
 

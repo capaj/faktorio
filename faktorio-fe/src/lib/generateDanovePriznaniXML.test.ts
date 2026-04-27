@@ -83,7 +83,8 @@ describe('generateDanovePriznaniXML', () => {
         vat_21: null,
         vat_base_12: null,
         vat_12: null,
-        currency: 'CZK'
+        currency: 'CZK',
+        exchange_rate: 1
       }
     ]
 
@@ -156,7 +157,8 @@ describe('generateDanovePriznaniXML', () => {
         vat_21: null,
         vat_base_12: null,
         vat_12: null,
-        currency: 'CZK'
+        currency: 'CZK',
+        exchange_rate: 1
       },
       {
         id: 'rec2',
@@ -173,7 +175,8 @@ describe('generateDanovePriznaniXML', () => {
         vat_21: null,
         vat_base_12: null,
         vat_12: null,
-        currency: 'CZK'
+        currency: 'CZK',
+        exchange_rate: 1
       }
     ]
 
@@ -317,7 +320,8 @@ describe('generateDanovePriznaniXML', () => {
         vat_21: 84,
         vat_base_12: 160,
         vat_12: 19.2,
-        currency: 'CZK'
+        currency: 'CZK',
+        exchange_rate: 1
       }
     ]
 
@@ -334,6 +338,227 @@ describe('generateDanovePriznaniXML', () => {
     expect(xmlString).toMatch(
       /<Veta4[\s\S]*pln23="400" odp_tuz23_nar="84"[\s\S]*odp_sum_nar="84"/
     )
+  })
+
+  it('falls back to native_subtotal for legacy invoices with null vat_base_21 when other invoices have the breakdown populated', () => {
+    const submitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    const issuedInvoices: Invoice[] = [
+      {
+        id: '1',
+        number: '2026-021',
+        client_name: 'Greenometer s.r.o.',
+        client_vat_no: 'CZ87654321',
+        due_on: '2026-02-09',
+        issued_on: '2026-02-02',
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: '2026-01-31',
+        subtotal: 137834,
+        native_subtotal: 137834,
+        native_total: 166779.14,
+        total: 166779.14,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
+        currency: 'CZK'
+      },
+      {
+        id: '2',
+        number: '2026-022',
+        client_name: 'Greenometer s.r.o.',
+        client_vat_no: 'CZ87654321',
+        due_on: '2026-03-10',
+        issued_on: '2026-03-01',
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: '2026-02-28',
+        subtotal: 138808,
+        native_subtotal: 138808,
+        native_total: 167840.5,
+        total: 167840.5,
+        vat_base_21: 138808,
+        vat_21: 29032.5,
+        vat_base_12: 0,
+        vat_12: 0,
+        currency: 'CZK'
+      },
+      {
+        id: '3',
+        number: '2026-023',
+        client_name: 'Greenometer s.r.o.',
+        client_vat_no: 'CZ87654321',
+        due_on: '2026-03-30',
+        issued_on: '2026-03-21',
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: '2026-03-21',
+        subtotal: 80114,
+        native_subtotal: 80114,
+        native_total: 96835.25,
+        total: 96835.25,
+        vat_base_21: 80114,
+        vat_21: 16721.25,
+        vat_base_12: 0,
+        vat_12: 0,
+        currency: 'CZK'
+      }
+    ]
+
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices,
+      receivedInvoices: [],
+      submitterData,
+      year: 2026,
+      quarter: 1,
+      czkSumEurServices: 0
+    })
+
+    // 137834 + 138808 + 80114 = 356756 (regardless of breakdown availability)
+    // 356756 * 0.21 = 74918.76 -> rounds to 74919
+    expect(xmlString).toMatch(/<Veta1[\s\S]*obrat23="356756" dan23="74919"/)
+  })
+
+  it('excludes non-VATable line items (e.g. § 36 odst. 11 přeúčtování) from obrat23', () => {
+    const submitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    // Q1 2026 export: invoice 2026-023 has an 80,114 CZK subtotal, but only
+    // 79,625 is at 21% — the remaining 489 is a § 36 odst. 11 přeúčtování
+    // (not subject to VAT). obrat23 must report only the 21% portion.
+    const issuedInvoices: Invoice[] = [
+      {
+        id: '3',
+        number: '2026-023',
+        client_name: 'Greenometer s.r.o.',
+        client_vat_no: 'CZ87654321',
+        due_on: '2026-03-30',
+        issued_on: '2026-03-21',
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: '2026-03-21',
+        subtotal: 80114,
+        native_subtotal: 80114,
+        native_total: 96835.25,
+        total: 96835.25,
+        vat_base_21: 79625,
+        vat_21: 16721.25,
+        vat_base_12: null,
+        vat_12: null,
+        currency: 'CZK'
+      }
+    ]
+
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices,
+      receivedInvoices: [],
+      submitterData,
+      year: 2026,
+      quarter: 1,
+      czkSumEurServices: 0
+    })
+
+    // 79625 * 0.21 = 16721.25 -> rounds to 16721
+    expect(xmlString).toMatch(/<Veta1[\s\S]*obrat23="79625" dan23="16721"/)
+  })
+
+  it('uses CZK-converted values for non-CZK invoices instead of raw vat_base_21', () => {
+    const submitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    // EUR invoice: 1000 EUR base at exchange rate 25 -> 25000 CZK base
+    // vat_base_21 is stored in original currency (EUR) per getInvoiceSums.ts,
+    // so summing it directly mixes EUR with CZK from other invoices.
+    const issuedInvoices: Invoice[] = [
+      {
+        id: '1',
+        number: 'EUR-001',
+        client_name: 'EU Client',
+        client_vat_no: 'DE123456789',
+        due_on: '2026-02-09',
+        issued_on: '2026-02-02',
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 25,
+        taxable_fulfillment_due: '2026-01-31',
+        subtotal: 1000,
+        native_subtotal: 25000,
+        native_total: 30250,
+        total: 1210,
+        vat_base_21: 1000, // stored in EUR, not CZK
+        vat_21: 210,
+        vat_base_12: 0,
+        vat_12: 0,
+        currency: 'EUR'
+      },
+      {
+        id: '2',
+        number: 'CZK-001',
+        client_name: 'Czech Client',
+        client_vat_no: 'CZ87654321',
+        due_on: '2026-02-09',
+        issued_on: '2026-02-02',
+        sent_at: null,
+        paid_on: null,
+        exchange_rate: 1,
+        taxable_fulfillment_due: '2026-01-31',
+        subtotal: 50000,
+        native_subtotal: 50000,
+        native_total: 60500,
+        total: 60500,
+        vat_base_21: 50000,
+        vat_21: 10500,
+        vat_base_12: 0,
+        vat_12: 0,
+        currency: 'CZK'
+      }
+    ]
+
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices,
+      receivedInvoices: [],
+      submitterData,
+      year: 2026,
+      quarter: 1,
+      czkSumEurServices: 0
+    })
+
+    // Expected base in CZK: 25000 (EUR converted) + 50000 (CZK) = 75000
+    // 75000 * 0.21 = 15750
+    expect(xmlString).toMatch(/<Veta1[\s\S]*obrat23="75000" dan23="15750"/)
   })
 
   // Restore real timers after tests
