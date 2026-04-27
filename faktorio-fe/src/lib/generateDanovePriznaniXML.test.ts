@@ -38,6 +38,10 @@ describe('generateDanovePriznaniXML', () => {
         native_subtotal: 10000, // Use native_subtotal for consistency
         native_total: 12100, // 21% VAT
         total: 12100, // 21% VAT
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       },
       {
@@ -55,6 +59,10 @@ describe('generateDanovePriznaniXML', () => {
         total: 6050, // 21% VAT
         native_subtotal: 5000, // Use native_subtotal for consistency
         native_total: 6050, // 21% VAT
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       }
     ]
@@ -71,6 +79,10 @@ describe('generateDanovePriznaniXML', () => {
         status: 'received',
         total_without_vat: 2000,
         total_with_vat: 2420, // 21% VAT
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       }
     ]
@@ -120,6 +132,10 @@ describe('generateDanovePriznaniXML', () => {
         native_subtotal: 10000,
         native_total: 12100,
         total: 12100,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       }
     ]
@@ -136,6 +152,10 @@ describe('generateDanovePriznaniXML', () => {
         status: 'received',
         total_without_vat: 2000,
         total_with_vat: 2420,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       },
       {
@@ -149,6 +169,10 @@ describe('generateDanovePriznaniXML', () => {
         status: 'received',
         total_without_vat: -1500,
         total_with_vat: -1815,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       }
     ]
@@ -199,6 +223,10 @@ describe('generateDanovePriznaniXML', () => {
         native_subtotal: 100000,
         native_total: 120940,
         total: 120940,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       },
       {
@@ -216,6 +244,10 @@ describe('generateDanovePriznaniXML', () => {
         native_subtotal: 256756,
         native_total: 310515,
         total: 310515,
+        vat_base_21: null,
+        vat_21: null,
+        vat_base_12: null,
+        vat_12: null,
         currency: 'CZK'
       }
     ]
