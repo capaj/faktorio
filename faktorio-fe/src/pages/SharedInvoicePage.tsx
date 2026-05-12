@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'wouter'
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
+import { PDFDownloadLink } from '@react-pdf/renderer'
 import { CzechInvoicePDF } from './InvoiceDetail/CzechInvoicePDF'
 import { EnglishInvoicePDF } from './InvoiceDetail/EnglishInvoicePDF'
+import { InvoicePdfPreview } from './InvoiceDetail/InvoicePdfPreview'
 import { Button } from '@/components/ui/button'
 import { trpcClient } from '@/lib/trpcClient'
 
@@ -77,13 +78,8 @@ export function SharedInvoicePage() {
         </select>
       </div>
 
-      <div className="flex justify-center">
-        <PDFViewer
-          style={{ width: '70vw', height: '1100px' }}
-          showToolbar={false}
-        >
-          <PdfComponent {...docProps} />
-        </PDFViewer>
+      <div className="overflow-hidden rounded-lg border">
+        <InvoicePdfPreview document={<PdfComponent {...docProps} />} />
       </div>
 
       <div className="flex justify-center">
