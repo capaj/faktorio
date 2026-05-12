@@ -4,3 +4,11 @@ packages:
   - 'faktorio-shared/**'
   - 'faktorio-db/**'
   - 'faktorio-public-api/**'
+allowBuilds:
+  '@google/genai': true
+  '@sqld/linux-x64': true
+  '@swc/core': true
+  esbuild: true
+  protobufjs: true
+  sharp: true
+  workerd: true

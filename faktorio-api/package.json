@@ -15,26 +15,26 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260426.1",
+    "@cloudflare/workers-types": "^4.20260511.1",
     "@types/debug": "^4.1.13",
     "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.31.10",
     "faktorio-db": "workspace:*",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.5",
-    "wrangler": "^4.85.0"
+    "vitest": "^4.1.6",
+    "wrangler": "^4.90.0"
   },
   "dependencies": {
-    "@google/genai": "^1.50.1",
+    "@google/genai": "^2.1.0",
     "@google/generative-ai": "^0.24.1",
     "@libsql/client": "^0.17.3",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
-    "@tanstack/react-query": "^5.100.5",
-    "@trpc/client": "^11.16.0",
-    "@trpc/react-query": "^11.16.0",
-    "@trpc/server": "^11.16.0",
+    "@tanstack/react-query": "^5.100.10",
+    "@trpc/client": "^11.17.0",
+    "@trpc/react-query": "^11.17.0",
+    "@trpc/server": "^11.17.0",
     "@tsndr/cloudflare-worker-jwt": "^3.2.1",
     "currency-codes": "^2.2.0",
     "debug": "^4.4.3",
@@ -44,6 +44,6 @@
     "faktorio-shared": "workspace:*",
     "node-mailjet": "^6.0.11",
     "web-push": "^3.6.7",
-    "zod": "^4.3.6"
+    "zod": "^4.4.3"
   }
 }
