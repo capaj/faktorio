@@ -19,7 +19,7 @@ import {
 } from 'faktorio-api/src/zodDbSchemas'
 import { useCallback, useEffect, useState } from 'react'
 import { Center } from '../../components/Center'
-import { useLocation } from 'wouter'
+import { useLocation, useSearchParams } from 'wouter'
 import {
   Form,
   FormControl,
@@ -113,7 +113,14 @@ const LocalizedNumberInput = ({
 }
 
 export const NewInvoicePage = () => {
+  const [searchParams] = useSearchParams()
+  const duplicateFromInvoiceId = searchParams.get('duplicateFrom')
   const [lastInvoice] = trpcClient.invoices.lastInvoiceThisYear.useSuspenseQuery()
+  const invoiceToDuplicateQuery = trpcClient.invoices.getById.useQuery(
+    { id: duplicateFromInvoiceId ?? '' },
+    { enabled: !!duplicateFromInvoiceId }
+  )
+  const invoiceToDuplicate = invoiceToDuplicateQuery.data
   const [contacts] = trpcClient.contacts.all.useSuspenseQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
   const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
@@ -155,6 +162,51 @@ export const NewInvoicePage = () => {
       ]
     }
   })
+
+  useEffect(() => {
+    if (!invoiceToDuplicate) {
+      return
+    }
+
+    const shiftDateToCurrentMonth = (dateString: string) => {
+      const sourceDate = djs(dateString)
+      if (!sourceDate.isValid()) {
+        return djs().format('YYYY-MM-DD')
+      }
+
+      const now = djs()
+      const daysInCurrentMonth = now.daysInMonth()
+      const dayOfMonth = Math.min(sourceDate.date(), daysInCurrentMonth)
+
+      return now.date(dayOfMonth).format('YYYY-MM-DD')
+    }
+
+    form.reset({
+      ...form.getValues(),
+      number: nextInvoiceNumber,
+      currency: invoiceToDuplicate.currency,
+      issued_on: shiftDateToCurrentMonth(invoiceToDuplicate.issued_on),
+      taxable_fulfillment_due: shiftDateToCurrentMonth(
+        invoiceToDuplicate.taxable_fulfillment_due
+      ),
+      payment_method: invoiceToDuplicate.payment_method,
+      footer_note: invoiceToDuplicate.footer_note ?? '',
+      due_in_days: invoiceToDuplicate.due_in_days,
+      client_contact_id: invoiceToDuplicate.client_contact_id,
+      exchange_rate: invoiceToDuplicate.exchange_rate,
+      bank_account: invoiceToDuplicate.bank_account ?? '',
+      iban: invoiceToDuplicate.iban ?? '',
+      swift_bic: invoiceToDuplicate.swift_bic ?? '',
+      language: invoiceToDuplicate.language,
+      items: invoiceToDuplicate.items.map((item) => ({
+        description: item.description,
+        unit: item.unit,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        vat_rate: item.vat_rate
+      }))
+    })
+  }, [form, invoiceToDuplicate, nextInvoiceNumber])
 
   const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>(
     () => {
