@@ -11,7 +11,6 @@ import {
   SQL,
   and,
   count,
-  asc,
   desc,
   eq,
   gte,
@@ -479,6 +478,17 @@ export const invoiceRouter = trpcContext.router({
         throw new Error('Invoice not found')
       }
 
+      const client = await ctx.db.query.contactTb.findFirst({
+        where: and(
+          eq(contactTb.id, input.invoice.client_contact_id),
+          eq(contactTb.user_id, ctx.user.id)
+        )
+      })
+
+      if (!client) {
+        throw new Error('Client not found')
+      }
+
       await ctx.db.transaction(async (tx) => {
         const invoiceSums = getInvoiceSums(
           input.items,
@@ -500,7 +510,15 @@ export const invoiceRouter = trpcContext.router({
             ...input.invoice,
             due_on,
             ...invoiceSums,
-            exchange_rate: input.invoice.exchange_rate ?? 1
+            exchange_rate: input.invoice.exchange_rate ?? 1,
+            client_name: client.name,
+            client_street: client.street ?? '',
+            client_street2: client.street2,
+            client_city: client.city ?? '',
+            client_zip: client.zip,
+            client_country: client.country,
+            client_registration_no: client.registration_no,
+            client_vat_no: client.vat_no
           })
           .where(eq(invoicesTb.id, input.id))
           .execute()
