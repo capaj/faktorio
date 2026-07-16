@@ -12,11 +12,18 @@ import { Input } from '@/components/ui/input'
 import { useQueryParamState } from './useQueryParamState'
 import { MarkAsPaidDialog } from './MarkAsPaidDialog'
 import { IssuedInvoiceTable } from '@/components/IssuedInvoiceTable'
+import type { TRPCClientErrorLike } from '@trpc/client'
+import type { UseQueryResult } from '@tanstack/react-query'
+import type { AppRouter } from 'faktorio-api/src/trpcRouter'
+import type { RouterOutputs } from '@/lib/trpcClient'
 
 export function useFilteredInvoicesQuery(
   search: string = '',
   year?: number | null // Add year parameter
-) {
+): UseQueryResult<
+  RouterOutputs['invoices']['listInvoices'] | undefined,
+  TRPCClientErrorLike<AppRouter>
+> {
   return trpcClient.invoices.listInvoices.useQuery({
     filter: search,
     limit: 100,
