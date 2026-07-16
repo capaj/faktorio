@@ -3,6 +3,8 @@ import {
   generateQrPaymentString,
   normalizeAccountNumberForQrPayment
 } from './qrCodeGenerator'
+import QRCode from 'qrcode'
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 describe('generateQrPaymentString', () => {
@@ -46,6 +48,36 @@ describe('generateQrPaymentString', () => {
     expect(qrPaymentData).toBe(
       'SPD*1.0*ACC:CZ7511116701009999999999*AM:100.00*CC:CZK*X-VS:20260001'
     )
+  })
+
+  it('keeps the scannable QR payment image unchanged for a Czech domestic account', async () => {
+    const qrPaymentData = generateQrPaymentString({
+      accountNumber: '670100-9999999999/1111',
+      amount: 100,
+      currency: 'CZK',
+      variableSymbol: '20260001'
+    })
+
+    expect(qrPaymentData).not.toBeNull()
+
+    if (!qrPaymentData) {
+      throw new Error('QR payment data was not generated')
+    }
+
+    const qrCodeImage = await QRCode.toBuffer(qrPaymentData, {
+      errorCorrectionLevel: 'M',
+      margin: 4,
+      scale: 8,
+      type: 'png'
+    })
+    const qrCodeImageSnapshot = readFileSync(
+      new URL(
+        './__snapshots__/qr-payment-czech-domestic-account.png',
+        import.meta.url
+      )
+    )
+
+    expect(qrCodeImage).toEqual(qrCodeImageSnapshot)
   })
 })
 
