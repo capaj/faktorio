@@ -42,12 +42,12 @@ export function InvoicePdfPreview({
         const loadedPdf = await loadingTask.promise
 
         if (cancelled) {
-          await loadedPdf.destroy()
+          await loadedPdf.cleanup()
           return
         }
 
         setPdfDocument((previousPdf) => {
-          void previousPdf?.destroy()
+          void previousPdf?.cleanup()
           return loadedPdf
         })
         setPageNumbers(
@@ -72,7 +72,7 @@ export function InvoicePdfPreview({
 
   useEffect(() => {
     return () => {
-      void pdfDocument?.destroy()
+      void pdfDocument?.cleanup()
     }
   }, [pdfDocument])
 

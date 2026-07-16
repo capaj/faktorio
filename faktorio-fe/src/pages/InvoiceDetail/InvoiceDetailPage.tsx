@@ -34,10 +34,16 @@ import {
 } from 'lucide-react'
 import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
 import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
-import { useQueryClient } from '@tanstack/react-query'
+import {
+  useQueryClient,
+  type UseSuspenseQueryResult
+} from '@tanstack/react-query'
+import type { TRPCClientErrorLike } from '@trpc/client'
 import { toast } from 'sonner'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 import { resolveLogoForDisplay } from '@/lib/invoiceLogoStorage'
+import type { AppRouter } from 'faktorio-api/src/trpcRouter'
+import type { RouterOutputs } from '@/lib/trpcClient'
 import {
   Dialog,
   DialogContent,
@@ -54,7 +60,13 @@ import {
   TableRow
 } from '@/components/ui/table'
 
-export function useInvoiceQueryByUrlParam() {
+export function useInvoiceQueryByUrlParam(): [
+  RouterOutputs['invoices']['getById'],
+  UseSuspenseQueryResult<
+    RouterOutputs['invoices']['getById'],
+    TRPCClientErrorLike<AppRouter>
+  >
+] {
   const { invoiceId } = useParams()
   if (!invoiceId) {
     throw new Error('No invoiceId')
