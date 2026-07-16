@@ -26,9 +26,24 @@ import { TRPCError } from '@trpc/server'
 type UserBankAccountInsert = typeof userBankAccountsTb.$inferInsert
 import { z } from 'zod/v4'
 
+const optionalTrimmedString = z.preprocess((value) => {
+  if (typeof value !== 'string') return value
+
+  const trimmed = value.trim()
+  return trimmed.length ? trimmed : undefined
+}, z.string().optional())
+
+const requiredTrimmedString = (message: string) =>
+  z.preprocess(
+    (value) => (typeof value === 'string' ? value.trim() : value),
+    z.string().min(1, message)
+  )
+
 export const upsertInvoicingDetailsSchema = z
   .object({
-    registration_no: z.string().min(8).max(8).optional() // this forces the input to be first in AutoForm
+    registration_no: optionalTrimmedString.pipe(
+      z.string().min(8).max(8).optional()
+    ) // this forces the input to be first in AutoForm
   })
   .merge(
     userInvoicingDetailsInsertSchema.omit({
@@ -42,6 +57,17 @@ export const upsertInvoicingDetailsSchema = z
     })
   )
   .extend({
+    name: requiredTrimmedString('Name is required'),
+    street: requiredTrimmedString('Street is required'),
+    city: requiredTrimmedString('City is required'),
+    zip: requiredTrimmedString('ZIP is required'),
+    country: requiredTrimmedString('Country is required'),
+    street2: optionalTrimmedString,
+    main_email: optionalTrimmedString,
+    vat_no: optionalTrimmedString,
+    phone_number: optionalTrimmedString,
+    web_url: optionalTrimmedString,
+    logo_url: optionalTrimmedString,
     bank_accounts: z.array(bankAccountInputSchema).default([])
   })
 
