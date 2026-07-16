@@ -1,6 +1,7 @@
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
+import { PDFDownloadLink } from '@react-pdf/renderer'
 
 import { CzechInvoicePDF } from './CzechInvoicePDF'
+import { InvoicePdfPreview } from './InvoicePdfPreview'
 import { Button } from '@/components/ui/button'
 import { snakeCase } from 'lodash-es'
 import { useLocation, useParams, useSearchParams } from 'wouter'
@@ -264,30 +265,17 @@ export const InvoiceDetail = ({
           data-testid="invoice-pdf-preview"
           className="overflow-hidden rounded-lg border bg-background shadow-sm"
         >
-          <div
-            className="flex items-stretch justify-center bg-muted"
-            style={{
-              minHeight: '700px',
-              height: '1188px'
-            }}
-          >
-            <PDFViewer
-              key={`${invoice.id}-${language}-${!!qrCodeBase64}-${resolvedLogoUrl ?? ''}`}
-              showToolbar={false}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none'
-              }}
-            >
+          <InvoicePdfPreview
+            key={`${invoice.id}-${language}-${!!qrCodeBase64}-${resolvedLogoUrl ?? ''}`}
+            document={
               <PdfContent
                 invoiceData={invoice}
                 qrCodeBase64={qrCodeBase64}
                 vatPayer={invoicingDetails?.vat_payer}
                 logoUrl={resolvedLogoUrl}
               />
-            </PDFViewer>
-          </div>
+            }
+          />
         </div>
 
         <div className="rounded-lg border bg-background p-5 shadow-sm">
