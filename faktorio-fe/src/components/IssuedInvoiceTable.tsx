@@ -18,6 +18,7 @@ import { RemoveDialogUncontrolled } from '@/components/RemoveDialog'
 import {
   LucideEllipsisVertical,
   Pencil,
+  Copy,
   Trash2,
   CheckCircle,
   XCircle,
@@ -159,6 +160,15 @@ export function IssuedInvoiceTable({
           <Link href={`/invoices/${invoice.id}`} className="flex w-full">
             <Eye size={16} strokeWidth="1.5" />
             <span className="ml-2">Zobrazit PDF</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link
+            href={`/new-invoice?duplicateFrom=${invoice.id}`}
+            className="flex w-full"
+          >
+            <Copy size={16} strokeWidth="1.5" />
+            <span className="ml-2">Duplikovat</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>

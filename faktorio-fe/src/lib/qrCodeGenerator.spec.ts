@@ -1,8 +1,11 @@
-import { generateQrPaymentString } from './qrCodeGenerator'
-import { BankingInfo } from './qrCodeGenerator'
+import {
+  BankingInfo,
+  generateQrPaymentString,
+  normalizeAccountNumberForQrPayment
+} from './qrCodeGenerator'
 import { describe, expect, it } from 'vitest'
 
-describe('description', () => {
+describe('generateQrPaymentString', () => {
   it('should generate', () => {
     // Example usage:
     const bankingInfo: BankingInfo = {
@@ -27,6 +30,35 @@ describe('description', () => {
     }
 
     const qrPaymentData2 = generateQrPaymentString(bankingInfo2)
-    expect(qrPaymentData2).toMatchInlineSnapshot(`"SPD*1.0*ACC:CZ6220100000002200152294*AM:10.00*CC:CZK*X-VS:112233"`)
+    expect(qrPaymentData2).toMatchInlineSnapshot(
+      `"SPD*1.0*ACC:CZ6220100000002200152294*AM:10.00*CC:CZK*X-VS:112233"`
+    )
+  })
+
+  it('converts Czech domestic account numbers to IBAN for SPD QR payments', () => {
+    const qrPaymentData = generateQrPaymentString({
+      accountNumber: '670100-9999999999/1111',
+      amount: 100,
+      currency: 'CZK',
+      variableSymbol: '20260001'
+    })
+
+    expect(qrPaymentData).toBe(
+      'SPD*1.0*ACC:CZ7511116701009999999999*AM:100.00*CC:CZK*X-VS:20260001'
+    )
+  })
+})
+
+describe('normalizeAccountNumberForQrPayment', () => {
+  it('normalizes Czech domestic account variants to IBAN', () => {
+    expect(normalizeAccountNumberForQrPayment('19-2000145399/0800')).toBe(
+      'CZ6508000000192000145399'
+    )
+    expect(normalizeAccountNumberForQrPayment('2214376555/6210')).toBe(
+      'CZ7662100000002214376555'
+    )
+    expect(
+      normalizeAccountNumberForQrPayment(' CZ28 0600 0000 0000 0000 0123 ')
+    ).toBe('CZ2806000000000000000123')
   })
 })

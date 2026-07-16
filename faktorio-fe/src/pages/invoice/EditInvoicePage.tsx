@@ -145,8 +145,9 @@ export const EditInvoicePage = () => {
 
   const [_location, navigate] = useLocation()
   const updateInvoice = trpcClient.invoices.update.useMutation()
+  const selectedContactId = form.watch('client_contact_id')
   const contact = contactsQuery.data?.find(
-    (contact) => contact.id === invoice.client_contact_id
+    (contact) => contact.id === selectedContactId
   )
 
   const formValues = form.watch()
@@ -307,7 +308,7 @@ export const EditInvoicePage = () => {
         .add(formValues.due_in_days, 'day')
         .format('YYYY-MM-DD'),
       your_name: invoice.your_name ?? '',
-      client_contact_id: invoice.client_contact_id
+      client_contact_id: formValues.client_contact_id
     }
     setPreviewInvoice(invoiceCompleteForPreview)
   }, [formValues, invoiceItems])
@@ -344,10 +345,7 @@ export const EditInvoicePage = () => {
 
             await updateInvoice.mutateAsync({
               id: invoice.id,
-              invoice: {
-                ...formattedInvoice,
-                client_contact_id: contact.id
-              },
+              invoice: formattedInvoice,
               items: values.items
             })
 

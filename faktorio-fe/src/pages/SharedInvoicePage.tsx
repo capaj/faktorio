@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'wouter'
 import { PDFDownloadLink } from '@react-pdf/renderer'
 import { CzechInvoicePDF } from './InvoiceDetail/CzechInvoicePDF'
 import { EnglishInvoicePDF } from './InvoiceDetail/EnglishInvoicePDF'
 import { InvoicePdfPreview } from './InvoiceDetail/InvoicePdfPreview'
+import { Download } from 'lucide-react'
+import { snakeCase } from 'lodash-es'
 import { Button } from '@/components/ui/button'
+import { generateIsdocXml } from '@/lib/isdoc/generateIsdocXml'
 import { trpcClient } from '@/lib/trpcClient'
 
 const PUBLIC_API_BASE = (import.meta as any).env.VITE_PUBLIC_API_URL as
@@ -48,7 +51,9 @@ export function SharedInvoicePage() {
   const invoice = data.invoice
   const items = data.items
 
-  const pdfName = `${invoice.your_name}-${invoice.number}.pdf`
+  const baseFileName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}`
+  const pdfName = `${baseFileName}.pdf`
+  const isdocName = `${baseFileName}.isdoc`
 
   const docProps = {
     invoiceData: { ...invoice, items },
@@ -60,6 +65,28 @@ export function SharedInvoicePage() {
   const onDownload = () => {
     if (!shareId) return
     sharedInvoiceEvent.mutate({ shareId, type: 'download' })
+  }
+
+  const handleIsdocDownload = () => {
+    try {
+      const xml = generateIsdocXml(
+        { ...invoice, items },
+        data.vatPayer ?? false
+      )
+
+      const blob = new Blob([xml], { type: 'application/xml' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = isdocName
+      document.body.appendChild(a)
+      a.click()
+      URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      onDownload()
+    } catch (error) {
+      console.error('Error downloading ISDOC:', error)
+    }
   }
 
   return (
@@ -82,14 +109,31 @@ export function SharedInvoicePage() {
         <InvoicePdfPreview document={<PdfComponent {...docProps} />} />
       </div>
 
-      <div className="flex justify-center">
-        <PDFDownloadLink
-          document={<PdfComponent {...docProps} />}
-          onClick={onDownload}
-          fileName={pdfName}
-        >
-          <Button>Stáhnout {pdfName}</Button>
-        </PDFDownloadLink>
+      <div className="rounded-lg border bg-background p-5 shadow-sm">
+        <h4 className="text-lg font-semibold text-foreground">
+          Stažení faktury
+        </h4>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Stáhněte si fakturu ve formátu PDF nebo ISDOC.
+        </p>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          <PDFDownloadLink
+            document={<PdfComponent {...docProps} />}
+            onClick={onDownload}
+            fileName={pdfName}
+          >
+            <Button className="w-full sm:w-32">
+              <Download className="mr-2 h-4 w-4" /> PDF
+            </Button>
+          </PDFDownloadLink>
+          <Button
+            className="w-full sm:w-32"
+            variant="outline"
+            onClick={handleIsdocDownload}
+          >
+            <Download className="mr-2 h-4 w-4" /> ISDOC
+          </Button>
+        </div>
       </div>
     </div>
   )

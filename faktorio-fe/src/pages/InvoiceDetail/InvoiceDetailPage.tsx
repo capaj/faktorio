@@ -26,6 +26,7 @@ import {
 } from 'faktorio-api/src/zodDbSchemas'
 import {
   LucideEdit,
+  Copy,
   Copy as CopyIcon,
   Trash2,
   Eye,
@@ -245,6 +246,15 @@ export const InvoiceDetail = ({
                 >
                   <LucideEdit />
                   Upravit
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    navigate(`/new-invoice?duplicateFrom=${invoice.id}`)
+                  }}
+                >
+                  <Copy />
+                  Duplikovat
                 </Button>
               </div>
             </div>
