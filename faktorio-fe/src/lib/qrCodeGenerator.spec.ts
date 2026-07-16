@@ -37,14 +37,14 @@ describe('generateQrPaymentString', () => {
 
   it('converts Czech domestic account numbers to IBAN for SPD QR payments', () => {
     const qrPaymentData = generateQrPaymentString({
-      accountNumber: '670100-2214376555/6210',
+      accountNumber: '670100-9999999999/1111',
       amount: 100,
       currency: 'CZK',
       variableSymbol: '20260001'
     })
 
     expect(qrPaymentData).toBe(
-      'SPD*1.0*ACC:CZ4362106701002214376555*AM:100.00*CC:CZK*X-VS:20260001'
+      'SPD*1.0*ACC:CZ7511116701009999999999*AM:100.00*CC:CZK*X-VS:20260001'
     )
   })
 })
