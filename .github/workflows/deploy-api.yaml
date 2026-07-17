@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'faktorio-api/**'
+      - 'faktorio-db/**'
       - '.github/workflows/deploy-api.yaml'
 
     branches:
@@ -43,6 +44,9 @@ jobs:
       - name: Check Environment Variables
         working-directory: ./faktorio-api
         run: pnpm check-env
+
+      - name: Run database migrations
+        run: pnpm --filter faktorio-db migrate
 
       - name: Deploy API
         uses: cloudflare/wrangler-action@v3
