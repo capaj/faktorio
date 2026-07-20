@@ -44,6 +44,7 @@ Frontend env:
 | Support reverse charge invoices(both domestic and abroad) |     ✅      |      ❌       |      ✅      |     ✅     |
 | Share invoice publicly through a public link              |     ✅      |      ❌       |      ✅      |     ✅     |
 | Multiple bank accounts                                    |     ✅      |      ✅       |      ✅      |     ✅     |
+| Keep account without logging in every 12 months           |     ✅      |      ✅       |      ❌      |     ✅     |
 | Run locally without sending data to the cloud             |     ✅      |      ❌       |      ❌      |     ❌     |
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
