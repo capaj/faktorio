@@ -51,7 +51,8 @@ _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common co
 
 ## Project status
 
-Project is under active development. The aim is to keep this a number one open source invoicing app in Czech republic for freelancers and small companies.
+Project is mostly feature ready. The aim is to be a number one open source invoicing app in Czech republic for freelancers and small companies.
+If you have migrated to another open source because faktorio is missing a feature please let me know in the issues or in a X.com DM.
 
 ## Planned features
 
