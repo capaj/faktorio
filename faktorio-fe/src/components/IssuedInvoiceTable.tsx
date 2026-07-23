@@ -63,7 +63,14 @@ export type Invoice = Pick<
   Partial<
     Pick<
       InferSelectModel<typeof invoicesTb>,
-      'vat_base_21' | 'vat_21' | 'vat_base_12' | 'vat_12'
+      | 'vat_base_21'
+      | 'vat_21'
+      | 'vat_base_15'
+      | 'vat_15'
+      | 'vat_base_12'
+      | 'vat_12'
+      | 'vat_base_10'
+      | 'vat_10'
     >
   >
 

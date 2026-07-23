@@ -384,4 +384,113 @@ describe('generateKontrolniHlaseniXML', () => {
       'dic_dod="11112222"\n      c_evid_dd="F2025-0002"\n      dppd="01.02.2025"\n      zakl_dane1="9000"\n      dan1="1890"'
     )
   })
+
+  it('splits issued invoices between itemized A.4 and aggregated A.5 using the VAT-inclusive CZK total', () => {
+    const createIssuedInvoice = (
+      id: string,
+      number: string,
+      base: number,
+      vat: number,
+      clientVatNo: string | null = 'CZ11112222'
+    ): Invoice => ({
+      id,
+      number,
+      client_name: 'Odběratel',
+      client_country: 'Česká republika',
+      client_vat_no: clientVatNo,
+      taxable_fulfillment_due: '2026-06-16',
+      issued_on: '2026-06-16',
+      sent_at: null,
+      due_on: '2026-06-30',
+      total: base + vat,
+      subtotal: base,
+      native_subtotal: base,
+      native_total: base + vat,
+      vat_base_21: base,
+      vat_21: vat,
+      vat_base_12: 0,
+      vat_12: 0,
+      currency: 'CZK',
+      exchange_rate: 1,
+      paid_on: null
+    })
+
+    const xmlString = generateKontrolniHlaseniXML({
+      issuedInvoices: [
+        createIssuedInvoice('below', '2026-027', 7300, 1533),
+        createIssuedInvoice('exact', '2026-028', 8264.46, 1735.54),
+        createIssuedInvoice('above', '2026-029', 8265.29, 1735.71),
+        createIssuedInvoice('consumer', '2026-030', 20000, 4200, null)
+      ],
+      receivedInvoices: [],
+      submitterData: {
+        dic: 'CZ76543210',
+        naz_obce: 'Praha',
+        typ_ds: 'F',
+        jmeno: 'Jan',
+        prijmeni: 'Novák',
+        ulice: 'Hlavní 1',
+        psc: '11000',
+        stat: 'ČESKÁ REPUBLIKA',
+        email: 'jan.novak@example.com'
+      },
+      year: 2026,
+      month: 6
+    })
+
+    expect(xmlString).not.toContain('c_evid_dd="2026-027"')
+    expect(xmlString).not.toContain('c_evid_dd="2026-028"')
+    expect(xmlString).toContain('c_evid_dd="2026-029"')
+    expect(xmlString).not.toContain('c_evid_dd="2026-030"')
+    expect(xmlString).toMatch(
+      /<VetaA5[\s\S]*zakl_dane1="35564"[\s\S]*dan1="7469"/
+    )
+  })
+
+  it('aggregates the reduced VAT rate in A.5', () => {
+    const xmlString = generateKontrolniHlaseniXML({
+      issuedInvoices: [
+        {
+          id: 'reduced',
+          number: '2026-031',
+          client_name: 'Odběratel',
+          client_country: 'Česká republika',
+          client_vat_no: 'CZ11112222',
+          taxable_fulfillment_due: '2026-06-16',
+          issued_on: '2026-06-16',
+          sent_at: null,
+          due_on: '2026-06-30',
+          total: 5600,
+          subtotal: 5000,
+          native_subtotal: 5000,
+          native_total: 5600,
+          vat_base_21: 0,
+          vat_21: 0,
+          vat_base_12: 5000,
+          vat_12: 600,
+          currency: 'CZK',
+          exchange_rate: 1,
+          paid_on: null
+        }
+      ],
+      receivedInvoices: [],
+      submitterData: {
+        dic: 'CZ76543210',
+        naz_obce: 'Praha',
+        typ_ds: 'F',
+        jmeno: 'Jan',
+        prijmeni: 'Novák',
+        ulice: 'Hlavní 1',
+        psc: '11000',
+        stat: 'ČESKÁ REPUBLIKA',
+        email: 'jan.novak@example.com'
+      },
+      year: 2026,
+      month: 6
+    })
+
+    expect(xmlString).toMatch(
+      /<VetaA5[\s\S]*zakl_dane2="5000"[\s\S]*dan2="600"/
+    )
+  })
 })

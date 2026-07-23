@@ -51,6 +51,33 @@ function getCzkVat21Issued(invoice: Invoice): number {
   return (invoice.native_total ?? 0) - (invoice.native_subtotal ?? 0)
 }
 
+function getCzkBaseReducedIssued(invoice: Invoice): number {
+  const exchangeRate = invoice.exchange_rate ?? 1
+  return (
+    ((invoice.vat_base_12 ?? 0) + (invoice.vat_base_15 ?? 0)) * exchangeRate
+  )
+}
+
+function getCzkVatReducedIssued(invoice: Invoice): number {
+  const exchangeRate = invoice.exchange_rate ?? 1
+  return ((invoice.vat_12 ?? 0) + (invoice.vat_15 ?? 0)) * exchangeRate
+}
+
+function getCzkBaseSecondReducedIssued(invoice: Invoice): number {
+  return (invoice.vat_base_10 ?? 0) * (invoice.exchange_rate ?? 1)
+}
+
+function getCzkVatSecondReducedIssued(invoice: Invoice): number {
+  return (invoice.vat_10 ?? 0) * (invoice.exchange_rate ?? 1)
+}
+
+function getCzkDocumentTotalIssued(invoice: Invoice): number {
+  return (
+    invoice.native_total ??
+    invoice.total * (invoice.exchange_rate ?? 1)
+  )
+}
+
 function getCzkBase21Received(invoice: ReceivedInvoice): number {
   const exchangeRate = invoice.exchange_rate ?? 1
   if (invoice.vat_base_21 !== null && invoice.vat_base_21 !== undefined) {
@@ -81,31 +108,40 @@ export function generateKontrolniHlaseniXML({
   // Process Issued Invoices (VetaA1 for reverse charge, VetaA4 for regular)
   let vetaA1Xml = ''
   let vetaA4Xml = ''
+  let a5Base21 = 0
+  let a5Vat21 = 0
+  let a5BaseReduced = 0
+  let a5VatReduced = 0
+  let a5BaseSecondReduced = 0
+  let a5VatSecondReduced = 0
+  let a5InvoiceCount = 0
   let issuedInvoiceSubtotalSum = 0
   let a1Index = 0
   let a4Index = 0
 
   issuedInvoices.forEach((inv) => {
     const clientVatId = inv.client_vat_no
+    const domesticCustomerTaxId = clientVatId?.startsWith('CZ')
+      ? clientVatId.slice(2)
+      : null
     const taxableDate = formatCzechDate(inv.taxable_fulfillment_due)
     const subtotalAmount = inv.native_subtotal ?? 0
     const totalAmount = inv.native_total ?? 0
     const vatAmount = totalAmount - subtotalAmount
     const base21Czk = getCzkBase21Issued(inv)
     const vat21Czk = getCzkVat21Issued(inv)
+    const baseReducedCzk = getCzkBaseReducedIssued(inv)
+    const vatReducedCzk = getCzkVatReducedIssued(inv)
+    const baseSecondReducedCzk = getCzkBaseSecondReducedIssued(inv)
+    const vatSecondReducedCzk = getCzkVatSecondReducedIssued(inv)
     issuedInvoiceSubtotalSum += base21Czk
-
-    if (!clientVatId) {
-      console.warn('Skipping issued invoice due to missing client VAT ID:', inv)
-      return
-    }
 
     // Check if this is a reverse charge invoice (no VAT charged)
     // This happens when subtotal equals total (vatAmount is 0)
     // and both client and supplier are Czech (CZ VAT IDs)
     const isReverseCharge =
       vatAmount === 0 &&
-      clientVatId.startsWith('CZ') &&
+      domesticCustomerTaxId !== null &&
       submitterData.dic.startsWith('CZ')
 
     if (isReverseCharge) {
@@ -113,26 +149,64 @@ export function generateKontrolniHlaseniXML({
       vetaA1Xml += `
     <VetaA1
       c_radku="${a1Index}"
-      dic_odb="${clientVatId.replace('CZ', '')}"
+      dic_odb="${domesticCustomerTaxId}"
       c_evid_dd="${inv.number}"
       duzp="${taxableDate}"
       zakl_dane1="${toInt(subtotalAmount)}"
     />`
-    } else {
+      return
+    }
+
+    // A.4 is itemized only when the rounded absolute document total is above
+    // CZK 10,000 and the customer supplied a domestic tax ID. All other
+    // regular taxable supplies are aggregated in A.5.
+    const documentTotalCzk = Math.abs(
+      Math.round(getCzkDocumentTotalIssued(inv))
+    )
+    const shouldReportInA4 =
+      domesticCustomerTaxId !== null && documentTotalCzk > VAT_THRESHOLD
+
+    if (shouldReportInA4) {
       a4Index++
       vetaA4Xml += `
     <VetaA4
       c_radku="${a4Index}"
-      dic_odb="${clientVatId.replace('CZ', '')}"
+      dic_odb="${domesticCustomerTaxId}"
       c_evid_dd="${inv.number}"
       dppd="${taxableDate}"
       zakl_dane1="${toInt(base21Czk)}"
       dan1="${toInt(vat21Czk)}"
+      zakl_dane2="${toInt(baseReducedCzk)}"
+      dan2="${toInt(vatReducedCzk)}"
+      zakl_dane3="${toInt(baseSecondReducedCzk)}"
+      dan3="${toInt(vatSecondReducedCzk)}"
       kod_rezim_pl="0"
       zdph_44="N"
     />`
+      return
     }
+
+    a5InvoiceCount++
+    a5Base21 += base21Czk
+    a5Vat21 += vat21Czk
+    a5BaseReduced += baseReducedCzk
+    a5VatReduced += vatReducedCzk
+    a5BaseSecondReduced += baseSecondReducedCzk
+    a5VatSecondReduced += vatSecondReducedCzk
   })
+
+  const vetaA5Xml =
+    a5InvoiceCount > 0
+      ? `
+    <VetaA5
+      zakl_dane1="${toInt(a5Base21)}"
+      dan1="${toInt(a5Vat21)}"
+      zakl_dane2="${toInt(a5BaseReduced)}"
+      dan2="${toInt(a5VatReduced)}"
+      zakl_dane3="${toInt(a5BaseSecondReduced)}"
+      dan3="${toInt(a5VatSecondReduced)}"
+    />`
+      : ''
 
   // Process Received Invoices (VetaB2 and VetaB3)
   let vetaB2Xml = ''
@@ -221,6 +295,7 @@ export function generateKontrolniHlaseniXML({
   />
   ${vetaA1Xml}
   ${vetaA4Xml}
+  ${vetaA5Xml}
   ${vetaB2Xml}
   ${vetaB3Xml}
   <VetaC
