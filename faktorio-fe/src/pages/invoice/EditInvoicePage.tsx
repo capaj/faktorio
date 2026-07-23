@@ -26,7 +26,6 @@ import {
 } from '@/components/ui/form'
 import { BankDetailsAccordion } from './BankDetailsAccordion'
 import { DatePicker } from '@/components/ui/date-picker'
-import { useExchangeRate } from '@/hooks/useExchangeRate'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { InvoiceTotals } from './InvoiceTotals'
 // import removed: InvoicingDetailsFormSchema
@@ -152,14 +151,10 @@ export const EditInvoicePage = () => {
 
   const formValues = form.watch()
   const invoiceItems = form.watch('items')
-  const currency = form.watch('currency')
-  const taxableFulfillmentDue = form.watch('taxable_fulfillment_due')
   const bankAccountValue = form.watch('bank_account')
   const ibanValue = form.watch('iban')
   const swiftBicValue = form.watch('swift_bic')
   const isDirty = form.formState.isDirty
-
-  useExchangeRate({ currency, taxableFulfillmentDue, form })
 
   useEffect(() => {
     if (selectedBankAccountId === 'custom') {
