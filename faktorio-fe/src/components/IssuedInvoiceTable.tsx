@@ -56,6 +56,7 @@ export type Invoice = Pick<
   | 'subtotal'
   | 'currency'
   | 'paid_on'
+  | 'client_country'
   | 'client_vat_no'
   | 'exchange_rate'
 > &

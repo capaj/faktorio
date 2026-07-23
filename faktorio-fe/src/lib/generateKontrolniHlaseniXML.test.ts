@@ -21,6 +21,7 @@ describe('generateKontrolniHlaseniXML', () => {
         id: 'iss1',
         number: '2024-001',
         client_name: 'Client A',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ11111111', // Added mock VAT ID
         taxable_fulfillment_due: '2024-07-15',
         issued_on: '2024-07-10',
@@ -138,6 +139,7 @@ describe('generateKontrolniHlaseniXML', () => {
         id: 'iss1',
         number: '2026-023',
         client_name: 'Greenometer s.r.o.',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ11111111',
         taxable_fulfillment_due: '2026-03-21',
         issued_on: '2026-03-21',
@@ -196,6 +198,7 @@ describe('generateKontrolniHlaseniXML', () => {
         id: 'iss1',
         number: '2024-001',
         client_name: 'Client A',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ11111111', //
         taxable_fulfillment_due: '2024-07-15',
         issued_on: '2024-07-10',

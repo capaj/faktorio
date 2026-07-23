@@ -27,6 +27,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '1',
         number: 'INV001',
         client_name: 'Client A',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ87654321',
         due_on: new Date('2024-07-20').toISOString(),
         issued_on: new Date('2024-07-10').toISOString(),
@@ -48,6 +49,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '2',
         number: 'INV002',
         client_name: 'Client B',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ11223344',
         issued_on: new Date('2024-08-01').toISOString(),
         due_on: new Date('2024-08-05').toISOString(),
@@ -122,6 +124,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '1',
         number: 'INV001',
         client_name: 'Client A',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ87654321',
         due_on: new Date('2024-07-20').toISOString(),
         issued_on: new Date('2024-07-10').toISOString(),
@@ -215,6 +218,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '1',
         number: 'INV001',
         client_name: 'Client A',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ87654321',
         due_on: new Date('2024-07-20').toISOString(),
         issued_on: new Date('2024-07-10').toISOString(),
@@ -236,6 +240,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '2',
         number: 'INV002',
         client_name: 'Client B',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ11223344',
         due_on: new Date('2024-07-25').toISOString(),
         issued_on: new Date('2024-07-15').toISOString(),
@@ -285,6 +290,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '1',
         number: 'INV001',
         client_name: 'Client A',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ87654321',
         due_on: new Date('2024-07-20').toISOString(),
         issued_on: new Date('2024-07-10').toISOString(),
@@ -358,6 +364,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '1',
         number: '2026-021',
         client_name: 'Greenometer s.r.o.',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ87654321',
         due_on: '2026-02-09',
         issued_on: '2026-02-02',
@@ -379,6 +386,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '2',
         number: '2026-022',
         client_name: 'Greenometer s.r.o.',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ87654321',
         due_on: '2026-03-10',
         issued_on: '2026-03-01',
@@ -400,6 +408,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '3',
         number: '2026-023',
         client_name: 'Greenometer s.r.o.',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ87654321',
         due_on: '2026-03-30',
         issued_on: '2026-03-21',
@@ -454,6 +463,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '3',
         number: '2026-023',
         client_name: 'Greenometer s.r.o.',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ87654321',
         due_on: '2026-03-30',
         issued_on: '2026-03-21',
@@ -507,6 +517,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '1',
         number: 'EUR-001',
         client_name: 'EU Client',
+        client_country: 'Germany',
         client_vat_no: 'DE123456789',
         due_on: '2026-02-09',
         issued_on: '2026-02-02',
@@ -528,6 +539,7 @@ describe('generateDanovePriznaniXML', () => {
         id: '2',
         number: 'CZK-001',
         client_name: 'Czech Client',
+        client_country: 'Česká republika',
         client_vat_no: 'CZ87654321',
         due_on: '2026-02-09',
         issued_on: '2026-02-02',
@@ -559,6 +571,33 @@ describe('generateDanovePriznaniXML', () => {
     // Expected base in CZK: 25000 (EUR converted) + 50000 (CZK) = 75000
     // 75000 * 0.21 = 15750
     expect(xmlString).toMatch(/<Veta1[\s\S]*obrat23="75000" dan23="15750"/)
+  })
+
+  it('reports services supplied outside the EU on row 26', () => {
+    const submitterData: SubmitterData = {
+      dic: 'CZ12345678',
+      naz_obce: 'Brno',
+      typ_ds: 'F',
+      jmeno: 'Test',
+      prijmeni: 'Submitter',
+      ulice: 'Test Street 1',
+      psc: '12345',
+      stat: 'ČESKÁ REPUBLIKA',
+      email: 'test@example.com'
+    }
+
+    const xmlString = generateDanovePriznaniXML({
+      issuedInvoices: [],
+      receivedInvoices: [],
+      submitterData,
+      year: 2026,
+      quarter: 2,
+      czkSumEurServices: 0,
+      czkSumOutsideEuServices: 628900
+    })
+
+    expect(xmlString).toContain('<Veta2 pln_ost="628900" />')
+    expect(xmlString).not.toContain('pln_sluzby=')
   })
 
   // Restore real timers after tests

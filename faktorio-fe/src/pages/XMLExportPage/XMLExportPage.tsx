@@ -22,37 +22,7 @@ import { generateDanovePriznaniXML } from '@/lib/generateDanovePriznaniXML'
 import { generateSouhrnneHlaseniXML } from '@/lib/generateSouhrnneHlaseniXML'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { formatCzechDate } from '@/lib/utils'
-
-// EU country codes
-const EU_COUNTRY_CODES = [
-  'AT',
-  'BE',
-  'BG',
-  'CZ',
-  'HR',
-  'CY',
-  'DK',
-  'EE',
-  'FI',
-  'FR',
-  'DE',
-  'GR',
-  'HU',
-  'IE',
-  'IT',
-  'LV',
-  'LT',
-  'LU',
-  'MT',
-  'NL',
-  'PL',
-  'PT',
-  'RO',
-  'SK',
-  'SI',
-  'ES',
-  'SE'
-]
+import { classifyInvoiceDestination } from '@/lib/invoiceDestination'
 
 // Helper function to format date as YYYY-MM-DD
 const formatDate = (date: Date) => {
@@ -157,14 +127,11 @@ export function XMLExportPage() {
       }
     })
 
-  // Filter reverse charge invoices to only include EU countries based on VAT ID prefix
   const reverseChargeAbroadInvoices = invoicesWithoutVat.filter(
-    (invoice: { client_vat_no?: string | null }) => {
-      if (!invoice.client_vat_no || invoice.client_vat_no.length < 2)
-        return false
-      const countryCode = invoice.client_vat_no.substring(0, 2).toUpperCase()
-      return EU_COUNTRY_CODES.includes(countryCode) && countryCode !== 'CZ'
-    }
+    (invoice) => classifyInvoiceDestination(invoice) === 'eu'
+  )
+  const outsideEuInvoices = invoicesWithoutVat.filter(
+    (invoice) => classifyInvoiceDestination(invoice) === 'outside-eu'
   )
 
   // Fetch received invoices for the selected period
@@ -256,8 +223,11 @@ export function XMLExportPage() {
       submitterData,
       year: selectedYear,
       czkSumEurServices: reverseChargeAbroadInvoices.reduce(
-        (sum: number, inv: { native_total?: number | null }) =>
-          sum + (inv.native_total ?? 0),
+        (sum, inv) => sum + inv.native_subtotal,
+        0
+      ),
+      czkSumOutsideEuServices: outsideEuInvoices.reduce(
+        (sum, inv) => sum + inv.native_subtotal,
         0
       ),
       quarter: cadence === 'quarterly' ? selectedQuarter : undefined,
@@ -449,6 +419,23 @@ export function XMLExportPage() {
         </div>
       )}
 
+      {outsideEuInvoices.length > 0 && (
+        <div className="my-4">
+          <h4 className="text-lg font-semibold mt-4 mb-2">
+            Faktury vystavené mimo EU
+          </h4>
+          <IssuedInvoiceTable invoices={outsideEuInvoices} isLoading={false} />
+
+          <p className="text-sm text-muted-foreground mt-1">
+            Faktury s nulovou DPH odběratelům mimo EU budou v přiznání k DPH
+            zahrnuty na řádku 26 jako ostatní uskutečněná plnění s nárokem na
+            odpočet daně. Nezahrnují se do kontrolního ani souhrnného hlášení.
+            Faktorio předpokládá, že jde o běžné B2B služby s místem plnění mimo
+            tuzemsko.
+          </p>
+        </div>
+      )}
+
       {/* Placeholder for Received Invoices Table */}
       <h4 className="text-lg font-semibold mt-6 mb-2">Přijaté faktury</h4>
 
@@ -509,7 +496,9 @@ export function XMLExportPage() {
           <Button
             disabled={
               receivedInvoices.length === 0 &&
-              issuedInvoicesWithVat.length === 0
+              issuedInvoicesWithVat.length === 0 &&
+              reverseChargeAbroadInvoices.length === 0 &&
+              outsideEuInvoices.length === 0
             }
             onClick={handleDownloadDanovePriznaniXML}
           >

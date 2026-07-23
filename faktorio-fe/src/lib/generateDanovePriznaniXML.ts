@@ -7,6 +7,7 @@ interface GenerateDanovePriznaniParams {
   issuedInvoices: Invoice[]
   receivedInvoices: ReceivedInvoice[]
   czkSumEurServices: number
+  czkSumOutsideEuServices?: number
   submitterData: SubmitterData
   year: number
   quarter?: number
@@ -50,6 +51,7 @@ export function generateDanovePriznaniXML({
   issuedInvoices,
   receivedInvoices,
   czkSumEurServices,
+  czkSumOutsideEuServices = 0,
   submitterData,
   year,
   quarter,
@@ -114,7 +116,11 @@ export function generateDanovePriznaniXML({
   <Veta1
     obrat23="${toInt(obrat23)}" dan23="${toInt(dan23)}"
   />
-  ${czkSumEurServices > 0 ? `<Veta2 pln_sluzby="${toInt(czkSumEurServices)}" />` : ''}
+  ${
+    czkSumEurServices > 0 || czkSumOutsideEuServices > 0
+      ? `<Veta2${czkSumEurServices > 0 ? ` pln_sluzby="${toInt(czkSumEurServices)}"` : ''}${czkSumOutsideEuServices > 0 ? ` pln_ost="${toInt(czkSumOutsideEuServices)}"` : ''} />`
+      : ''
+  }
   <Veta4
     pln23="${toInt(pln23)}" odp_tuz23_nar="${toInt(odp_tuz23_nar)}"
     odp_sum_nar="${toInt(odp_sum_nar)}"
