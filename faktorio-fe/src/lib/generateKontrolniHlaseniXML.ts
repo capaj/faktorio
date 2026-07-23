@@ -294,8 +294,7 @@ export function generateKontrolniHlaseniXML({
     dic="${submitterData.dic.replace('CZ', '')}" typ_ds="${submitterData.typ_ds}" jmeno="${submitterData.jmeno}" prijmeni="${submitterData.prijmeni}" ulice="${submitterData.ulice}" psc="${submitterData.psc}" stat="${submitterData.stat}" email="${submitterData.email}" sest_jmeno="${submitterData.jmeno}" sest_prijmeni="${submitterData.prijmeni}"
   />
   ${vetaA1Xml}
-  ${vetaA4Xml}
-  ${vetaA5Xml}
+  ${vetaA4Xml}${vetaA5Xml}
   ${vetaB2Xml}
   ${vetaB3Xml}
   <VetaC
