@@ -79,4 +79,4 @@ Ve Faktoriu proto zkontrolujte zejména:
 3. datum uskutečnění plnění,
 4. použitý kurz a výslednou korunovou hodnotu.
 
-Vygenerované XML doporučujeme před podáním vždy zkontrolovat v aplikaci EPO nebo MOJE daně. Tento článek popisuje obecný případ a nenahrazuje individuální daňové poradenství.
+Vygenerované XML doporučujeme před podáním vždy zkontrolovat v aplikaci EPO nebo MOJE daně.
