@@ -174,6 +174,10 @@ test('smoke', async ({ page }) => {
 
   // Verify the invoice detail page is loaded with the correct invoice number
   await expect(page.getByText('2025-001')).toBeVisible()
+  await expect(page.getByLabel('PDF page 1')).toBeVisible({ timeout: 10000 })
+  await expect(
+    page.getByRole('heading', { name: 'Něco se pokazilo.' })
+  ).toHaveCount(0)
   // The PDF viewer streams assets after the route is visible, including the logo image.
   await page.waitForTimeout(5000)
   await page.addStyleTag({
