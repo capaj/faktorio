@@ -8,16 +8,16 @@
     "faktorio-public-api"
   ],
   "devDependencies": {
-    "@playwright/test": "^1.61.1",
-    "@types/node": "^26.1.1",
-    "npm-check-updates": "^22.2.9",
-    "oxlint": "^1.75.0",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.2.0",
+    "npm-check-updates": "^23.0.2",
+    "oxlint": "^1.78.0",
     "prettier": "^3.9.6",
-    "turbo": "^2.10.6",
+    "turbo": "^2.10.9",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
-  "packageManager": "pnpm@11.17.0",
+  "packageManager": "pnpm@11.21.0",
   "scripts": {
     "dev:fe": "cd faktorio-fe && pnpm dev",
     "dev:api": "cd faktorio-api && pnpm dev",
