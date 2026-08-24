@@ -8,11 +8,12 @@ import { Download } from 'lucide-react'
 import { snakeCase } from 'lodash-es'
 import { Button } from '@/components/ui/button'
 import { generateIsdocXml } from '@/lib/isdoc/generateIsdocXml'
+import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 import { trpcClient } from '@/lib/trpcClient'
+import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
 
 const PUBLIC_API_BASE = (import.meta as any).env.VITE_PUBLIC_API_URL as
-  | string
-  | undefined
+  string | undefined
 
 export function SharedInvoicePage() {
   const { shareId } = useParams()
@@ -43,13 +44,33 @@ export function SharedInvoicePage() {
   }, [])
 
   const PdfComponent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
+  const invoice = data?.invoice
+  const items = data?.items ?? []
+  const invoiceTotal = items.reduce(
+    (total: number, item: any) =>
+      total + (item.quantity ?? 0) * (item.unit_price ?? 0),
+    0
+  )
+  const taxTotal = items.reduce((total: number, item: any) => {
+    const itemTotal = (item.quantity ?? 0) * (item.unit_price ?? 0)
+    const vat = data?.vatPayer ? (item.vat_rate ?? 0) : 0
+    return total + itemTotal * (vat / 100)
+  }, 0)
+  const qrPayload = invoice
+    ? generateQrPaymentString({
+        accountNumber:
+          invoice.iban?.replace(/\s/g, '') ?? invoice.bank_account ?? null,
+        amount: invoiceTotal + taxTotal,
+        currency: invoice.currency,
+        variableSymbol: invoice.number?.replace('-', ''),
+        message: 'Faktura ' + invoice.number
+      })
+    : null
+  const qrCodeBase64 = useQRCodeBase64(qrPayload)
 
   if (loading) return <div className="p-8 text-center">Načítání…</div>
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>
   if (!data) return null
-
-  const invoice = data.invoice
-  const items = data.items
 
   const baseFileName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}`
   const pdfName = `${baseFileName}.pdf`
@@ -57,7 +78,7 @@ export function SharedInvoicePage() {
 
   const docProps = {
     invoiceData: { ...invoice, items },
-    qrCodeBase64: '',
+    qrCodeBase64,
     vatPayer: data.vatPayer ?? false,
     logoUrl: data.logoUrl ?? null
   }
