@@ -1,4 +1,4 @@
-import { useState, DragEvent } from 'react'
+import { useEffect, useState, DragEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -45,6 +45,15 @@ import { SpinnerContainer } from '@/components/SpinnerContainer'
 import { trpcClient } from '@/lib/trpcClient'
 import { cn } from '@/lib/utils'
 import Papa from 'papaparse'
+import { useAuth } from '@/lib/AuthContext'
+import {
+  RECEIVED_INVOICE_FORM_DEFAULT_VALUES,
+  clearReceivedInvoiceDraft,
+  getReceivedInvoiceDraftStorage,
+  loadReceivedInvoiceDraft,
+  saveReceivedInvoiceDraft,
+  type ReceivedInvoiceDraft
+} from '@/lib/receivedInvoiceDraft'
 
 const MAX_UPLOAD_SIZE_BYTES = 7 * 1024 * 1024
 
@@ -77,9 +86,15 @@ const receivedInvoiceFormSchema = z.object({
 type ReceivedInvoiceFormValues = z.infer<typeof receivedInvoiceFormSchema>
 
 export function ReceivedInvoicesPage() {
+  const { user } = useAuth()
+  const userId = user?.id
+  const draftStorage = getReceivedInvoiceDraftStorage()
+  const [initialDraft] = useState(() =>
+    loadReceivedInvoiceDraft(draftStorage, userId)
+  )
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState<number | null>(currentYear)
-  const [showAddForm, setShowAddForm] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(initialDraft !== null)
 
   const [isProcessingImage, setIsProcessingImage] = useState(false)
   const [processedFileUrl, setProcessedFileUrl] = useState<string | null>(null)
@@ -95,7 +110,9 @@ export function ReceivedInvoicesPage() {
     onSuccess: () => {
       utils.receivedInvoices.list.invalidate()
       toast.success('Faktura byla úspěšně přidána')
-      form.reset()
+      clearReceivedInvoiceDraft(draftStorage, userId)
+      form.reset(RECEIVED_INVOICE_FORM_DEFAULT_VALUES)
+      setProcessedFileUrl(null)
       setShowAddForm(false)
     },
     onError: (error) => {
@@ -182,13 +199,20 @@ export function ReceivedInvoicesPage() {
   // Setup react-hook-form
   const form = useForm<ReceivedInvoiceFormValues>({
     resolver: zodResolver(receivedInvoiceFormSchema),
-    defaultValues: {
-      supplier_name: '',
-      invoice_number: '',
-      currency: 'CZK',
-      supplier_country: 'Česká republika'
-    }
+    defaultValues: initialDraft ?? RECEIVED_INVOICE_FORM_DEFAULT_VALUES
   })
+
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      saveReceivedInvoiceDraft(
+        draftStorage,
+        userId,
+        values as ReceivedInvoiceDraft
+      )
+    })
+
+    return () => subscription.unsubscribe()
+  }, [draftStorage, form, userId])
 
   const onSubmit = async (values: ReceivedInvoiceFormValues) => {
     const formattedValues = {
@@ -204,8 +228,6 @@ export function ReceivedInvoicesPage() {
     }
 
     await createMutation.mutateAsync(formattedValues)
-    toast.success('Faktura byla úspěšně přidána')
-    form.reset()
   }
 
   const handleDeleteInvoice = async (id: string) => {
