@@ -398,10 +398,10 @@ export function ReceivedInvoicesPage() {
   const currency = invoices[0]?.currency || 'CZK'
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <h3 className="text-2xl font-bold">Přijaté faktury</h3>
+    <div className="space-y-4">
+      <div className="m-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <h1 className="text-2xl font-bold">Přijaté faktury</h1>
           {!showAddForm && (
             <Select
               value={selectedYear === null ? 'null' : selectedYear.toString()}
@@ -413,7 +413,7 @@ export function ReceivedInvoicesPage() {
                 }
               }}
             >
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Rok" />
               </SelectTrigger>
               <SelectContent>
@@ -432,7 +432,10 @@ export function ReceivedInvoicesPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button onClick={() => setShowAddForm(!showAddForm)}>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => setShowAddForm(!showAddForm)}
+          >
             {showAddForm ? (
               <>Zpět na seznam</>
             ) : (
@@ -446,14 +449,14 @@ export function ReceivedInvoicesPage() {
 
       {showAddForm ? (
         <Card>
-          <CardHeader>
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle>Nová přijatá faktura</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
             {/* Upload Section - Added Drag and Drop Handlers */}
             <div
               className={cn(
-                'mb-8 flex flex-col items-center p-8 border-2 border-dashed rounded-lg transition-colors',
+                'mb-8 flex flex-col items-center p-4 sm:p-8 border-2 border-dashed rounded-lg transition-colors',
                 isDraggingOver ? 'border-primary bg-primary/10' : '',
                 isProcessingImage
                   ? 'cursor-not-allowed opacity-70'

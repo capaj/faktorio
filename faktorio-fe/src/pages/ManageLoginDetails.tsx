@@ -201,7 +201,7 @@ export const ManageLoginDetails = () => {
             <Form {...passwordForm}>
               <form
                 onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-                className="space-y-6 p-4 grid grid-cols-2 gap-4 items-center"
+                className="space-y-6 p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center"
               >
                 <FormField
                   control={passwordForm.control}
@@ -278,7 +278,7 @@ export const ManageLoginDetails = () => {
             <Form {...emailForm}>
               <form
                 onSubmit={emailForm.handleSubmit(onEmailSubmit)}
-                className="space-y-6 p-4 grid grid-cols-3 gap-4 items-center"
+                className="space-y-6 p-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-center"
               >
                 <FormField
                   control={emailForm.control}
@@ -347,7 +347,7 @@ export const ManageLoginDetails = () => {
                       deleteAccountPasswordForm.trigger()
                     }
                   }}
-                  className="space-y-6 max-w-md p-4 grid grid-cols-2 gap-4 items-center"
+                  className="space-y-6 max-w-md p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center"
                 >
                   <FormField
                     control={deleteAccountPasswordForm.control}

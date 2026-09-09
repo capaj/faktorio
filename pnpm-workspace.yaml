@@ -71,3 +71,6 @@ minimumReleaseAgeExclude:
   - vitest@5.0.0
   - '@types/react@19.3.0'
   - zod@4.6.1
+# Keep Drizzle's optional Cloudflare peer identical across workspace packages.
+overrides:
+  '@cloudflare/workers-types': '^5.20260908.1'

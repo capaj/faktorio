@@ -201,8 +201,8 @@ export const InvoiceDetail = ({
   const formattedTotal = currencyFormatter.format(invoiceTotal + taxTotal)
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-muted/20 py-6">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4">
+    <div className="min-h-[calc(100vh-64px)] bg-muted/20 md:py-6">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 md:px-4">
         <div className="rounded-lg border bg-background p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>

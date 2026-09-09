@@ -302,7 +302,7 @@ export function XMLExportPage() {
     <>
       <div className="flex items-center justify-between m-4 flex-wrap gap-2">
         <h3 className="font-semibold md:block">Export XML pro finanční úřad</h3>
-        <div className="flex items-center space-x-2 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2">
           <Select
             value={cadence}
             onValueChange={(value: 'quarterly' | 'monthly') => {

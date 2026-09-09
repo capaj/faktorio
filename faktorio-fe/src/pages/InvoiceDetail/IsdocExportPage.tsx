@@ -64,7 +64,7 @@ export const IsdocExportPage = () => {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold mb-6">ISDOC Export</h1>
       
       {invoice ? (
@@ -78,8 +78,8 @@ export const IsdocExportPage = () => {
             </p>
           </div>
           
-          <div className="mb-6">
-            <Button onClick={downloadXml} className="mr-4">
+          <div className="mb-6 flex flex-wrap gap-3">
+            <Button onClick={downloadXml}>
               Download ISDOC XML
             </Button>
             <Button variant="outline" onClick={() => window.history.back()}>
