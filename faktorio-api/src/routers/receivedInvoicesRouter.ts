@@ -114,122 +114,15 @@ const ocrResponseSchema = z.object({
   line_items_summary: z.string().optional().nullable()
 })
 
+const GEMINI_MODEL = 'gemini-3.8-flash'
 const GEMINI_REQUEST_TIMEOUT_MS = 45_000
-const PDF_TOTAL_REQUEST_TIMEOUT_MS = 60_000
-const PDF_FULL_ATTEMPT_TIMEOUT_MS = 25_000
-const PDF_FALLBACK_ATTEMPT_TIMEOUT_MS = 15_000
 
-const pdfFallbackSchema = {
-  type: 'object',
-  required: [
-    'supplier_name',
-    'invoice_number',
-    'issue_date',
-    'due_date',
-    'total_with_vat'
-  ],
-  properties: {
-    supplier_name: {
-      type: 'string'
-    },
-    supplier_registration_no: {
-      type: 'string',
-      nullable: true
-    },
-    supplier_vat_no: {
-      type: 'string',
-      nullable: true
-    },
-    invoice_number: {
-      type: 'string'
-    },
-    variable_symbol: {
-      type: 'string',
-      nullable: true
-    },
-    issue_date: {
-      type: 'string',
-      format: 'date'
-    },
-    taxable_supply_date: {
-      type: 'string',
-      format: 'date',
-      nullable: true
-    },
-    due_date: {
-      type: 'string',
-      format: 'date'
-    },
-    total_without_vat: {
-      type: 'number',
-      nullable: true
-    },
-    total_with_vat: {
-      type: 'number'
-    },
-    currency: {
-      type: 'string',
-      minLength: 3,
-      maxLength: 3
-    },
-    vat_base_21: {
-      type: 'number',
-      nullable: true
-    },
-    vat_21: {
-      type: 'number',
-      nullable: true
-    },
-    payment_method: {
-      type: 'string',
-      enum: ['bank', 'cash', 'card', 'cod', 'crypto', 'other'],
-      nullable: true
-    },
-    line_items_summary: {
-      type: 'string',
-      nullable: true,
-      maxLength: 90
-    }
-  }
-} as const
-
-const fullExtractionPrompt = `Extract invoice data from this invoice document.
+const extractionPrompt = `Extract invoice data from this invoice document.
 Return ONLY a JSON object.
 If you cannot extract some fields, leave them as null.
 For dates, use the format YYYY-MM-DD.
 If the document is a credit note (dobropis), make all taxable amounts, VAT amounts, and totals negative.
 If text is partially unreadable, leave "?" for each unreadable character.`
-
-const pdfFallbackPrompt = `Extract only the essential invoice metadata needed to create a received invoice quickly from this PDF.
-Do not extract line items unless they are trivial to identify.
-Prefer the main invoice totals and dates over detailed breakdowns.
-Return ONLY a JSON object.
-If you cannot extract some fields, leave them as null.
-For dates, use the format YYYY-MM-DD.
-If the document is a credit note (dobropis), make all taxable amounts, VAT amounts, and totals negative.`
-
-function isRetryableGeminiError(error: unknown) {
-  const message = (error as Error)?.message ?? ''
-  const status =
-    (error as any)?.status ??
-    (error as any)?.response?.status ??
-    (error as any)?.code
-
-  return (
-    status === 408 ||
-    status === 503 ||
-    status === 504 ||
-    status === 524 ||
-    (error as Error)?.name === 'AbortError' ||
-    /DEADLINE_EXCEEDED/i.test(String(message)) ||
-    /UNAVAILABLE/i.test(String(message)) ||
-    /model is overloaded/i.test(String(message)) ||
-    /timed out/i.test(String(message)) ||
-    /timeout/i.test(String(message)) ||
-    /aborted/i.test(String(message)) ||
-    /error code: 524/i.test(String(message))
-  )
-}
 
 function isInvalidGeminiApiKeyError(error: unknown) {
   const message = (error as Error)?.message ?? ''
@@ -247,30 +140,11 @@ function isInvalidGeminiApiKeyError(error: unknown) {
   )
 }
 
-async function withAbortTimeout<T>(
-  timeoutMs: number,
-  fn: (abortSignal: AbortSignal) => Promise<T>
-) {
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-
-  try {
-    return await fn(controller.signal)
-  } finally {
-    clearTimeout(timer)
-  }
-}
-
 async function waitForGeminiFileActive(
   ctx: Pick<TrpcContext, 'googleGenAIFileManager'>,
-  fileName: string,
-  abortSignal: AbortSignal
+  fileName: string
 ) {
-  while (true) {
-    if (abortSignal.aborted) {
-      throw new Error('Gemini file activation timed out')
-    }
-
+  for (let attempt = 0; attempt < 10; attempt++) {
     const file = await ctx.googleGenAIFileManager.getFile(fileName)
 
     if (file.state === 'ACTIVE') {
@@ -283,6 +157,8 @@ async function waitForGeminiFileActive(
 
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
+
+  throw new Error('Gemini file activation timed out')
 }
 
 export const receivedInvoicesRouter = trpcContext.router({
@@ -458,13 +334,6 @@ export const receivedInvoicesRouter = trpcContext.router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        if (!schema) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Failed to load schema for OCR processing'
-          })
-        }
-
         // Clean the base64 data (remove any data URI prefix, e.g. data:image/jpeg;base64, or data:application/pdf;base64,)
         const base64Data = input.imageData.replace(
           /^data:[^;]+;base64,/,
@@ -474,163 +343,96 @@ export const receivedInvoicesRouter = trpcContext.router({
 
         // TODO use https://googleapis.github.io/js-genai/main/classes/files.Files.html to allow uploading files bigger than 7MB
 
-        const requestPlan =
-          input.mimeType === 'application/pdf'
-            ? [
-                {
-                  model: 'gemini-3-flash-preview',
-                  timeoutMs: PDF_FULL_ATTEMPT_TIMEOUT_MS,
-                  prompt: fullExtractionPrompt,
-                  responseSchema: schema as any,
-                  maxOutputTokens: 2048
-                },
-                {
-                  model: 'gemini-3-flash-preview',
-                  timeoutMs: PDF_FALLBACK_ATTEMPT_TIMEOUT_MS,
-                  prompt: pdfFallbackPrompt,
-                  responseSchema: pdfFallbackSchema as any,
-                  maxOutputTokens: 768
-                }
-              ]
-            : [
-                {
-                  model: 'gemini-3-flash-preview',
-                  timeoutMs: GEMINI_REQUEST_TIMEOUT_MS,
-                  prompt: fullExtractionPrompt,
-                  responseSchema: schema as any,
-                  maxOutputTokens: 2048
-                }
-              ]
+        const isPdf = input.mimeType === 'application/pdf'
+        let uploadedFileName: string | undefined
 
-        const totalTimeoutMs =
-          input.mimeType === 'application/pdf'
-            ? PDF_TOTAL_REQUEST_TIMEOUT_MS
-            : GEMINI_REQUEST_TIMEOUT_MS
-
-        const result = await withAbortTimeout(totalTimeoutMs, async (
-          abortSignal
-        ) => {
-          let uploadedFileName: string | undefined
-          let lastError: unknown
-
-          try {
-            const filePart =
-              input.mimeType === 'application/pdf'
-                ? await (async () => {
-                    const uploadedFile =
-                      await ctx.googleGenAIFileManager.uploadFile(
-                        Buffer.from(base64Data, 'base64'),
-                        {
-                          mimeType: input.mimeType,
-                          displayName: 'invoice.pdf'
-                        }
-                      )
-
-                    uploadedFileName = uploadedFile.file.name
-
-                    const activeFile =
-                      uploadedFile.file.name &&
-                      uploadedFile.file.state !== 'ACTIVE'
-                        ? await waitForGeminiFileActive(
-                            ctx,
-                            uploadedFile.file.name,
-                            abortSignal
-                          )
-                        : uploadedFile.file
-
-                    return {
-                      fileData: {
-                        fileUri: activeFile.uri,
-                        mimeType: activeFile.mimeType ?? input.mimeType
-                      }
-                    }
-                  })()
-                : {
-                    inlineData: {
-                      mimeType: input.mimeType,
-                      data: base64Data
-                    }
-                  }
-
-            for (const attempt of requestPlan) {
-              try {
-                return await ctx.googleGenAI.models.generateContent({
-                  model: attempt.model,
-                  contents: [
+        try {
+          // PDFs go through the Gemini File API (inline base64 PDFs are unreliable),
+          // images are sent inline.
+          const filePart = isPdf
+            ? await (async () => {
+                const uploadedFile =
+                  await ctx.googleGenAIFileManager.uploadFile(
+                    Buffer.from(base64Data, 'base64'),
                     {
-                      parts: [{ text: attempt.prompt }, filePart]
+                      mimeType: input.mimeType,
+                      displayName: 'invoice.pdf'
                     }
-                  ],
-                  config: {
-                    httpOptions: {
-                      timeout: attempt.timeoutMs
-                    },
-                    abortSignal,
-                    systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from a czech invoice document. Most likely the invoice is in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency field is ISO 4217.`,
-                    responseMimeType: 'application/json',
-                    responseSchema: attempt.responseSchema,
-                    maxOutputTokens: attempt.maxOutputTokens,
-                    temperature: 0.2,
-                    thinkingConfig: {
-                      includeThoughts: false,
-                      thinkingBudget: 0
-                    }
+                  )
+
+                uploadedFileName = uploadedFile.file.name
+
+                const activeFile =
+                  uploadedFile.file.name &&
+                  uploadedFile.file.state !== 'ACTIVE'
+                    ? await waitForGeminiFileActive(
+                        ctx,
+                        uploadedFile.file.name
+                      )
+                    : uploadedFile.file
+
+                return {
+                  fileData: {
+                    fileUri: activeFile.uri,
+                    mimeType: activeFile.mimeType ?? input.mimeType
                   }
-                })
-              } catch (err) {
-                lastError = err
-                if (!isRetryableGeminiError(err)) {
-                  throw err
+                }
+              })()
+            : {
+                inlineData: {
+                  mimeType: input.mimeType,
+                  data: base64Data
                 }
               }
+
+          const result = await ctx.googleGenAI.models.generateContent({
+            model: GEMINI_MODEL,
+            contents: [
+              {
+                parts: [{ text: extractionPrompt }, filePart]
+              }
+            ],
+            config: {
+              httpOptions: {
+                timeout: GEMINI_REQUEST_TIMEOUT_MS
+              },
+              systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from a czech invoice document. Most likely the invoice is in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency field is ISO 4217.`,
+              responseMimeType: 'application/json',
+              responseSchema: schema as any,
+              maxOutputTokens: 2048,
+              temperature: 0.2
             }
+          })
 
-            throw lastError
-          } finally {
-            if (uploadedFileName) {
-              void ctx.googleGenAIFileManager
-                .deleteFile(uploadedFileName)
-                .catch((error) => {
-                  console.error('Failed to delete uploaded Gemini file:', error)
-                })
-            }
-          }
-        })
-
-        const textContent = result.text?.trim() ?? ''
-
-        // Try to find JSON object in the response
-        let extractedData
-        try {
-          extractedData = JSON.parse(textContent)
-        } catch (error) {
+          // JSON mode with a response schema guarantees a pure JSON object
+          let extractedData: unknown
           try {
-            const jsonMatch = textContent.match(/\{[\s\S]*\}/)
-            if (jsonMatch) {
-              extractedData = JSON.parse(jsonMatch[0])
-            } else {
-              throw new Error('No valid JSON found in response')
-            }
-          } catch (fallbackError) {
-            console.error('Error parsing Gemini response:', error, fallbackError)
+            extractedData = JSON.parse(result.text?.trim() ?? '')
+          } catch {
             throw new TRPCError({
               code: 'INTERNAL_SERVER_ERROR',
               message: 'Failed to parse OCR results'
             })
           }
-        }
 
-        console.log('extractedData for invoice:', extractedData)
-        // Validate data against our schema
-        try {
-          const validatedData = ocrResponseSchema.parse(extractedData)
-          return validatedData
-        } catch (error) {
-          console.error('Validation error:', error)
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'OCR results did not match expected format'
-          })
+          // Validate data against our schema
+          try {
+            return ocrResponseSchema.parse(extractedData)
+          } catch (error) {
+            console.error('Validation error:', error)
+            throw new TRPCError({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'OCR results did not match expected format'
+            })
+          }
+        } finally {
+          if (uploadedFileName) {
+            void ctx.googleGenAIFileManager
+              .deleteFile(uploadedFileName)
+              .catch((error) => {
+                console.error('Failed to delete uploaded Gemini file:', error)
+              })
+          }
         }
       } catch (error) {
         console.error('OCR processing error:', error)

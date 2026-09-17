@@ -61,18 +61,19 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
     expect(generateContent).toHaveBeenCalledTimes(1)
 
     const params = generateContent.mock.calls[0][0]
-    expect(params.model).toBe('gemini-3-flash-preview')
+    expect(params.model).toBe('gemini-3.8-flash')
     expect(params.config.responseMimeType).toBe('application/json')
     expect(params.config.responseSchema).toBeTruthy()
+    expect(params.config.httpOptions.timeout).toBe(45000)
     expect(params.contents[0].parts[1].inlineData).toEqual({
       mimeType: 'image/png',
       data: 'Zm9vYmFy'
     })
   })
 
-  it('keeps using gemini-3 for PDFs and sends them as fileData', async () => {
+  it('sends PDFs as fileData with a single full extraction', async () => {
     const generateContent = vi.fn().mockResolvedValue({
-      text: `Here is the extracted invoice:\n\n\`\`\`json\n${JSON.stringify(extractedInvoice, null, 2)}\n\`\`\``
+      text: JSON.stringify(extractedInvoice)
     })
     const uploadFile = vi.fn().mockResolvedValue({
       file: {
@@ -97,9 +98,8 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
     expect(generateContent).toHaveBeenCalledTimes(1)
 
     const params = generateContent.mock.calls[0][0]
-    expect(params.model).toBe('gemini-3-flash-preview')
-    expect(params.config.httpOptions.timeout).toBe(25000)
-    expect(params.config.abortSignal).toBeInstanceOf(AbortSignal)
+    expect(params.model).toBe('gemini-3.8-flash')
+    expect(params.config.httpOptions.timeout).toBe(45000)
     expect(params.contents[0].parts[1].fileData).toEqual({
       fileUri: 'gs://gemini/invoice-1',
       mimeType: 'application/pdf'
@@ -108,16 +108,11 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
     expect(deleteFile).toHaveBeenCalledWith('files/invoice-1')
   })
 
-  it('retries PDFs with a smaller same-model extraction when the full attempt hits deadline exceeded', async () => {
-    const generateContent = vi
-      .fn()
-      .mockRejectedValueOnce({
-        status: 504,
-        message: 'Deadline expired before operation could complete. DEADLINE_EXCEEDED'
-      })
-      .mockResolvedValueOnce({
-        text: JSON.stringify(extractedInvoice)
-      })
+  it('fails fast instead of retrying with a partial extraction when Gemini errors', async () => {
+    const generateContent = vi.fn().mockRejectedValueOnce({
+      status: 504,
+      message: 'Deadline expired before operation could complete.'
+    })
     const uploadFile = vi.fn().mockResolvedValue({
       file: {
         name: 'files/invoice-2',
@@ -132,31 +127,33 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
       deleteFile
     })
 
-    const result = await caller.extractInvoiceData({
-      mimeType: 'application/pdf',
-      imageData: 'JVBERi0xLjQK'
-    })
+    await expect(
+      caller.extractInvoiceData({
+        mimeType: 'application/pdf',
+        imageData: 'JVBERi0xLjQK'
+      })
+    ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR' })
 
-    expect(result).toEqual(extractedInvoice)
-    expect(generateContent).toHaveBeenCalledTimes(2)
+    expect(generateContent).toHaveBeenCalledTimes(1)
     expect(uploadFile).toHaveBeenCalledTimes(1)
-
-    const firstCall = generateContent.mock.calls[0][0]
-    const secondCall = generateContent.mock.calls[1][0]
-
-    expect(firstCall.model).toBe('gemini-3-flash-preview')
-    expect(firstCall.config.httpOptions.timeout).toBe(25000)
-    expect(firstCall.contents[0].parts[1].fileData).toEqual({
-      fileUri: 'gs://gemini/invoice-2',
-      mimeType: 'application/pdf'
-    })
-
-    expect(secondCall.model).toBe('gemini-3-flash-preview')
-    expect(secondCall.config.httpOptions.timeout).toBe(15000)
-    expect(secondCall.contents[0].parts[1].fileData).toEqual({
-      fileUri: 'gs://gemini/invoice-2',
-      mimeType: 'application/pdf'
-    })
+    // The uploaded temp file is still cleaned up
     expect(deleteFile).toHaveBeenCalledWith('files/invoice-2')
+  })
+
+  it('returns a clear error when Gemini does not return valid JSON', async () => {
+    const generateContent = vi.fn().mockResolvedValue({
+      text: 'not json at all'
+    })
+    const caller = createCaller(generateContent)
+
+    await expect(
+      caller.extractInvoiceData({
+        mimeType: 'image/png',
+        imageData: 'Zm9vYmFy'
+      })
+    ).rejects.toMatchObject({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to parse OCR results'
+    })
   })
 })
