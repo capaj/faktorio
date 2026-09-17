@@ -1,7 +1,7 @@
 TURSO_DATABASE_URL=http://127.0.0.1:8080
 TURSO_AUTH_TOKEN=local
 JWT_SECRET=e2e-jwt-secret-not-used-anywhere-real-32-chars
-GEMINI_API_KEY=e2e-test-gemini-key
+OPENROUTER_API_KEY=e2e-test-openrouter-key
 MAILJET_API_KEY=e2e-test-mailjet-key
 MAILJET_API_SECRET=e2e-test-mailjet-secret
 VAPID_PUBLIC_KEY=BGs37P8xLBBboVi_dD2JWT6y8Kauh1iiXtxrs6tpy2edZCzYixA8BA6iQhm2rFBH7SSgR5xKHF23BkXkRWMS-fQ

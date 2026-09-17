@@ -2,11 +2,18 @@ import { z } from 'zod/v4'
 
 import { receivedInvoiceTb } from 'faktorio-db/schema'
 import { protectedProc } from '../isAuthorizedMiddleware'
-import { trpcContext, TrpcContext } from '../trpcContext'
+import { trpcContext } from '../trpcContext'
 import { eq, desc, and, gte, lt, SQL } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
-import schema from '../json-schema/receivedInvoicesSchema.json'
+import { createOpenRouter } from '@openrouter/ai-sdk-provider'
+import {
+  APICallError,
+  generateText,
+  JSONParseError,
+  NoObjectGeneratedError,
+  Output
+} from 'ai'
 import { stringDateSchema, paymentMethodEnum } from './zodSchemas'
 
 // Define Zod schema based on Drizzle schema, making fields optional/required as needed for creation
@@ -51,7 +58,7 @@ const receivedInvoiceCreateSchema = createInsertSchema(receivedInvoiceTb)
     attachment_data: z.string().optional().nullable() // Base64 encoded image data
   })
 
-// Type for the Gemini OCR processing response
+// Shared schema for structured extraction and response validation
 const ocrResponseSchema = z.object({
   supplier_name: z.string().optional(),
   supplier_street: z.string().optional().nullable(),
@@ -114,52 +121,16 @@ const ocrResponseSchema = z.object({
   line_items_summary: z.string().optional().nullable()
 })
 
-const GEMINI_MODEL = 'gemini-3.8-flash'
-const GEMINI_REQUEST_TIMEOUT_MS = 45_000
+const OCR_MODEL = 'meta/muse-spark-1.3-contributor'
+const OCR_REQUEST_TIMEOUT_MS = 45_000
 
 const extractionPrompt = `Extract invoice data from this invoice document.
 Return ONLY a JSON object.
-If you cannot extract some fields, leave them as null.
-For dates, use the format YYYY-MM-DD.
+If you cannot extract a nullable field, use null. Omit other optional fields when unknown.
+For dates, use the format YYYY-MM-DD. Use issue_date for taxable_supply_date if not specified otherwise.
+Keep line_items_summary to at most 90 characters.
 If the document is a credit note (dobropis), make all taxable amounts, VAT amounts, and totals negative.
 If text is partially unreadable, leave "?" for each unreadable character.`
-
-function isInvalidGeminiApiKeyError(error: unknown) {
-  const message = (error as Error)?.message ?? ''
-  const details = (error as any)?.errorDetails
-
-  return (
-    /API key not valid/i.test(String(message)) ||
-    /API_KEY_INVALID/i.test(String(message)) ||
-    (Array.isArray(details) &&
-      details.some(
-        (detail) =>
-          detail?.reason === 'API_KEY_INVALID' ||
-          /API key not valid/i.test(String(detail?.message ?? ''))
-      ))
-  )
-}
-
-async function waitForGeminiFileActive(
-  ctx: Pick<TrpcContext, 'googleGenAIFileManager'>,
-  fileName: string
-) {
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const file = await ctx.googleGenAIFileManager.getFile(fileName)
-
-    if (file.state === 'ACTIVE') {
-      return file
-    }
-
-    if (file.state === 'FAILED') {
-      throw new Error('Gemini failed to process uploaded PDF')
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-  }
-
-  throw new Error('Gemini file activation timed out')
-}
 
 export const receivedInvoicesRouter = trpcContext.router({
   list: protectedProc
@@ -324,126 +295,72 @@ export const receivedInvoicesRouter = trpcContext.router({
       return { success: true }
     }),
 
-  // OCR an invoice with Gemini API
+  // Extract structured invoice data from an image or PDF using OpenRouter.
   extractInvoiceData: protectedProc
     .input(
       z.object({
         mimeType: z.string(),
-        imageData: z.string() // Base64 encoded image data
+        imageData: z.string() // Base64 encoded document data
       })
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // Clean the base64 data (remove any data URI prefix, e.g. data:image/jpeg;base64, or data:application/pdf;base64,)
-        const base64Data = input.imageData.replace(
-          /^data:[^;]+;base64,/,
-          ''
-        )
-        // Get the model
-
-        // TODO use https://googleapis.github.io/js-genai/main/classes/files.Files.html to allow uploading files bigger than 7MB
-
-        const isPdf = input.mimeType === 'application/pdf'
-        let uploadedFileName: string | undefined
-
-        try {
-          // PDFs go through the Gemini File API (inline base64 PDFs are unreliable),
-          // images are sent inline.
-          const filePart = isPdf
-            ? await (async () => {
-                const uploadedFile =
-                  await ctx.googleGenAIFileManager.uploadFile(
-                    Buffer.from(base64Data, 'base64'),
-                    {
-                      mimeType: input.mimeType,
-                      displayName: 'invoice.pdf'
-                    }
-                  )
-
-                uploadedFileName = uploadedFile.file.name
-
-                const activeFile =
-                  uploadedFile.file.name &&
-                  uploadedFile.file.state !== 'ACTIVE'
-                    ? await waitForGeminiFileActive(
-                        ctx,
-                        uploadedFile.file.name
-                      )
-                    : uploadedFile.file
-
-                return {
-                  fileData: {
-                    fileUri: activeFile.uri,
-                    mimeType: activeFile.mimeType ?? input.mimeType
-                  }
-                }
-              })()
-            : {
-                inlineData: {
-                  mimeType: input.mimeType,
-                  data: base64Data
-                }
-              }
-
-          const result = await ctx.googleGenAI.models.generateContent({
-            model: GEMINI_MODEL,
-            contents: [
-              {
-                parts: [{ text: extractionPrompt }, filePart]
-              }
-            ],
-            config: {
-              httpOptions: {
-                timeout: GEMINI_REQUEST_TIMEOUT_MS
-              },
-              systemInstruction: `You are a data extraction assistant. Your main objective is to extract invoice data from a czech invoice document. Most likely the invoice is in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency field is ISO 4217.`,
-              responseMimeType: 'application/json',
-              responseSchema: schema as any,
-              maxOutputTokens: 2048,
-              temperature: 0.2
-            }
+        if (!ctx.env.OPENROUTER_API_KEY) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'OPENROUTER_API_KEY is not configured'
           })
-
-          // JSON mode with a response schema guarantees a pure JSON object
-          let extractedData: unknown
-          try {
-            extractedData = JSON.parse(result.text?.trim() ?? '')
-          } catch {
-            throw new TRPCError({
-              code: 'INTERNAL_SERVER_ERROR',
-              message: 'Failed to parse OCR results'
-            })
-          }
-
-          // Validate data against our schema
-          try {
-            return ocrResponseSchema.parse(extractedData)
-          } catch (error) {
-            console.error('Validation error:', error)
-            throw new TRPCError({
-              code: 'INTERNAL_SERVER_ERROR',
-              message: 'OCR results did not match expected format'
-            })
-          }
-        } finally {
-          if (uploadedFileName) {
-            void ctx.googleGenAIFileManager
-              .deleteFile(uploadedFileName)
-              .catch((error) => {
-                console.error('Failed to delete uploaded Gemini file:', error)
-              })
-          }
         }
+
+        const base64Data = input.imageData.replace(/^data:[^;]+;base64,/, '')
+        const openrouter = createOpenRouter({
+          apiKey: ctx.env.OPENROUTER_API_KEY
+        })
+        const { output } = await generateText({
+          model: openrouter(OCR_MODEL),
+          output: Output.object({ schema: ocrResponseSchema }),
+          system: `You are a data extraction assistant. Your main objective is to extract invoice data from a czech invoice document. Most likely the invoice is in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency field is ISO 4217.`,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: extractionPrompt },
+                {
+                  type: 'file',
+                  data: base64Data,
+                  mediaType: input.mimeType,
+                  ...(input.mimeType === 'application/pdf'
+                    ? { filename: 'invoice.pdf' }
+                    : {})
+                }
+              ]
+            }
+          ],
+          abortSignal: AbortSignal.timeout(OCR_REQUEST_TIMEOUT_MS),
+          maxRetries: 0,
+          maxOutputTokens: 2048,
+          temperature: 0.2
+        })
+
+        return output
       } catch (error) {
         console.error('OCR processing error:', error)
         if (error instanceof TRPCError) {
           throw error
         }
-        if (isInvalidGeminiApiKeyError(error)) {
+        if (APICallError.isInstance(error) && error.statusCode === 401) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message:
-              'Gemini API key is invalid in backend configuration. Update GEMINI_API_KEY.'
+              'OpenRouter API key is invalid in backend configuration. Update OPENROUTER_API_KEY.'
+          })
+        }
+        if (NoObjectGeneratedError.isInstance(error)) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: JSONParseError.isInstance(error.cause)
+              ? 'Failed to parse OCR results'
+              : 'OCR results did not match expected format'
           })
         }
         throw new TRPCError({

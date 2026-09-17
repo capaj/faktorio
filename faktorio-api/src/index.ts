@@ -9,8 +9,6 @@ import * as schema from 'faktorio-db/schema'
 import colorize from '@pinojs/json-colorizer'
 import { TrpcContext } from './trpcContext'
 import { extractUserFromAuthHeader, generateToken } from './jwtUtils'
-import { GoogleAIFileManager } from '@google/generative-ai/server'
-import { GoogleGenAI } from '@google/genai'
 import { Env } from './envSchema'
 import { checkAndNotifyDueInvoices } from './lib/scheduledNotifications'
 import { calculateAndStoreSystemStats } from './lib/calculateSystemStats'
@@ -72,26 +70,15 @@ export default {
       authToken: env.TURSO_AUTH_TOKEN
     })
 
-    const apiKey = env.GEMINI_API_KEY
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not configured')
-    }
-
-    // Initialize the Gemini client
-    const genAI = new GoogleGenAI({ apiKey })
-
     const createTrpcContext = async (): Promise<TrpcContext> => {
       const authHeader = request.headers.get('authorization')
       const user = await extractUserFromAuthHeader(authHeader, env.JWT_SECRET)
-      const fileManager = new GoogleAIFileManager(apiKey)
 
       return {
         db: drizzle(turso, { schema }),
         env,
         user,
         req: request,
-        googleGenAIFileManager: fileManager,
-        googleGenAI: genAI,
         sendEmail: (email) => sendEmail(email, env),
         generateToken: (user) => generateToken(user, env.JWT_SECRET)
       }

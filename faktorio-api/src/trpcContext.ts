@@ -2,11 +2,9 @@ import { initTRPC } from '@trpc/server'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
 import * as schema from 'faktorio-db/schema'
 import superjson from 'superjson'
-import { GoogleAIFileManager } from '@google/generative-ai/server'
 
 import { UserSelectType } from 'faktorio-db/schema'
 import { Env } from './envSchema'
-import { GoogleGenAI } from '@google/genai'
 
 // JWT secret should be the same as in authRouter
 
@@ -22,8 +20,6 @@ export type TrpcContext = {
     subject: string
     html: string
   }) => Promise<void>
-  googleGenAIFileManager: GoogleAIFileManager
-  googleGenAI: GoogleGenAI
 }
 // @ts-ignore
 const isBrowser = typeof window !== 'undefined'

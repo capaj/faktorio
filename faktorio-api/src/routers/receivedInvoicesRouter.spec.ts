@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { receivedInvoicesRouter } from './receivedInvoicesRouter'
 
 const extractedInvoice = {
@@ -10,150 +10,159 @@ const extractedInvoice = {
   currency: 'CZK'
 }
 
-function createCaller(
-  generateContent: ReturnType<typeof vi.fn>,
-  fileManagerOverrides?: {
-    uploadFile?: ReturnType<typeof vi.fn>
-    getFile?: ReturnType<typeof vi.fn>
-    deleteFile?: ReturnType<typeof vi.fn>
-  }
-) {
+function createCaller(apiKey = 'test-openrouter-key') {
   return receivedInvoicesRouter.createCaller({
     db: {} as any,
-    env: {} as any,
-    user: {
-      id: 'user-1'
-    } as any,
+    env: { OPENROUTER_API_KEY: apiKey } as any,
+    user: { id: 'user-1' } as any,
     req: new Request('http://localhost/trpc'),
     generateToken: vi.fn() as any,
-    sendEmail: vi.fn() as any,
-    googleGenAIFileManager: {
-      uploadFile: fileManagerOverrides?.uploadFile ?? vi.fn(),
-      getFile: fileManagerOverrides?.getFile ?? vi.fn(),
-      deleteFile: fileManagerOverrides?.deleteFile ?? vi.fn()
-    } as any,
-    googleGenAI: {
-      models: {
-        generateContent
-      }
-    } as any
+    sendEmail: vi.fn() as any
   })
 }
 
+function completion(content = JSON.stringify(extractedInvoice)) {
+  return Response.json({
+    id: 'test-completion',
+    model: 'meta/muse-spark-1.3-contributor',
+    created: 1,
+    choices: [
+      {
+        index: 0,
+        message: { role: 'assistant', content },
+        finish_reason: 'stop'
+      }
+    ],
+    usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 }
+  })
+}
+
+const imageInput = {
+  mimeType: 'image/png',
+  imageData: 'data:image/png;base64,Zm9vYmFy'
+}
+
 describe('receivedInvoicesRouter.extractInvoiceData', () => {
+  const fetchMock = vi.fn<typeof fetch>()
+
   beforeEach(() => {
-    vi.restoreAllMocks()
+    fetchMock.mockReset().mockResolvedValue(completion())
+    vi.stubGlobal('fetch', fetchMock)
     vi.spyOn(console, 'log').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
-  it('uses Gemini JSON mode and strips data URI prefixes before sending inline data', async () => {
-    const generateContent = vi.fn().mockResolvedValue({
-      text: JSON.stringify(extractedInvoice)
-    })
-    const caller = createCaller(generateContent)
-
-    const result = await caller.extractInvoiceData({
-      mimeType: 'image/png',
-      imageData: 'data:image/png;base64,Zm9vYmFy'
-    })
-
-    expect(result).toEqual(extractedInvoice)
-    expect(generateContent).toHaveBeenCalledTimes(1)
-
-    const params = generateContent.mock.calls[0][0]
-    expect(params.model).toBe('gemini-3.8-flash')
-    expect(params.config.responseMimeType).toBe('application/json')
-    expect(params.config.responseSchema).toBeTruthy()
-    expect(params.config.httpOptions.timeout).toBe(45000)
-    expect(params.contents[0].parts[1].inlineData).toEqual({
-      mimeType: 'image/png',
-      data: 'Zm9vYmFy'
-    })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
   })
 
-  it('sends PDFs as fileData with a single full extraction', async () => {
-    const generateContent = vi.fn().mockResolvedValue({
-      text: JSON.stringify(extractedInvoice)
+  it('sends images and a JSON schema through the AI SDK OpenRouter provider', async () => {
+    const timeout = vi.spyOn(AbortSignal, 'timeout')
+    expect(await createCaller().extractInvoiceData(imageInput)).toEqual(
+      extractedInvoice
+    )
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toBe('https://openrouter.ai/api/v1/chat/completions')
+    expect(new Headers(init?.headers).get('authorization')).toBe(
+      'Bearer test-openrouter-key'
+    )
+    const body = JSON.parse(init?.body as string)
+    expect(body.model).toBe('meta/muse-spark-1.3-contributor')
+    expect(body.response_format.type).toBe('json_schema')
+    expect(
+      body.response_format.json_schema.schema.properties.issue_date
+    ).toBeTruthy()
+    expect(body.messages[1].content[1]).toEqual({
+      type: 'image_url',
+      image_url: { url: imageInput.imageData }
     })
-    const uploadFile = vi.fn().mockResolvedValue({
-      file: {
-        name: 'files/invoice-1',
-        state: 'ACTIVE',
-        uri: 'gs://gemini/invoice-1',
-        mimeType: 'application/pdf'
-      }
-    })
-    const deleteFile = vi.fn().mockResolvedValue(undefined)
-    const caller = createCaller(generateContent, {
-      uploadFile,
-      deleteFile
-    })
-
-    const result = await caller.extractInvoiceData({
-      mimeType: 'application/pdf',
-      imageData: 'JVBERi0xLjQK'
-    })
-
-    expect(result).toEqual(extractedInvoice)
-    expect(generateContent).toHaveBeenCalledTimes(1)
-
-    const params = generateContent.mock.calls[0][0]
-    expect(params.model).toBe('gemini-3.8-flash')
-    expect(params.config.httpOptions.timeout).toBe(45000)
-    expect(params.contents[0].parts[1].fileData).toEqual({
-      fileUri: 'gs://gemini/invoice-1',
-      mimeType: 'application/pdf'
-    })
-    expect(uploadFile).toHaveBeenCalledTimes(1)
-    expect(deleteFile).toHaveBeenCalledWith('files/invoice-1')
+    expect(timeout).toHaveBeenCalledWith(45000)
   })
 
-  it('fails fast instead of retrying with a partial extraction when Gemini errors', async () => {
-    const generateContent = vi.fn().mockRejectedValueOnce({
-      status: 504,
-      message: 'Deadline expired before operation could complete.'
-    })
-    const uploadFile = vi.fn().mockResolvedValue({
-      file: {
-        name: 'files/invoice-2',
-        state: 'ACTIVE',
-        uri: 'gs://gemini/invoice-2',
-        mimeType: 'application/pdf'
-      }
-    })
-    const deleteFile = vi.fn().mockResolvedValue(undefined)
-    const caller = createCaller(generateContent, {
-      uploadFile,
-      deleteFile
-    })
-
-    await expect(
-      caller.extractInvoiceData({
-        mimeType: 'application/pdf',
-        imageData: 'JVBERi0xLjQK'
+  it.each(['JVBERi0xLjQK', 'data:application/pdf;base64,JVBERi0xLjQK'])(
+    'sends PDFs inline without uploading a temporary file (%s)',
+    async (imageData) => {
+      expect(
+        await createCaller().extractInvoiceData({
+          mimeType: 'application/pdf',
+          imageData
+        })
+      ).toEqual(extractedInvoice)
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      const body = JSON.parse(fetchMock.mock.calls[0][1]?.body as string)
+      expect(body.messages[1].content[1]).toEqual({
+        type: 'file',
+        file: {
+          filename: 'invoice.pdf',
+          file_data: 'data:application/pdf;base64,JVBERi0xLjQK'
+        }
       })
+    }
+  )
+
+  it('does not retry provider failures', async () => {
+    fetchMock.mockResolvedValue(
+      Response.json(
+        { error: { message: 'Deadline expired', code: 504 } },
+        { status: 504 }
+      )
+    )
+    await expect(
+      createCaller().extractInvoiceData(imageInput)
     ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR' })
-
-    expect(generateContent).toHaveBeenCalledTimes(1)
-    expect(uploadFile).toHaveBeenCalledTimes(1)
-    // The uploaded temp file is still cleaned up
-    expect(deleteFile).toHaveBeenCalledWith('files/invoice-2')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  it('returns a clear error when Gemini does not return valid JSON', async () => {
-    const generateContent = vi.fn().mockResolvedValue({
-      text: 'not json at all'
-    })
-    const caller = createCaller(generateContent)
-
+  it('reports invalid credentials', async () => {
+    fetchMock.mockResolvedValue(
+      Response.json(
+        { error: { message: 'Invalid API key', code: 401 } },
+        { status: 401 }
+      )
+    )
     await expect(
-      caller.extractInvoiceData({
-        mimeType: 'image/png',
-        imageData: 'Zm9vYmFy'
-      })
+      createCaller().extractInvoiceData(imageInput)
     ).rejects.toMatchObject({
       code: 'INTERNAL_SERVER_ERROR',
-      message: 'Failed to parse OCR results'
+      message:
+        'OpenRouter API key is invalid in backend configuration. Update OPENROUTER_API_KEY.'
+    })
+  })
+
+  it('reports a missing key before calling the provider', async () => {
+    await expect(
+      createCaller('').extractInvoiceData(imageInput)
+    ).rejects.toMatchObject({ message: 'OPENROUTER_API_KEY is not configured' })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['not json at all', 'Failed to parse OCR results'],
+    [
+      JSON.stringify({ ...extractedInvoice, issue_date: 'invalid' }),
+      'OCR results did not match expected format'
+    ]
+  ])('rejects invalid extraction output (%s)', async (content, message) => {
+    fetchMock.mockResolvedValue(completion(content))
+    await expect(
+      createCaller().extractInvoiceData(imageInput)
+    ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR', message })
+  })
+
+  it('preserves nullable fields, credit note amounts, and the default currency', async () => {
+    const invoice = {
+      ...extractedInvoice,
+      currency: undefined,
+      total_with_vat: -1210,
+      supplier_city: null,
+      items: null
+    }
+    fetchMock.mockResolvedValue(completion(JSON.stringify(invoice)))
+    expect(await createCaller().extractInvoiceData(imageInput)).toEqual({
+      ...invoice,
+      currency: 'CZK'
     })
   })
 })

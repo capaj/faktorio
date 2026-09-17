@@ -163,15 +163,14 @@ export interface LocalCallerLinkOptions<TRouter extends AppRouter> {
   router: TRouter
   onMutation: (mutation: Operation) => void
   createContext: () =>
-    | Promise<inferRouterContext<TRouter>>
-    | inferRouterContext<TRouter>
+    Promise<inferRouterContext<TRouter>> | inferRouterContext<TRouter>
 }
 
 function parseEnvVars(): {
   TURSO_DATABASE_URL: string
   TURSO_AUTH_TOKEN: string
   JWT_SECRET: string
-  GEMINI_API_KEY: string
+  OPENROUTER_API_KEY: string
   VAPID_PRIVATE_KEY: string
   VAPID_PUBLIC_KEY: string
   VAPID_SUBJECT: string
@@ -200,7 +199,7 @@ function parseEnvVars(): {
     TURSO_DATABASE_URL: '',
     TURSO_AUTH_TOKEN: '',
     JWT_SECRET: 'local_secret_key',
-    GEMINI_API_KEY: '',
+    OPENROUTER_API_KEY: '',
     VAPID_PRIVATE_KEY: '',
     VAPID_PUBLIC_KEY: '',
     VAPID_SUBJECT: 'mailto:admin@example.com',
@@ -213,7 +212,8 @@ function parseEnvVars(): {
       envVars.TURSO_DATABASE_URL || defaults.TURSO_DATABASE_URL,
     TURSO_AUTH_TOKEN: envVars.TURSO_AUTH_TOKEN || defaults.TURSO_AUTH_TOKEN,
     JWT_SECRET: envVars.JWT_SECRET || defaults.JWT_SECRET,
-    GEMINI_API_KEY: envVars.GEMINI_API_KEY || defaults.GEMINI_API_KEY,
+    OPENROUTER_API_KEY:
+      envVars.OPENROUTER_API_KEY || defaults.OPENROUTER_API_KEY,
     VAPID_PRIVATE_KEY: envVars.VAPID_PRIVATE_KEY || defaults.VAPID_PRIVATE_KEY,
     VAPID_PUBLIC_KEY: envVars.VAPID_PUBLIC_KEY || defaults.VAPID_PUBLIC_KEY,
     VAPID_SUBJECT: envVars.VAPID_SUBJECT || defaults.VAPID_SUBJECT,

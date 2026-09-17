@@ -17,7 +17,7 @@ const envVarsToInclude: string[] = [
   'JWT_SECRET',
   'MAILJET_API_KEY',
   'MAILJET_API_SECRET',
-  'GEMINI_API_KEY'
+  'OPENROUTER_API_KEY'
 ]
 
 let devVarsContent: string = ''

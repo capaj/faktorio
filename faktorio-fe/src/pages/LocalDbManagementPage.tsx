@@ -30,7 +30,7 @@ const defaultUser: UserSelectType = {
 
 const defaultEnvVars = `JWT_SECRET=lsk_${createId()}
 # nepovinne
-GEMINI_API_KEY=
+OPENROUTER_API_KEY=
 VAPID_PRIVATE_KEY=
 VAPID_PUBLIC_KEY=
 VAPID_SUBJECT=mailto:admin@example.com
