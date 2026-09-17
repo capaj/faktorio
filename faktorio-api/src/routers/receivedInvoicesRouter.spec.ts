@@ -54,7 +54,11 @@ function createCaller(apiKey = 'test-openrouter-key') {
   })
 }
 
-function completion(content = JSON.stringify(extractedInvoice)) {
+function completion(
+  content: string | null = JSON.stringify(extractedInvoice),
+  finishReason = 'stop',
+  reasoning?: string
+) {
   return Response.json({
     id: 'test-completion',
     model: 'meta/muse-spark-1.3-contributor',
@@ -62,8 +66,8 @@ function completion(content = JSON.stringify(extractedInvoice)) {
     choices: [
       {
         index: 0,
-        message: { role: 'assistant', content },
-        finish_reason: 'stop'
+        message: { role: 'assistant', content, reasoning },
+        finish_reason: finishReason
       }
     ],
     usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 }
@@ -103,6 +107,8 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
     )
     const body = JSON.parse(init?.body as string)
     expect(body.model).toBe('meta/muse-spark-1.3-contributor')
+    expect(body.reasoning).toEqual({ effort: 'minimal' })
+    expect(body.max_tokens).toBe(8192)
     expect(body.response_format.type).toBe('json_schema')
     expect(body.response_format.json_schema.strict).toBe(true)
     const schema = body.response_format.json_schema.schema
@@ -161,6 +167,47 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
       createCaller().extractInvoiceData(imageInput)
     ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR' })
     expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([null, '', '{"supplier_name":', JSON.stringify(extractedInvoice)])(
+    'reports token exhaustion without returning incomplete data (%s)',
+    async (content) => {
+      fetchMock.mockResolvedValue(
+        completion(content, 'length', 'Still analyzing the invoice.')
+      )
+      await expect(
+        createCaller().extractInvoiceData(imageInput)
+      ).rejects.toMatchObject({
+        code: 'INTERNAL_SERVER_ERROR',
+        message:
+          'Invoice extraction reached the output token limit before completing. Try processing fewer pages at a time.'
+      })
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    }
+  )
+
+  it.each(['stop', 'content_filter'])(
+    'reports empty responses with finish reason %s',
+    async (finishReason) => {
+      fetchMock.mockResolvedValue(completion(null, finishReason))
+      await expect(
+        createCaller().extractInvoiceData(imageInput)
+      ).rejects.toMatchObject({
+        code: 'INTERNAL_SERVER_ERROR',
+        message:
+          'The invoice model returned no extraction data. Please try again.'
+      })
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    }
+  )
+
+  it('extracts JSON when the model also returns reasoning', async () => {
+    fetchMock.mockResolvedValue(
+      completion(JSON.stringify(extractedInvoice), 'stop', 'Invoice analyzed.')
+    )
+    expect(await createCaller().extractInvoiceData(imageInput)).toEqual(
+      extractedInvoice
+    )
   })
 
   it('reports invalid credentials', async () => {

@@ -119,6 +119,9 @@ const ocrResponseSchema = z.object({
 
 const OCR_MODEL = 'meta/muse-spark-1.3-contributor'
 const OCR_REQUEST_TIMEOUT_MS = 45_000
+const OCR_MAX_OUTPUT_TOKENS = 8192
+const OCR_OUTPUT_LIMIT_MESSAGE =
+  'Invoice extraction reached the output token limit before completing. Try processing fewer pages at a time.'
 
 const extractionPrompt = `Extract invoice data from this invoice document.
 Return ONLY a JSON object.
@@ -312,8 +315,9 @@ export const receivedInvoicesRouter = trpcContext.router({
         const openrouter = createOpenRouter({
           apiKey: ctx.env.OPENROUTER_API_KEY
         })
-        const { output } = await generateText({
-          model: openrouter(OCR_MODEL),
+        const result = await generateText({
+          // Reasoning is mandatory for Muse Spark and shares the output budget.
+          model: openrouter(OCR_MODEL, { reasoning: { effort: 'minimal' } }),
           output: Output.object({ schema: ocrResponseSchema }),
           system: `You are a data extraction assistant. Your main objective is to extract invoice data from a czech invoice document. Most likely the invoice is in CZK currency, but on the invoice it is often represented as Kč. The format we want for currency field is ISO 4217.`,
           messages: [
@@ -334,10 +338,26 @@ export const receivedInvoicesRouter = trpcContext.router({
           ],
           abortSignal: AbortSignal.timeout(OCR_REQUEST_TIMEOUT_MS),
           maxRetries: 0,
-          maxOutputTokens: 2048,
+          maxOutputTokens: OCR_MAX_OUTPUT_TOKENS,
           temperature: 0.2
         })
 
+        if (result.finishReason === 'length' || !result.text.trim()) {
+          console.error('Incomplete OCR response:', {
+            responseId: result.response.id,
+            finishReason: result.finishReason,
+            usage: result.usage
+          })
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message:
+              result.finishReason === 'length'
+                ? OCR_OUTPUT_LIMIT_MESSAGE
+                : 'The invoice model returned no extraction data. Please try again.'
+          })
+        }
+
+        const output = result.output
         return { ...output, currency: output.currency ?? 'CZK' }
       } catch (error) {
         console.error('OCR processing error:', error)
@@ -354,9 +374,14 @@ export const receivedInvoicesRouter = trpcContext.router({
         if (NoObjectGeneratedError.isInstance(error)) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
-            message: JSONParseError.isInstance(error.cause)
-              ? 'Failed to parse OCR results'
-              : 'OCR results did not match expected format'
+            message:
+              error.finishReason === 'length'
+                ? OCR_OUTPUT_LIMIT_MESSAGE
+                : !error.text?.trim()
+                  ? 'The invoice model returned no extraction data. Please try again.'
+                  : JSONParseError.isInstance(error.cause)
+                    ? 'Failed to parse OCR results'
+                    : 'OCR results did not match expected format'
           })
         }
         throw new TRPCError({
