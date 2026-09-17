@@ -58,67 +58,63 @@ const receivedInvoiceCreateSchema = createInsertSchema(receivedInvoiceTb)
     attachment_data: z.string().optional().nullable() // Base64 encoded image data
   })
 
-// Shared schema for structured extraction and response validation
+// Meta strict outputs require every property, including line-item fields.
+// Unknown values are represented by null instead of omitted properties.
 const ocrResponseSchema = z.object({
-  supplier_name: z.string().optional(),
-  supplier_street: z.string().optional().nullable(),
-  supplier_street2: z.string().optional().nullable(),
-  supplier_city: z.string().optional().nullable(),
-  supplier_zip: z.string().optional().nullable(),
-  supplier_country: z.string().optional().nullable(),
-  supplier_registration_no: z.string().optional().nullable(),
-  supplier_vat_no: z.string().optional().nullable(),
-  supplier_email: z.string().optional().nullable(),
-  supplier_phone: z.string().optional().nullable(),
-  invoice_number: z.string().optional(),
-  internal_number: z.string().optional().nullable(),
-  variable_symbol: z.string().optional().nullable(),
-  expense_category: z.string().optional().nullable(),
+  supplier_name: z.string().nullable(),
+  supplier_street: z.string().nullable(),
+  supplier_street2: z.string().nullable(),
+  supplier_city: z.string().nullable(),
+  supplier_zip: z.string().nullable(),
+  supplier_country: z.string().nullable(),
+  supplier_registration_no: z.string().nullable(),
+  supplier_vat_no: z.string().nullable(),
+  supplier_email: z.string().nullable(),
+  supplier_phone: z.string().nullable(),
+  invoice_number: z.string().nullable(),
+  internal_number: z.string().nullable(),
+  variable_symbol: z.string().nullable(),
+  expense_category: z.string().nullable(),
   issue_date: stringDateSchema,
-  taxable_supply_date: stringDateSchema.optional().nullable(),
+  taxable_supply_date: stringDateSchema.nullable(),
   due_date: stringDateSchema,
-  receipt_date: stringDateSchema.optional().nullable(),
-  payment_date: stringDateSchema.optional().nullable(),
-  total_without_vat: z.number().optional().nullable(),
-  total_with_vat: z.number().optional(),
-  currency: z
-    .string()
-    .optional()
-    .describe('ISO 4217 currency code')
-    .default('CZK'),
-  exchange_rate: z.number().optional().nullable(),
-  vat_base_21: z.number().optional().nullable(),
-  vat_21: z.number().optional().nullable(),
-  vat_base_15: z.number().optional().nullable(),
-  vat_15: z.number().optional().nullable(),
-  vat_base_10: z.number().optional().nullable(),
-  vat_10: z.number().optional().nullable(),
-  vat_base_0: z.number().optional().nullable(),
-  reverse_charge: z.boolean().optional().nullable(),
-  vat_regime: z.string().optional().nullable(),
+  receipt_date: stringDateSchema.nullable(),
+  payment_date: stringDateSchema.nullable(),
+  total_without_vat: z.number().nullable(),
+  total_with_vat: z.number().nullable(),
+  currency: z.string().nullable().describe('ISO 4217 currency code'),
+  exchange_rate: z.number().nullable(),
+  vat_base_21: z.number().nullable(),
+  vat_21: z.number().nullable(),
+  vat_base_15: z.number().nullable(),
+  vat_15: z.number().nullable(),
+  vat_base_10: z.number().nullable(),
+  vat_10: z.number().nullable(),
+  vat_base_0: z.number().nullable(),
+  reverse_charge: z.boolean().nullable(),
+  vat_regime: z.string().nullable(),
   payment_method: z
     .enum(['bank', 'cash', 'card', 'cod', 'crypto', 'other'])
-    .optional(),
-  bank_account: z.string().optional().nullable(),
-  iban: z.string().optional().nullable(),
-  swift_bic: z.string().optional().nullable(),
+    .nullable(),
+  bank_account: z.string().nullable(),
+  iban: z.string().nullable(),
+  swift_bic: z.string().nullable(),
   items: z
     .array(
       z.object({
-        description: z.string().optional().nullable(),
-        quantity: z.number().optional().nullable(),
-        unit_price: z.number().optional().nullable(),
-        unit: z.string().optional().nullable(),
-        vat_rate: z.number().optional().nullable(),
-        total_without_vat: z.number().optional().nullable(),
-        total_with_vat: z.number().optional().nullable(),
-        accounting_code: z.string().optional().nullable()
+        description: z.string().nullable(),
+        quantity: z.number().nullable(),
+        unit_price: z.number().nullable(),
+        unit: z.string().nullable(),
+        vat_rate: z.number().nullable(),
+        total_without_vat: z.number().nullable(),
+        total_with_vat: z.number().nullable(),
+        accounting_code: z.string().nullable()
       })
     )
-    .optional()
     .nullable(),
-  status: z.enum(['received', 'verified', 'disputed', 'paid']).optional(),
-  line_items_summary: z.string().optional().nullable()
+  status: z.enum(['received', 'verified', 'disputed', 'paid']).nullable(),
+  line_items_summary: z.string().nullable()
 })
 
 const OCR_MODEL = 'meta/muse-spark-1.3-contributor'
@@ -126,7 +122,7 @@ const OCR_REQUEST_TIMEOUT_MS = 45_000
 
 const extractionPrompt = `Extract invoice data from this invoice document.
 Return ONLY a JSON object.
-If you cannot extract a nullable field, use null. Omit other optional fields when unknown.
+Include every field. If you cannot extract a nullable field, use null.
 For dates, use the format YYYY-MM-DD. Use issue_date for taxable_supply_date if not specified otherwise.
 Keep line_items_summary to at most 90 characters.
 If the document is a credit note (dobropis), make all taxable amounts, VAT amounts, and totals negative.
@@ -342,7 +338,7 @@ export const receivedInvoicesRouter = trpcContext.router({
           temperature: 0.2
         })
 
-        return output
+        return { ...output, currency: output.currency ?? 'CZK' }
       } catch (error) {
         console.error('OCR processing error:', error)
         if (error instanceof TRPCError) {

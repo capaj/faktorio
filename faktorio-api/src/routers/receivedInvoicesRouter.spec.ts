@@ -7,7 +7,40 @@ const extractedInvoice = {
   issue_date: '2026-03-01',
   due_date: '2026-03-15',
   total_with_vat: 1210,
-  currency: 'CZK'
+  currency: 'CZK',
+  supplier_street: null,
+  supplier_street2: null,
+  supplier_city: null,
+  supplier_zip: null,
+  supplier_country: null,
+  supplier_registration_no: null,
+  supplier_vat_no: null,
+  supplier_email: null,
+  supplier_phone: null,
+  internal_number: null,
+  variable_symbol: null,
+  expense_category: null,
+  taxable_supply_date: null,
+  receipt_date: null,
+  payment_date: null,
+  total_without_vat: null,
+  exchange_rate: null,
+  vat_base_21: null,
+  vat_21: null,
+  vat_base_15: null,
+  vat_15: null,
+  vat_base_10: null,
+  vat_10: null,
+  vat_base_0: null,
+  reverse_charge: null,
+  vat_regime: null,
+  payment_method: null,
+  bank_account: null,
+  iban: null,
+  swift_bic: null,
+  items: null,
+  status: null,
+  line_items_summary: null
 }
 
 function createCaller(apiKey = 'test-openrouter-key') {
@@ -71,6 +104,21 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
     const body = JSON.parse(init?.body as string)
     expect(body.model).toBe('meta/muse-spark-1.3-contributor')
     expect(body.response_format.type).toBe('json_schema')
+    expect(body.response_format.json_schema.strict).toBe(true)
+    const schema = body.response_format.json_schema.schema
+    function expectStrictObjects(node: any) {
+      if (!node || typeof node !== 'object') return
+      if (node.type === 'object') {
+        expect([...node.required].sort()).toEqual(
+          Object.keys(node.properties).sort()
+        )
+        expect(node.additionalProperties).toBe(false)
+      }
+      for (const value of Object.values(node)) expectStrictObjects(value)
+    }
+    expectStrictObjects(schema)
+    expect(schema.required).toContain('bank_account')
+
     expect(
       body.response_format.json_schema.schema.properties.issue_date
     ).toBeTruthy()
@@ -151,10 +199,43 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
     ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR', message })
   })
 
+  it('rejects omitted fields in strict output', async () => {
+    fetchMock.mockResolvedValue(
+      completion(
+        JSON.stringify({ ...extractedInvoice, bank_account: undefined })
+      )
+    )
+    await expect(
+      createCaller().extractInvoiceData(imageInput)
+    ).rejects.toMatchObject({
+      message: 'OCR results did not match expected format'
+    })
+  })
+
+  it('validates nullable fields inside invoice line items', async () => {
+    const invoice = {
+      ...extractedInvoice,
+      items: [
+        {
+          description: 'Service',
+          quantity: 1,
+          unit_price: 1000,
+          unit: null,
+          vat_rate: 21,
+          total_without_vat: 1000,
+          total_with_vat: 1210,
+          accounting_code: null
+        }
+      ]
+    }
+    fetchMock.mockResolvedValue(completion(JSON.stringify(invoice)))
+    expect(await createCaller().extractInvoiceData(imageInput)).toEqual(invoice)
+  })
+
   it('preserves nullable fields, credit note amounts, and the default currency', async () => {
     const invoice = {
       ...extractedInvoice,
-      currency: undefined,
+      currency: null,
       total_with_vat: -1210,
       supplier_city: null,
       items: null
