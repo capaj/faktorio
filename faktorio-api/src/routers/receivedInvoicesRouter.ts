@@ -119,7 +119,7 @@ const ocrResponseSchema = z.object({
 
 const OCR_MODEL = 'meta/muse-spark-1.3-contributor'
 const OCR_REQUEST_TIMEOUT_MS = 45_000
-const OCR_MAX_OUTPUT_TOKENS = 8192
+const OCR_MAX_OUTPUT_TOKENS = 16_384
 const OCR_OUTPUT_LIMIT_MESSAGE =
   'Invoice extraction reached the output token limit before completing. Try processing fewer pages at a time.'
 

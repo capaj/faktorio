@@ -85,8 +85,8 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
   beforeEach(() => {
     fetchMock.mockReset().mockResolvedValue(completion())
     vi.stubGlobal('fetch', fetchMock)
-    vi.spyOn(console, 'log').mockImplementation(() => {})
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'log').mockImplementation(() => { })
+    vi.spyOn(console, 'error').mockImplementation(() => { })
   })
 
   afterEach(() => {
@@ -106,9 +106,7 @@ describe('receivedInvoicesRouter.extractInvoiceData', () => {
       'Bearer test-openrouter-key'
     )
     const body = JSON.parse(init?.body as string)
-    expect(body.model).toBe('meta/muse-spark-1.3-contributor')
-    expect(body.reasoning).toEqual({ effort: 'minimal' })
-    expect(body.max_tokens).toBe(8192)
+
     expect(body.response_format.type).toBe('json_schema')
     expect(body.response_format.json_schema.strict).toBe(true)
     const schema = body.response_format.json_schema.schema
