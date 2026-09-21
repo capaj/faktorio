@@ -1,8 +1,31 @@
 import { expect, test } from './fixtures'
+import { mkdir } from 'node:fs/promises'
+import { resolve } from 'node:path'
 
 test('invoice email composer uses the contact language, preserves edits and sends reminders', async ({
   page
-}) => {
+}, testInfo) => {
+  const captureComposer = async (filename: string) => {
+    if (!testInfo.project.metadata.documentationScreenshots) return
+    const directory = resolve('docs/screenshots')
+    await mkdir(directory, { recursive: true })
+    await page.evaluate(() => document.fonts.ready)
+    // Expand only for documentation so the complete draft is visible.
+    const textarea = page
+      .getByRole('dialog')
+      .getByLabel('Zpráva', { exact: true })
+    await textarea.evaluate((element) => {
+      if (element.scrollHeight > element.clientHeight) {
+        element.style.height = `${element.scrollHeight + 24}px`
+      }
+    })
+    await page.getByRole('dialog').getByRole('heading').click()
+    await page.getByRole('dialog').screenshot({
+      path: resolve(directory, filename),
+      animations: 'disabled',
+      caret: 'hide'
+    })
+  }
   await page.addInitScript(() => {
     localStorage.setItem('auth_token', 'email-composer-test-token')
     localStorage.setItem(
@@ -113,6 +136,7 @@ test('invoice email composer uses the contact language, preserves edits and send
   await expect(dialog.getByLabel('Příjemce')).toHaveValue('client@example.com')
   await language.selectOption('cs')
   await expect(subject).toHaveValue('Faktura 2026-123')
+  await captureComposer('invoice-email-cs.png')
   await body.fill('Vlastní zpráva')
   page.once('dialog', (confirmation) => confirmation.dismiss())
   await language.selectOption('en')
@@ -155,6 +179,7 @@ test('invoice email composer uses the contact language, preserves edits and send
     .click()
   await expect(subject).toHaveValue('Payment reminder – invoice 2026-123')
   await expect(body).toHaveValue(/remains unpaid/)
+  await captureComposer('invoice-reminder-en.png')
   await dialog
     .getByRole('button', { name: 'Odeslat e-mail', exact: true })
     .click()

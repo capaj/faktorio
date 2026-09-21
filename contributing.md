@@ -18,6 +18,10 @@ Emails use the Cloudflare `SEND_EMAIL` Worker binding. `wrangler dev` simulates 
 5. run migrations
 6. `pnpm dev`
 
+## UI documentation
+
+See [app screenshots](docs/screenshots/README.md) for examples of the current interface, starting with invoice and reminder emails. Run `pnpm docs:screenshots` to refresh these captures with sample data. When documenting another screen, add its screenshot and reproduction instructions there.
+
 ## Database
 
 use turso cloud for database to develop locally. You can also use local sqlite database, but it's not recommended as some features are not supported for local database.
