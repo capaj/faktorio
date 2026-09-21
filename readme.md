@@ -67,7 +67,7 @@ are all listed in [roadmap.md](roadmap.md)
 - Drizzle ORM
 - Turso(sqlite)
 - Cloudflare workers
-- Google gemini for AI
+- Muse models over OpenRouter for AI data extraction
 
 ## Self-hosting
 
