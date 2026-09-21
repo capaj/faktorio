@@ -9,7 +9,6 @@ import jwt from '@tsndr/cloudflare-worker-jwt'
 import { createId } from '@paralleldrive/cuid2'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { verifyPassword, hashPassword } from '../lib/crypto'
-import { sendEmail } from '../sendEmail'
 
 // We'll define a simple user schema here since we can't find the imported one
 const userSchema = z.object({

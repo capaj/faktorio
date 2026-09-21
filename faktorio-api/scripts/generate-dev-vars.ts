@@ -15,8 +15,6 @@ const envVarsToInclude: string[] = [
   'TURSO_DATABASE_URL',
   'TURSO_AUTH_TOKEN',
   'JWT_SECRET',
-  'MAILJET_API_KEY',
-  'MAILJET_API_SECRET',
   'OPENROUTER_API_KEY'
 ]
 

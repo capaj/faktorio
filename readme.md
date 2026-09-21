@@ -77,12 +77,16 @@ You will need accounts/keys for these services before deploying your own instanc
 - [Cloudflare Pages](https://developers.cloudflare.com/pages/) (or another static host) for the `faktorio-fe` Vite build
 - [Turso / libSQL](https://turso.tech/) for the primary database
 - [Google Gemini API](https://aistudio.google.com/api-keys) for invoice extraction and AI features
-- [Mailjet](https://www.mailjet.com/) for transactional emails (password reset, notifications)
+- [Cloudflare Email Service](https://developers.cloudflare.com/email-service/get-started/send-emails/) for password-reset emails through the `SEND_EMAIL` Worker binding
 - [Google Cloud OAuth Client](https://console.cloud.google.com/apis/credentials) to obtain `VITE_GOOGLE_CLIENT_ID` for Google sign-in
 - Web Push VAPID keys (generate locally with `pnpm --filter faktorio-api tsx scripts/generate-vapid-keys.ts`; no external service required)
 
 Environment configuration:
 
-- API Worker (`faktorio-api`): `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `JWT_SECRET`, `OPENROUTER_API_KEY`, `MAILJET_API_KEY`, `MAILJET_API_SECRET`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
+- API Worker (`faktorio-api`): `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `JWT_SECRET`, `OPENROUTER_API_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`; `SEND_EMAIL` is a Worker binding configured in `wrangler.toml`, not an environment secret
 - Public API Worker (`faktorio-public-api`): `TURSO_DATABASE_URL` and optionally `TURSO_AUTH_TOKEN` for Turso access
 - Frontend (`faktorio-fe`): `VITE_API_URL` (points to `faktorio-api` `/trpc`), `VITE_PUBLIC_API_URL` (points to `faktorio-public-api`), `VITE_GOOGLE_CLIENT_ID`, `VITE_VAPID_PUBLIC_KEY`
+
+Before deploying email sending, onboard `faktorio.cz` in Cloudflare's **Compute > Email Service > Email Sending** dashboard and wait for its DNS authentication records to be verified. The domain must use Cloudflare DNS and belong to the account hosting the Worker. Email Sending must be enabled for transactional delivery to users; Email Routing alone is not sufficient. The sender is `Faktorio <no-reply@faktorio.cz>`. Self-hosters must update both the sender in `faktorio-api/src/sendEmail.ts` and `allowed_sender_addresses` in `faktorio-api/wrangler.toml` to their onboarded domain.
+
+Local `wrangler dev` (including `--env e2e`) simulates delivery without sending real mail. After onboarding and deploying, verify a password reset reaches a controlled mailbox and its link works before closing issue #66. Once the migration is verified, revoke the old Mailjet credentials and remove `MAILJET_API_KEY` / `MAILJET_API_SECRET` from GitHub Actions secrets, Worker secrets, and any local `.dev.vars` files; they are no longer used. No replacement email API secret is required.

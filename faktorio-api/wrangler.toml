@@ -3,6 +3,12 @@ main = "src/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+# Onboard faktorio.cz in Cloudflare Email Service > Email Sending before deploy.
+# Local development simulates delivery (no remote binding).
+[[send_email]]
+name = "SEND_EMAIL"
+allowed_sender_addresses = ["no-reply@faktorio.cz"]
+
 # Cron trigger for checking due invoices daily at 14:00 Prague time (12:00 UTC)
 [triggers]
 crons = ["0 12 * * *"]
@@ -11,8 +17,12 @@ crons = ["0 12 * * *"]
 enabled = true
 
 # E2E environment: uses .dev.vars.e2e via `wrangler dev --env e2e`.
-# Inherits all top-level config; only exists so `--env e2e` is valid.
+# Email bindings are not inherited, so repeat the local binding here.
 [env.e2e]
+
+[[env.e2e.send_email]]
+name = "SEND_EMAIL"
+allowed_sender_addresses = ["no-reply@faktorio.cz"]
 
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.

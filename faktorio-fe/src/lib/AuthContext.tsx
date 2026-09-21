@@ -174,8 +174,6 @@ function parseEnvVars(): {
   VAPID_PRIVATE_KEY: string
   VAPID_PUBLIC_KEY: string
   VAPID_SUBJECT: string
-  MAILJET_API_KEY: string
-  MAILJET_API_SECRET: string
 } {
   const envVarsString = localStorage.getItem('local_env_vars')
   const envVars: Record<string, string> = {}
@@ -202,9 +200,7 @@ function parseEnvVars(): {
     OPENROUTER_API_KEY: '',
     VAPID_PRIVATE_KEY: '',
     VAPID_PUBLIC_KEY: '',
-    VAPID_SUBJECT: 'mailto:admin@example.com',
-    MAILJET_API_KEY: '',
-    MAILJET_API_SECRET: ''
+    VAPID_SUBJECT: 'mailto:admin@example.com'
   }
 
   return {
@@ -216,10 +212,7 @@ function parseEnvVars(): {
       envVars.OPENROUTER_API_KEY || defaults.OPENROUTER_API_KEY,
     VAPID_PRIVATE_KEY: envVars.VAPID_PRIVATE_KEY || defaults.VAPID_PRIVATE_KEY,
     VAPID_PUBLIC_KEY: envVars.VAPID_PUBLIC_KEY || defaults.VAPID_PUBLIC_KEY,
-    VAPID_SUBJECT: envVars.VAPID_SUBJECT || defaults.VAPID_SUBJECT,
-    MAILJET_API_KEY: envVars.MAILJET_API_KEY || defaults.MAILJET_API_KEY,
-    MAILJET_API_SECRET:
-      envVars.MAILJET_API_SECRET || defaults.MAILJET_API_SECRET
+    VAPID_SUBJECT: envVars.VAPID_SUBJECT || defaults.VAPID_SUBJECT
   }
 }
 

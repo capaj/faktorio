@@ -7,15 +7,14 @@
 - Optionally
   - turso DB on your turso cloud account
   - google client ID for google login
-  - mailjet API key for sending emails
 
 You need to have turso DB setup. You only need google client ID for google login.
-Mailjet you only need if you want to send emails.
+Emails use the Cloudflare `SEND_EMAIL` Worker binding. `wrangler dev` simulates delivery locally, logging messages and saving their content for inspection; no email API keys are needed. Browser-only local mode does not send emails.
 
 1. `pnpm i`
 2. `cd faktorio-fe && cp .env.example .env`
 3. `cd faktorio-api && cp .dev.vars.example .dev.vars`
-4. fill in missing env vars in both files, keep empty those you don't want to use(mailjet, google client ID)
+4. fill in missing env vars in both files, keep the Google client ID empty if you don't want Google login
 5. run migrations
 6. `pnpm dev`
 
