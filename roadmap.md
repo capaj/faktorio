@@ -9,7 +9,6 @@
 - integrate with Fio bank API to be able to mark invoices as paid when you receive money
 - track changes to invoices on every edit in the UI
 - onboarding with recurring invoices question
-- allow to send invoice as email
 - be able to share invoice link
 - be able to export as excel
 - ability to create an organization and add users to it. Users can see all the invoices for the organization.

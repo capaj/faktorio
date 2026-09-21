@@ -12,6 +12,7 @@ export const envSchema = z.object({
   OPENROUTER_API_KEY: z.string().min(1),
   // Supplied by Wrangler, not process.env; absent in browser-only local mode.
   SEND_EMAIL: z.custom<SendEmail>().optional(),
+  PUBLIC_APP_URL: z.url().optional(),
   VAPID_PUBLIC_KEY: z.string().min(1),
   VAPID_PRIVATE_KEY: z.string().min(1),
   VAPID_SUBJECT: z.string().min(1),

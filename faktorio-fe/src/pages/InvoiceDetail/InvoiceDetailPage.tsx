@@ -2,6 +2,7 @@ import { PDFDownloadLink } from '@react-pdf/renderer'
 
 import { CzechInvoicePDF } from './CzechInvoicePDF'
 import { InvoicePdfPreview } from './InvoicePdfPreview'
+import { InvoiceEmailControls } from './InvoiceEmailControls'
 import { Button } from '@/components/ui/button'
 import { snakeCase } from 'lodash-es'
 import { useLocation, useParams, useSearchParams } from 'wouter'
@@ -272,6 +273,12 @@ export const InvoiceDetail = ({
             </div>
           </div>
         </div>
+
+        {!isLocalUser && (
+          <div className="rounded-lg border bg-background p-5 shadow-sm">
+            <InvoiceEmailControls key={invoice.id} invoice={invoice} />
+          </div>
+        )}
 
         <div
           data-testid="invoice-pdf-preview"
