@@ -28,6 +28,7 @@ allowed_sender_addresses = ["no-reply@faktorio.cz"]
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
 [vars]
+PUBLIC_APP_URL = "https://faktorio.cz"
 INVOICE_LOGO_PUBLIC_BASE_URL = "https://uploads.faktorio.cz"
 
 

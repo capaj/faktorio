@@ -27,6 +27,7 @@ import { invoiceItemFormSchema } from '../../zodDbSchemas'
 import { getInvoiceSums } from './getInvoiceSums'
 import { getCNBExchangeRate } from './getCNBExchangeRate'
 import { invoiceShareEventTb, invoiceShareTb } from 'faktorio-db/schema'
+import { getEmailDraft, sendInvoiceEmail } from './invoiceEmail'
 
 const invoiceSchema = getInvoiceCreateSchema(djs().format('YYYYMMDD') + '001')
 
@@ -54,6 +55,8 @@ const updateInvoiceInput = z.object({
 })
 
 export const invoiceRouter = trpcContext.router({
+  getEmailDraft,
+  sendEmail: sendInvoiceEmail,
   createShare: protectedProc
     .input(
       z.object({

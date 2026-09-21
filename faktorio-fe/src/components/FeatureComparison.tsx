@@ -61,7 +61,7 @@ const features = [
   },
   {
     name: 'Odesílání faktur emailem z aplikace',
-    faktorio: false,
+    faktorio: true,
     fakturovac: true,
     fakturoid: true,
     idoklad: true,

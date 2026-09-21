@@ -5,6 +5,7 @@ import superjson from 'superjson'
 
 import { UserSelectType } from 'faktorio-db/schema'
 import { Env } from './envSchema'
+import type { EmailData } from './sendEmail'
 
 // JWT secret should be the same as in authRouter
 
@@ -15,11 +16,7 @@ export type TrpcContext = {
   user: UserSelectType | undefined
   req: Request
   generateToken: (user: UserSelectType) => Promise<string>
-  sendEmail: (email: {
-    to: { email: string; name: string }
-    subject: string
-    html: string
-  }) => Promise<void>
+  sendEmail: (email: EmailData) => Promise<void>
 }
 // @ts-ignore
 const isBrowser = typeof window !== 'undefined'

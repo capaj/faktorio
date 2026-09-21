@@ -35,7 +35,8 @@
     "bump": "turbo bump && npm-check-updates -u && pnpm i",
     "typecheck": "turbo tsc",
     "test": "turbo test",
-    "test:e2e": "pnpm exec playwright test --max-failures=1"
+    "test:e2e": "pnpm exec playwright test --max-failures=1",
+    "docs:screenshots": "playwright test --config playwright.docs.config.ts"
   },
   "resolutions": {
     "@react-pdf/image": "3.0.4"

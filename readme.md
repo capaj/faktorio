@@ -35,7 +35,7 @@ Frontend env:
 | Support for foreign currencies                            |     ✅      |      ❌       |      ✅      |     ✅     |
 | Export invoices to Excel, CSV, ISDOC                      |     ✅      |      ✅       |      ✅      |     ✅     |
 | Export invoices to XML for tax authorities                |     ✅      |      ✅       |      ✅      |     ✅     |
-| Send invoices to an email from the app                    |     ❌      |      ✅       |      ✅      |     ✅     |
+| Send invoices to an email from the app                    |     ✅      |      ✅       |      ✅      |     ✅     |
 | API for integrations                                      |     ✅      |      ❌       |      ✅      |     ✅     |
 | Push notifications in web app                             |     ✅      |      ❌       |      ❌      |     ❌     |
 | Mobile app                                                |     ❌      |      ❌       |      ✅      |     ✅     |
@@ -67,7 +67,7 @@ are all listed in [roadmap.md](roadmap.md)
 - Drizzle ORM
 - Turso(sqlite)
 - Cloudflare workers
-- Google gemini for AI
+- Muse models over OpenRouter for AI data extraction
 
 ## Self-hosting
 
@@ -80,6 +80,10 @@ You will need accounts/keys for these services before deploying your own instanc
 - [Cloudflare Email Service](https://developers.cloudflare.com/email-service/get-started/send-emails/) for password-reset emails through the `SEND_EMAIL` Worker binding
 - [Google Cloud OAuth Client](https://console.cloud.google.com/apis/credentials) to obtain `VITE_GOOGLE_CLIENT_ID` for Google sign-in
 - Web Push VAPID keys (generate locally with `pnpm --filter faktorio-api tsx scripts/generate-vapid-keys.ts`; no external service required)
+
+Invoice details include an email composer for invoices and payment reminders. It defaults to the contact's Czech/English language, allows editing the recipient, subject and body, and lets you change the language for one email without changing the contact or invoice. Emails contain a revocable public invoice link with PDF download, and replies go to the issuer's invoicing email (falling back to their account email). Successful sends update the invoice's sent/reminder date. This feature requires a hosted account, not browser-only local mode.
+
+Set the API Worker's `PUBLIC_APP_URL` to the frontend origin used in email links (defaults to `https://faktorio.cz`; use `http://localhost:5173` locally). Do not use the API Worker URL here.
 
 Environment configuration:
 
