@@ -9,15 +9,15 @@
   ],
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.2",
     "npm-check-updates": "^23.1.0",
     "oxlint": "^1.83.0",
-    "prettier": "^3.9.7",
-    "turbo": "^2.10.13",
+    "prettier": "^3.9.8",
+    "turbo": "^2.11.2",
     "typescript": "^7.0.2",
     "vitest": "^5.0.1"
   },
-  "packageManager": "pnpm@12.4.2",
+  "packageManager": "pnpm@12.5.1",
   "scripts": {
     "dev:fe": "cd faktorio-fe && pnpm dev",
     "dev:api": "cd faktorio-api && pnpm dev",

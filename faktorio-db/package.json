@@ -12,17 +12,17 @@
     "local-migrations-generate": "tsx ./scripts/update-fe-migrations.ts",
     "dup": "drizzle-kit up"
   },
-  "packageManager": "pnpm@12.4.2",
+  "packageManager": "pnpm@12.5.1",
   "dependencies": {
     "@libsql/client": "^0.18.0",
     "@paralleldrive/cuid2": "^2.2.2",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.1",
     "drizzle-orm": "^0.45.2",
     "faktorio-shared": "workspace:*"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.10",
     "sqld": "0.24.1-pre.42",
-    "tsx": "^4.23.13"
+    "tsx": "^4.23.15"
   }
 }
