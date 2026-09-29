@@ -78,6 +78,10 @@ minimumReleaseAgeExclude:
   - '@trpc/server@11.19.0'
   - prettier@3.9.7
   - tsx@4.23.15
+  - '@ai-sdk/gateway@4.0.100'
+  - '@ai-sdk/provider-utils@5.0.51'
+  - '@ai-sdk/provider@4.0.19'
+  - ai@7.0.122
 # Keep Drizzle's optional Cloudflare peer identical across workspace packages.
 overrides:
   '@cloudflare/workers-types': '^5.20260908.1'
