@@ -1,6 +1,5 @@
-import { Invoice } from '@/components/IssuedInvoiceTable' // Keep for reference, but use actual fields
 import { SubmitterData } from './generateKontrolniHlaseniXML'
-import { formatCzechDate, toInt } from './utils'
+import { formatCzechDate } from './utils'
 
 interface GenerateSouhrnneHlaseniParams {
   // Use a more accurate type reflecting the tRPC response structure

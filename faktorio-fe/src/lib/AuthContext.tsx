@@ -60,7 +60,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     localStorage.getItem('auth_token')
   )
   const [isLoaded, setIsLoaded] = useState(false)
-  const [location, navigate] = useLocation()
+  const [, navigate] = useLocation()
   const utils = trpcClient.useUtils()
   // Get TRPC mutations
   const loginMutation = trpcClient.auth.login.useMutation()
@@ -135,7 +135,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 
       utils.invalidate()
 
-      path && navigate('/')
+      if (path) navigate('/')
     },
     [logoutMutation]
   )
@@ -240,7 +240,7 @@ export const AuthProvider: React.FC<{
       return trpcClient.createClient({
         links: [
           createLocalCallerLink({
-            onMutation: (mutation) => {
+            onMutation: () => {
               saveDatabase()
             },
             router: appRouter,

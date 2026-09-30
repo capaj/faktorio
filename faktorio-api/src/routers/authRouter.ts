@@ -256,7 +256,7 @@ export const authRouter = trpcContext.router({
       try {
         const result = await jwt.verify(input.token, ctx.env.JWT_SECRET)
         return { valid: !!result }
-      } catch (error) {
+      } catch {
         return { valid: false }
       }
     }),

@@ -1,7 +1,7 @@
 import { z } from 'zod/v4'
 import { contactTb, invoicesTb } from 'faktorio-db/schema'
 import { trpcContext } from '../trpcContext'
-import { and, asc, count, desc, eq, like } from 'drizzle-orm'
+import { and, count, desc, eq, like } from 'drizzle-orm'
 import { contactCreateFormSchema } from './contactCreateFormSchema'
 import { protectedProc } from '../isAuthorizedMiddleware'
 import { contactInsertSchema } from '../zodDbSchemas'

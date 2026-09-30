@@ -5,7 +5,7 @@ import React, {
   useEffect,
   ReactNode
 } from 'react'
-import { getOpfsRoot, initSqlDb, saveDatabaseToOPFS } from './initSql'
+import { initSqlDb, saveDatabaseToOPFS } from './initSql'
 import type { Database } from 'sql.js'
 import { createId } from '@paralleldrive/cuid2'
 import { drizzle } from 'drizzle-orm/sql-js'

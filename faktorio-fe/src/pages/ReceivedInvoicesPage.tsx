@@ -241,7 +241,7 @@ export function ReceivedInvoicesPage() {
     ) {
       try {
         await deleteMutation.mutateAsync({ id })
-      } catch (error) {
+      } catch {
         // Error is handled by the onError callback in useMutation
       }
     }

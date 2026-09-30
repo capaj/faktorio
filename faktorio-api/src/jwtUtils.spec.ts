@@ -104,7 +104,7 @@ describe('JWT Utilities', () => {
       const token = await generateToken(mockUser, mockSecret)
 
       // Verify the token is valid and decode it
-      const isVerified = await jwt.verify(token, mockSecret)
+      expect(await jwt.verify(token, mockSecret)).toBeTruthy()
 
       // Decode and check contents
       const decoded = jwt.decode(token) as UserPayload

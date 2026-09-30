@@ -32,7 +32,7 @@ export const Header = () => {
   const { isSignedIn, user, logout } = useAuth()
   const { activeDbName } = useDb()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [location, navigate] = useLocation()
+  const [, navigate] = useLocation()
 
   // Check if this is a local user (from auth token in localStorage)
   const isLocalUser = localStorage.getItem('auth_token')?.startsWith('local_')

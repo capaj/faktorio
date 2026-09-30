@@ -29,6 +29,7 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
     ),
     due_in_days: z.coerce.number(),
     client_contact_id: z.string(),
+    language: z.string().optional(),
     exchange_rate: z.number().nullable().default(1),
     bank_account: z.string().nullish(),
     iban: z.string().nullish(),

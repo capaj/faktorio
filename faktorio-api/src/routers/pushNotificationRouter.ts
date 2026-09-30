@@ -62,7 +62,6 @@ export const pushNotificationRouter = trpcContext.router({
   }),
 
   checkDueInvoices: protectedProc.query(async ({ ctx }) => {
-    const today = djs().format('YYYY-MM-DD')
     const tomorrow = djs().add(1, 'day').format('YYYY-MM-DD')
 
     const dueInvoices = await ctx.db

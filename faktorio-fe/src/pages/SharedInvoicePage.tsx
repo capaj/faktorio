@@ -20,7 +20,7 @@ export function SharedInvoicePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<any | null>(null)
-  const [language, setLanguage] = useState<'cs' | 'en'>('cs')
+  const [selectedLanguage, setLanguage] = useState<'cs' | 'en' | null>(null)
   const sharedInvoiceEvent = trpcClient.sharedInvoiceEvent.useMutation()
 
   useEffect(() => {
@@ -43,8 +43,9 @@ export function SharedInvoicePage() {
     // log view is handled server-side on GET
   }, [])
 
-  const PdfComponent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
   const invoice = data?.invoice
+  const language = selectedLanguage ?? (invoice?.language === 'en' ? 'en' : 'cs')
+  const PdfComponent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
   const items = data?.items ?? []
   const invoiceTotal = items.reduce(
     (total: number, item: any) =>

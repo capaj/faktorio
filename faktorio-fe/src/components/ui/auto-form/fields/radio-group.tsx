@@ -5,7 +5,6 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import * as z from 'zod/v4'
 import AutoFormLabel from '../common/label'
 import AutoFormTooltip from '../common/tooltip'
 import { AutoFormInputComponentProps } from '../types'

@@ -2,16 +2,6 @@ import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { SubmitterData } from './generateKontrolniHlaseniXML'
 import { generateSouhrnneHlaseniXML } from './generateSouhrnneHlaseniXML'
 
-// Define a type for the test invoice structure matching tRPC result expectation
-type TestInvoice = {
-  id: string
-  invoice_number?: string | null
-  customer_name?: string | null
-  client_vat_no?: string | null
-  issue_date?: string | null
-  due_date?: string | null
-}
-
 describe('generateSouhrnneHlaseniXML', () => {
   beforeAll(() => {
     vi.useFakeTimers()

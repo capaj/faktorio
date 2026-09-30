@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { CheckCircle } from 'lucide-react'
 import { useState } from 'react' // Removed useEffect import, wasn't needed
 import { trpcClient } from '@/lib/trpcClient'
 // Removed unused djs import
@@ -43,18 +42,6 @@ export function MarkAsPaidDialog({
   })
 
   // Removed handleMarkAsPaid
-
-  const handleCloseDialog = (e?: React.MouseEvent) => {
-    // This can be handled by DialogClose or onOpenChange directly
-    // If specific logic is needed before closing, it can stay, otherwise remove.
-    // For now, let's rely on onOpenChange.
-    if (e) {
-      // Keep stopPropagation if needed for specific cases, but DialogClose might be better
-      e.preventDefault()
-      e.stopPropagation()
-    }
-    onOpenChange(false)
-  }
 
   // Removed handleOpenChange - now handled by parent via props
 

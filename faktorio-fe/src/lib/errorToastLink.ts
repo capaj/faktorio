@@ -55,27 +55,6 @@ export const errorToastLink: TRPCLink<AppRouter> = () => {
     return observable((observer) => {
       const unsubscribe = next(op).subscribe({
         error(err) {
-          let message
-          try {
-            const parsedError = JSON.parse(err.message)
-            if (Array.isArray(parsedError) && parsedError.length > 0) {
-              const customErrors = []
-              for (const error of parsedError) {
-                if (error['code'] === 'custom') {
-                  customErrors.push(error)
-                }
-              }
-
-              if (customErrors.length) {
-                message = customErrors[0].message
-              } else {
-                message = parsedError[0].message
-              }
-            }
-          } catch (e) {
-            // we do not need to handle the case where JSON parsing fails. err.message does not need to be JSON
-          }
-
           toast.error(
             err.name === 'TRPCClientError'
               ? err.message

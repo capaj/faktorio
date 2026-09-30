@@ -72,7 +72,9 @@ vi.mock('@/lib/useQRCodeBase64', () => ({
 
 import { SharedInvoicePage } from './SharedInvoicePage'
 import { CzechInvoicePDF } from './InvoiceDetail/CzechInvoicePDF'
+import { EnglishInvoicePDF } from './InvoiceDetail/EnglishInvoicePDF'
 import { InvoicePdfPreview } from './InvoiceDetail/InvoicePdfPreview'
+import { PDFDownloadLink } from '@react-pdf/renderer'
 
 const sharedInvoice = {
   invoice: {
@@ -113,7 +115,7 @@ describe('SharedInvoicePage QR payment preview', () => {
       .mockReturnValueOnce([false, vi.fn()])
       .mockReturnValueOnce([null, vi.fn()])
       .mockReturnValueOnce([sharedInvoice, vi.fn()])
-      .mockReturnValueOnce(['cs', vi.fn()])
+      .mockReturnValueOnce([null, vi.fn()])
   })
 
   it('passes a generated QR code to the PDF shown on the public share link', () => {
@@ -135,4 +137,35 @@ describe('SharedInvoicePage QR payment preview', () => {
     expect(pdfElement.type).toBe(CzechInvoicePDF)
     expect(pdfElement.props.qrCodeBase64).toMatch(/^data:image\/png;base64,/)
   })
+
+  it.each([
+    ['en', null, EnglishInvoicePDF, 'en'],
+    ['cs', null, CzechInvoicePDF, 'cs'],
+    ['en', 'cs', CzechInvoicePDF, 'cs'],
+    ['cs', 'en', EnglishInvoicePDF, 'en']
+  ])(
+    'uses invoice language %s with selection %s for preview and download',
+    (invoiceLanguage, selectedLanguage, expectedPdf, expectedLanguage) => {
+      reactMocks.useState.mockReset()
+      reactMocks.useState
+        .mockReturnValueOnce([false, vi.fn()])
+        .mockReturnValueOnce([null, vi.fn()])
+        .mockReturnValueOnce([
+          {
+            ...sharedInvoice,
+            invoice: { ...sharedInvoice.invoice, language: invoiceLanguage }
+          },
+          vi.fn()
+        ])
+        .mockReturnValueOnce([selectedLanguage, vi.fn()])
+
+      const page = SharedInvoicePage()
+      const preview = findElementByType(page, InvoicePdfPreview)
+      const download = findElementByType(page, PDFDownloadLink)
+
+      expect((preview?.props.document as ReactElement).type).toBe(expectedPdf)
+      expect((download?.props.document as ReactElement).type).toBe(expectedPdf)
+      expect(findElementByType(page, 'select')?.props.value).toBe(expectedLanguage)
+    }
+  )
 })

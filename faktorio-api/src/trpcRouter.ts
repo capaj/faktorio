@@ -10,7 +10,7 @@ import {
   userBankAccountsTb
 } from 'faktorio-db/schema'
 import { conflictUpdateSetAll } from './drizzle-utils/conflictUpdateSet'
-import { eq, desc, asc, and, notInArray } from 'drizzle-orm'
+import { eq, desc, and, notInArray } from 'drizzle-orm'
 
 import { receivedInvoicesRouter } from './routers/receivedInvoicesRouter'
 import { authRouter } from './routers/authRouter'
@@ -72,7 +72,7 @@ export const upsertInvoicingDetailsSchema = z
   })
 
 export const appRouter = trpcContext.router({
-  test: trpcContext.procedure.query(async ({ ctx }) => {
+  test: trpcContext.procedure.query(async () => {
     return 'test ' + new Date()
   }),
   auth: authRouter,
@@ -318,7 +318,6 @@ export const appRouter = trpcContext.router({
       const { shareId, type } = input
       const agent = ctx.req.headers.get('user-agent') ?? ''
       const ip = ctx.req.headers.get('cf-connecting-ip') ?? ''
-      const country = ctx.req.headers.get('cf-ipcountry') ?? ''
       const referer = ctx.req.headers.get('referer') ?? ''
       const path = ctx.req.url ?? ''
       await ctx.db.insert(invoiceShareEventTb).values({

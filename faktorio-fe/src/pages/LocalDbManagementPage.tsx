@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useLocation } from 'wouter'
 import {
   getTrackedDbFiles,
   createNewDatabase,
@@ -48,7 +47,6 @@ export function LocalDbManagementPage() {
   const [isImporting, setIsImporting] = useState(false)
   const [isDeactivating, setIsDeactivating] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [, navigate] = useLocation()
 
   // User form state
   const [userFullName, setUserFullName] = useState('')
@@ -146,7 +144,7 @@ export function LocalDbManagementPage() {
     }
 
     // Basic validation for filename characters (optional but good practice)
-    if (!/^[a-zA-Z0-9_\-]+$/.test(trimmedName)) {
+    if (!/^[a-zA-Z0-9_-]+$/.test(trimmedName)) {
       setError(
         'Název databáze může obsahovat pouze písmena, číslice, podtržítka a pomlčky.'
       )

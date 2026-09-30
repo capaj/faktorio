@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from 'react'
-import { Route, Switch, useLocation } from 'wouter'
+import { Route, Switch } from 'wouter'
 // Create Document Component
 import { LandingPage } from './pages/LandingPage'
 import { InvoiceListPage } from './pages/InvoiceList/InvoiceListPage'
@@ -36,10 +36,7 @@ interface BlogPost {
 function AppContent() {
   const { isLoaded } = useUser()
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
-  const [location] = useLocation()
-  const { token, isSignedIn } = useAuth()
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isSignedIn } = useAuth()
 
   // Initialize auto-update service
   useAutoUpdate()
@@ -49,10 +46,6 @@ function AppContent() {
       .then((res) => res.json())
       .then((data) => setBlogPosts(data))
   }, [])
-
-  useEffect(() => {
-    setIsMenuOpen(false)
-  }, [location])
 
   if (!isLoaded) {
     return <SpinnerContainer loading={true} />

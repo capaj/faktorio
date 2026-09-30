@@ -250,6 +250,7 @@ export const invoiceRouter = trpcContext.router({
           .insert(invoicesTb)
           .values({
             ...input.invoice,
+            language: input.invoice.language ?? client.language,
             due_on,
             taxable_fulfillment_due: input.invoice.taxable_fulfillment_due,
             issued_on: input.invoice.issued_on,

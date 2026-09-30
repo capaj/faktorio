@@ -1,5 +1,5 @@
-import { Suspense, useEffect } from 'react'
-import { Route, useParams } from 'wouter'
+import { Suspense } from 'react'
+import { Route } from 'wouter'
 // Create Document Component
 import { InvoiceDetailPage } from './pages/InvoiceDetail/InvoiceDetailPage'
 import { InvoiceListPage } from './pages/InvoiceList/InvoiceListPage'
@@ -14,9 +14,6 @@ import { useAuth } from './lib/AuthContext'
 import { XMLExportPage } from './pages/XMLExportPage/XMLExportPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { IsdocExportPage } from './pages/InvoiceDetail/IsdocExportPage'
-import { trpcClient } from './lib/trpcClient'
-import { generateIsdocXml } from './lib/isdoc/generateIsdocXml'
-import { snakeCase } from 'lodash-es'
 
 export const SignedInRoutes = () => {
   const { token } = useAuth()

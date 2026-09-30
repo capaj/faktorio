@@ -1,7 +1,6 @@
 import { toNestErrors, validateFieldsNatively } from '@hookform/resolvers'
 import {
   type FieldError,
-  type FieldErrors,
   type FieldValues,
   type Resolver,
   type ResolverError,
@@ -139,7 +138,9 @@ export function zodResolver<Input extends FieldValues, Context, Output>(
         resolverOptions.mode === 'sync' ? 'parse' : 'parseAsync'
       ](values, schemaOptions)
 
-      options.shouldUseNativeValidation && validateFieldsNatively({}, options)
+      if (options.shouldUseNativeValidation) {
+        validateFieldsNatively({}, options)
+      }
 
       const resolverResult: ResolverSuccess<Output | Input> = {
         errors: {} as ResolverSuccess<Output | Input>['errors'],

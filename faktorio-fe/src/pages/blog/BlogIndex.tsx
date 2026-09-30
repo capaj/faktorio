@@ -1,6 +1,5 @@
-import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useEffect, useState, useCallback } from 'react'
+import { useState } from 'react'
 import { Link } from 'wouter'
 
 interface BlogPost {

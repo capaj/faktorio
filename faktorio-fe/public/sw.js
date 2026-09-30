@@ -12,7 +12,7 @@ workbox.setConfig({
 workbox.precaching.precacheAndRoute(self.__WB_MANIFEST)
 
 // Enable automatic updates - skip waiting and claim clients immediately
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting()
 })
 

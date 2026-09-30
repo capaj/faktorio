@@ -1,5 +1,3 @@
-import { djs } from 'faktorio-shared/src/djs'
-
 // Czech public holidays
 const getCzechHolidays = (year: number): Date[] => {
   const holidays: Date[] = [
