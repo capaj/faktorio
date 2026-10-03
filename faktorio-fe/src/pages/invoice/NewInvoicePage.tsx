@@ -7,11 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button, ButtonWithLoader } from '@/components/ui/button'
 import { getInvoiceCreateSchema } from 'faktorio-api/src/routers/zodSchemas'
 import { djs } from 'faktorio-shared/src/djs'
-import {
-  useFieldArray,
-  useForm,
-  useFormContext
-} from 'react-hook-form'
+import { useFieldArray, useForm, useFormContext } from 'react-hook-form'
 import { z } from 'zod/v4'
 import {
   invoiceItemFormSchema,
@@ -115,7 +111,8 @@ const LocalizedNumberInput = ({
 export const NewInvoicePage = () => {
   const [searchParams] = useSearchParams()
   const duplicateFromInvoiceId = searchParams.get('duplicateFrom')
-  const [lastInvoice] = trpcClient.invoices.lastInvoiceThisYear.useSuspenseQuery()
+  const [lastInvoice] =
+    trpcClient.invoices.lastInvoiceThisYear.useSuspenseQuery()
   const invoiceToDuplicateQuery = trpcClient.invoices.getById.useQuery(
     { id: duplicateFromInvoiceId ?? '' },
     { enabled: !!duplicateFromInvoiceId }
@@ -311,7 +308,7 @@ export const NewInvoicePage = () => {
       ((item.quantity ?? 0) *
         (item.unit_price ?? 0) *
         (!invoicingDetails?.vat_payer ? 0 : (item.vat_rate ?? 0))) /
-      100,
+        100,
     0
   )
 
@@ -415,7 +412,10 @@ export const NewInvoicePage = () => {
                   invoiceData.taxable_fulfillment_due
                 ).format('YYYY-MM-DD')
               },
-              items: items
+              items: items.map((item) => ({
+                ...item,
+                vat_rate: invoicingDetails?.vat_payer ? item.vat_rate : 0
+              }))
             })
 
             navigate(`/invoices/${newInvoiceId}`)
@@ -661,8 +661,20 @@ const InvoiceItemForm = ({
   contacts: Contact[]
   selectedContactId?: string
 }) => {
-  const { setValue, control } = useFormContext()
+  const { setValue, control, watch } = useFormContext()
+  const vatRate = watch(`items.${index}.vat_rate`)
   const [showVatWarning, setShowVatWarning] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (vatPayer) {
+      return
+    }
+
+    setShowVatWarning(null)
+    if (vatRate !== 0) {
+      setValue(`items.${index}.vat_rate`, 0)
+    }
+  }, [index, setValue, vatPayer, vatRate])
 
   const handleConfirmZeroVat = () => {
     // User confirmed they want to use 0% VAT
@@ -817,7 +829,7 @@ const InvoiceItemForm = ({
       </div>
 
       <Dialog
-        open={showVatWarning === true}
+        open={!!vatPayer && showVatWarning === true}
         onOpenChange={(open) => {
           if (!open) {
             setShowVatWarning(null)
