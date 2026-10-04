@@ -44,6 +44,7 @@ jobs:
         run: pnpm exec playwright install chromium --with-deps
 
       - name: Run Playwright tests
+        timeout-minutes: 10
         run: pnpm test:e2e
         env:
           VITE_API_URL: http://localhost:9189/trpc
