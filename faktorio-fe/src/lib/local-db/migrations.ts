@@ -23,6 +23,7 @@ import migration0017_large_killer_shrike from 'faktorio-db/drizzle/0017_large_ki
 import migration0018_nice_the_fury from 'faktorio-db/drizzle/0018_nice_the_fury.sql?raw';
 import migration0019_nifty_pepper_potts from 'faktorio-db/drizzle/0019_nifty_pepper_potts.sql?raw';
 import migration0020_sweet_beast from 'faktorio-db/drizzle/0020_sweet_beast.sql?raw';
+import migration0021_tearful_vector from 'faktorio-db/drizzle/0021_tearful_vector.sql?raw';
 
 export const localDBMigrations: Record<string, string> = {
   migration0000_dry_rick_jones,
@@ -46,4 +47,5 @@ export const localDBMigrations: Record<string, string> = {
   migration0018_nice_the_fury,
   migration0019_nifty_pepper_potts,
   migration0020_sweet_beast,
+  migration0021_tearful_vector,
 };

@@ -1,8 +1,10 @@
 import { z } from 'zod/v4'
+import { TRPCError } from '@trpc/server'
 import {
   contactTb,
   invoiceItemsTb,
   invoicesTb,
+  invoiceTemplatesTb,
   userInvoicingDetailsTb,
   userBankAccountsTb
 } from 'faktorio-db/schema'
@@ -39,6 +41,38 @@ const createInvoiceInput = z.object({
       unit_price: z.coerce.number().optional(),
       vat_rate: z.coerce.number().optional()
     })
+  )
+})
+
+const invoiceTemplateDataSchema = z.object({
+  invoice: invoiceSchema
+    .omit({
+      client_contact_id: true,
+      number: true,
+      issued_on: true,
+      taxable_fulfillment_due: true,
+      exchange_rate: true
+    })
+    .extend({
+      client_contact_id: z.string().optional(),
+      language: z.string().optional()
+    }),
+  items: z.array(
+    invoiceItemFormSchema
+      .pick({
+        description: true,
+        quantity: true,
+        unit_price: true,
+        unit: true,
+        vat_rate: true,
+        order: true
+      })
+      .extend({
+        quantity: z.coerce.number().nullish(),
+        unit_price: z.coerce.number().nullish(),
+        vat_rate: z.coerce.number().nullish()
+      })
+      .partial({ order: true })
   )
 })
 
@@ -384,7 +418,7 @@ export const invoiceRouter = trpcContext.router({
       return invoicesForUser
     }),
 
-    /**
+  /**
    * used to get the last invoice number for the current year, to suggest the next invoice number when creating a new invoice
    */
   lastInvoiceThisYear: protectedProc.query(async ({ ctx }) => {
@@ -449,6 +483,77 @@ export const invoiceRouter = trpcContext.router({
         items
       }
     }),
+  listTemplates: protectedProc.query(async ({ ctx }) => {
+    const templates = await ctx.db
+      .select()
+      .from(invoiceTemplatesTb)
+      .where(eq(invoiceTemplatesTb.user_id, ctx.user.id))
+      .orderBy(desc(invoiceTemplatesTb.created_at))
+      .execute()
+
+    const parsedTemplates: {
+      id: string
+      user_id: string
+      name: string
+      created_at: string
+      updated_at: string | null
+      data: z.infer<typeof invoiceTemplateDataSchema>
+    }[] = []
+
+    for (const template of templates) {
+      const parsed = invoiceTemplateDataSchema.safeParse(template.data)
+      if (!parsed.success) {
+        console.warn('Skipping invalid invoice template', template.id)
+        continue
+      }
+
+      parsedTemplates.push({ ...template, data: parsed.data })
+    }
+
+    return parsedTemplates
+  }),
+  saveTemplateFromInvoice: protectedProc
+    .input(
+      z.object({
+        name: z.string().trim().min(1).max(200),
+        data: invoiceTemplateDataSchema
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const templateData = invoiceTemplateDataSchema.parse(input.data)
+
+      if (templateData.invoice.client_contact_id) {
+        const contact = await ctx.db.query.contactTb.findFirst({
+          where: and(
+            eq(contactTb.id, templateData.invoice.client_contact_id),
+            eq(contactTb.user_id, ctx.user.id)
+          ),
+          columns: { id: true }
+        })
+        if (!contact) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Contact not found'
+          })
+        }
+      }
+
+      const [template] = await ctx.db
+        .insert(invoiceTemplatesTb)
+        .values({
+          name: input.name,
+          user_id: ctx.user.id,
+          data: templateData
+        })
+        .onConflictDoUpdate({
+          target: [invoiceTemplatesTb.user_id, invoiceTemplatesTb.name],
+          set: { data: templateData, updated_at: sql`CURRENT_TIMESTAMP` }
+        })
+        .returning()
+        .execute()
+
+      return template
+    }),
   delete: protectedProc
     .input(
       z.object({
@@ -499,7 +604,10 @@ export const invoiceRouter = trpcContext.router({
           input.invoice.exchange_rate ?? 1
         )
         console.log('Update invoice - items count:', input.items.length)
-        console.log('Update invoice - items:', JSON.stringify(input.items, null, 2))
+        console.log(
+          'Update invoice - items:',
+          JSON.stringify(input.items, null, 2)
+        )
 
         // No need for additional conversion - client now sends a string in YYYY-MM-DD format
 
@@ -538,7 +646,14 @@ export const invoiceRouter = trpcContext.router({
           .insert(invoiceItemsTb)
           .values(
             input.items.map((item, index) => {
-              const { id, created_at: _created_at, updated_at: _updated_at, invoice_id: _invoice_id, order: _order, ...itemData } = item as any
+              const {
+                id,
+                created_at: _created_at,
+                updated_at: _updated_at,
+                invoice_id: _invoice_id,
+                order: _order,
+                ...itemData
+              } = item as any
               // For new items (no id or id === 0), omit the id to let SQLite auto-generate
               // For existing items, keep their id
               const itemToInsert: any = {

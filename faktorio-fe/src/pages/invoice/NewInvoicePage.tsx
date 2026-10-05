@@ -1,7 +1,13 @@
 import { trpcClient } from '@/lib/trpcClient'
 
 import { ContactComboBox } from './ContactComboBox'
-import { LucidePlus, LucideTrash2, LucideClock } from 'lucide-react'
+import {
+  LucidePlus,
+  LucideTrash2,
+  LucideClock,
+  Copy as CopyIcon,
+  Loader2
+} from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button, ButtonWithLoader } from '@/components/ui/button'
@@ -40,6 +46,9 @@ import { InvoiceTotals } from './InvoiceTotals'
 import { ButtonLink } from '@/components/ui/link'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 import { getMonthWorkingDays } from '@/lib/czechWorkingDays'
+import { RouterOutputs } from '@/lib/trpcClient'
+import { toast } from 'sonner'
+import { interpolateTemplatePlaceholders } from '@/lib/interpolateTemplatePlaceholders'
 
 const getDefaultInvoiceItem = ({
   isVatPayer,
@@ -108,6 +117,9 @@ const LocalizedNumberInput = ({
   )
 }
 
+type InvoiceTemplate = RouterOutputs['invoices']['listTemplates'][number]
+type Contact = RouterOutputs['contacts']['all'][number]
+
 export const NewInvoicePage = () => {
   const [searchParams] = useSearchParams()
   const duplicateFromInvoiceId = searchParams.get('duplicateFrom')
@@ -120,9 +132,19 @@ export const NewInvoicePage = () => {
   const invoiceToDuplicate = invoiceToDuplicateQuery.data
   const [contacts] = trpcClient.contacts.all.useSuspenseQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(
+    () => searchParams.get('fromTemplate') === 'true'
+  )
+  const fromTemplate = searchParams.get('fromTemplate') === 'true'
+  useEffect(() => {
+    if (fromTemplate) setIsTemplateDialogOpen(true)
+  }, [fromTemplate])
   const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
   const bankAccounts = (invoicingDetails?.bankAccounts ??
     []) as UserBankAccountSelectType[]
+  const templatesQuery = trpcClient.invoices.listTemplates.useQuery(undefined, {
+    enabled: isTemplateDialogOpen
+  })
 
   const invoiceOrdinal =
     parseInt(lastInvoice?.number?.split('-')[1] ?? '0', 10) + 1
@@ -281,22 +303,72 @@ export const NewInvoicePage = () => {
   const invoiceItems = form.watch('items')
   const currency = form.watch('currency')
   const taxableFulfillmentDue = form.watch('taxable_fulfillment_due')
-  const clientContactId = form.watch('client_contact_id')
 
   useExchangeRate({ currency, taxableFulfillmentDue, form })
 
-  useEffect(() => {
-    if (clientContactId && contacts) {
-      const selectedContact = contacts.find(
-        (contact) => contact.id === clientContactId
-      )
+  const applyTemplate = (template: InvoiceTemplate) => {
+    const templateInvoice = template.data.invoice
+    const templateItems = template.data.items ?? []
+    const defaultInvoiceItem = getDefaultInvoiceItem({
+      isVatPayer: invoicingDetails?.vat_payer,
+      currency: templateInvoice.currency
+    })
 
-      if (selectedContact) {
-        form.setValue('language', selectedContact.language)
-        form.setValue('currency', selectedContact.currency)
-      }
+    const contactExists = templateInvoice.client_contact_id
+      ? contacts.some(
+          (contact) => contact.id === templateInvoice.client_contact_id
+        )
+      : false
+
+    const sourceItems: (InvoiceTemplate['data']['items'][number] & {
+      order?: number
+    })[] =
+      templateItems.length > 0
+        ? templateItems
+        : [{ ...defaultInvoiceItem, order: 0 }]
+
+    const mappedItems = sourceItems.map((item, index) => ({
+      description: interpolateTemplatePlaceholders(
+        item.description,
+        templateInvoice.language
+      ),
+      unit: item.unit ?? defaultInvoiceItem.unit,
+      quantity: item.quantity ?? defaultInvoiceItem.quantity,
+      unit_price: item.unit_price ?? defaultInvoiceItem.unit_price,
+      vat_rate: item.vat_rate ?? defaultInvoiceItem.vat_rate,
+      order: index
+    }))
+
+    form.reset(
+      {
+        ...form.getValues(),
+        ...templateInvoice,
+        number: form.getValues('number'),
+        footer_note: interpolateTemplatePlaceholders(
+          templateInvoice.footer_note,
+          templateInvoice.language
+        ),
+        bank_account: templateInvoice.bank_account ?? '',
+        iban: templateInvoice.iban ?? '',
+        swift_bic: templateInvoice.swift_bic ?? '',
+        client_contact_id: contactExists
+          ? templateInvoice.client_contact_id
+          : undefined,
+        language: templateInvoice.language ?? form.getValues('language'),
+        items: mappedItems
+      },
+      { keepDefaultValues: true }
+    )
+
+    setSelectedBankAccountId('custom')
+    setIsTemplateDialogOpen(false)
+
+    if (templateInvoice.client_contact_id && !contactExists) {
+      toast.warning('Kontakt ze šablony nebyl nalezen, vyberte prosím jiný.')
+    } else {
+      toast.success('Šablona byla načtena')
     }
-  }, [clientContactId, contacts, form])
+  }
 
   const total = invoiceItems.reduce(
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
@@ -354,10 +426,79 @@ export const NewInvoicePage = () => {
     dueDate.month(),
     dueDate.year()
   )
+  const templates = templatesQuery.data ?? []
   return (
     <div>
-      <div className="mb-5 flex justify-between items-start">
-        <h2>Nová faktura</h2>
+      <Dialog
+        open={isTemplateDialogOpen}
+        onOpenChange={(open) => setIsTemplateDialogOpen(open)}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Načíst šablonu</DialogTitle>
+            <DialogDescription>
+              Vyberte uloženou šablonu pro předvyplnění nové faktury.
+            </DialogDescription>
+          </DialogHeader>
+
+          {templatesQuery.isLoading ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+            </div>
+          ) : templatesQuery.isError ? (
+            <div className="space-y-3">
+              <p role="alert" className="text-sm text-destructive">
+                Nepodařilo se načíst šablony.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => templatesQuery.refetch()}
+              >
+                Zkusit znovu
+              </Button>
+            </div>
+          ) : templates.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Zatím nemáte žádné uložené šablony. V detailu faktury klikněte na
+              „Uložit jako šablonu“ a zde ji pak můžete znovu použít.{' '}
+              <ButtonLink href="/invoices" variant="link">
+                Zobrazit faktury
+              </ButtonLink>
+            </p>
+          ) : (
+            <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+              {templates.map((template) => (
+                <div
+                  key={template.id}
+                  className="flex items-center justify-between rounded-md border px-3 py-2"
+                >
+                  <div className="space-y-1">
+                    <p className="font-medium">{template.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Vytvořeno {djs(template.created_at).format('D. M. YYYY')}
+                    </p>
+                  </div>
+                  <Button size="sm" onClick={() => applyTemplate(template)}>
+                    <CopyIcon className="mr-2 h-4 w-4" /> Použít
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="flex items-center gap-3">
+          <h2>Nová faktura</h2>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsTemplateDialogOpen(true)}
+          >
+            <CopyIcon className="mr-2 h-4 w-4" /> Načíst šablonu
+          </Button>
+        </div>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <LucideClock className="w-4 h-4" />
           <span>
@@ -445,7 +586,22 @@ export const NewInvoicePage = () => {
                       <FormControl>
                         <ContactComboBox
                           value={field.value ?? ''}
-                          onChange={field.onChange}
+                          onChange={(contactId) => {
+                            field.onChange(contactId)
+                            const selectedContact = contacts.find(
+                              (contact) => contact.id === contactId
+                            )
+                            if (selectedContact) {
+                              form.setValue(
+                                'language',
+                                selectedContact.language
+                              )
+                              form.setValue(
+                                'currency',
+                                selectedContact.currency
+                              )
+                            }
+                          }}
                           onBlur={field.onBlur}
                           disabled={field.disabled}
                         />
@@ -643,10 +799,6 @@ export const NewInvoicePage = () => {
     </div>
   )
 }
-
-import { RouterOutputs } from '@/lib/trpcClient'
-
-type Contact = RouterOutputs['contacts']['all'][number]
 
 const InvoiceItemForm = ({
   index,

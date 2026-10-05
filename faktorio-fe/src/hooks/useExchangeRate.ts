@@ -26,13 +26,14 @@ export const useExchangeRate = ({
       return
     }
 
+    let cancelled = false
     const fetchRate = async () => {
       try {
         const rate = await utils.invoices.getExchangeRate.fetch({
           currency: currency,
           date: djs(taxableFulfillmentDue).format('YYYY-MM-DD')
         })
-        if (rate !== null) {
+        if (!cancelled && rate !== null) {
           form.setValue('exchange_rate', rate)
         }
       } catch (error) {
@@ -40,5 +41,8 @@ export const useExchangeRate = ({
       }
     }
     fetchRate()
+    return () => {
+      cancelled = true
+    }
   }, [currency, taxableFulfillmentDue, form, utils.invoices.getExchangeRate])
 }
