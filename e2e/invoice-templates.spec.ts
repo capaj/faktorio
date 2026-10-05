@@ -307,3 +307,70 @@ test('requires another customer when the saved contact was deleted', async ({
     page.getByRole('button', { name: 'Vytvořit fakturu' })
   ).toBeEnabled()
 })
+
+test('ignores an old exchange rate response after switching templates', async ({
+  page
+}) => {
+  const state = await setup(page)
+  state.templates.push({
+    ...structuredClone(initialTemplate),
+    id: 'usd',
+    name: 'USD services',
+    data: {
+      ...initialTemplate.data,
+      invoice: { ...initialTemplate.data.invoice, currency: 'USD' }
+    }
+  })
+  let releaseEuroRate!: () => void
+  const euroRate = new Promise<void>((resolve) => {
+    releaseEuroRate = resolve
+  })
+  await page.route('**/trpc/invoices.getExchangeRate*', async (route) => {
+    const input = JSON.parse(
+      new URL(route.request().url()).searchParams.get('input')!
+    )['0'].json
+    if (input.currency === 'EUR') await euroRate
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify([
+        { result: { data: { json: input.currency === 'EUR' ? 24.5 : 22.5 } } }
+      ])
+    })
+  })
+  await page.goto(`${url}/new-invoice?fromTemplate=true`)
+  const euroRequest = page.waitForRequest(
+    (request) =>
+      request.url().includes('invoices.getExchangeRate') &&
+      request.url().includes('EUR')
+  )
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Použít', exact: true })
+    .first()
+    .click()
+  await euroRequest
+  await page
+    .getByRole('button', { name: 'Načíst šablonu', exact: true })
+    .click()
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Použít', exact: true })
+    .last()
+    .click()
+  await expect(page.getByLabel('Kurz', { exact: true })).toHaveValue('22.5')
+  const oldResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('invoices.getExchangeRate') &&
+      response.url().includes('EUR')
+  )
+  releaseEuroRate()
+  await oldResponse
+  // Wait for the completed response to reach the form before checking the value.
+  await page.getByLabel('Poznámka', { exact: true }).fill('USD invoice')
+  await page.getByRole('button', { name: 'Vytvořit fakturu' }).click()
+  await expect.poll(() => state.creates.length).toBe(1)
+  expect(state.creates[0].invoice).toMatchObject({
+    currency: 'USD',
+    exchange_rate: 22.5
+  })
+})
