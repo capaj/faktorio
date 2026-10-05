@@ -47,7 +47,6 @@ import { ButtonLink } from '@/components/ui/link'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 import { getMonthWorkingDays } from '@/lib/czechWorkingDays'
 import { RouterOutputs } from '@/lib/trpcClient'
-import { useSearchParams } from 'wouter'
 import { toast } from 'sonner'
 import { interpolateTemplatePlaceholders } from '@/lib/interpolateTemplatePlaceholders'
 
@@ -133,10 +132,13 @@ export const NewInvoicePage = () => {
   const invoiceToDuplicate = invoiceToDuplicateQuery.data
   const [contacts] = trpcClient.contacts.all.useSuspenseQuery()
   const [invoicingDetails] = trpcClient.invoicingDetails.useSuspenseQuery()
-  const [searchParams] = useSearchParams()
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(
     () => searchParams.get('fromTemplate') === 'true'
   )
+  const fromTemplate = searchParams.get('fromTemplate') === 'true'
+  useEffect(() => {
+    if (fromTemplate) setIsTemplateDialogOpen(true)
+  }, [fromTemplate])
   const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)
   const bankAccounts = (invoicingDetails?.bankAccounts ??
     []) as UserBankAccountSelectType[]
@@ -301,16 +303,21 @@ export const NewInvoicePage = () => {
   const invoiceItems = form.watch('items')
   const currency = form.watch('currency')
   const taxableFulfillmentDue = form.watch('taxable_fulfillment_due')
-  const clientContactId = form.watch('client_contact_id')
 
   useExchangeRate({ currency, taxableFulfillmentDue, form })
 
   const applyTemplate = (template: InvoiceTemplate) => {
     const templateInvoice = template.data.invoice
     const templateItems = template.data.items ?? []
+    const defaultInvoiceItem = getDefaultInvoiceItem({
+      isVatPayer: invoicingDetails?.vat_payer,
+      currency: templateInvoice.currency
+    })
 
     const contactExists = templateInvoice.client_contact_id
-      ? contacts.some((contact) => contact.id === templateInvoice.client_contact_id)
+      ? contacts.some(
+          (contact) => contact.id === templateInvoice.client_contact_id
+        )
       : false
 
     const sourceItems: (InvoiceTemplate['data']['items'][number] & {
@@ -321,12 +328,15 @@ export const NewInvoicePage = () => {
         : [{ ...defaultInvoiceItem, order: 0 }]
 
     const mappedItems = sourceItems.map((item, index) => ({
-      description: interpolateTemplatePlaceholders(item.description ?? ''),
+      description: interpolateTemplatePlaceholders(
+        item.description,
+        templateInvoice.language
+      ),
       unit: item.unit ?? defaultInvoiceItem.unit,
       quantity: item.quantity ?? defaultInvoiceItem.quantity,
       unit_price: item.unit_price ?? defaultInvoiceItem.unit_price,
       vat_rate: item.vat_rate ?? defaultInvoiceItem.vat_rate,
-      order: item.order ?? index
+      order: index
     }))
 
     form.reset(
@@ -334,6 +344,13 @@ export const NewInvoicePage = () => {
         ...form.getValues(),
         ...templateInvoice,
         number: form.getValues('number'),
+        footer_note: interpolateTemplatePlaceholders(
+          templateInvoice.footer_note,
+          templateInvoice.language
+        ),
+        bank_account: templateInvoice.bank_account ?? '',
+        iban: templateInvoice.iban ?? '',
+        swift_bic: templateInvoice.swift_bic ?? '',
         client_contact_id: contactExists
           ? templateInvoice.client_contact_id
           : undefined,
@@ -352,19 +369,6 @@ export const NewInvoicePage = () => {
       toast.success('Šablona byla načtena')
     }
   }
-
-  useEffect(() => {
-    if (clientContactId && contacts) {
-      const selectedContact = contacts.find(
-        (contact) => contact.id === clientContactId
-      )
-
-      if (selectedContact) {
-        form.setValue('language', selectedContact.language)
-        form.setValue('currency', selectedContact.currency)
-      }
-    }
-  }, [clientContactId, contacts, form])
 
   const total = invoiceItems.reduce(
     (acc, item) => acc + (item.quantity ?? 0) * (item.unit_price ?? 0),
@@ -441,10 +445,25 @@ export const NewInvoicePage = () => {
             <div className="flex items-center justify-center py-6">
               <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
             </div>
+          ) : templatesQuery.isError ? (
+            <div className="space-y-3">
+              <p role="alert" className="text-sm text-destructive">
+                Nepodařilo se načíst šablony.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => templatesQuery.refetch()}
+              >
+                Zkusit znovu
+              </Button>
+            </div>
           ) : templates.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Zatím nemáte žádné uložené šablony. Uložte libovolnou fakturu a
-              zde ji pak můžete znovu použít.
+              Zatím nemáte žádné uložené šablony. V detailu faktury klikněte na
+              „Uložit jako šablonu“ a zde ji pak můžete znovu použít.{' '}
+              <ButtonLink href="/invoices" variant="link">
+                Zobrazit faktury
+              </ButtonLink>
             </p>
           ) : (
             <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
@@ -567,7 +586,22 @@ export const NewInvoicePage = () => {
                       <FormControl>
                         <ContactComboBox
                           value={field.value ?? ''}
-                          onChange={field.onChange}
+                          onChange={(contactId) => {
+                            field.onChange(contactId)
+                            const selectedContact = contacts.find(
+                              (contact) => contact.id === contactId
+                            )
+                            if (selectedContact) {
+                              form.setValue(
+                                'language',
+                                selectedContact.language
+                              )
+                              form.setValue(
+                                'currency',
+                                selectedContact.currency
+                              )
+                            }
+                          }}
                           onBlur={field.onBlur}
                           disabled={field.disabled}
                         />

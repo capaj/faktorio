@@ -5,6 +5,7 @@ import { InvoicePdfPreview } from './InvoicePdfPreview'
 import { InvoiceEmailControls } from './InvoiceEmailControls'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { snakeCase } from 'lodash-es'
 import { useLocation, useParams, useSearchParams } from 'wouter'
 import { useEffect, useState } from 'react'
@@ -123,8 +124,12 @@ export const InvoiceDetail = ({
   const [_location, navigate] = useLocation()
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
   const [templateName, setTemplateName] = useState('')
+  const [templateDescriptions, setTemplateDescriptions] = useState<string[]>([])
+  const [templateFooterNote, setTemplateFooterNote] = useState('')
+  const utils = trpcClient.useUtils()
   const saveTemplate = trpcClient.invoices.saveTemplateFromInvoice.useMutation({
     onSuccess: () => {
+      void utils.invoices.listTemplates.invalidate()
       toast.success('Šablona byla uložena')
       setIsTemplateDialogOpen(false)
     },
@@ -133,7 +138,39 @@ export const InvoiceDetail = ({
 
   useEffect(() => {
     setTemplateName(`Šablona ${invoice.number}`)
-  }, [invoice.number])
+    setTemplateDescriptions(invoice.items.map((item) => item.description ?? ''))
+    setTemplateFooterNote(invoice.footer_note ?? '')
+  }, [invoice.id])
+
+  const handleSaveTemplate = () => {
+    if (!templateName.trim()) return
+    saveTemplate.mutate({
+      name: templateName.trim(),
+      data: {
+        invoice: {
+          currency: invoice.currency,
+          payment_method: paymentMethodEnum.parse(
+            invoice.payment_method ?? 'bank'
+          ),
+          footer_note: templateFooterNote,
+          due_in_days: invoice.due_in_days,
+          client_contact_id: invoice.client_contact_id ?? undefined,
+          bank_account: invoice.bank_account,
+          iban: invoice.iban,
+          swift_bic: invoice.swift_bic,
+          language: invoice.language
+        },
+        items: invoice.items.map((item, index) => ({
+          description: templateDescriptions[index],
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          unit: item.unit,
+          vat_rate: item.vat_rate,
+          order: index
+        }))
+      }
+    })
+  }
 
   const handleIsdocDownload = () => {
     try {
@@ -231,72 +268,91 @@ export const InvoiceDetail = ({
           }
         }}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Uložit jako šablonu</DialogTitle>
-            <DialogDescription>
-              Uložte tuto fakturu jako vzor pro budoucí vystavené doklady.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              handleSaveTemplate()
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Uložit jako šablonu</DialogTitle>
+              <DialogDescription>
+                Uložte tuto fakturu jako vzor pro opakované faktury. Nová
+                faktura dostane nové číslo a aktuální data. Stejný název
+                aktualizuje existující šablonu.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-2 py-2">
-            <Label htmlFor="template-name">Název šablony</Label>
-            <Input
-              id="template-name"
-              value={templateName}
-              onChange={(event) => setTemplateName(event.target.value)}
-              placeholder={`Šablona ${invoice.number}`}
-            />
-          </div>
+            <div className="space-y-2 py-2">
+              <Label htmlFor="template-name">Název šablony</Label>
+              <Input
+                id="template-name"
+                value={templateName}
+                onChange={(event) => setTemplateName(event.target.value)}
+                placeholder={`Šablona ${invoice.number}`}
+                maxLength={200}
+                required
+                disabled={saveTemplate.isPending}
+              />
+            </div>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsTemplateDialogOpen(false)}
-              disabled={saveTemplate.isPending}
-            >
-              Zrušit
-            </Button>
-            <Button
-              onClick={() => {
-                const nameToSave =
-                  templateName.trim() || `Šablona ${invoice.number}`
-                saveTemplate.mutate({
-                  name: nameToSave,
-                  data: {
-                    invoice: {
-                      number: invoice.number ?? undefined,
-                      currency: invoice.currency,
-                      issued_on: invoice.issued_on,
-                      payment_method: paymentMethodEnum.parse(
-                        invoice.payment_method ?? 'bank'
-                      ),
-                      footer_note: invoice.footer_note,
-                      taxable_fulfillment_due: invoice.taxable_fulfillment_due,
-                      due_in_days: invoice.due_in_days,
-                      client_contact_id: invoice.client_contact_id ?? undefined,
-                      exchange_rate: invoice.exchange_rate,
-                      bank_account: invoice.bank_account,
-                      iban: invoice.iban,
-                      swift_bic: invoice.swift_bic,
-                      language: invoice.language
-                    },
-                    items: invoice.items.map((item) => ({
-                      description: item.description,
-                      quantity: item.quantity,
-                      unit_price: item.unit_price,
-                      unit: item.unit,
-                      vat_rate: item.vat_rate,
-                      order: item.order ?? undefined
-                    }))
+            <div className="space-y-3 py-2">
+              <p className="text-sm text-muted-foreground">
+                V popisech a poznámce můžete použít {'{{month}}'} (aktuální
+                měsíc),
+                {' {{previousMonth}}'} (předchozí měsíc) a {'{{date}}'} (dnešní
+                datum). Text faktury se tím nezmění.
+              </p>
+              {templateDescriptions.map((description, index) => (
+                <div key={index} className="space-y-2">
+                  <Label htmlFor={`template-description-${index}`}>
+                    Popis položky {index + 1}
+                  </Label>
+                  <Textarea
+                    id={`template-description-${index}`}
+                    value={description}
+                    disabled={saveTemplate.isPending}
+                    onChange={(event) =>
+                      setTemplateDescriptions((descriptions) =>
+                        descriptions.map((value, itemIndex) =>
+                          itemIndex === index ? event.target.value : value
+                        )
+                      )
+                    }
+                  />
+                </div>
+              ))}
+              <div className="space-y-2">
+                <Label htmlFor="template-footer-note">Poznámka šablony</Label>
+                <Input
+                  id="template-footer-note"
+                  value={templateFooterNote}
+                  disabled={saveTemplate.isPending}
+                  onChange={(event) =>
+                    setTemplateFooterNote(event.target.value)
                   }
-                })
-              }}
-              disabled={saveTemplate.isPending}
-            >
-              {saveTemplate.isPending ? 'Ukládám…' : 'Uložit šablonu'}
-            </Button>
-          </DialogFooter>
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setIsTemplateDialogOpen(false)}
+                disabled={saveTemplate.isPending}
+              >
+                Zrušit
+              </Button>
+              <Button
+                type="submit"
+                disabled={saveTemplate.isPending || !templateName.trim()}
+              >
+                {saveTemplate.isPending ? 'Ukládám…' : 'Uložit šablonu'}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 md:px-4">

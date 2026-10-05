@@ -14,15 +14,11 @@ import z from 'zod'
 
 export type InvoiceTemplateData = {
   invoice: {
-    number?: string | null
     currency?: string | null
-    issued_on?: string | null
     payment_method?: PaymentMethodType
     footer_note?: string | null
-    taxable_fulfillment_due?: string | null
     due_in_days?: number | null
     client_contact_id?: string | null
-    exchange_rate?: number | null
     bank_account?: string | null
     iban?: string | null
     swift_bic?: string | null
@@ -34,6 +30,7 @@ export type InvoiceTemplateData = {
     unit_price?: number | null
     unit?: string | null
     vat_rate?: number | null
+    order?: number
   }[]
 }
 
@@ -353,12 +350,7 @@ export const userBankAccountsTb = sqliteTable(
 )
 
 export type PaymentMethodType =
-  | 'bank'
-  | 'cash'
-  | 'card'
-  | 'cod'
-  | 'crypto'
-  | 'other'
+  'bank' | 'cash' | 'card' | 'cod' | 'crypto' | 'other'
 
 export const receivedInvoiceTb = sqliteTable(
   'received_invoice',
@@ -510,9 +502,7 @@ export const invoiceTemplatesTb = sqliteTable(
       .notNull()
       .references(() => userT.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
-    data: text('data', { mode: 'json' })
-      .$type<InvoiceTemplateData>()
-      .notNull(),
+    data: text('data', { mode: 'json' }).$type<InvoiceTemplateData>().notNull(),
     created_at: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
