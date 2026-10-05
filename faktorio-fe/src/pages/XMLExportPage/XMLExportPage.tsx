@@ -18,7 +18,10 @@ import {
   generateKontrolniHlaseniXML,
   type SubmitterData
 } from '@/lib/generateKontrolniHlaseniXML'
-import { generateDanovePriznaniXML } from '@/lib/generateDanovePriznaniXML'
+import {
+  generateDanovePriznaniXML,
+  hasIssuedVatAmounts
+} from '@/lib/generateDanovePriznaniXML'
 import { generateSouhrnneHlaseniXML } from '@/lib/generateSouhrnneHlaseniXML'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { formatCzechDate } from '@/lib/utils'
@@ -107,25 +110,17 @@ export function XMLExportPage() {
       ? getQuarterDateRange(selectedYear, selectedQuarter)
       : getMonthlyDateRange(selectedYear, selectedMonth)
 
-  // Fetch issued invoices for the selected period
-  const [issuedInvoicesWithVat] =
-    trpcClient.invoices.listInvoices.useSuspenseQuery({
-      from: startDate,
-      to: endDate,
-      vat: {
-        minimum: 1
-      }
-    })
-
-  // Fetch reverse charge invoices (VAT = 0) to filter for EU invoices
-  const [invoicesWithoutVat] =
-    trpcClient.invoices.listInvoices.useSuspenseQuery({
-      from: startDate,
-      to: endDate,
-      vat: {
-        maximum: 0
-      }
-    })
+  // Export the complete period, including credit notes, sub-crown VAT and
+  // legacy documents whose rate breakdown is missing.
+  const [issuedInvoices] = trpcClient.invoices.listInvoices.useSuspenseQuery({
+    from: startDate,
+    to: endDate,
+    limit: null
+  })
+  const issuedInvoicesWithVat = issuedInvoices.filter(hasIssuedVatAmounts)
+  const invoicesWithoutVat = issuedInvoices.filter(
+    (invoice) => !hasIssuedVatAmounts(invoice)
+  )
 
   const reverseChargeAbroadInvoices = invoicesWithoutVat.filter(
     (invoice) => classifyInvoiceDestination(invoice) === 'eu'
