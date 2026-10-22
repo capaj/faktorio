@@ -61,6 +61,19 @@ export const LandingPage = () => {
                 Spustit s lokální databází
               </ButtonLink>
             </div>
+            <a
+              href="https://czechlaunch.cz/project/faktorio?ref=badge"
+              target="_blank"
+              rel="noopener"
+              className="inline-block"
+            >
+              <img
+                src="https://czechlaunch.cz/badges/launched-v3-en-light.svg"
+                alt="Launched on CzechLaunch"
+                width="228"
+                height="54"
+              />
+            </a>
           </div>
         </section>
         <section className="w-full py-12 md:py-24">
