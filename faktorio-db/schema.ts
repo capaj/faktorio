@@ -12,6 +12,28 @@ import { djs } from 'faktorio-shared/src/djs'
 import z from 'zod'
 // always add postfix Tb to table names
 
+export type InvoiceTemplateData = {
+  invoice: {
+    currency?: string | null
+    payment_method?: PaymentMethodType
+    footer_note?: string | null
+    due_in_days?: number | null
+    client_contact_id?: string | null
+    bank_account?: string | null
+    iban?: string | null
+    swift_bic?: string | null
+    language?: string | null
+  }
+  items: {
+    description?: string | null
+    quantity?: number | null
+    unit_price?: number | null
+    unit?: string | null
+    vat_rate?: number | null
+    order?: number
+  }[]
+}
+
 export const invoicesTb = sqliteTable(
   'invoice',
   {
@@ -328,12 +350,7 @@ export const userBankAccountsTb = sqliteTable(
 )
 
 export type PaymentMethodType =
-  | 'bank'
-  | 'cash'
-  | 'card'
-  | 'cod'
-  | 'crypto'
-  | 'other'
+  'bank' | 'cash' | 'card' | 'cod' | 'crypto' | 'other'
 
 export const receivedInvoiceTb = sqliteTable(
   'received_invoice',
@@ -472,6 +489,29 @@ export const pushSubscriptionTb = sqliteTable(
       endpointUniqueIndex: unique().on(pushSubscriptions.endpoint)
     }
   }
+)
+
+export const invoiceTemplatesTb = sqliteTable(
+  'invoice_template',
+  {
+    id: text('id')
+      .$defaultFn(() => createId())
+      .primaryKey()
+      .notNull(),
+    user_id: text('user_id')
+      .notNull()
+      .references(() => userT.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    data: text('data', { mode: 'json' }).$type<InvoiceTemplateData>().notNull(),
+    created_at: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updated_at: text('updated_at').$onUpdate(() => sql`CURRENT_TIMESTAMP`)
+  },
+  (templates) => ({
+    userIndex: index('invoice_template_user_idx').on(templates.user_id),
+    nameUniqueIndex: unique().on(templates.user_id, templates.name)
+  })
 )
 
 export const systemStatsTb = sqliteTable('system_stats', {
