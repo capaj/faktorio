@@ -1,39 +1,13 @@
-// Import Workbox from CDN
-importScripts(
-  'https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js'
-)
-
-// Initialize Workbox
-workbox.setConfig({
-  debug: false
-})
+import { clientsClaim } from 'workbox-core'
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
 
 // Precache and route using the manifest
-workbox.precaching.precacheAndRoute(self.__WB_MANIFEST)
+cleanupOutdatedCaches()
+precacheAndRoute(self.__WB_MANIFEST)
 
 // Enable automatic updates - skip waiting and claim clients immediately
-self.addEventListener('install', () => {
-  self.skipWaiting()
-})
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    Promise.all([
-      // Clean up old caches
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== workbox.core.cacheNames.precache) {
-              return caches.delete(cacheName)
-            }
-          })
-        )
-      }),
-      // Take control of all clients immediately
-      self.clients.claim()
-    ])
-  )
-})
+self.skipWaiting()
+clientsClaim()
 
 self.addEventListener('push', function (event) {
   console.log('Push event received:', event)

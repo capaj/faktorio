@@ -24,7 +24,6 @@ import { Header } from './components/Header'
 import { SignedInRoutes } from './SignedInRoutes'
 import { LocalDbManagementPage } from './pages'
 import { UserSelectType } from 'faktorio-db/schema'
-import { useAutoUpdate } from './lib/autoUpdateService'
 import { SharedInvoicePage } from '@/pages/SharedInvoicePage'
 
 interface BlogPost {
@@ -38,9 +37,6 @@ function AppContent() {
   const { isLoaded } = useUser()
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
   const { isSignedIn } = useAuth()
-
-  // Initialize auto-update service
-  useAutoUpdate()
 
   useEffect(() => {
     fetch('/blog-content/index.json')

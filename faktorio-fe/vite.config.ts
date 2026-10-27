@@ -162,6 +162,7 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false,
       srcDir: 'public',
       filename: 'sw.js',
       strategies: 'injectManifest',
@@ -183,6 +184,24 @@ export default defineConfig({
         ]
       }
     }),
+    {
+      name: 'app-bootstrap',
+      apply: 'build',
+      transformIndexHtml: {
+        order: 'pre',
+        handler: () => [
+          {
+            tag: 'script',
+            attrs: { id: 'faktorio-app-bootstrap' },
+            children: fs.readFileSync(
+              path.resolve(__dirname, 'src/lib/appBootstrap.js'),
+              'utf8'
+            ),
+            injectTo: 'head-prepend'
+          }
+        ]
+      }
+    },
     react(),
     tailwindcss(),
     blogPlugin()

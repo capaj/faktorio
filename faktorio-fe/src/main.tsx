@@ -29,3 +29,4 @@ export const reactMainRender = async () => {
 }
 
 reactMainRender()
+window.dispatchEvent(new Event('faktorio:app-ready'))
