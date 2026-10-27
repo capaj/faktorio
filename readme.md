@@ -46,6 +46,9 @@ Frontend env:
 | Multiple bank accounts                                    |     ✅      |      ✅       |      ✅      |     ✅     |
 | Keep account without logging in every 12 months           |     ✅      |      ✅       |      ❌      |     ✅     |
 | Run locally without sending data to the cloud             |     ✅      |      ❌       |      ❌      |     ❌     |
+| Dark theme                                                |     ✅      |      ❔       |      ✅      |     ✅     |
+
+Dark theme support is documented by [Fakturoid](https://www.fakturoid.cz/podpora/nastaveni/dark-mode-a-barva-menu) and [iDoklad](https://www.idoklad.cz/podpora/nastaveni-aplikace-idoklad). ❔ means support has not been verified.
 
 _Note: Feature information for Fakturoid.cz and iDoklad.cz is based on common commercial offerings and may require verification._
 
