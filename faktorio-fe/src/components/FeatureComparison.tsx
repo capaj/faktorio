@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react'
+import { Check, CircleHelp, X } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -129,6 +129,13 @@ const features = [
     fakturoid: false,
     idoklad: false,
   },
+  {
+    name: 'Tmavý režim',
+    faktorio: true,
+    fakturovac: null,
+    fakturoid: true,
+    idoklad: true,
+  },
 ]
 
 export const FeatureComparison = () => {
@@ -174,7 +181,13 @@ export const FeatureComparison = () => {
                   )}
                 </TableCell>
                 <TableCell className="text-center p-2 sm:p-4">
-                  {feature.fakturovac ? (
+                  {feature.fakturovac === null ? (
+                    <CircleHelp
+                      role="img"
+                      aria-label="Podpora nebyla ověřena"
+                      className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
+                    />
+                  ) : feature.fakturovac ? (
                     <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-success opacity-70" />
                   ) : (
                     <X className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-red-400 opacity-30" />
@@ -200,7 +213,8 @@ export const FeatureComparison = () => {
         </Table>
         <p className="text-xs text-muted-foreground mt-4 text-center px-4 pb-4 sm:px-0 sm:pb-0">
           Poznámka: Informace o funkcích Fakturoid.cz a iDoklad.cz vycházejí z
-          běžných komerčních nabídek a mohou vyžadovat ověření.
+          běžných komerčních nabídek a mohou vyžadovat ověření. Symbol ? označuje
+          neověřenou podporu.
         </p>
       </CardContent>
     </Card>
