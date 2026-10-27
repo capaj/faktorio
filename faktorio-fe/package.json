@@ -97,6 +97,7 @@
     "vitest": "^5.0.2",
     "workbox-core": "^7.4.1",
     "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1",
     "wrangler": "^4.143.0"
   }
 }

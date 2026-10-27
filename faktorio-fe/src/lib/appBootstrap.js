@@ -36,10 +36,14 @@
 
   const recoverFromAssetError = () => {
     assetFailed = true
-    // A permanently missing asset must not cause an endless reload loop.
+    // Retry each build once per tab. A late stylesheet or dynamic import error
+    // can occur after the application starts, so startup must not reset this.
+    const entry =
+      document.querySelector('script[type="module"][src]')?.src ||
+      window.location.href
     try {
-      if (sessionStorage.getItem(recoveryKey)) return false
-      sessionStorage.setItem(recoveryKey, '1')
+      if (sessionStorage.getItem(recoveryKey) === entry) return false
+      sessionStorage.setItem(recoveryKey, entry)
     } catch {
       return false
     }
@@ -75,13 +79,6 @@
 
   window.addEventListener('vite:preloadError', (event) => {
     if (recoverFromAssetError()) event.preventDefault()
-  })
-
-  window.addEventListener('faktorio:app-ready', () => {
-    if (assetFailed) return
-    try {
-      sessionStorage.removeItem(recoveryKey)
-    } catch {}
   })
 
   document.addEventListener('visibilitychange', () => {

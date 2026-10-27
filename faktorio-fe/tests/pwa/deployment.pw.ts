@@ -14,7 +14,7 @@ let server: Server
 let origin: string
 let version: string
 let staleResponses: number
-let brokenAsset: 'script' | 'style' | undefined
+let brokenAsset: 'script' | 'style' | 'late style' | undefined
 let missingAssets: string[]
 
 function html(release: string) {
@@ -58,11 +58,11 @@ test.beforeAll(async () => {
       release,
       new Map([
         ['/index.html', html(release)],
+        ['/probe.html', '<!doctype html><title>Cache setup</title>'],
         ['/sw.js', worker.code],
         [
           `/assets/app-${release}.js`,
-          `document.querySelector('main').textContent = '${release}';
-           window.dispatchEvent(new Event('faktorio:app-ready'))`
+          `document.querySelector('main').textContent = '${release}'`
         ],
         [`/assets/app-${release}.css`, 'main { color: rgb(0, 128, 0) }']
       ])
@@ -88,6 +88,18 @@ test.beforeAll(async () => {
         resource !== '/sw.js') ||
       (brokenAsset === 'style' && resource.endsWith('.css'))
     let body = absent ? undefined : deployments.get(version)!.get(resource)
+    if (
+      brokenAsset === 'late style' &&
+      resource.startsWith('/assets/') &&
+      resource.endsWith('.js')
+    ) {
+      body += `;setTimeout(() => {
+        const style = document.createElement('link');
+        style.rel = 'stylesheet';
+        style.href = '/assets/missing.css';
+        document.head.append(style);
+      }, 50)`
+    }
     let type = resource.endsWith('.js')
       ? 'application/javascript'
       : resource.endsWith('.css')
@@ -180,10 +192,42 @@ test('recovers from stale HTML even when the application module cannot run', asy
   expect(missingAssets).toContain('/assets/app-v1.js')
   expect(
     await page.evaluate(() => sessionStorage.getItem('faktorio:asset-recovery'))
-  ).toBeNull()
+  ).toBe(`${origin}/assets/app-v1.js`)
 })
 
-for (const asset of ['script', 'style'] as const) {
+test('uses the deployed HTML when navigating with an older worker', async ({
+  page
+}) => {
+  await page.goto(origin)
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller)
+  version = 'v2'
+  await page.reload()
+  await expect(page.locator('main')).toHaveText('v2')
+})
+
+test('repairs HTML cached under a JavaScript asset URL', async ({ page }) => {
+  await page.goto(`${origin}/probe.html`)
+  await page.evaluate(async () => {
+    const cache = await caches.open(`workbox-precache-v2-${location.origin}/`)
+    await cache.put(
+      '/assets/app-v1.js',
+      new Response('<!doctype html>', {
+        headers: { 'Content-Type': 'text/html' }
+      })
+    )
+  })
+  await page.goto(origin)
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller)
+  expect(
+    await page.evaluate(async () =>
+      (await caches.match('/assets/app-v1.js'))?.headers.get('Content-Type')
+    )
+  ).toBe('application/javascript')
+  await page.reload()
+  await expect(page.locator('main')).toHaveText('v1')
+})
+
+for (const asset of ['script', 'style', 'late style'] as const) {
   test(`does not loop when a ${asset} is permanently unavailable`, async ({
     page
   }) => {
@@ -202,7 +246,7 @@ for (const asset of ['script', 'style'] as const) {
       await page.evaluate(() =>
         sessionStorage.getItem('faktorio:asset-recovery')
       )
-    ).toBe('1')
+    ).toBe(`${origin}/assets/app-v1.js`)
   })
 }
 
