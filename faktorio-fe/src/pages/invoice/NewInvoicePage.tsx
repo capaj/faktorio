@@ -71,18 +71,18 @@ const LocalizedNumberInput = ({
   onChange,
   ...props
 }: Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange'> & {
-  value: number | undefined
+  value: number | null | undefined
   onChange: (value: number | undefined) => void
 }) => {
   const [localValue, setLocalValue] = useState(() =>
-    value !== undefined ? String(value) : ''
+    value != null ? String(value) : ''
   )
 
   useEffect(() => {
-    if (value !== undefined && parseLocalizedFloat(localValue) !== value) {
+    if (value != null && parseLocalizedFloat(localValue) !== value) {
       setLocalValue(String(value))
     } else if (
-      value === undefined &&
+      value == null &&
       localValue !== '' &&
       parseLocalizedFloat(localValue) !== undefined
     ) {
@@ -664,6 +664,13 @@ const InvoiceItemForm = ({
   const { setValue, control, watch } = useFormContext()
   const vatRate = watch(`items.${index}.vat_rate`)
   const [showVatWarning, setShowVatWarning] = useState<boolean | null>(null)
+  // Remounting the VAT input drops a rejected 0 and shows the form value again
+  const [vatInputKey, setVatInputKey] = useState(0)
+
+  const cancelZeroVat = () => {
+    setShowVatWarning(null)
+    setVatInputKey((key) => key + 1)
+  }
 
   useEffect(() => {
     if (vatPayer) {
@@ -787,20 +794,23 @@ const InvoiceItemForm = ({
               name={`items.${index}.vat_rate`}
               render={({ field }) => (
                 <LocalizedNumberInput
+                  key={vatInputKey}
                   id={`items.${index}.vat_rate`}
-                  className="w-full sm:w-20"
+                  className="w-full sm:w-20 user-invalid:border-destructive user-invalid:focus-visible:ring-destructive"
                   placeholder="DPH %"
+                  required
                   value={field.value}
                   onChange={(vatRate) => {
                     if (vatRate === undefined) {
-                      field.onChange(undefined)
+                      // null instead of undefined, otherwise react-hook-form falls back to the default rate
+                      field.onChange(null)
                       return
                     }
 
                     if (
                       vatPayer &&
                       vatRate === 0 &&
-                      (field.value ?? 0) > 0 &&
+                      field.value !== 0 &&
                       selectedContactId &&
                       contacts
                         .find((c) => c.id === selectedContactId)
@@ -832,7 +842,7 @@ const InvoiceItemForm = ({
         open={!!vatPayer && showVatWarning === true}
         onOpenChange={(open) => {
           if (!open) {
-            setShowVatWarning(null)
+            cancelZeroVat()
           }
         }}
       >
@@ -857,12 +867,7 @@ const InvoiceItemForm = ({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowVatWarning(null)
-              }}
-            >
+            <Button variant="outline" onClick={cancelZeroVat}>
               Zrušit
             </Button>
             <Button onClick={handleConfirmZeroVat}>

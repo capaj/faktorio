@@ -1,9 +1,9 @@
 import { defineConfig } from '@playwright/test'
 
-// Reuse the mocked composer workflow: no database, account or email delivery.
+// Reuse the mocked composer and invoice item workflows: no database, account or email delivery.
 export default defineConfig({
   testDir: './e2e',
-  testMatch: 'invoice-email.spec.ts',
+  testMatch: ['invoice-email.spec.ts', 'invoice-vat.spec.ts'],
   timeout: 60000,
   workers: 1,
   reporter: 'list',
