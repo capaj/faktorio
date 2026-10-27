@@ -12,13 +12,7 @@ import {
 } from 'lucide-react'
 import { useFilteredInvoicesQuery } from './InvoiceListPage'
 import Papa from 'papaparse'
-import { pdf } from '@react-pdf/renderer'
-import { BlobWriter, ZipWriter } from '@zip.js/zip.js'
-import { CzechInvoicePDF } from '../InvoiceDetail/CzechInvoicePDF'
-import { EnglishInvoicePDF } from '../InvoiceDetail/EnglishInvoicePDF'
 import { trpcClient } from '@/lib/trpcClient'
-import QRCode from 'qrcode'
-import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 import { snakeCase } from 'lodash-es'
 import { useState } from 'react'
@@ -39,6 +33,23 @@ export function InvoicesDownloadButton({
   const generateZipDownload = async () => {
     try {
       setIsGeneratingZip(true)
+
+      // PDF rendering, QR codes and zip are heavy; load them only when a download starts
+      const [
+        { pdf },
+        { BlobWriter, ZipWriter },
+        { CzechInvoicePDF },
+        { EnglishInvoicePDF },
+        { default: QRCode },
+        { generateQrPaymentString }
+      ] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('@zip.js/zip.js'),
+        import('../InvoiceDetail/CzechInvoicePDF'),
+        import('../InvoiceDetail/EnglishInvoicePDF'),
+        import('qrcode'),
+        import('@/lib/qrCodeGenerator')
+      ])
 
       const zipWriter = new ZipWriter(new BlobWriter('application/zip'))
 

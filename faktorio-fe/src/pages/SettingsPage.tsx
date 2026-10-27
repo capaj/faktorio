@@ -44,7 +44,7 @@ export function SettingsPage() {
       {!isLocalUser && (
         <Card>
           <CardHeader>
-            <CardTitle>Notifikace</CardTitle>
+            <CardTitle as="h2">Notifikace</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -91,7 +91,7 @@ export function SettingsPage() {
       {isLocalUser && (
         <Card>
           <CardHeader>
-            <CardTitle>Lokální uživatel</CardTitle>
+            <CardTitle as="h2">Lokální uživatel</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-fg-subtle">
@@ -104,7 +104,7 @@ export function SettingsPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>API tokeny</CardTitle>
+            <CardTitle as="h2">API tokeny</CardTitle>
             <Button
               size="sm"
               className="text-xs"

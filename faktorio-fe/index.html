@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/mountain.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Faktorio – fakturace zdarma pro živnostníky a malé firmy</title>
     <meta name="color-scheme" content="light dark" />
@@ -112,6 +113,19 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // #root holds the prerendered landing page. This file is also served for every other
+      // route and to signed-in visitors, who must not see the landing page before the app loads.
+      try {
+        if (
+          location.pathname !== '/' ||
+          localStorage.getItem('auth_user') ||
+          localStorage.getItem('faktorio_local_user')
+        ) {
+          document.getElementById('root').replaceChildren()
+        }
+      } catch {}
+    </script>
     <div id="portal-root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

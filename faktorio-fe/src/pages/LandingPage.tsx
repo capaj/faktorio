@@ -10,7 +10,17 @@ import { Separator } from '@/components/ui/separator'
 import { trpcClient } from '@/lib/trpcClient'
 import { FeatureComparison } from '@/components/FeatureComparison'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
-import { GithubIcon, TwitterIcon } from './Icons'
+import { GithubIcon, XIcon } from './Icons'
+
+// Responsive WebP versions of /faktura.png (1904×1935)
+const invoicePreview = {
+  src: '/images/landing/faktura-800.webp',
+  srcSet: [480, 800, 1200, 1904]
+    .map((width) => `/images/landing/faktura-${width}.webp ${width}w`)
+    .join(', '),
+  width: 1904,
+  height: 1935
+}
 
 export const LandingPage = () => {
   const { data: systemStats } = trpcClient.systemStats.useQuery(undefined, {
@@ -20,7 +30,7 @@ export const LandingPage = () => {
   return (
     <>
       <div>
-        <section className="w-full py-6 md:py-12 lg:py-16 xl:py-24 animate-in fade-in zoom-in-95 duration-700">
+        <section className="w-full py-6 md:py-12 lg:py-16 xl:py-24">
           <div className="container flex flex-col items-center justify-center space-y-4 px-2 md:px-6 text-center">
             <div className="space-y-4">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 pb-2">
@@ -33,16 +43,12 @@ export const LandingPage = () => {
             </div>
 
             <div className="mx-auto max-w-[400px] space-y-4 pt-4">
-              <Link href="/signup">
-                <Button
-                  className="w-full h-12 text-lg transition-all hover:scale-105 shadow-lg"
-                  type="submit"
-                  role="link"
-                  aria-label="Registrace"
-                >
-                  Začít fakturovat zdarma
-                </Button>
-              </Link>
+              <Button
+                asChild
+                className="w-full h-12 text-lg transition-all hover:scale-105 shadow-lg"
+              >
+                <Link href="/signup">Začít fakturovat zdarma</Link>
+              </Button>
 
               <p className="text-xs text-center text-muted-foreground mt-2">
                 Registrace zabere méně než minutu. Žádné skryté poplatky.
@@ -56,7 +62,7 @@ export const LandingPage = () => {
               <ButtonLink
                 href="/local-dbs"
                 variant="secondary"
-                className="text-sm font-medium hover:underline underline-offset-4"
+                className="text-sm font-medium"
               >
                 Spustit s lokální databází
               </ButtonLink>
@@ -70,13 +76,19 @@ export const LandingPage = () => {
                 <button
                   type="button"
                   aria-label="Zvětšit náhled faktury"
-                  className="relative block w-full text-left group animate-in slide-in-from-left-8 duration-700 delay-200 lg:col-span-3 cursor-zoom-in"
+                  className="relative block w-full text-left group lg:col-span-3 cursor-zoom-in"
                 >
                   <span className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl blur-xl opacity-50 group-hover:opacity-75 transition duration-500"></span>
                   <img
                     alt="Náhled faktury"
-                    className="relative block mx-auto rounded-xl object-contain w-full shadow-2xl border border-border/50"
-                    src="/faktura.png"
+                    className="relative block mx-auto rounded-xl object-contain w-full h-auto shadow-2xl border border-border/50"
+                    src={invoicePreview.src}
+                    srcSet={invoicePreview.srcSet}
+                    sizes="(min-width: 1024px) 60vw, 100vw"
+                    width={invoicePreview.width}
+                    height={invoicePreview.height}
+                    // LCP element on mobile; React 18 only passes the lowercase attribute through
+                    {...{ fetchpriority: 'high' }}
                   />
                 </button>
               </DialogTrigger>
@@ -84,46 +96,57 @@ export const LandingPage = () => {
                 <img
                   alt="Náhled faktury"
                   className="max-w-none min-w-[150vw] md:min-w-0 md:max-w-full md:max-h-[95vh] rounded-lg shadow-2xl mx-auto"
-                  src="/faktura.png"
+                  src="/images/landing/faktura-1904.webp"
+                  width={invoicePreview.width}
+                  height={invoicePreview.height}
                 />
               </DialogContent>
             </Dialog>
-            <div className="flex flex-col gap-6 animate-in slide-in-from-right-8 duration-700 delay-300 lg:col-span-2">
-              {systemStats && (
-                <Card className="overflow-hidden border-none shadow-lg bg-card/50 backdrop-blur-sm">
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-2 gap-8">
-                      <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
-                        <Users className="h-8 w-8 text-blue-500 mb-2" />
-                        <div className="text-center">
-                          <div className="text-3xl font-bold tracking-tight">
-                            {Math.ceil(systemStats.user_count / 10) * 10}+
-                          </div>
-                          <div className="text-sm text-muted-foreground font-medium">
-                            aktivních uživatelů
-                          </div>
+            <div className="flex flex-col gap-6 lg:col-span-2">
+              {/* Always rendered (with placeholders while loading) so the prerendered layout does not shift */}
+              <Card className="overflow-hidden border-none shadow-lg bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
+                      <Users className="h-8 w-8 text-blue-500 mb-2" />
+                      <div className="text-center">
+                        <div className="text-3xl font-bold tracking-tight">
+                          {systemStats
+                            ? `${Math.ceil(systemStats.user_count / 10) * 10}+`
+                            : '…'}
                         </div>
-                      </div>
-                      <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
-                        <FileText className="h-8 w-8 text-green-500 mb-2" />
-                        <div className="text-center">
-                          <div className="text-3xl font-bold tracking-tight">
-                            {Math.ceil(systemStats.invoice_count / 10) * 10}+
-                          </div>
-                          <div className="text-sm text-muted-foreground font-medium">
-                            vystavených faktur
-                          </div>
+                        <div className="text-sm text-muted-foreground font-medium">
+                          aktivních uživatelů
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                    <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
+                      <FileText className="h-8 w-8 text-green-500 mb-2" />
+                      <div className="text-center">
+                        <div className="text-3xl font-bold tracking-tight">
+                          {systemStats
+                            ? `${Math.ceil(systemStats.invoice_count / 10) * 10}+`
+                            : '…'}
+                        </div>
+                        <div className="text-sm text-muted-foreground font-medium">
+                          vystavených faktur
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
               <Card className="hover:shadow-md transition-shadow duration-300">
                 <CardHeader>
-                  <CardTitle className="flex flex-row items-center gap-3 text-xl">
-                    <MountainIcon className="h-6 w-6 text-primary" />
-                    <h2>Vše co potřebujete, nic navíc</h2>
+                  <CardTitle
+                    as="h2"
+                    className="flex flex-row items-center gap-3 text-3xl font-bold"
+                  >
+                    <MountainIcon
+                      className="h-6 w-6 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
+                    Vše co potřebujete, nic navíc
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-muted-foreground leading-relaxed">
@@ -134,21 +157,25 @@ export const LandingPage = () => {
                     kdykoliv a odkudkoliv, bez zadávání kreditní karty, během
                     několika vteřin po registraci.
                   </p>
-                  <Link href="/manifest" className="block mt-4">
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto font-semibold text-primary hover:underline"
-                    >
-                      Přečtěte si náš manifest &rarr;
-                    </Button>
+                  <Link
+                    href="/manifest"
+                    className="mt-4 inline-flex min-h-6 items-center font-semibold text-primary underline-offset-4 hover:underline"
+                  >
+                    Přečtěte si náš manifest &rarr;
                   </Link>
                 </CardContent>
               </Card>
               <Card className="hover:shadow-md transition-shadow duration-300">
                 <CardHeader>
-                  <CardTitle className="flex flex-row items-center gap-3 text-xl">
-                    <LucidePiggyBank className="h-6 w-6 text-primary" />
-                    <h2>Kolik to stojí?</h2>
+                  <CardTitle
+                    as="h2"
+                    className="flex flex-row items-center gap-3 text-3xl font-bold"
+                  >
+                    <LucidePiggyBank
+                      className="h-6 w-6 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
+                    Kolik to stojí?
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-muted-foreground leading-relaxed space-y-4">
@@ -186,7 +213,7 @@ export const LandingPage = () => {
               </Card>
               <Card className="hover:shadow-md transition-shadow duration-300">
                 <CardHeader>
-                  <CardTitle className="text-xl">
+                  <CardTitle as="h2" className="text-xl">
                     Chcete se podílet na vývoji?
                   </CardTitle>
                 </CardHeader>
@@ -206,33 +233,37 @@ export const LandingPage = () => {
                   </p>
 
                   <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                    <a
-                      href="https://github.com/capaj/faktorio"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <Button variant="outline" className="gap-2">
-                        <GithubIcon className="h-4 w-4" />
+                    <Button asChild variant="outline" className="gap-2">
+                      <a
+                        href="https://github.com/capaj/faktorio"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <GithubIcon className="h-4 w-4" aria-hidden="true" />
                         GitHub repozitář
-                      </Button>
-                    </a>
-                    <a
-                      href="https://twitter.com/capajj"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <Button variant="outline" className="gap-2">
-                        <TwitterIcon className="h-4 w-4 text-blue-400" />
+                        <span className="sr-only">(otevře se v novém okně)</span>
+                      </a>
+                    </Button>
+                    <Button asChild variant="outline" className="gap-2">
+                      <a
+                        href="https://x.com/capajj"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <XIcon className="h-4 w-4" aria-hidden="true" />
                         @capajj
-                      </Button>
-                    </a>
+                        <span className="sr-only">
+                          na X (otevře se v novém okně)
+                        </span>
+                      </a>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 bg-muted/30">
+        <section className="w-full py-12 md:py-24 bg-muted/30 [content-visibility:auto] [contain-intrinsic-size:auto_1000px]">
           <div className="container px-2 md:px-6">
             <FeatureComparison />
           </div>

@@ -139,7 +139,7 @@ export async function checkAndNotifyDueInvoices(
       await webPushService.sendNotificationToUser(userId, {
         title,
         body,
-        icon: '/faktura.png',
+        icon: '/icons/icon-192.png',
         badge: '/faktura.png',
         data: {
           type: 'due_invoices',

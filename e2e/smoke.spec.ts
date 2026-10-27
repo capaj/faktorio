@@ -25,7 +25,7 @@ test('smoke', async ({ page }) => {
   })
 
   await page
-    .getByRole('link', { name: 'Registrace', exact: true })
+    .getByRole('link', { name: 'Začít fakturovat zdarma', exact: true })
     .first()
     .click()
 
