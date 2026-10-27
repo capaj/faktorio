@@ -13,7 +13,8 @@ function isValidAsset(request, response) {
   if (/\.m?js$/.test(pathname))
     return /javascript|ecmascript/i.test(contentType)
   if (pathname.endsWith('.css')) return /^text\/css\b/i.test(contentType)
-  if (pathname.endsWith('.wasm')) return /^application\/wasm\b/i.test(contentType)
+  if (pathname.endsWith('.wasm'))
+    return /^application\/wasm\b/i.test(contentType)
   return true
 }
 
