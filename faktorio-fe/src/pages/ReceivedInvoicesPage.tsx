@@ -506,7 +506,7 @@ export function ReceivedInvoicesPage() {
                 </div>
               ) : (
                 <>
-                  <ReceiptIcon className="h-12 w-12 text-gray-400 mb-4" />
+                  <ReceiptIcon className="h-12 w-12 text-fg-faint mb-4" />
                   <p className="text-lg font-medium mb-4">
                     Přetáhněte sem soubor nebo klikněte pro výběr
                   </p>
@@ -863,10 +863,10 @@ export function ReceivedInvoicesPage() {
                           <span
                             className={`inline-block px-2 py-1 text-xs rounded-full ${
                               invoice.status === 'paid'
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-success-subtle text-success-fg'
                                 : invoice.status === 'disputed'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-yellow-100 text-yellow-800'
+                                  ? 'bg-danger-subtle text-danger-fg'
+                                  : 'bg-warning-subtle text-warning-fg'
                             }`}
                           >
                             {invoice.status === 'received' && 'Přijato'}
@@ -881,7 +881,7 @@ export function ReceivedInvoicesPage() {
                             size="icon"
                             onClick={() => handleDeleteInvoice(invoice.id)}
                             disabled={deleteMutation.isPending}
-                            className="text-red-600 hover:text-red-800 disabled:text-gray-400"
+                            className="text-danger hover:text-danger-fg disabled:text-fg-faint"
                             aria-label="Smazat fakturu"
                           >
                             {deleteMutation.isPending &&

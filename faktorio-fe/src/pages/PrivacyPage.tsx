@@ -3,7 +3,7 @@ import { PageShell } from './PageShell'
 export const PrivacyPage = () => {
   return (
     <PageShell>
-      <div className="flex flex-col gap-6 w-full  dark:prose-invert dark">
+      <div className="flex flex-col gap-6 w-full">
         <h1>Zásady ochrany osobních údajů pro Aplikaci na Fakturování</h1>
         <p>Poslední aktualizace: 2026-04-15</p>
         <p>

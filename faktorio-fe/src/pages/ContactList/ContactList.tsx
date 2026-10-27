@@ -571,7 +571,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
                 <strong>{editForm.getValues('name')}</strong>?
               </DialogTitle>
               {hasInvoices && (
-                <DialogDescription className="pt-2 text-red-500">
+                <DialogDescription className="pt-2 text-red-500 dark:text-red-400">
                   Budou smazány také všechny faktury ({invoiceCount}) spojené s
                   tímto kontaktem!
                 </DialogDescription>

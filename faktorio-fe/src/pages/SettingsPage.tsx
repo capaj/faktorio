@@ -48,13 +48,13 @@ export function SettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-fg-subtle">
                 Zapněte si upozornění na splatné faktury přímo do prohlížeče.
               </p>
 
               {isBrave && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                  <p className="text-sm text-yellow-800">
+                <div className="p-3 bg-warning-muted border border-warning-line-subtle rounded-md">
+                  <p className="text-sm text-warning-fg">
                     ⚠️ <strong>Brave Browser:</strong> Push notifikace nemusí
                     fungovat správně. Doporučujeme použít Firefox,Edge nebo
                     Chrome pro nejlepší funkčnost.
@@ -63,7 +63,7 @@ export function SettingsPage() {
               )}
 
               {/* Debug information */}
-              <div className="text-xs text-gray-500 space-y-1">
+              <div className="text-xs text-fg-muted space-y-1">
                 <div>
                   Service Worker podpora:{' '}
                   {'serviceWorker' in navigator ? '✅' : '❌'}
@@ -94,7 +94,7 @@ export function SettingsPage() {
             <CardTitle>Lokální uživatel</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-fg-subtle">
               Push notifikace nejsou dostupné pro lokální uživatele.
             </p>
           </CardContent>
@@ -116,7 +116,7 @@ export function SettingsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-600 mb-4">
+          <div className="text-sm text-fg-subtle mb-4">
             Tokeny umožňují přístup k Public API. Posílejte je v hlavičce
             <code className="ml-1">X-API-KEY</code>. Api dokumentace je k
             dispozici na{' '}

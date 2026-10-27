@@ -70,7 +70,7 @@ export function SharedInvoicePage() {
   const qrCodeBase64 = useQRCodeBase64(qrPayload)
 
   if (loading) return <div className="p-8 text-center">Načítání…</div>
-  if (error) return <div className="p-8 text-center text-red-600">{error}</div>
+  if (error) return <div className="p-8 text-center text-danger">{error}</div>
   if (!data) return null
 
   const baseFileName = `${snakeCase(invoice.your_name ?? '')}-${invoice.number}`

@@ -494,7 +494,7 @@ export const EditInvoicePage = () => {
             onBankAccountChange={handleBankAccountChange}
           />
 
-          <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
+          <div className="flex flex-col gap-4 p-4 bg-surface border rounded-md mt-6">
             <h3 className="flex items-center gap-2">Položky</h3>
             {fields.map((item, index) => {
               return (
@@ -510,12 +510,12 @@ export const EditInvoicePage = () => {
             <div className="flex gap-4">
               <Button
                 type="button"
-                className="flex items-center gap-2 bg-green-500 text-white"
+                className="flex items-center gap-2 bg-success-solid text-on-success-solid"
                 onClick={() => {
                   append(createDefaultInvoiceItem(fields.length))
                 }}
               >
-                <LucidePlus className="text-white" />
+                <LucidePlus className="text-on-success-solid" />
                 Další položka
               </Button>
             </div>
@@ -590,7 +590,7 @@ const InvoiceItemForm = ({
       <div className="sm:flex sm:flex-row gap-4 grow grid grid-cols-2 flex-wrap items-end">
         <div>
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.quantity`}
           >
             Množství
@@ -613,7 +613,7 @@ const InvoiceItemForm = ({
 
         <div>
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.unit`}
           >
             Jednotka
@@ -649,7 +649,7 @@ const InvoiceItemForm = ({
       <div className="flex gap-4 items-end">
         <div className="grow sm:grow-0">
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.unit_price`}
           >
             Cena/jedn.
@@ -672,7 +672,7 @@ const InvoiceItemForm = ({
         {invoicingDetails?.vat_payer && (
           <div className="grow sm:grow-0">
             <Label
-              className="text-xs text-gray-500 mb-1 block md:block"
+              className="text-xs text-fg-muted mb-1 block md:block"
               htmlFor={`items.${index}.vat_rate`}
             >
               DPH %
@@ -694,10 +694,10 @@ const InvoiceItemForm = ({
         <div>
           <button
             type="button"
-            className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300 shrink-0"
+            className="flex items-center justify-center w-10 h-10 bg-surface-strong rounded hover:bg-surface-stronger shrink-0"
             onClick={onDelete}
           >
-            <LucideTrash2 className="text-gray-600" />
+            <LucideTrash2 className="text-fg-subtle" />
           </button>
         </div>
       </div>

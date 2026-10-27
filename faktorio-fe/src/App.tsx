@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useState } from 'react'
+import { ThemeProvider } from 'next-themes'
 import { Route, Switch } from 'wouter'
 // Create Document Component
 import { LandingPage } from './pages/LandingPage'
@@ -135,9 +136,16 @@ function AppWithLocalDb() {
 
 function App() {
   return (
-    <DbProvider>
-      <AppWithLocalDb />
-    </DbProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <DbProvider>
+        <AppWithLocalDb />
+      </DbProvider>
+    </ThemeProvider>
   )
 }
 

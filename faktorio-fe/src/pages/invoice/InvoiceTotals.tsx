@@ -19,7 +19,7 @@ export const InvoiceTotals = ({
     <div className="grid grid-cols-2 gap-6 mt-8">
       <>
         {isCzkInvoice && (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-fg-muted">
             Celkem: {(total * exchangeRate).toFixed(2)} CZK
           </span>
         )}
@@ -31,7 +31,7 @@ export const InvoiceTotals = ({
         {vatPayer && (
           <>
             {isCzkInvoice && (
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-fg-muted">
                 DPH: {(totalVat * exchangeRate).toFixed(2)} CZK
               </span>
             )}
@@ -40,7 +40,7 @@ export const InvoiceTotals = ({
             </h3>
 
             {isCzkInvoice && (
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-fg-muted">
                 Celkem s DPH: {((total + totalVat) * exchangeRate).toFixed(2)}{' '}
                 CZK
               </span>

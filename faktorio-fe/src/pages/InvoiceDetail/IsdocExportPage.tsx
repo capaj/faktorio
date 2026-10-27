@@ -57,7 +57,7 @@ export const IsdocExportPage = () => {
     if (!xmlContent) return null
     
     return (
-      <pre className="bg-gray-100 p-4 rounded-md overflow-auto max-h-[500px] text-xs">
+      <pre className="bg-surface-muted p-4 rounded-md overflow-auto max-h-[500px] text-xs">
         {xmlContent}
       </pre>
     )
@@ -71,7 +71,7 @@ export const IsdocExportPage = () => {
         <>
           <div className="mb-6">
             <h2 className="text-xl mb-2">Invoice: {invoice.number}</h2>
-            <p className="text-gray-600">
+            <p className="text-fg-subtle">
               Client: {invoice.client_name}<br />
               Issued on: {invoice.issued_on}<br />
               Due on: {invoice.due_on}

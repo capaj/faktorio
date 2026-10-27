@@ -51,23 +51,23 @@ export function BlogIndex({ posts }: BlogIndexProps) {
                 </Link>
               )}
             </h2>
-            <time className="text-gray-500 mb-6 block">
+            <time className="text-fg-muted mb-6 block">
               {new Date(post.date).toLocaleDateString()}
             </time>
-            <p className="text-gray-700 text-lg leading-relaxed mb-6">
+            <p className="text-fg-secondary text-lg leading-relaxed mb-6">
               {post.excerpt}
             </p>
             {isSSR ? (
               <a
                 href={`/blog/${post.slug}`}
-                className="text-blue-600 hover:underline inline-block text-lg"
+                className="text-info hover:underline inline-block text-lg"
               >
                 Celý článek →
               </a>
             ) : (
               <Link
                 href={`/blog/${post.slug}`}
-                className="text-blue-600 hover:underline inline-block text-lg"
+                className="text-info hover:underline inline-block text-lg"
               >
                 Celý článek →
               </Link>

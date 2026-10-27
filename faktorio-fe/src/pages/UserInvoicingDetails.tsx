@@ -298,7 +298,7 @@ const BankAccountCard = ({
         <div className="flex items-center gap-2">
           <span className="font-medium">Bankovní účet {index + 1}</span>
           {isDefault && (
-            <span className="text-xs font-semibold text-emerald-600">
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               Výchozí
             </span>
           )}
