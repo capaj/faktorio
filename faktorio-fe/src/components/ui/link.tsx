@@ -5,7 +5,6 @@ import { Link, useRoute } from 'wouter'
 export function ButtonLink({
   children,
   tabIndex,
-  type,
   ...props
 }: {
   children: React.ReactNode
@@ -25,28 +24,27 @@ export function ButtonLink({
   type?: 'button' | 'submit' | 'reset'
 }) {
   const [isActive] = useRoute(props.href)
+  // One focusable element: the link itself, styled as a button (a <button> inside <a> was two tab stops)
   return (
-    <Link
-      href={props.href}
-      target={props.target}
-      rel={props.rel}
-      className={(active: boolean) => {
-        return active ? 'text-primary' : 'text-accent'
-      }}
+    <Button
+      asChild
+      variant={props.variant ?? 'link'}
+      size={props.size}
+      className={cn(
+        props.className,
+        isActive ? 'underline' : '',
+        'cursor-pointer'
+      )}
     >
-      <Button
+      <Link
+        href={props.href}
+        target={props.target}
+        rel={props.rel}
         tabIndex={tabIndex}
-        variant={props.variant ?? 'link'}
-        size={props.size}
-        className={cn(
-          props.className,
-          isActive ? 'underline' : '',
-          'cursor-pointer'
-        )}
-        type={type}
+        aria-current={isActive ? 'page' : undefined}
       >
         {children}
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   )
 }

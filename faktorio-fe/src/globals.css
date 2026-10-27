@@ -28,12 +28,14 @@
   --secondary-foreground: hsl(222.2 47.4% 11.2%);
 
   --muted: hsl(210 40% 96.1%);
-  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  /* 44% lightness keeps 4.5:1 on --muted (e.g. inactive tabs), 46.9% did not */
+  --muted-foreground: hsl(215.4 16.3% 44%);
 
   --accent: hsl(210 40% 96.1%);
   --accent-foreground: hsl(222.2 47.4% 11.2%);
 
-  --destructive: hsl(0 84.2% 60.2%);
+  /* Destructive is a solid button color; red text uses the danger token */
+  --destructive: var(--color-red-600);
   --destructive-foreground: hsl(210 40% 98%);
 
   --border: hsl(214.3 31.8% 91.4%);
@@ -67,7 +69,7 @@
   --success-fg: var(--color-green-800);
   --success: var(--color-green-600);
   --success-strong: var(--color-green-700);
-  --success-solid: var(--color-green-500);
+  --success-solid: var(--color-green-700);
   --on-success-solid: var(--color-white);
 
   --warning-subtle: var(--color-yellow-100);
@@ -116,7 +118,7 @@
   --accent: hsl(217.2 32.6% 17.5%);
   --accent-foreground: hsl(210 40% 98%);
 
-  --destructive: hsl(0 62.8% 30.6%);
+  --destructive: var(--color-red-700);
   --destructive-foreground: hsl(210 40% 98%);
 
   --border: hsl(217.2 32.6% 17.5%);
@@ -145,7 +147,7 @@
   --success-fg: var(--color-green-200);
   --success: var(--color-green-400);
   --success-strong: var(--color-green-300);
-  --success-solid: var(--color-green-500);
+  --success-solid: var(--color-green-700);
   --on-success-solid: var(--color-white);
 
   --warning-subtle: var(--color-yellow-950);

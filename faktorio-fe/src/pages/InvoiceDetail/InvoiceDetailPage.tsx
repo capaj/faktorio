@@ -242,7 +242,7 @@ export const InvoiceDetail = ({
                     navigate(`/invoices/${params.invoiceId}?language=${val}`)
                   }}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px]" aria-label="Jazyk faktury">
                     <SelectValue placeholder="Jazyk" />
                   </SelectTrigger>
                   <SelectContent>

@@ -75,7 +75,7 @@ export const BankDetailsAccordion = ({
                     onBankAccountChange?.(value)
                   }}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full" aria-label="Bankovní účet">
                     <SelectValue placeholder="Vyberte bankovní účet" />
                   </SelectTrigger>
                   <SelectContent>

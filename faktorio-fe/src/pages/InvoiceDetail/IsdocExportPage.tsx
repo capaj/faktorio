@@ -57,7 +57,11 @@ export const IsdocExportPage = () => {
     if (!xmlContent) return null
     
     return (
-      <pre className="bg-surface-muted p-4 rounded-md overflow-auto max-h-[500px] text-xs">
+      <pre
+        tabIndex={0}
+        aria-label="Náhled ISDOC XML"
+        className="bg-surface-muted p-4 rounded-md overflow-auto max-h-[500px] text-xs"
+      >
         {xmlContent}
       </pre>
     )

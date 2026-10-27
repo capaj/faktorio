@@ -94,7 +94,7 @@ export function InvoiceListPage() {
             }
           }}
         >
-          <SelectTrigger className="w-full sm:w-[140px]">
+          <SelectTrigger className="w-full sm:w-[140px]" aria-label="Rok">
             <SelectValue placeholder="Rok" />
           </SelectTrigger>
           <SelectContent>

@@ -46,21 +46,23 @@ export const Header = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="ml-3">
         {user?.pictureUrl ? (
-          <div
+          <button
+            type="button"
             style={{
               backgroundImage: `url(${user.pictureUrl})`,
               backgroundSize: 'cover'
             }}
             aria-label="Uživatelský profil"
-            className="h-8 w-8 rounded-full bg-surface-muted flex items-center justify-center cursor-pointer hover:bg-surface-strong"
-          ></div>
+            className="h-8 w-8 rounded-full bg-surface-muted flex items-center justify-center cursor-pointer hover:bg-surface-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+          ></button>
         ) : (
-          <div
+          <button
+            type="button"
             aria-label="Uživatelský profil"
-            className="h-8 w-8 rounded-full bg-surface-muted flex items-center justify-center cursor-pointer hover:bg-surface-strong"
+            className="h-8 w-8 rounded-full bg-surface-muted flex items-center justify-center cursor-pointer hover:bg-surface-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
           >
-            <User className="h-4 w-4 text-fg-emphasis" />
-          </div>
+            <User className="h-4 w-4 text-fg-emphasis" aria-hidden="true" />
+          </button>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

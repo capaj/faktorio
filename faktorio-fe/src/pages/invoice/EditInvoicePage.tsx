@@ -510,7 +510,7 @@ export const EditInvoicePage = () => {
             <div className="flex gap-4">
               <Button
                 type="button"
-                className="flex items-center gap-2 bg-success-solid text-on-success-solid"
+                className="flex items-center gap-2 bg-success-solid text-on-success-solid hover:bg-success-solid/90"
                 onClick={() => {
                   append(createDefaultInvoiceItem(fields.length))
                 }}
@@ -692,13 +692,17 @@ const InvoiceItemForm = ({
           </div>
         )}
         <div>
-          <button
+          <Button
             type="button"
-            className="flex items-center justify-center w-10 h-10 bg-surface-strong rounded hover:bg-surface-stronger shrink-0"
+            variant="outline"
+            size="icon"
+            className="shrink-0"
             onClick={onDelete}
+            aria-label="Odstranit položku"
+            title="Odstranit položku"
           >
-            <LucideTrash2 className="text-fg-subtle" />
-          </button>
+            <LucideTrash2 aria-hidden="true" />
+          </Button>
         </div>
       </div>
     </div>

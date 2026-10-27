@@ -150,8 +150,12 @@ export function IssuedInvoiceTable({
   const renderActionMenu = (invoice: Invoice) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="bg-surface-strong">
-          <LucideEllipsisVertical className="h-5 w-5 text-fg-faint" />
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label={`Akce pro fakturu ${invoice.number}`}
+        >
+          <LucideEllipsisVertical className="h-5 w-5" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="cursor-pointer">

@@ -607,6 +607,7 @@ export function LocalDbManagementPage() {
             type="file"
             ref={fileInputRef}
             accept=".sqlite"
+            aria-label="Importovat databázi (.sqlite)"
             onChange={handleImportDb}
             disabled={isImporting}
             className="flex-grow"
