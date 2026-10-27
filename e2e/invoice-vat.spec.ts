@@ -1,5 +1,7 @@
 import { expect, test } from './fixtures'
 import type { Page } from '@playwright/test'
+import { mkdir } from 'node:fs/promises'
+import { resolve } from 'node:path'
 
 const url = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173'
 
@@ -173,4 +175,62 @@ test('switching to non-VAT payer closes an open warning and clears all VAT rates
 
   const submitted = await submitInvoice(page)
   expect(submitted.items.map((item) => item.vat_rate)).toEqual([0, 0])
+})
+
+test('VAT payers can clear the VAT rate with Backspace and must fill it in again', async ({
+  page
+}, testInfo) => {
+  await setupInvoice(page, true)
+  await page.goto(`${url}/new-invoice`)
+  await expect(page.getByTestId('contact-combobox')).toContainText(
+    'Czech Client'
+  )
+  await page.getByLabel('Cena/jedn.', { exact: true }).fill('1000')
+  const vatRate = page.getByLabel('DPH %', { exact: true })
+  await expect(vatRate).toHaveValue('21')
+  await vatRate.click()
+  await vatRate.press('End')
+  await vatRate.press('Backspace')
+  await vatRate.press('Backspace')
+  await expect(vatRate).toHaveValue('')
+  await page.getByRole('heading', { name: 'Položky', exact: true }).click()
+  await expect(vatRate).toHaveValue('')
+  await expect(vatRate).toHaveJSProperty('required', true)
+  expect(
+    await vatRate.evaluate((input) => input.matches(':user-invalid'))
+  ).toBe(true)
+
+  if (testInfo.project.metadata.documentationScreenshots) {
+    const directory = resolve('docs/screenshots')
+    await mkdir(directory, { recursive: true })
+    await page.evaluate(() => document.fonts.ready)
+    await page
+      .locator('div', {
+        has: page.getByRole('heading', { name: 'Položky', exact: true })
+      })
+      .last()
+      .screenshot({
+        path: resolve(directory, 'invoice-item-vat-required.png'),
+        animations: 'disabled',
+        caret: 'hide'
+      })
+  }
+
+  let createRequests = 0
+  page.on('request', (request) => {
+    if (request.url().includes('/trpc/invoices.create')) createRequests++
+  })
+  await page.getByRole('button', { name: 'Vytvořit fakturu' }).click()
+  await expect(vatRate).toBeFocused()
+  expect(createRequests).toBe(0)
+
+  await vatRate.press('0')
+  await expect(page.getByRole('dialog', { name: 'Upozornění' })).toBeVisible()
+  await page.getByRole('button', { name: 'Zrušit' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(vatRate).toHaveValue('')
+
+  await vatRate.fill('12')
+  const submitted = await submitInvoice(page)
+  expect(submitted.items.map((item) => item.vat_rate)).toEqual([12])
 })
