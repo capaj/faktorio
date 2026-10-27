@@ -44,6 +44,7 @@ export const fieldLabels = {
   iban: 'IBAN',
   swift_bic: 'SWIFT/BIC',
   bank_account: 'Číslo bankovního účtu - včetně bankovního kódu',
+  web: 'Web (nepovinné)',
   web_url: 'Web'
 } as const
 
@@ -303,6 +304,28 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
             </FormItem>
           )}
         />
+
+        {!showInvoicingFields && (
+          <FormField
+            control={form.control}
+            name={asPath('web')}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{fieldLabels.web}</FormLabel>
+                <FormControl>
+                  <Input
+                    autoComplete="off"
+                    inputMode="url"
+                    placeholder="https://example.cz"
+                    {...field}
+                    value={(field.value as string | null | undefined) ?? ''}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="col-span-2 flex flex-col gap-4 md:flex-row md:gap-2">
           <FormField
