@@ -20,6 +20,12 @@ The theme follows the operating system by default. The **Motiv vzhledu** button 
 
 ![Invoice list in the dark theme with the theme menu open](invoice-list-dark.png)
 
+## Invoice item VAT rate
+
+For VAT payers, each invoice item has a mandatory **DPH %** field prefilled with 21. It can be cleared with Backspace; after leaving it empty, the field is highlighted with the `:user-invalid` style and the invoice cannot be submitted until a rate is filled in. Entering 0 for a domestic contact still asks for confirmation.
+
+![Invoice item with an empty, highlighted VAT rate field](invoice-item-vat-required.png)
+
 ## Refreshing the screenshots
 
 From the repository root after installing dependencies:
@@ -29,8 +35,8 @@ pnpm exec playwright install chromium
 pnpm docs:screenshots
 ```
 
-The dedicated [Playwright configuration](../../playwright.docs.config.ts) starts the frontend and runs the mocked [email composer](../../e2e/invoice-email.spec.ts) and [theme](../../e2e/theme.spec.ts) workflows. It needs no backend or database and sends no real email. Normal E2E runs do not overwrite these images. If a development frontend is already running on port 5173, it is reused.
+The dedicated [Playwright configuration](../../playwright.docs.config.ts) starts the frontend and runs the mocked [email composer](../../e2e/invoice-email.spec.ts), [invoice VAT](../../e2e/invoice-vat.spec.ts) and [theme](../../e2e/theme.spec.ts) workflows. It needs no backend or database and sends no real email. Normal E2E runs do not overwrite these images. If a development frontend is already running on port 5173, it is reused.
 
-Captures use Chromium, a 1440 × 1100 viewport, 1× scale, and light mode, except the dark theme capture. For documentation only, the capture helper expands the message field when necessary to show the full draft; it does not alter the app's default layout. Images are cropped to the dialog to keep the documentation focused. Inspect the PNGs after regenerating them and commit them alongside the corresponding UI changes.
+Captures use Chromium, a 1440 × 1100 viewport, 1× scale, and light mode, except the dark theme capture. For documentation only, the capture helper expands the message field when necessary to show the full draft; it does not alter the app's default layout. Images are cropped to the dialog, invoice items section or invoice list to keep the documentation focused. Inspect the PNGs after regenerating them and commit them alongside the corresponding UI changes.
 
 For future screens, use descriptive, stable filenames in this folder, add a short explanation here, and provide a reproducible capture using synthetic data. Never include personal data, credentials, real share links, or customer details.

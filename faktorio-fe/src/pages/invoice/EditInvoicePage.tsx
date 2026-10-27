@@ -48,18 +48,18 @@ const LocalizedNumberInput = ({
   onChange,
   ...props
 }: Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange'> & {
-  value: number | undefined
+  value: number | null | undefined
   onChange: (value: number | undefined) => void
 }) => {
   const [localValue, setLocalValue] = useState(() =>
-    value !== undefined ? String(value) : ''
+    value != null ? String(value) : ''
   )
 
   useEffect(() => {
-    if (value !== undefined && parseLocalizedFloat(localValue) !== value) {
+    if (value != null && parseLocalizedFloat(localValue) !== value) {
       setLocalValue(String(value))
     } else if (
-      value === undefined &&
+      value == null &&
       localValue !== '' &&
       parseLocalizedFloat(localValue) !== undefined
     ) {
@@ -682,10 +682,13 @@ const InvoiceItemForm = ({
               name={`items.${index}.vat_rate`}
               render={({ field }) => (
                 <LocalizedNumberInput
-                  className="w-full sm:w-20"
+                  id={`items.${index}.vat_rate`}
+                  className="w-full sm:w-20 user-invalid:border-destructive user-invalid:focus-visible:ring-destructive"
                   placeholder="DPH %"
+                  required
                   value={field.value}
-                  onChange={field.onChange}
+                  // null instead of undefined, otherwise react-hook-form falls back to the default rate
+                  onChange={(vatRate) => field.onChange(vatRate ?? null)}
                 />
               )}
             />
