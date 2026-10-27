@@ -57,7 +57,7 @@ export const ManifestPage = () => {
         <p className="mt-3">
           Přispět na provoz faktorio.cz můžete zasláním peněz na můj{' '}
           <a
-            className="text-accent underline underline-offset-2 bg-accent text-black"
+            className="text-accent underline underline-offset-2 bg-accent text-black dark:text-white"
             href="https://revolut.me/capaj"
           >
             revolut účet

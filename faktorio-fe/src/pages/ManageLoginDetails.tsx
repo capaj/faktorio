@@ -327,7 +327,7 @@ export const ManageLoginDetails = () => {
         </AccordionItem>
 
         <AccordionItem value="delete-account">
-          <AccordionTrigger className="text-xl font-semibold text-destructive">
+          <AccordionTrigger className="text-xl font-semibold text-danger">
             Smazání účtu
           </AccordionTrigger>
           <AccordionContent>

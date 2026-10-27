@@ -126,7 +126,7 @@ export function IssuedInvoiceTable({
 
     if (invoice.paid_on) {
       return (
-        <span className={`${baseClass} bg-green-100 text-green-800`}>
+        <span className={`${baseClass} bg-success-subtle text-success-fg`}>
           {formatCzechDate(invoice.paid_on)}
         </span>
       )
@@ -134,14 +134,14 @@ export function IssuedInvoiceTable({
 
     if (isOverdue) {
       return (
-        <span className={`${baseClass} bg-red-100 text-red-800`}>
+        <span className={`${baseClass} bg-danger-subtle text-danger-fg`}>
           Po splatnosti
         </span>
       )
     }
 
     return (
-      <span className={`${baseClass} bg-yellow-100 text-yellow-800`}>
+      <span className={`${baseClass} bg-warning-subtle text-warning-fg`}>
         Nezaplaceno
       </span>
     )
@@ -150,8 +150,12 @@ export function IssuedInvoiceTable({
   const renderActionMenu = (invoice: Invoice) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="bg-gray-200">
-          <LucideEllipsisVertical className="h-5 w-5 text-gray-400" />
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label={`Akce pro fakturu ${invoice.number}`}
+        >
+          <LucideEllipsisVertical className="h-5 w-5" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="cursor-pointer">
@@ -214,14 +218,14 @@ export function IssuedInvoiceTable({
             onSelect={(e) => e.preventDefault()}
             onClick={() => onMarkAsPaid(invoice.id, invoice.number)}
           >
-            <CheckCircle size={16} strokeWidth="1.5" className="text-green-600" />
+            <CheckCircle size={16} strokeWidth="1.5" className="text-success" />
             <span className="ml-2">Označit jako zaplacené</span>
           </DropdownMenuItem>
         )}
 
         {invoice.paid_on && onMarkAsUnpaid && (
           <DropdownMenuItem
-            className="text-red-600 focus:text-red-700 focus:bg-red-50"
+            className="text-danger focus:text-danger-strong focus:bg-danger-muted"
             onSelect={(e) => e.preventDefault()}
             onClick={async () => {
               await onMarkAsUnpaid(invoice.id)
@@ -340,7 +344,7 @@ export function IssuedInvoiceTable({
     <>
       <div className="hidden md:block">
         <Table>
-          <TableHeader className="bg-gray-50">
+          <TableHeader className="bg-surface-subtle">
             <TableRow>
               <TableHead className="w-[100px]">Nr.</TableHead>
               <TableHead>Klient</TableHead>
@@ -374,7 +378,7 @@ export function IssuedInvoiceTable({
                     {invoice.currency !== 'CZK' &&
                       invoice.exchange_rate &&
                       invoice.subtotal && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-fg-muted">
                           ({invoice.exchange_rate * invoice.subtotal} CZK)
                         </div>
                       )}
@@ -408,7 +412,7 @@ export function IssuedInvoiceTable({
               <>
                 {/* Dynamically render rows for each currency */}
                 {sortedCurrencies.map((currency) => (
-                  <TableRow key={currency} className="bg-gray-100 font-medium">
+                  <TableRow key={currency} className="bg-surface-muted font-medium">
                     <TableCell colSpan={5}>
                       Celkem {currencyTotals[currency].count}{' '}
                       {currencyTotals[currency].count === 1
@@ -435,7 +439,7 @@ export function IssuedInvoiceTable({
 
                 {/* Overall Total Count, Sum, and Download Row - Only show if multiple currencies */}
                 {Object.keys(currencyTotals).length > 1 && (
-                  <TableRow className="bg-gray-200 font-semibold">
+                  <TableRow className="bg-surface-strong font-semibold">
                     <TableCell colSpan={3}>
                       {' '}
                       {/* Adjusted colspan to push sum next to button */}
@@ -448,7 +452,7 @@ export function IssuedInvoiceTable({
                     </TableCell>
                     <TableCell colSpan={3} className="text-right font-light">
                       Celkem částka DPH:{' '}
-                      <span className="font-bold text-yellow-800">
+                      <span className="font-bold text-warning-fg">
                         {formatNumberWithSpaces(totalVAT)} CZK
                       </span>
                     </TableCell>
@@ -488,12 +492,12 @@ export function IssuedInvoiceTable({
 
       <div className="space-y-3 md:hidden">
         {isLoading && (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-center text-sm text-gray-600">
+          <div className="rounded-lg border border-line bg-surface p-4 text-center text-sm text-fg-subtle">
             Načítám faktury...
           </div>
         )}
         {!isLoading && invoices.length === 0 && (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-center text-sm text-gray-600">
+          <div className="rounded-lg border border-line bg-surface p-4 text-center text-sm text-fg-subtle">
             Žádné faktury v seznamu.
           </div>
         )}
@@ -504,24 +508,24 @@ export function IssuedInvoiceTable({
             .map((invoice) => (
               <div
                 key={invoice.id}
-                className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+                className="rounded-xl border border-line bg-surface p-4 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <Link
                       href={`/invoices/${invoice.id}/?language=cs`}
-                      className="text-lg font-semibold text-slate-800 underline-offset-2 hover:underline"
+                      className="text-lg font-semibold text-slate-800 dark:text-slate-100 underline-offset-2 hover:underline"
                     >
                       {invoice.number}
                     </Link>
-                    <div className="mt-1 text-sm text-gray-500">
+                    <div className="mt-1 text-sm text-fg-muted">
                       {invoice.client_name}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="text-right">
-                      <div className="text-xs text-gray-500">s DPH</div>
-                      <div className="text-base font-bold text-gray-900">
+                      <div className="text-xs text-fg-muted">s DPH</div>
+                      <div className="text-base font-bold text-fg-strong">
                         {invoice.total
                           ? `${invoice.total} ${invoice.currency}`
                           : '—'}
@@ -533,12 +537,12 @@ export function IssuedInvoiceTable({
 
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-500">Stav</span>
+                    <span className="text-fg-muted">Stav</span>
                     {renderPaymentBadge(invoice)}
                   </div>
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-sm font-medium text-slate-700"
+                    className="flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-200"
                     onClick={() => toggleExpanded(invoice.id)}
                   >
                     {expandedMobileCards.has(invoice.id) ? 'Skrýt detaily' : 'Zobrazit detaily'}
@@ -552,34 +556,34 @@ export function IssuedInvoiceTable({
 
                 {expandedMobileCards.has(invoice.id) && (
                   <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
-                    <div className="text-gray-500">Zdanitelné plnění</div>
-                    <div className="font-medium text-gray-900">
+                    <div className="text-fg-muted">Zdanitelné plnění</div>
+                    <div className="font-medium text-fg-strong">
                       {formatCzechDate(invoice.taxable_fulfillment_due) || '—'}
                     </div>
-                    <div className="text-gray-500">Vystaveno</div>
-                    <div className="text-gray-900">
+                    <div className="text-fg-muted">Vystaveno</div>
+                    <div className="text-fg-strong">
                       {formatCzechDate(invoice.issued_on) || '—'}
                     </div>
-                    <div className="text-gray-500">Odesláno</div>
-                    <div className="text-gray-900">
+                    <div className="text-fg-muted">Odesláno</div>
+                    <div className="text-fg-strong">
                       {formatCzechDate(invoice.sent_at) || '—'}
                     </div>
                     {invoice.due_on && (
                       <>
-                        <div className="text-gray-500">Splatnost</div>
-                        <div className="text-gray-900">
+                        <div className="text-fg-muted">Splatnost</div>
+                        <div className="text-fg-strong">
                           {formatCzechDate(invoice.due_on)}
                         </div>
                       </>
                     )}
-                    <div className="text-gray-500">bez DPH</div>
-                    <div className="text-gray-900">
+                    <div className="text-fg-muted">bez DPH</div>
+                    <div className="text-fg-strong">
                       {invoice.subtotal
                         ? `${invoice.subtotal} ${invoice.currency}`
                         : '—'}
                     </div>
-                    <div className="text-gray-500">s DPH</div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="text-fg-muted">s DPH</div>
+                    <div className="font-semibold text-fg-strong">
                       {invoice.total
                         ? `${invoice.total} ${invoice.currency}`
                         : '—'}
@@ -590,12 +594,12 @@ export function IssuedInvoiceTable({
             ))}
 
         {showTotals && !isLoading && invoices.length > 0 && (
-          <div className="mt-2 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="text-sm font-semibold text-gray-700">Souhrn</div>
+          <div className="mt-2 rounded-xl border border-line bg-surface p-4 shadow-sm">
+            <div className="text-sm font-semibold text-fg-secondary">Souhrn</div>
             <div className="mt-2 space-y-2 text-sm">
               {sortedCurrencies.map((currency) => (
                 <div key={currency} className="flex items-center justify-between">
-                  <span className="text-gray-700">
+                  <span className="text-fg-secondary">
                     {currencyTotals[currency].count}{' '}
                     {currencyTotals[currency].count === 1
                       ? 'faktura'
@@ -605,7 +609,7 @@ export function IssuedInvoiceTable({
                         : 'faktur'}{' '}
                     v {currency}
                   </span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-fg-strong">
                     {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
                     {currency}
                   </span>
@@ -614,15 +618,15 @@ export function IssuedInvoiceTable({
 
               {Object.keys(currencyTotals).length > 1 && (
                 <>
-                  <div className="flex items-center justify-between border-t border-dashed border-gray-200 pt-2">
-                    <span className="text-gray-700">Celkem částka DPH</span>
-                    <span className="font-semibold text-yellow-800">
+                  <div className="flex items-center justify-between border-t border-dashed border-line pt-2">
+                    <span className="text-fg-secondary">Celkem částka DPH</span>
+                    <span className="font-semibold text-warning-fg">
                       {formatNumberWithSpaces(totalVAT)} CZK
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-gray-700">
+                  <div className="flex items-center justify-between text-fg-secondary">
                     <span>Celkem v CZK</span>
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold text-fg-strong">
                       {formatNumberWithSpaces(totalSumCZK)} CZK
                     </span>
                   </div>

@@ -310,7 +310,7 @@ export function XMLExportPage() {
               // }
             }}
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[140px]" aria-label="Periodicita">
               <SelectValue placeholder="Periodicita" />
             </SelectTrigger>
             <SelectContent>
@@ -325,7 +325,7 @@ export function XMLExportPage() {
               setSelectedYear(parseInt(value))
             }}
           >
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-[120px]" aria-label="Rok">
               <SelectValue placeholder="Rok" />
             </SelectTrigger>
             <SelectContent>
@@ -347,7 +347,7 @@ export function XMLExportPage() {
                 setSelectedQuarter(parseInt(value))
               }}
             >
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[150px]" aria-label="Kvartál">
                 <SelectValue placeholder="Kvartál" />
               </SelectTrigger>
               <SelectContent>
@@ -365,7 +365,7 @@ export function XMLExportPage() {
                 setSelectedMonth(parseInt(value))
               }}
             >
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[150px]" aria-label="Měsíc">
                 <SelectValue placeholder="Měsíc" />
               </SelectTrigger>
               <SelectContent>

@@ -168,28 +168,28 @@ export const FeatureComparison = () => {
                 </TableCell>
                 <TableCell className="text-center bg-primary/5 p-2 sm:p-4">
                   {feature.faktorio ? (
-                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-success" />
                   ) : (
                     <X className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-red-400 opacity-50" />
                   )}
                 </TableCell>
                 <TableCell className="text-center p-2 sm:p-4">
                   {feature.fakturovac ? (
-                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-green-600 opacity-70" />
+                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-success opacity-70" />
                   ) : (
                     <X className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-red-400 opacity-30" />
                   )}
                 </TableCell>
                 <TableCell className="text-center p-2 sm:p-4">
                   {feature.fakturoid ? (
-                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-green-600 opacity-70" />
+                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-success opacity-70" />
                   ) : (
                     <X className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-red-400 opacity-30" />
                   )}
                 </TableCell>
                 <TableCell className="text-center p-2 sm:p-4">
                   {feature.idoklad ? (
-                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-green-600 opacity-70" />
+                    <Check className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-success opacity-70" />
                   ) : (
                     <X className="mx-auto h-4 w-4 sm:h-5 sm:w-5 text-red-400 opacity-30" />
                   )}

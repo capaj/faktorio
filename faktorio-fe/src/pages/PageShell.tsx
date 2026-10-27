@@ -52,7 +52,7 @@ export function Footer() {
         </ButtonLink>
       </div>
     <div className="container mx-auto p-4">
-        <div className="text-center text-sm text-gray-600">
+        <div className="text-center text-sm text-fg-subtle">
           © {new Date().getFullYear()} Faktorio
         </div>
       </div>

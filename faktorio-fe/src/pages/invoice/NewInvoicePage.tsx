@@ -358,7 +358,7 @@ export const NewInvoicePage = () => {
     <div>
       <div className="mb-5 flex justify-between items-start">
         <h2>Nová faktura</h2>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-fg-muted">
           <LucideClock className="w-4 h-4" />
           <span>
             {month}:{' '}
@@ -368,7 +368,7 @@ export const NewInvoicePage = () => {
                 form.setValue('items.0.quantity', workingDays)
                 form.setValue('items.0.unit', 'manday')
               }}
-              className="hover:text-blue-600 hover:underline cursor-pointer"
+              className="hover:text-info hover:underline cursor-pointer"
             >
               {workingDays} pracovních dní
             </button>{' '}
@@ -379,7 +379,7 @@ export const NewInvoicePage = () => {
                 form.setValue('items.0.quantity', hours)
                 form.setValue('items.0.unit', 'hodin')
               }}
-              className="hover:text-blue-600 hover:underline cursor-pointer"
+              className="hover:text-info hover:underline cursor-pointer"
             >
               {hours} hodin
             </button>
@@ -586,7 +586,7 @@ export const NewInvoicePage = () => {
             onBankAccountChange={handleBankAccountChange}
           />
 
-          <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
+          <div className="flex flex-col gap-4 p-4 bg-surface border rounded-md mt-6">
             <h3 className="flex items-center gap-2">Položky</h3>
             {fields.map((item, index) => {
               return (
@@ -604,7 +604,7 @@ export const NewInvoicePage = () => {
             <div className="flex gap-4">
               <Button
                 type="button"
-                className="flex items-center gap-2 bg-green-500 text-white"
+                className="flex items-center gap-2 bg-success-solid text-on-success-solid hover:bg-success-solid/90"
                 onClick={() => {
                   append(
                     getDefaultInvoiceItem({
@@ -614,7 +614,7 @@ export const NewInvoicePage = () => {
                   )
                 }}
               >
-                <LucidePlus className="text-white" />
+                <LucidePlus className="text-on-success-solid" />
                 Další položka
               </Button>
             </div>
@@ -694,7 +694,7 @@ const InvoiceItemForm = ({
       <div className="sm:flex sm:flex-row gap-4 grow grid grid-cols-2 flex-wrap items-end">
         <div>
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.quantity`}
           >
             Množství
@@ -716,7 +716,7 @@ const InvoiceItemForm = ({
 
         <div>
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.unit`}
           >
             Jednotka
@@ -738,7 +738,7 @@ const InvoiceItemForm = ({
         </div>
         <div className="flex flex-col flex-1">
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.description`}
           >
             Popis položky
@@ -762,7 +762,7 @@ const InvoiceItemForm = ({
       <div className="flex gap-4 items-end">
         <div className="flex-grow sm:flex-grow-0">
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.unit_price`}
           >
             Cena/jedn.
@@ -784,7 +784,7 @@ const InvoiceItemForm = ({
         {vatPayer && (
           <div className="flex-grow sm:flex-grow-0">
             <Label
-              className="text-xs text-gray-500 mb-1 block md:block"
+              className="text-xs text-fg-muted mb-1 block md:block"
               htmlFor={`items.${index}.vat_rate`}
             >
               DPH %
@@ -828,13 +828,17 @@ const InvoiceItemForm = ({
           </div>
         )}
         <div>
-          <button
+          <Button
             type="button"
-            className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300 flex-shrink-0"
+            variant="outline"
+            size="icon"
+            className="flex-shrink-0"
             onClick={onDelete}
+            aria-label="Odstranit položku"
+            title="Odstranit položku"
           >
-            <LucideTrash2 className="text-gray-600" />
-          </button>
+            <LucideTrash2 aria-hidden="true" />
+          </Button>
         </div>
       </div>
 
@@ -856,7 +860,7 @@ const InvoiceItemForm = ({
                 href="https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 underline"
+                className="text-info underline"
               >
                 https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni
               </a>

@@ -242,7 +242,7 @@ export const InvoiceDetail = ({
                     navigate(`/invoices/${params.invoiceId}?language=${val}`)
                   }}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px]" aria-label="Jazyk faktury">
                     <SelectValue placeholder="Jazyk" />
                   </SelectTrigger>
                   <SelectContent>
@@ -393,7 +393,7 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
                 <div className="flex flex-col gap-2">
                   <div className="flex items-start justify-between gap-2">
                     <a
-                      className="break-all text-blue-600 underline"
+                      className="break-all text-info underline"
                       href={link}
                       target="_blank"
                       rel="noreferrer"

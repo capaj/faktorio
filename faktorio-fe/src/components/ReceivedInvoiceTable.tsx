@@ -173,7 +173,7 @@ export function ReceivedInvoiceTable({
                   size="icon"
                   onClick={() => onDelete(invoice.id)}
                   disabled={isDeleting && deletingId === invoice.id}
-                  className="text-red-600 hover:text-red-800 disabled:text-gray-400"
+                  className="text-danger hover:text-danger-fg disabled:text-fg-faint"
                   aria-label="Smazat fakturu"
                 >
                   {isDeleting && deletingId === invoice.id ? (

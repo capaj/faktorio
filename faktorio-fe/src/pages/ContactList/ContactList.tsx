@@ -518,8 +518,13 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="ml-1">
-                  <HelpCircleIcon className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1"
+                  aria-label="Nápověda k CSV formátu"
+                >
+                  <HelpCircleIcon className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="max-w-md">
@@ -571,7 +576,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
                 <strong>{editForm.getValues('name')}</strong>?
               </DialogTitle>
               {hasInvoices && (
-                <DialogDescription className="pt-2 text-red-500">
+                <DialogDescription className="pt-2 text-danger">
                   Budou smazány také všechny faktury ({invoiceCount}) spojené s
                   tímto kontaktem!
                 </DialogDescription>

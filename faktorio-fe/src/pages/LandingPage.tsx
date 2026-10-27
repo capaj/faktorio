@@ -26,7 +26,7 @@ export const LandingPage = () => {
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 pb-2">
                 Fakturace bez zbytečností.
               </h1>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
+              <p className="mx-auto max-w-[700px] text-fg-muted md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 Moderní, rychlý a otevřený nástroj pro živnostníky a malé firmy.
                 Vystavujte faktury zdarma, bezpečně a s radostí.
               </p>
@@ -48,7 +48,7 @@ export const LandingPage = () => {
                 Registrace zabere méně než minutu. Žádné skryté poplatky.
               </p>
               <Separator className="my-4" />
-              <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-sm text-center text-fg-muted mt-2">
                 Nechcete svoje data posílat na cloud? Je pro vás soukromí na
                 prvním místě a rád si zálohujete data sám?
               </p>
@@ -67,14 +67,18 @@ export const LandingPage = () => {
           <div className="container grid items-start gap-8 px-2 md:px-6 lg:grid-cols-5">
             <Dialog>
               <DialogTrigger asChild>
-                <div className="relative group animate-in slide-in-from-left-8 duration-700 delay-200 lg:col-span-3 cursor-zoom-in">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl blur-xl opacity-50 group-hover:opacity-75 transition duration-500"></div>
+                <button
+                  type="button"
+                  aria-label="Zvětšit náhled faktury"
+                  className="relative block w-full text-left group animate-in slide-in-from-left-8 duration-700 delay-200 lg:col-span-3 cursor-zoom-in"
+                >
+                  <span className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl blur-xl opacity-50 group-hover:opacity-75 transition duration-500"></span>
                   <img
                     alt="Náhled faktury"
-                    className="relative mx-auto rounded-xl object-contain w-full shadow-2xl border border-border/50"
+                    className="relative block mx-auto rounded-xl object-contain w-full shadow-2xl border border-border/50"
                     src="/faktura.png"
                   />
-                </div>
+                </button>
               </DialogTrigger>
               <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 border-none bg-transparent shadow-none block overflow-auto outline-none [&>button]:hidden">
                 <img
@@ -194,7 +198,7 @@ export const LandingPage = () => {
                     podle velikosti jejich příspěvku (více info v projektu{' '}
                     <a
                       href="https://github.com/capaj/contrib-locs"
-                      className="text-primary hover:underline"
+                      className="text-primary underline underline-offset-2"
                     >
                       contrib-locs
                     </a>
