@@ -187,19 +187,17 @@ for (const asset of ['script', 'style'] as const) {
   test(`does not loop when a ${asset} is permanently unavailable`, async ({
     page
   }) => {
+    let navigations = 0
+    page.on('framenavigated', (frame) => {
+      if (frame === page.mainFrame()) navigations++
+    })
     brokenAsset = asset
     await page.goto(origin)
-    await expect
-      .poll(() =>
-        page.evaluate(() => Number(sessionStorage.getItem('page-loads')))
-      )
-      .toBeGreaterThanOrEqual(2)
+    await expect.poll(() => navigations).toBeGreaterThanOrEqual(2)
     await page.waitForTimeout(1000)
     // Initial activation can coincide with the single asset recovery reload.
-    // Count page loads rather than network requests: the worker serves reloads.
-    expect(
-      await page.evaluate(() => Number(sessionStorage.getItem('page-loads')))
-    ).toBeLessThanOrEqual(3)
+    // Observe navigations outside the page: reloads destroy its JS context.
+    expect(navigations).toBeLessThanOrEqual(3)
     expect(
       await page.evaluate(() =>
         sessionStorage.getItem('faktorio:asset-recovery')
