@@ -48,18 +48,18 @@ const LocalizedNumberInput = ({
   onChange,
   ...props
 }: Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange'> & {
-  value: number | undefined
+  value: number | null | undefined
   onChange: (value: number | undefined) => void
 }) => {
   const [localValue, setLocalValue] = useState(() =>
-    value !== undefined ? String(value) : ''
+    value != null ? String(value) : ''
   )
 
   useEffect(() => {
-    if (value !== undefined && parseLocalizedFloat(localValue) !== value) {
+    if (value != null && parseLocalizedFloat(localValue) !== value) {
       setLocalValue(String(value))
     } else if (
-      value === undefined &&
+      value == null &&
       localValue !== '' &&
       parseLocalizedFloat(localValue) !== undefined
     ) {
@@ -494,7 +494,7 @@ export const EditInvoicePage = () => {
             onBankAccountChange={handleBankAccountChange}
           />
 
-          <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
+          <div className="flex flex-col gap-4 p-4 bg-surface border rounded-md mt-6">
             <h3 className="flex items-center gap-2">Položky</h3>
             {fields.map((item, index) => {
               return (
@@ -510,12 +510,12 @@ export const EditInvoicePage = () => {
             <div className="flex gap-4">
               <Button
                 type="button"
-                className="flex items-center gap-2 bg-green-500 text-white"
+                className="flex items-center gap-2 bg-success-solid text-on-success-solid hover:bg-success-solid/90"
                 onClick={() => {
                   append(createDefaultInvoiceItem(fields.length))
                 }}
               >
-                <LucidePlus className="text-white" />
+                <LucidePlus className="text-on-success-solid" />
                 Další položka
               </Button>
             </div>
@@ -590,7 +590,7 @@ const InvoiceItemForm = ({
       <div className="sm:flex sm:flex-row gap-4 grow grid grid-cols-2 flex-wrap items-end">
         <div>
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.quantity`}
           >
             Množství
@@ -613,7 +613,7 @@ const InvoiceItemForm = ({
 
         <div>
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.unit`}
           >
             Jednotka
@@ -649,7 +649,7 @@ const InvoiceItemForm = ({
       <div className="flex gap-4 items-end">
         <div className="grow sm:grow-0">
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.unit_price`}
           >
             Cena/jedn.
@@ -672,7 +672,7 @@ const InvoiceItemForm = ({
         {invoicingDetails?.vat_payer && (
           <div className="grow sm:grow-0">
             <Label
-              className="text-xs text-gray-500 mb-1 block md:block"
+              className="text-xs text-fg-muted mb-1 block md:block"
               htmlFor={`items.${index}.vat_rate`}
             >
               DPH %
@@ -682,23 +682,30 @@ const InvoiceItemForm = ({
               name={`items.${index}.vat_rate`}
               render={({ field }) => (
                 <LocalizedNumberInput
-                  className="w-full sm:w-20"
+                  id={`items.${index}.vat_rate`}
+                  className="w-full sm:w-20 user-invalid:border-destructive user-invalid:focus-visible:ring-destructive"
                   placeholder="DPH %"
+                  required
                   value={field.value}
-                  onChange={field.onChange}
+                  // null instead of undefined, otherwise react-hook-form falls back to the default rate
+                  onChange={(vatRate) => field.onChange(vatRate ?? null)}
                 />
               )}
             />
           </div>
         )}
         <div>
-          <button
+          <Button
             type="button"
-            className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300 shrink-0"
+            variant="outline"
+            size="icon"
+            className="shrink-0"
             onClick={onDelete}
+            aria-label="Odstranit položku"
+            title="Odstranit položku"
           >
-            <LucideTrash2 className="text-gray-600" />
-          </button>
+            <LucideTrash2 aria-hidden="true" />
+          </Button>
         </div>
       </div>
     </div>

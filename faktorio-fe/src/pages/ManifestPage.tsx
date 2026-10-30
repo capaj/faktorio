@@ -9,9 +9,11 @@ export const ManifestPage = () => {
         </h1>
         <div className='flex justify-center w-full'>
           <img
-            src="/images/20250610_1649_Robot Tax Preparation_simple_compose_01jxd4zrkafbvtmnk43fr8armx.png"
+            src="/images/manifest-robot.webp"
             alt="robot in a factory doing taxes with a keen eye"
-            className="max-h-96"
+            width={512}
+            height={768}
+            className="h-96 w-auto"
           />
         </div>
         <p className="mt-3">
@@ -53,11 +55,11 @@ export const ManifestPage = () => {
           jsem tomu pár hodin svého času obětoval a když vidím jak se to daří,
           tak mě to motivuje k tomu pokračovat.
         </p>
-        <h4 className='mt-6'>Jak můžete pomoci?</h4>
+        <h2 className='mt-6 text-xl'>Jak můžete pomoci?</h2>
         <p className="mt-3">
           Přispět na provoz faktorio.cz můžete zasláním peněz na můj{' '}
           <a
-            className="text-accent underline underline-offset-2 bg-accent text-black"
+            className="text-accent underline underline-offset-2 bg-accent text-black dark:text-white"
             href="https://revolut.me/capaj"
           >
             revolut účet

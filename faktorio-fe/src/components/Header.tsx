@@ -19,6 +19,7 @@ import {
   Receipt
 } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
+import { ThemeToggle } from './ThemeToggle'
 import { useState } from 'react'
 import { useLocation } from 'wouter'
 import { useDb } from '../lib/local-db/DbContext'
@@ -36,31 +37,35 @@ export const Header = () => {
   const [, navigate] = useLocation()
 
   // Check if this is a local user (from auth token in localStorage)
-  const isLocalUser = localStorage.getItem('auth_token')?.startsWith('local_')
+  const isLocalUser =
+    typeof localStorage !== 'undefined' &&
+    localStorage.getItem('auth_token')?.startsWith('local_')
 
   // Shared className for mobile menu buttons
   const mobileMenuButtonClass =
-    'inline-flex h-9 items-center justify-start rounded-md bg-white px-4 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50'
+    'inline-flex h-9 items-center justify-start rounded-md bg-surface px-4 text-sm font-medium transition-colors hover:bg-surface-strong hover:text-fg-strong focus:bg-surface-muted focus:text-fg-strong focus:outline-none disabled:pointer-events-none disabled:opacity-50 aria-[current=page]:bg-surface-muted'
 
   const UserDropdownMenu = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="ml-3">
         {user?.pictureUrl ? (
-          <div
+          <button
+            type="button"
             style={{
               backgroundImage: `url(${user.pictureUrl})`,
               backgroundSize: 'cover'
             }}
             aria-label="Uživatelský profil"
-            className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200"
-          ></div>
+            className="h-8 w-8 rounded-full bg-surface-muted flex items-center justify-center cursor-pointer hover:bg-surface-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+          ></button>
         ) : (
-          <div
+          <button
+            type="button"
             aria-label="Uživatelský profil"
-            className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200"
+            className="h-8 w-8 rounded-full bg-surface-muted flex items-center justify-center cursor-pointer hover:bg-surface-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
           >
-            <User className="h-4 w-4 text-gray-800" />
-          </div>
+            <User className="h-4 w-4 text-fg-emphasis" aria-hidden="true" />
+          </button>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -82,7 +87,7 @@ export const Header = () => {
               <span>Správa lokálních databází</span>
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="cursor-default hover:bg-gray-50 !opacity-100"
+              className="cursor-default hover:bg-surface-subtle !opacity-100"
               disabled
             >
               <Database className="mr-2 h-4 w-4" />
@@ -170,11 +175,16 @@ export const Header = () => {
                     }
                   }}
                 >
-                  <ButtonLink className={mobileMenuButtonClass} href="/blog">
+                  <ButtonLink
+                    variant="ghost"
+                    className={mobileMenuButtonClass}
+                    href="/blog"
+                  >
                     <BookOpen className="mr-2 h-4 w-4" />
                     Blog
                   </ButtonLink>
                   <ButtonLink
+                    variant="ghost"
                     className={mobileMenuButtonClass}
                     href="/new-invoice"
                   >
@@ -182,6 +192,7 @@ export const Header = () => {
                     Vystavit fakturu
                   </ButtonLink>
                   <ButtonLink
+                    variant="ghost"
                     className={mobileMenuButtonClass}
                     href="/new-invoice?fromTemplate=true"
                   >
@@ -198,6 +209,7 @@ export const Header = () => {
 
                   {!isLocalUser && (
                     <ButtonLink
+                      variant="ghost"
                       className={mobileMenuButtonClass}
                       href="/received-invoices"
                     >
@@ -207,6 +219,7 @@ export const Header = () => {
                   )}
 
                   <ButtonLink
+                    variant="ghost"
                     className={mobileMenuButtonClass}
                     href="/xml-export"
                   >
@@ -215,7 +228,8 @@ export const Header = () => {
                   </ButtonLink>
 
                   <ButtonLink
-                    className="inline-flex h-9 items-center justify-start rounded-md px-4 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-gray-900 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                    variant="ghost"
+                    className="inline-flex h-9 items-center justify-start rounded-md px-4 text-sm font-medium transition-colors hover:bg-surface-strong hover:text-fg-strong focus:text-fg-strong focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                     href="/contacts"
                   >
                     <Users className="mr-2 h-4 w-4" />
@@ -224,6 +238,7 @@ export const Header = () => {
 
                   {isLocalUser && (
                     <ButtonLink
+                      variant="ghost"
                       className={mobileMenuButtonClass}
                       href="/local-dbs"
                     >
@@ -233,7 +248,7 @@ export const Header = () => {
                   )}
 
                   {isLocalUser && activeDbName && (
-                    <div className="inline-flex h-9 items-center justify-start rounded-md bg-blue-50 px-4 text-sm font-medium text-blue-800">
+                    <div className="inline-flex h-9 items-center justify-start rounded-md bg-info-muted px-4 text-sm font-medium text-info-fg">
                       <Database className="mr-2 h-4 w-4" />
                       <span className="font-mono">{activeDbName}</span>
                     </div>
@@ -241,6 +256,7 @@ export const Header = () => {
                 </SheetContent>
               </Sheet>
 
+              <ThemeToggle className="ml-3 rounded-full" />
               <UserDropdownMenu />
             </div>
 
@@ -248,7 +264,8 @@ export const Header = () => {
             <div className="hidden sm:flex lg:flex justify-center items-center">
               <ButtonLink
                 href="/new-invoice"
-                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+                variant="ghost"
+                className="flex items-center gap-2 text-primary hover:bg-surface-strong aria-[current=page]:bg-surface-muted rounded-md px-2 py-1 transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 Vystavit fakturu
@@ -262,7 +279,8 @@ export const Header = () => {
               </ButtonLink>
               <ButtonLink
                 href="/invoices"
-                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+                variant="ghost"
+                className="flex items-center gap-2 text-primary hover:bg-surface-strong aria-[current=page]:bg-surface-muted rounded-md px-2 py-1 transition-colors"
               >
                 <Receipt className="h-4 w-4" />
                 Vystavené
@@ -270,7 +288,8 @@ export const Header = () => {
               {!isLocalUser && (
                 <ButtonLink
                   href="/received-invoices"
-                  className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+                  variant="ghost"
+                  className="flex items-center gap-2 text-primary hover:bg-surface-strong aria-[current=page]:bg-surface-muted rounded-md px-2 py-1 transition-colors"
                 >
                   <Download className="h-4 w-4" />
                   Přijaté
@@ -279,19 +298,22 @@ export const Header = () => {
 
               <ButtonLink
                 href="/xml-export"
-                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+                variant="ghost"
+                className="flex items-center gap-2 text-primary hover:bg-surface-strong aria-[current=page]:bg-surface-muted rounded-md px-2 py-1 transition-colors"
               >
                 <FileText className="h-4 w-4" />
                 Export XML
               </ButtonLink>
               <ButtonLink
                 href="/contacts"
-                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+                variant="ghost"
+                className="flex items-center gap-2 text-primary hover:bg-surface-strong aria-[current=page]:bg-surface-muted rounded-md px-2 py-1 transition-colors"
               >
                 <Users className="h-4 w-4" />
                 Kontakty
               </ButtonLink>
 
+              <ThemeToggle className="ml-3 rounded-full" />
               <UserDropdownMenu />
             </div>
           </>
@@ -311,6 +333,7 @@ export const Header = () => {
             >
               Registrovat
             </ButtonLink>
+            <ThemeToggle className="rounded-full" />
           </>
         )}
       </nav>

@@ -1,26 +1,17 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback
-} from 'react'
+import React, { createContext, useContext, useState, useCallback } from 'react'
 import { trpcClient } from './trpcClient'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { httpBatchLink, Operation } from '@trpc/client'
+import { httpBatchLink, type TRPCLink } from '@trpc/client'
+import { observable } from '@trpc/server/observable'
 import { SuperJSON } from 'superjson'
 import { trpcLinks } from './errorToastLink'
-import { userT } from 'faktorio-db/schema'
+import type { userT } from 'faktorio-db/schema'
 import { useLocation } from 'wouter'
 
-import { trpcContext, type TrpcContext } from 'faktorio-api/src/trpcContext'
-import { AppRouter, appRouter } from 'faktorio-api/src/trpcRouter'
-import { inferRouterContext } from '@trpc/server'
-import * as schema from 'faktorio-db/schema'
-import { LibSQLDatabase } from 'drizzle-orm/libsql'
-import { SQLJsDatabase } from 'drizzle-orm/sql-js'
+import type { AppRouter } from 'faktorio-api/src/trpcRouter'
+import type * as schema from 'faktorio-db/schema'
+import type { SQLJsDatabase } from 'drizzle-orm/sql-js'
 import { useDb } from './local-db/DbContext'
-import { createLocalCallerLink } from './createLocalCallerLink'
 const VITE_API_URL = import.meta.env.VITE_API_URL
 
 if (!VITE_API_URL) {
@@ -55,11 +46,19 @@ function storeAuthToken(result: { token: string; user: User }) {
 const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
   children
 }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem('auth_token')
+  // Read the session synchronously so the first render is already the right page
+  // (and the landing page can be prerendered at build time, where there is no localStorage)
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof localStorage === 'undefined') return null
+    const storedUser = localStorage.getItem('auth_user')
+    return storedUser ? JSON.parse(storedUser) : null
+  })
+  const [token, setToken] = useState<string | null>(() =>
+    typeof localStorage === 'undefined'
+      ? null
+      : localStorage.getItem('auth_token')
   )
-  const [isLoaded, setIsLoaded] = useState(false)
+  const isLoaded = true
   const [, navigate] = useLocation()
   const utils = trpcClient.useUtils()
   // Get TRPC mutations
@@ -68,17 +67,6 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
   const logoutMutation = trpcClient.auth.logout.useMutation()
   const googleLoginMutation = trpcClient.auth.googleLogin.useMutation()
   const googleSignupMutation = trpcClient.auth.googleSignup.useMutation()
-
-  // Check for token in localStorage on initial load
-  useEffect(() => {
-    const storedUser = localStorage.getItem('auth_user')
-
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-
-    setIsLoaded(true)
-  }, [])
 
   const login = useCallback(
     async (email: string, password: string, googleToken?: string) => {
@@ -154,65 +142,23 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export const createCaller: (
-  ctx: TrpcContext
-) => ReturnType<typeof appRouter.createCaller> =
-  trpcContext.createCallerFactory(appRouter)
-
-export interface LocalCallerLinkOptions<TRouter extends AppRouter> {
-  router: TRouter
-  onMutation: (mutation: Operation) => void
-  createContext: () =>
-    Promise<inferRouterContext<TRouter>> | inferRouterContext<TRouter>
-}
-
-function parseEnvVars(): {
-  TURSO_DATABASE_URL: string
-  TURSO_AUTH_TOKEN: string
-  JWT_SECRET: string
-  OPENROUTER_API_KEY: string
-  VAPID_PRIVATE_KEY: string
-  VAPID_PUBLIC_KEY: string
-  VAPID_SUBJECT: string
-} {
-  const envVarsString = localStorage.getItem('local_env_vars')
-  const envVars: Record<string, string> = {}
-
-  if (envVarsString) {
-    const lines = envVarsString.split('\n')
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
-        const [key, ...valueParts] = trimmed.split('=')
-        const value = valueParts.join('=')
-        if (key.trim()) {
-          envVars[key.trim()] = value.trim()
-        }
-      }
-    }
-  }
-
-  // Provide defaults for required environment variables
-  const defaults = {
-    TURSO_DATABASE_URL: '',
-    TURSO_AUTH_TOKEN: '',
-    JWT_SECRET: 'local_secret_key',
-    OPENROUTER_API_KEY: '',
-    VAPID_PRIVATE_KEY: '',
-    VAPID_PUBLIC_KEY: '',
-    VAPID_SUBJECT: 'mailto:admin@example.com'
-  }
-
-  return {
-    TURSO_DATABASE_URL:
-      envVars.TURSO_DATABASE_URL || defaults.TURSO_DATABASE_URL,
-    TURSO_AUTH_TOKEN: envVars.TURSO_AUTH_TOKEN || defaults.TURSO_AUTH_TOKEN,
-    JWT_SECRET: envVars.JWT_SECRET || defaults.JWT_SECRET,
-    OPENROUTER_API_KEY:
-      envVars.OPENROUTER_API_KEY || defaults.OPENROUTER_API_KEY,
-    VAPID_PRIVATE_KEY: envVars.VAPID_PRIVATE_KEY || defaults.VAPID_PRIVATE_KEY,
-    VAPID_PUBLIC_KEY: envVars.VAPID_PUBLIC_KEY || defaults.VAPID_PUBLIC_KEY,
-    VAPID_SUBJECT: envVars.VAPID_SUBJECT || defaults.VAPID_SUBJECT
+/** A link whose implementation is imported on first use */
+function lazyLink(
+  load: () => Promise<TRPCLink<AppRouter>>
+): TRPCLink<AppRouter> {
+  return (runtime) => {
+    const operationLink = load().then((link) => link(runtime))
+    return ({ op, next }) =>
+      observable((observer) => {
+        let unsubscribe = () => {}
+        operationLink.then(
+          (link) => {
+            unsubscribe = link({ op, next }).subscribe(observer).unsubscribe
+          },
+          (error) => observer.error(error)
+        )
+        return () => unsubscribe()
+      })
   }
 }
 
@@ -237,28 +183,14 @@ export const AuthProvider: React.FC<{
 
   const [trpc] = useState<any>(() => {
     if (localRun) {
+      // The whole API router runs in the browser in local mode; load it only then
       return trpcClient.createClient({
         links: [
-          createLocalCallerLink({
-            onMutation: () => {
-              saveDatabase()
-            },
-            router: appRouter,
-
-            createContext: () => {
-              const env = parseEnvVars()
-              return {
-                env,
-                req: {} as Request,
-                generateToken: () => Promise.resolve(''),
-                sendEmail: () => Promise.resolve(),
-                user: localRun.user,
-                db: localRun.db as any as LibSQLDatabase<typeof schema>, // gotta do this conversion, because drizzle types don't work when we define db as union of LibSQL and SQLJs
-                googleGenAIFileManager: {} as any,
-                googleGenAI: {} as any
-              }
-            }
-          })
+          lazyLink(() =>
+            import('./createLocalCallerLink').then(({ createLocalRunLink }) =>
+              createLocalRunLink(localRun, saveDatabase)
+            )
+          )
         ]
       })
     } else {

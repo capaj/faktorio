@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { startTransition } from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './globals.css'
 
-import { Database } from 'sql.js'
+import type { Database } from 'sql.js'
 
 let reactRoot: ReactDOM.Root
 
@@ -22,6 +22,16 @@ export const reactMainRender = async () => {
 
   if (!reactRootDiv) {
     throw new Error('Root element not found')
+  }
+
+  // The landing page is prerendered into #root at build time (see vite.config.ts). Hydrate it
+  // instead of re-creating the DOM, as a transition so React hydrates in small slices and
+  // does not block the main thread. Re-renders and other pages use a fresh client root.
+  if (!reactRoot && reactRootDiv.childElementCount > 0) {
+    startTransition(() => {
+      reactRoot = ReactDOM.hydrateRoot(reactRootDiv, <App />)
+    })
+    return
   }
 
   reactRoot = ReactDOM.createRoot(reactRootDiv)

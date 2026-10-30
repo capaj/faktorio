@@ -1,39 +1,58 @@
-// Import Workbox from CDN
-importScripts(
-  'https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js'
+import { clientsClaim } from 'workbox-core'
+import {
+  addPlugins,
+  cleanupOutdatedCaches,
+  matchPrecache,
+  precacheAndRoute
+} from 'workbox-precaching'
+import { registerRoute } from 'workbox-routing'
+
+function isValidAsset(request, response) {
+  const pathname = new URL(request.url).pathname
+  const contentType = response.headers.get('Content-Type') || ''
+  if (/\.m?js$/.test(pathname))
+    return /javascript|ecmascript/i.test(contentType)
+  if (pathname.endsWith('.css')) return /^text\/css\b/i.test(contentType)
+  if (pathname.endsWith('.wasm'))
+    return /^application\/wasm\b/i.test(contentType)
+  return true
+}
+
+// Pages returns HTML with status 200 for missing assets. Never cache that as
+// JavaScript/CSS, and repair entries left behind by an earlier deployment.
+addPlugins([
+  {
+    cacheWillUpdate: async ({ request, response }) =>
+      response.status === 200 && isValidAsset(request, response)
+        ? response
+        : null,
+    cachedResponseWillBeUsed: async ({ request, cachedResponse }) =>
+      cachedResponse && isValidAsset(request, cachedResponse)
+        ? cachedResponse
+        : undefined
+  }
+])
+
+// Online navigations must use the deployed HTML instead of an older cached
+// shell. Keep the matching precached shell available for offline use.
+registerRoute(
+  ({ request }) => request.mode === 'navigate',
+  async ({ request }) => {
+    try {
+      const response = await fetch(request)
+      if (response.ok) return response
+    } catch {}
+    return (await matchPrecache('index.html')) || Response.error()
+  }
 )
 
-// Initialize Workbox
-workbox.setConfig({
-  debug: false
-})
-
 // Precache and route using the manifest
-workbox.precaching.precacheAndRoute(self.__WB_MANIFEST)
+cleanupOutdatedCaches()
+precacheAndRoute(self.__WB_MANIFEST)
 
 // Enable automatic updates - skip waiting and claim clients immediately
-self.addEventListener('install', () => {
-  self.skipWaiting()
-})
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    Promise.all([
-      // Clean up old caches
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== workbox.core.cacheNames.precache) {
-              return caches.delete(cacheName)
-            }
-          })
-        )
-      }),
-      // Take control of all clients immediately
-      self.clients.claim()
-    ])
-  )
-})
+self.skipWaiting()
+clientsClaim()
 
 self.addEventListener('push', function (event) {
   console.log('Push event received:', event)
@@ -53,7 +72,7 @@ self.addEventListener('push', function (event) {
 
   const options = {
     body: data.body,
-    icon: data.icon || '/faktura.png',
+    icon: data.icon || '/icons/icon-192.png',
     badge: data.badge || '/faktura.png',
     data: data.data || {},
     actions: data.actions || [],

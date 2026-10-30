@@ -130,7 +130,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                         onRegistrySourceChange?.(value as CompanyRegistry)
                       }
                     >
-                      <SelectTrigger className="w-full md:w-[150px]">
+                      <SelectTrigger className="w-full md:w-[150px]" aria-label="Registr">
                         <SelectValue placeholder="Vyberte registr" />
                       </SelectTrigger>
                       <SelectContent>
@@ -330,7 +330,7 @@ export const ContactForm = <T extends ContactFormValues = ContactFormValues>({
                   value={String((field.value as string | undefined) || 'cs')}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger aria-label="Jazyk faktur">
                       <SelectValue placeholder="Vyberte jazyk" />
                     </SelectTrigger>
                   </FormControl>

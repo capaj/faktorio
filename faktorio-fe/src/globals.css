@@ -1,74 +1,290 @@
-@config "../tailwind.config.js";
-@import "tailwindcss";
+@import 'tailwindcss';
+@plugin "tailwindcss-animate";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+/* Dark mode is toggled by next-themes via the `dark` class on <html> (default: follow the OS) */
+@custom-variant dark (&:where(.dark, .dark *));
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+/*
+ * Design tokens. Components use only semantic colors (bg-surface, text-fg-muted, bg-success-subtle, …),
+ * so a theme is just a different set of values below. Light values map 1:1 to the palette colors
+ * the UI used before tokens were introduced.
+ */
+:root {
+  color-scheme: light;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(222.2 84% 4.9%);
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222.2 84% 4.9%);
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(222.2 84% 4.9%);
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+  --primary: hsl(222.2 47.4% 11.2%);
+  --primary-foreground: hsl(210 40% 98%);
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+  --secondary: hsl(210 40% 96.1%);
+  --secondary-foreground: hsl(222.2 47.4% 11.2%);
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+  --muted: hsl(210 40% 96.1%);
+  /* 44% lightness keeps 4.5:1 on --muted (e.g. inactive tabs), 46.9% did not */
+  --muted-foreground: hsl(215.4 16.3% 44%);
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+  --accent: hsl(210 40% 96.1%);
+  --accent-foreground: hsl(222.2 47.4% 11.2%);
 
-    --radius: 0.5rem;
+  /* Destructive is a solid button color; red text uses the danger token */
+  --destructive: var(--color-red-600);
+  --destructive-foreground: hsl(210 40% 98%);
+
+  --border: hsl(214.3 31.8% 91.4%);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(222.2 84% 4.9%);
+
+  --radius: 0.5rem;
+
+  /* Borders without an explicit color follow the text color, as Tailwind 4 does by default */
+  --default-border: currentColor;
+
+  /* Neutral surfaces, from the page background up to hover states */
+  --surface: var(--color-white);
+  --surface-subtle: var(--color-gray-50);
+  --surface-muted: var(--color-gray-100);
+  --surface-strong: var(--color-gray-200);
+  --surface-stronger: var(--color-gray-300);
+  --line: var(--color-gray-200);
+  --line-strong: var(--color-gray-400);
+
+  /* Neutral text, from the strongest to the faintest */
+  --fg-strong: var(--color-gray-900);
+  --fg-emphasis: var(--color-gray-800);
+  --fg-secondary: var(--color-gray-700);
+  --fg-subtle: var(--color-gray-600);
+  --fg-muted: var(--color-gray-500);
+  --fg-faint: var(--color-gray-400);
+
+  /* Status colors: subtle background, its border, a readable foreground on it and a standalone accent */
+  --success-subtle: var(--color-green-100);
+  --success-line: var(--color-green-400);
+  --success-fg: var(--color-green-800);
+  --success: var(--color-green-600);
+  --success-strong: var(--color-green-700);
+  --success-solid: var(--color-green-700);
+  --on-success-solid: var(--color-white);
+
+  --warning-subtle: var(--color-yellow-100);
+  --warning-muted: var(--color-yellow-50);
+  --warning-line: var(--color-yellow-400);
+  --warning-line-subtle: var(--color-yellow-200);
+  --warning-fg: var(--color-yellow-800);
+  --warning: var(--color-yellow-700);
+
+  --danger-subtle: var(--color-red-100);
+  --danger-muted: var(--color-red-50);
+  --danger-line: var(--color-red-400);
+  --danger-fg: var(--color-red-800);
+  --danger: var(--color-red-600);
+  --danger-strong: var(--color-red-700);
+
+  --info-subtle: var(--color-blue-100);
+  --info-muted: var(--color-blue-50);
+  --info-line: var(--color-blue-400);
+  --info-fg: var(--color-blue-800);
+  --info: var(--color-blue-600);
+  --info-strong: var(--color-blue-700);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: hsl(222.2 84% 4.9%);
+  --foreground: hsl(210 40% 98%);
+
+  --card: hsl(222.2 84% 4.9%);
+  --card-foreground: hsl(210 40% 98%);
+
+  --popover: hsl(222.2 84% 4.9%);
+  --popover-foreground: hsl(210 40% 98%);
+
+  --primary: hsl(210 40% 98%);
+  --primary-foreground: hsl(222.2 47.4% 11.2%);
+
+  --secondary: hsl(217.2 32.6% 17.5%);
+  --secondary-foreground: hsl(210 40% 98%);
+
+  --muted: hsl(217.2 32.6% 17.5%);
+  --muted-foreground: hsl(215 20.2% 65.1%);
+
+  --accent: hsl(217.2 32.6% 17.5%);
+  --accent-foreground: hsl(210 40% 98%);
+
+  --destructive: var(--color-red-700);
+  --destructive-foreground: hsl(210 40% 98%);
+
+  --border: hsl(217.2 32.6% 17.5%);
+  --input: hsl(217.2 32.6% 17.5%);
+  --ring: hsl(212.7 26.8% 83.9%);
+
+  /* currentColor would turn every plain border near-white on a dark background */
+  --default-border: var(--border);
+
+  --surface: var(--background);
+  --surface-subtle: var(--color-slate-900);
+  --surface-muted: var(--color-slate-800);
+  --surface-strong: var(--color-slate-700);
+  --surface-stronger: var(--color-slate-600);
+  --line: var(--color-slate-800);
+  --line-strong: var(--color-slate-400);
+
+  --fg-strong: var(--color-slate-50);
+  --fg-emphasis: var(--color-slate-100);
+  --fg-secondary: var(--color-slate-200);
+  --fg-subtle: var(--color-slate-300);
+  --fg-muted: var(--color-slate-400);
+  --fg-faint: var(--color-slate-500);
+
+  --success-subtle: var(--color-green-950);
+  --success-line: var(--color-green-700);
+  --success-fg: var(--color-green-200);
+  --success: var(--color-green-400);
+  --success-strong: var(--color-green-300);
+  --success-solid: var(--color-green-700);
+  --on-success-solid: var(--color-white);
+
+  --warning-subtle: var(--color-yellow-950);
+  --warning-muted: var(--color-yellow-950);
+  --warning-line: var(--color-yellow-600);
+  --warning-line-subtle: var(--color-yellow-800);
+  --warning-fg: var(--color-yellow-200);
+  --warning: var(--color-yellow-300);
+
+  --danger-subtle: var(--color-red-950);
+  --danger-muted: var(--color-red-950);
+  --danger-line: var(--color-red-700);
+  --danger-fg: var(--color-red-200);
+  --danger: var(--color-red-400);
+  --danger-strong: var(--color-red-300);
+
+  --info-subtle: var(--color-blue-950);
+  --info-muted: var(--color-blue-950);
+  --info-line: var(--color-blue-600);
+  --info-fg: var(--color-blue-200);
+  --info: var(--color-blue-400);
+  --info-strong: var(--color-blue-300);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-strong: var(--surface-strong);
+  --color-surface-stronger: var(--surface-stronger);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-fg-strong: var(--fg-strong);
+  --color-fg-emphasis: var(--fg-emphasis);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+
+  --color-success-subtle: var(--success-subtle);
+  --color-success-line: var(--success-line);
+  --color-success-fg: var(--success-fg);
+  --color-success: var(--success);
+  --color-success-strong: var(--success-strong);
+  --color-success-solid: var(--success-solid);
+  --color-on-success-solid: var(--on-success-solid);
+
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-muted: var(--warning-muted);
+  --color-warning-line: var(--warning-line);
+  --color-warning-line-subtle: var(--warning-line-subtle);
+  --color-warning-fg: var(--warning-fg);
+  --color-warning: var(--warning);
+
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-muted: var(--danger-muted);
+  --color-danger-line: var(--danger-line);
+  --color-danger-fg: var(--danger-fg);
+  --color-danger: var(--danger);
+  --color-danger-strong: var(--danger-strong);
+
+  --color-info-subtle: var(--info-subtle);
+  --color-info-muted: var(--info-muted);
+  --color-info-line: var(--info-line);
+  --color-info-fg: var(--info-fg);
+  --color-info: var(--info);
+  --color-info-strong: var(--info-strong);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= 40rem) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
   }
 }
 
 @layer base {
-  /* * {
-    @apply border-border;
-  } */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--default-border);
+  }
+
   body {
     @apply bg-background text-foreground;
   }

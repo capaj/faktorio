@@ -370,7 +370,7 @@ export function LocalDbManagementPage() {
   const renderUserForm = () => {
     if (token && !isLocalUser) {
       return (
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+        <div className="bg-warning-subtle border border-warning-line text-warning px-4 py-3 rounded">
           <p>
             Jste přihlášeni pomocí standardního účtu. Pro nastavení údajů pro
             lokální databázi se odhlašte.
@@ -380,9 +380,9 @@ export function LocalDbManagementPage() {
     }
 
     return (
-      <div className="space-y-2 p-4 bg-gray-50 rounded-lg border">
+      <div className="space-y-2 p-4 bg-surface-subtle rounded-lg border">
         <h3 className="text-xl">Nastavení uživatelských údajů</h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-fg-subtle">
           Pro používání lokální databáze potřebujete nastavit vaše údaje. Tyto
           údaje budou použity pouze lokálně.
         </p>
@@ -436,12 +436,12 @@ export function LocalDbManagementPage() {
     }
 
     return (
-      <div className="space-y-2 p-4 bg-gray-50 rounded-lg border">
+      <div className="space-y-2 p-4 bg-surface-subtle rounded-lg border">
         <h3 className="text-xl flex items-center">
           <Settings className="h-5 w-5 mr-2" />
           Nastavení proměnných prostředí
         </h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-fg-subtle">
           Zadejte proměnné prostředí pro lokální běh aplikace. Formát:
           KLÍČ=hodnota (jeden pár na řádek). Nepovinné-klíče jsou potřeba jen
           pro některé funkce.
@@ -480,13 +480,13 @@ export function LocalDbManagementPage() {
       <h3 className="text-2xl font-bold">Správa lokálních databází</h3>
 
       {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+        <div className="bg-success-subtle border border-success-line text-success-strong px-4 py-3 rounded">
           {success}
         </div>
       )}
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="bg-danger-subtle border border-danger-line text-danger-strong px-4 py-3 rounded">
           {error}
         </div>
       )}
@@ -498,7 +498,7 @@ export function LocalDbManagementPage() {
       {(!token || isLocalUser) && renderEnvVarsForm()}
 
       {activeDbName && (
-        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded flex justify-between items-center">
+        <div className="bg-info-subtle border border-info-line text-info-strong px-4 py-3 rounded flex justify-between items-center">
           <div>
             <span className="font-bold">Aktivní databáze:</span>{' '}
             <span className="font-mono">{activeDbName}</span>
@@ -533,7 +533,7 @@ export function LocalDbManagementPage() {
                   <Database className="h-4 w-4 mr-2" />
                   {file}
                   {activeDbName === file && (
-                    <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                    <span className="ml-2 px-2 py-0.5 bg-info-subtle text-info-strong text-xs rounded-full">
                       Aktivní
                     </span>
                   )}
@@ -607,6 +607,7 @@ export function LocalDbManagementPage() {
             type="file"
             ref={fileInputRef}
             accept=".sqlite"
+            aria-label="Importovat databázi (.sqlite)"
             onChange={handleImportDb}
             disabled={isImporting}
             className="flex-grow"
@@ -619,7 +620,7 @@ export function LocalDbManagementPage() {
             {isImporting ? 'Importuji...' : 'Importovat'}
           </Button>
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-fg-muted">
           Vyberte soubor .sqlite pro import do aplikace.
         </p>
       </div>

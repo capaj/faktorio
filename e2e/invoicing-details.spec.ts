@@ -9,7 +9,7 @@ test('submits the reported invoicing details with a default bank account', async
 }) => {
   await page.goto(url)
   await page
-    .getByRole('link', { name: 'Registrace', exact: true })
+    .getByRole('link', { name: 'Začít fakturovat zdarma', exact: true })
     .first()
     .click()
 
