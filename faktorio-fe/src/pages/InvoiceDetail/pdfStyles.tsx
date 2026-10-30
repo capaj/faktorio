@@ -1,11 +1,17 @@
-
 import React from 'react'
-import {
-  Text,
-  View,
-  StyleSheet,
-  DocumentProps
-} from '@react-pdf/renderer'
+import type {
+  InsertInvoiceItemType,
+  SelectInvoiceType
+} from 'faktorio-api/src/zodDbSchemas'
+import { Text, View, StyleSheet, DocumentProps } from '@react-pdf/renderer'
+
+export type InvoicePDFPageProps = {
+  invoiceData: SelectInvoiceType & { items: InsertInvoiceItemType[] }
+  qrCodeBase64?: string
+  vatPayer?: boolean
+  logoUrl?: string | null
+  singlePage?: boolean
+}
 
 export const pdfStyles = StyleSheet.create({
   page: {
@@ -14,6 +20,11 @@ export const pdfStyles = StyleSheet.create({
     // padding: 10,
     fontFamily: 'Inter',
     color: '#000'
+  },
+  // A4 minimum height; longer invoices grow to retain all items on one page.
+  singlePage: {
+    minHeight: 841.89,
+    paddingBottom: 70
   },
   section: {
     marginTop: 10,
@@ -59,7 +70,13 @@ export const SectionHeading = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-export const TextLabel = ({ children, style }: { children: React.ReactNode, style?: DocumentProps['style'] }) => {
+export const TextLabel = ({
+  children,
+  style
+}: {
+  children: React.ReactNode
+  style?: DocumentProps['style']
+}) => {
   return (
     <Text
       style={{
@@ -87,7 +104,11 @@ export const FlexRow = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-export const ThirdWidthColumnRight = ({ children }: { children: React.ReactNode }) => {
+export const ThirdWidthColumnRight = ({
+  children
+}: {
+  children: React.ReactNode
+}) => {
   return (
     <Flex
       style={{

@@ -10,13 +10,10 @@ import {
 } from '@react-pdf/renderer'
 import { formatMoneyCzech } from '../../lib/formatMoney'
 import {
-  InsertInvoiceItemType,
-  SelectInvoiceType
-} from 'faktorio-api/src/zodDbSchemas'
-import {
   Flex,
   FlexRow,
   ItemDescText,
+  type InvoicePDFPageProps,
   pdfStyles,
   SectionHeading,
   TextLabel,
@@ -82,17 +79,19 @@ function reformatDateToCzech(dateString: string) {
   return `${parseInt(day, 10)}.${parseInt(month, 10)}.${year}`
 }
 
-export const CzechInvoicePDF = ({
+export const CzechInvoicePDF = (props: InvoicePDFPageProps) => (
+  <Document>
+    <CzechInvoicePDFPage {...props} />
+  </Document>
+)
+
+export const CzechInvoicePDFPage = ({
   invoiceData,
   qrCodeBase64,
   vatPayer,
-  logoUrl
-}: {
-  invoiceData: SelectInvoiceType & { items: InsertInvoiceItemType[] }
-  qrCodeBase64?: string
-  vatPayer?: boolean
-  logoUrl?: string | null
-}) => {
+  logoUrl,
+  singlePage = false
+}: InvoicePDFPageProps) => {
   const taxPaidByRate: Record<number, number> = invoiceData.items.reduce(
     (acc, item) => {
       const total = (item.quantity ?? 0) * (item.unit_price ?? 0)
@@ -116,340 +115,420 @@ export const CzechInvoicePDF = ({
   )
 
   return (
-    <Document key={new Date().toISOString()}>
-      <Page size="A4" style={pdfStyles.page}>
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
-          <Flex
-            style={{
-              minHeight: 200,
-              width: '100%'
-            }}
-          >
-            <Flex
-              style={{
-                flexDirection: 'row',
-                marginTop: 50,
-                fontSize: 22
-              }}
-            >
-              <View
-                style={{
-                  width: '50%'
-                }}
-              >
-                <Flex
-                  style={{
-                    flexDirection: 'column',
-                    marginLeft: 20
-                  }}
-                >
-                  <Text>Faktura {invoiceData.number}</Text>
-
-                  <Text
-                    style={{
-                      marginTop: 10,
-                      fontSize: 11
-                    }}
-                  >
-                    Daňový doklad
-                  </Text>
-                </Flex>
-              </View>
-              <Flex
-                style={{
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  width: '50%'
-                }}
-              >
-                {logoUrl && (
-                  <View
-                    style={{
-                      marginRight: 20,
-                      marginBottom: 10
-                    }}
-                  >
-                    <InvoiceLogo logoUrl={logoUrl} />
-                  </View>
-                )}
-              </Flex>
-            </Flex>
-          </Flex>
-        </View>
+    <Page
+      size={singlePage ? { width: 595.28 } : 'A4'}
+      wrap={!singlePage}
+      style={
+        singlePage ? [pdfStyles.page, pdfStyles.singlePage] : pdfStyles.page
+      }
+    >
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}
+      >
         <Flex
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginLeft: 2
+            minHeight: 200,
+            width: '100%'
           }}
         >
           <Flex
             style={{
               flexDirection: 'row',
-              marginLeft: 20
+              marginTop: 50,
+              fontSize: 22
             }}
           >
-            <Flex
+            <View
               style={{
-                width: '57%',
-                flexDirection: 'column',
-                fontSize: 11
+                width: '50%'
               }}
             >
-              <SectionHeading>Dodavatel</SectionHeading>
-
-              <View style={pdfStyles.section}>
-                <View style={{ maxWidth: '95%' }}>
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 500
-                    }}
-                  >
-                    {invoiceData.your_name}
-                  </Text>
-                </View>
-                <Text>{invoiceData.your_street}</Text>
-                <Text>
-                  {invoiceData.your_zip} {invoiceData.your_city}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 8,
-                    marginTop: 8
-                  }}
-                >
-                  Fyzická osoba zapsaná v živnostenském rejstříku.
-                </Text>
-              </View>
               <Flex
                 style={{
-                  marginTop: 10,
-                  paddingRight: 40
+                  flexDirection: 'column',
+                  marginLeft: 20
                 }}
               >
-                <Flex
+                <Text>Faktura {invoiceData.number}</Text>
+
+                <Text
                   style={{
-                    flexDirection: 'row',
-                    fontSize: 10
+                    marginTop: 10,
+                    fontSize: 11
                   }}
                 >
-                  <TextLabel style={{ width: 30 }}>IČ</TextLabel>
-                  <Text>{invoiceData.your_registration_no}</Text>
-                </Flex>
-                <Flex
-                  style={{
-                    flexDirection: 'row',
-                    fontSize: 10
-                  }}
-                >
-                  <TextLabel style={{ width: 30 }}>DIČ</TextLabel>
-                  <Text>{invoiceData.your_vat_no}</Text>
-                </Flex>
+                  Daňový doklad
+                </Text>
               </Flex>
-              <View
-                style={{
-                  ...pdfStyles.section,
-                  paddingRight: 40
-                }}
-              >
-                <FlexRow>
-                  <TextLabel>Bankovní účet</TextLabel>
-                  <Text>{invoiceData.bank_account ?? '-'}</Text>
-                </FlexRow>
-                <FlexRow>
-                  <TextLabel>IBAN</TextLabel>
-                  <Text>{invoiceData.iban}</Text>
-                </FlexRow>
-                <FlexRow>
-                  <TextLabel>SWIFT/BIC</TextLabel>
-                  <Text>{invoiceData.swift_bic}</Text>
-                </FlexRow>
-                <FlexRow>
-                  <TextLabel>Variabilní symbol</TextLabel>
-                  <Text>{invoiceData.number.replace('-', '')}</Text>
-                </FlexRow>
-                <FlexRow>
-                  <TextLabel>Způsob platby</TextLabel>
-
-                  <Text>Převodem</Text>
-                </FlexRow>
-              </View>
-            </Flex>
-
+            </View>
             <Flex
               style={{
-                marginRight: 22,
-                width: '43%'
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                width: '50%'
               }}
             >
-              <SectionHeading>Odběratel</SectionHeading>
+              {logoUrl && (
+                <View
+                  style={{
+                    marginRight: 20,
+                    marginBottom: 10
+                  }}
+                >
+                  <InvoiceLogo logoUrl={logoUrl} />
+                </View>
+              )}
+            </Flex>
+          </Flex>
+        </Flex>
+      </View>
+      <Flex
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginLeft: 2
+        }}
+      >
+        <Flex
+          style={{
+            flexDirection: 'row',
+            marginLeft: 20
+          }}
+        >
+          <Flex
+            style={{
+              width: '57%',
+              flexDirection: 'column',
+              fontSize: 11
+            }}
+          >
+            <SectionHeading>Dodavatel</SectionHeading>
 
-              <View style={pdfStyles.section}>
+            <View style={pdfStyles.section}>
+              <View style={{ maxWidth: '95%' }}>
                 <Text
                   style={{
                     fontSize: 13,
                     fontWeight: 500
                   }}
                 >
-                  {invoiceData.client_name}
+                  {invoiceData.your_name}
                 </Text>
-                <Text>{invoiceData.client_street}</Text>
-                <Text>
-                  {invoiceData.client_zip} {invoiceData.client_city}
-                </Text>
-                <View
-                  style={{
-                    marginTop: 8,
-                    height: 10
-                  }}
-                />
-                <Flex
-                  style={{
-                    marginTop: 10
-                  }}
-                >
-                  <FlexRow>
-                    <TextLabel>IČ </TextLabel>
-                    <Text>{invoiceData.client_registration_no}</Text>
-                  </FlexRow>
-                  <FlexRow>
-                    <TextLabel>DIČ </TextLabel>
-                    <Text>{invoiceData.client_vat_no}</Text>
-                  </FlexRow>
-                </Flex>
-                <Flex
-                  style={{
-                    marginTop: 10
-                  }}
-                >
-                  <FlexRow>
-                    <TextLabel>Datum vystavení </TextLabel>
-                    <Text>
-                      {reformatDateToCzech(invoiceData.issued_on ?? '')}
-                    </Text>
-                  </FlexRow>
-                  <FlexRow>
-                    <TextLabel>Datum splatnosti </TextLabel>
-                    <Text>{reformatDateToCzech(invoiceData.due_on)}</Text>
-                  </FlexRow>
-                  <FlexRow>
-                    <TextLabel>Datum zdan. plnění </TextLabel>
-                    <Text>
-                      {reformatDateToCzech(
-                        invoiceData.taxable_fulfillment_due ?? ''
-                      )}
-                    </Text>
-                  </FlexRow>
-                </Flex>
               </View>
+              <Text>{invoiceData.your_street}</Text>
+              <Text>
+                {invoiceData.your_zip} {invoiceData.your_city}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 8,
+                  marginTop: 8
+                }}
+              >
+                Fyzická osoba zapsaná v živnostenském rejstříku.
+              </Text>
+            </View>
+            <Flex
+              style={{
+                marginTop: 10,
+                paddingRight: 40
+              }}
+            >
+              <Flex
+                style={{
+                  flexDirection: 'row',
+                  fontSize: 10
+                }}
+              >
+                <TextLabel style={{ width: 30 }}>IČ</TextLabel>
+                <Text>{invoiceData.your_registration_no}</Text>
+              </Flex>
+              <Flex
+                style={{
+                  flexDirection: 'row',
+                  fontSize: 10
+                }}
+              >
+                <TextLabel style={{ width: 30 }}>DIČ</TextLabel>
+                <Text>{invoiceData.your_vat_no}</Text>
+              </Flex>
             </Flex>
+            <View
+              style={{
+                ...pdfStyles.section,
+                paddingRight: 40
+              }}
+            >
+              <FlexRow>
+                <TextLabel>Bankovní účet</TextLabel>
+                <Text>{invoiceData.bank_account ?? '-'}</Text>
+              </FlexRow>
+              <FlexRow>
+                <TextLabel>IBAN</TextLabel>
+                <Text>{invoiceData.iban}</Text>
+              </FlexRow>
+              <FlexRow>
+                <TextLabel>SWIFT/BIC</TextLabel>
+                <Text>{invoiceData.swift_bic}</Text>
+              </FlexRow>
+              <FlexRow>
+                <TextLabel>Variabilní symbol</TextLabel>
+                <Text>{invoiceData.number.replace('-', '')}</Text>
+              </FlexRow>
+              <FlexRow>
+                <TextLabel>Způsob platby</TextLabel>
+
+                <Text>Převodem</Text>
+              </FlexRow>
+            </View>
           </Flex>
+
+          <Flex
+            style={{
+              marginRight: 22,
+              width: '43%'
+            }}
+          >
+            <SectionHeading>Odběratel</SectionHeading>
+
+            <View style={pdfStyles.section}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500
+                }}
+              >
+                {invoiceData.client_name}
+              </Text>
+              <Text>{invoiceData.client_street}</Text>
+              <Text>
+                {invoiceData.client_zip} {invoiceData.client_city}
+              </Text>
+              <View
+                style={{
+                  marginTop: 8,
+                  height: 10
+                }}
+              />
+              <Flex
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <FlexRow>
+                  <TextLabel>IČ </TextLabel>
+                  <Text>{invoiceData.client_registration_no}</Text>
+                </FlexRow>
+                <FlexRow>
+                  <TextLabel>DIČ </TextLabel>
+                  <Text>{invoiceData.client_vat_no}</Text>
+                </FlexRow>
+              </Flex>
+              <Flex
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <FlexRow>
+                  <TextLabel>Datum vystavení </TextLabel>
+                  <Text>
+                    {reformatDateToCzech(invoiceData.issued_on ?? '')}
+                  </Text>
+                </FlexRow>
+                <FlexRow>
+                  <TextLabel>Datum splatnosti </TextLabel>
+                  <Text>{reformatDateToCzech(invoiceData.due_on)}</Text>
+                </FlexRow>
+                <FlexRow>
+                  <TextLabel>Datum zdan. plnění </TextLabel>
+                  <Text>
+                    {reformatDateToCzech(
+                      invoiceData.taxable_fulfillment_due ?? ''
+                    )}
+                  </Text>
+                </FlexRow>
+              </Flex>
+            </View>
+          </Flex>
+        </Flex>
+      </Flex>
+      <Flex
+        style={{
+          flexDirection: 'row',
+          fontSize: 10,
+          marginTop: 20,
+          marginRight: 22,
+          justifyContent: 'flex-end'
+        }}
+      >
+        <Flex
+          style={{
+            width: '49%',
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+          }}
+        >
+          {vatPayer && <ThirdWidthColumnRight>DPH</ThirdWidthColumnRight>}
+          <ThirdWidthColumnRight>Cena za MJ</ThirdWidthColumnRight>
+          <ThirdWidthColumnRight>
+            Celkem {vatPayer && 'bez DPH'}
+          </ThirdWidthColumnRight>
+        </Flex>
+      </Flex>
+      <View
+        style={{
+          marginTop: 10,
+          marginRight: 22,
+          paddingTop: 7,
+          paddingBottom: 0,
+          marginLeft: 20,
+          fontSize: 10,
+          borderBottom: '1px solid #444',
+          borderTop: '1px solid #444'
+        }}
+      >
+        {invoiceData.items.map((item, index) => {
+          const unitPrice = item.unit_price ?? 0
+          const quantity = item.quantity ?? 0
+          const vatRate = vatPayer ? (item.vat_rate ?? 0) : 0
+          return (
+            <Flex
+              key={index}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: 7
+              }}
+            >
+              <Flex
+                style={{
+                  width: '50%',
+                  flexDirection: 'row',
+
+                  justifyContent: 'flex-start'
+                }}
+              >
+                <ItemDescText
+                  style={{
+                    width: '5%'
+                  }}
+                >
+                  {item.quantity}
+                </ItemDescText>
+                <ItemDescText
+                  style={{
+                    width: '14%',
+                    fontSize: 9
+                  }}
+                >
+                  {item.unit}
+                </ItemDescText>
+                <ItemDescText>{item.description}</ItemDescText>
+              </Flex>
+              <Flex
+                style={{
+                  width: '50%',
+                  flexDirection: 'row',
+                  alignItems: 'baseline',
+                  justifyContent: 'flex-start'
+                }}
+              >
+                <ThirdWidthColumnRight>
+                  {vatPayer ? `${vatRate}%` : ''}
+                </ThirdWidthColumnRight>
+                <ThirdWidthColumnRight>
+                  {formatMoneyCzech(unitPrice, invoiceData.currency)}
+                </ThirdWidthColumnRight>
+                <ThirdWidthColumnRight>
+                  {formatMoneyCzech(unitPrice * quantity, invoiceData.currency)}
+                </ThirdWidthColumnRight>
+              </Flex>
+            </Flex>
+          )
+        })}
+      </View>
+      <Flex
+        style={{
+          marginTop: 30,
+          marginRight: 22,
+          flexDirection: 'row'
+        }}
+      >
+        <Flex
+          style={{
+            width: '60%',
+            flexDirection: 'column',
+            paddingLeft: 20
+          }}
+        >
+          {qrCodeBase64 && (
+            <View>
+              <Text
+                style={{
+                  fontSize: 13,
+                  marginBottom: 8
+                }}
+              >
+                QR platba:
+              </Text>
+
+              <Image
+                style={{
+                  width: 100,
+                  height: 100
+                }}
+                source={qrCodeBase64}
+              ></Image>
+            </View>
+          )}
         </Flex>
         <Flex
           style={{
-            flexDirection: 'row',
-            fontSize: 10,
-            marginTop: 20,
-            marginRight: 22,
-            justifyContent: 'flex-end'
+            flexDirection: 'column',
+            width: '40%'
           }}
         >
           <Flex
             style={{
-              width: '49%',
-              flexDirection: 'row',
-              justifyContent: 'space-between'
+              borderBottom: '1px solid #444'
             }}
           >
-            {vatPayer && <ThirdWidthColumnRight>DPH</ThirdWidthColumnRight>}
-            <ThirdWidthColumnRight>Cena za MJ</ThirdWidthColumnRight>
-            <ThirdWidthColumnRight>
-              Celkem {vatPayer && 'bez DPH'}
-            </ThirdWidthColumnRight>
+            <FlexRow>
+              <TextLabel>Celkem {vatPayer && ' bez DPH'}</TextLabel>
+              <Text>
+                {formatMoneyCzech(invoiceTotal, invoiceData.currency)}
+              </Text>
+            </FlexRow>
+            {vatPayer &&
+              Object.entries(taxPaidByRate).map(([rate, tax]) => {
+                return (
+                  <Fragment key={rate}>
+                    <FlexRow>
+                      <TextLabel>DPH {Number(rate)}%</TextLabel>
+                      <Text>{formatMoneyCzech(tax, invoiceData.currency)}</Text>
+                    </FlexRow>
+                  </Fragment>
+                )
+              })}
           </Flex>
-        </Flex>
-        <View
-          style={{
-            marginTop: 10,
-            marginRight: 22,
-            paddingTop: 7,
-            paddingBottom: 0,
-            marginLeft: 20,
-            fontSize: 10,
-            borderBottom: '1px solid #444',
-            borderTop: '1px solid #444'
-          }}
-        >
-          {invoiceData.items.map((item, index) => {
-            const unitPrice = item.unit_price ?? 0
-            const quantity = item.quantity ?? 0
-            const vatRate = vatPayer ? (item.vat_rate ?? 0) : 0
-            return (
-              <Flex
-                key={index}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  marginBottom: 7
-                }}
-              >
-                <Flex
-                  style={{
-                    width: '50%',
-                    flexDirection: 'row',
 
-                    justifyContent: 'flex-start'
-                  }}
-                >
-                  <ItemDescText
-                    style={{
-                      width: '5%'
-                    }}
-                  >
-                    {item.quantity}
-                  </ItemDescText>
-                  <ItemDescText
-                    style={{
-                      width: '14%',
-                      fontSize: 9
-                    }}
-                  >
-                    {item.unit}
-                  </ItemDescText>
-                  <ItemDescText>{item.description}</ItemDescText>
-                </Flex>
-                <Flex
-                  style={{
-                    width: '50%',
-                    flexDirection: 'row',
-                    alignItems: 'baseline',
-                    justifyContent: 'flex-start'
-                  }}
-                >
-                  <ThirdWidthColumnRight>
-                    {vatPayer ? `${vatRate}%` : ''}
-                  </ThirdWidthColumnRight>
-                  <ThirdWidthColumnRight>
-                    {formatMoneyCzech(unitPrice, invoiceData.currency)}
-                  </ThirdWidthColumnRight>
-                  <ThirdWidthColumnRight>
-                    {formatMoneyCzech(
-                      unitPrice * quantity,
-                      invoiceData.currency
-                    )}
-                  </ThirdWidthColumnRight>
-                </Flex>
-              </Flex>
-            )
-          })}
-        </View>
+          <Text
+            style={{
+              fontSize: 24,
+              marginTop: 6,
+              textAlign: 'right',
+              fontWeight: 500
+            }}
+          >
+            {formatMoneyCzech(invoiceTotal + taxTotal, invoiceData.currency)}
+          </Text>
+        </Flex>
+      </Flex>
+      {invoiceData.exchange_rate !== 1 && (
         <Flex
           style={{
             marginTop: 30,
@@ -459,32 +538,9 @@ export const CzechInvoicePDF = ({
         >
           <Flex
             style={{
-              width: '60%',
-              flexDirection: 'column',
-              paddingLeft: 20
+              width: '60%'
             }}
-          >
-            {qrCodeBase64 && (
-              <View>
-                <Text
-                  style={{
-                    fontSize: 13,
-                    marginBottom: 8
-                  }}
-                >
-                  QR platba:
-                </Text>
-
-                <Image
-                  style={{
-                    width: 100,
-                    height: 100
-                  }}
-                  source={qrCodeBase64}
-                ></Image>
-              </View>
-            )}
-          </Flex>
+          ></Flex>
           <Flex
             style={{
               flexDirection: 'column',
@@ -496,136 +552,78 @@ export const CzechInvoicePDF = ({
                 borderBottom: '1px solid #444'
               }}
             >
+              <Text style={{ fontSize: 12, color: 'gray' }}>
+                Přepočet na CZK kurz{' '}
+                <Text style={{ fontWeight: 500, color: 'black' }}>
+                  {invoiceData.exchange_rate} CZK / 1 {invoiceData.currency}
+                </Text>
+              </Text>
               <FlexRow>
-                <TextLabel>Celkem {vatPayer && ' bez DPH'}</TextLabel>
-                <Text>
-                  {formatMoneyCzech(invoiceTotal, invoiceData.currency)}
+                <TextLabel>Celkem bez DPH</TextLabel>
+                <Text style={{ color: 'gray' }}>
+                  {formatMoneyCzech(
+                    invoiceTotal * invoiceData.exchange_rate,
+                    'CZK'
+                  )}
                 </Text>
               </FlexRow>
-              {vatPayer &&
-                Object.entries(taxPaidByRate).map(([rate, tax]) => {
-                  return (
-                    <Fragment key={rate}>
-                      <FlexRow>
-                        <TextLabel>DPH {Number(rate)}%</TextLabel>
-                        <Text>
-                          {formatMoneyCzech(tax, invoiceData.currency)}
-                        </Text>
-                      </FlexRow>
-                    </Fragment>
-                  )
-                })}
+              {Object.entries(taxPaidByRate).map(([rate, tax]) => {
+                return (
+                  <Fragment key={rate}>
+                    <FlexRow>
+                      <TextLabel style={{ color: 'gray' }}>
+                        DPH {Number(rate)}% v CZK
+                      </TextLabel>
+                      <Text
+                        style={{
+                          color: 'gray'
+                        }}
+                      >
+                        {formatMoneyCzech(
+                          tax * invoiceData.exchange_rate,
+                          'CZK'
+                        )}
+                      </Text>
+                    </FlexRow>
+                  </Fragment>
+                )
+              })}
             </Flex>
 
             <Text
               style={{
-                fontSize: 24,
+                fontSize: 16,
+                color: 'gray',
                 marginTop: 6,
                 textAlign: 'right',
                 fontWeight: 500
               }}
             >
-              {formatMoneyCzech(invoiceTotal + taxTotal, invoiceData.currency)}
+              {formatMoneyCzech(
+                (invoiceTotal + taxTotal) * invoiceData.exchange_rate,
+                'CZK'
+              )}
             </Text>
           </Flex>
         </Flex>
-        {invoiceData.exchange_rate !== 1 && (
-          <Flex
-            style={{
-              marginTop: 30,
-              marginRight: 22,
-              flexDirection: 'row'
-            }}
-          >
-            <Flex
-              style={{
-                width: '60%'
-              }}
-            ></Flex>
-            <Flex
-              style={{
-                flexDirection: 'column',
-                width: '40%'
-              }}
-            >
-              <Flex
-                style={{
-                  borderBottom: '1px solid #444'
-                }}
-              >
-                <Text style={{ fontSize: 12, color: 'gray' }}>
-                  Přepočet na CZK kurz{' '}
-                  <Text style={{ fontWeight: 500, color: 'black' }}>
-                    {invoiceData.exchange_rate} CZK / 1 {invoiceData.currency}
-                  </Text>
-                </Text>
-                <FlexRow>
-                  <TextLabel>Celkem bez DPH</TextLabel>
-                  <Text style={{ color: 'gray' }}>
-                    {formatMoneyCzech(
-                      invoiceTotal * invoiceData.exchange_rate,
-                      'CZK'
-                    )}
-                  </Text>
-                </FlexRow>
-                {Object.entries(taxPaidByRate).map(([rate, tax]) => {
-                  return (
-                    <Fragment key={rate}>
-                      <FlexRow>
-                        <TextLabel style={{ color: 'gray' }}>
-                          DPH {Number(rate)}% v CZK
-                        </TextLabel>
-                        <Text
-                          style={{
-                            color: 'gray'
-                          }}
-                        >
-                          {formatMoneyCzech(
-                            tax * invoiceData.exchange_rate,
-                            'CZK'
-                          )}
-                        </Text>
-                      </FlexRow>
-                    </Fragment>
-                  )
-                })}
-              </Flex>
-
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: 'gray',
-                  marginTop: 6,
-                  textAlign: 'right',
-                  fontWeight: 500
-                }}
-              >
-                {formatMoneyCzech(
-                  (invoiceTotal + taxTotal) * invoiceData.exchange_rate,
-                  'CZK'
-                )}
-              </Text>
-            </Flex>
-          </Flex>
-        )}
-        <Text style={{ marginLeft: 22, marginTop: 10, fontSize: 10 }}>
-          {invoiceData.footer_note}
+      )}
+      <Text style={{ marginLeft: 22, marginTop: 10, fontSize: 10 }}>
+        {invoiceData.footer_note}
+      </Text>
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 30,
+          left: 20,
+          fontSize: 8
+        }}
+      >
+        <Text>
+          Faktura vystavena na{' '}
+          <Link href="https://faktorio.cz">faktorio.cz</Link>
         </Text>
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 30,
-            left: 20,
-            fontSize: 8
-          }}
-        >
-          <Text>
-            Faktura vystavena na{' '}
-            <Link href="https://faktorio.cz">faktorio.cz</Link>
-          </Text>
-        </View>
-      </Page>
-    </Document>
+      </View>
+    </Page>
   )
 }
 

@@ -28,7 +28,6 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 import { formatNumberWithSpaces } from '@/pages/formatNumberWithSpaces' // Adjust path if needed
-import { InvoicesDownloadButton } from '@/pages/InvoiceList/InvoicesDownloadButton' // Adjust path if needed
 import { IsdocDownloadButton } from '@/components/IsdocDownloadButton'
 
 // Define the shape of an invoice - adjust based on your actual data structure
@@ -91,7 +90,6 @@ interface InvoiceTableProps {
   onMarkAsUnpaid?: (id: string) => Promise<void>
   showTotals?: boolean
   year?: number | null
-  search?: string
   // Add any other props needed, e.g., specific mutation status if needed inside the table
 }
 
@@ -102,8 +100,7 @@ export function IssuedInvoiceTable({
   onMarkAsPaid,
   onMarkAsUnpaid,
   showTotals = true, // Default to showing totals
-  year,
-  search
+  year
 }: InvoiceTableProps) {
   // Determine if we should show full year in dates
   const showFullYear = year === null || year === undefined
@@ -118,9 +115,7 @@ export function IssuedInvoiceTable({
 
   const renderPaymentBadge = (invoice: Invoice) => {
     const isOverdue =
-      invoice.due_on &&
-      !invoice.paid_on &&
-      new Date(invoice.due_on) < today
+      invoice.due_on && !invoice.paid_on && new Date(invoice.due_on) < today
 
     const baseClass = 'px-2 py-1 rounded-full text-xs font-medium'
 
@@ -156,10 +151,7 @@ export function IssuedInvoiceTable({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="cursor-pointer">
         <DropdownMenuItem>
-          <Link
-            href={`/invoices/${invoice.id}/edit`}
-            className="flex w-full"
-          >
+          <Link href={`/invoices/${invoice.id}/edit`} className="flex w-full">
             <Pencil size={16} strokeWidth="1.5" />
             <span className="ml-2">Editovat</span>
           </Link>
@@ -214,7 +206,11 @@ export function IssuedInvoiceTable({
             onSelect={(e) => e.preventDefault()}
             onClick={() => onMarkAsPaid(invoice.id, invoice.number)}
           >
-            <CheckCircle size={16} strokeWidth="1.5" className="text-green-600" />
+            <CheckCircle
+              size={16}
+              strokeWidth="1.5"
+              className="text-green-600"
+            />
             <span className="ml-2">Označit jako zaplacené</span>
           </DropdownMenuItem>
         )}
@@ -421,7 +417,9 @@ export function IssuedInvoiceTable({
                     </TableCell>
                     <TableCell></TableCell> {/* Empty cell for alignment */}
                     <TableCell className="whitespace-nowrap">
-                      {formatNumberWithSpaces(currencyTotals[currency].subtotal)}{' '}
+                      {formatNumberWithSpaces(
+                        currencyTotals[currency].subtotal
+                      )}{' '}
                       {currency}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
@@ -473,11 +471,7 @@ export function IssuedInvoiceTable({
                       {formatNumberWithSpaces(totalSumCZK)} CZK
                     </TableCell>
 
-                    <TableCell className="text-right">
-                      {year !== undefined && search !== undefined && (
-                        <InvoicesDownloadButton year={year} search={search} />
-                      )}
-                    </TableCell>
+                    <TableCell />
                   </TableRow>
                 )}
               </>
@@ -541,7 +535,9 @@ export function IssuedInvoiceTable({
                     className="flex items-center gap-1 text-sm font-medium text-slate-700"
                     onClick={() => toggleExpanded(invoice.id)}
                   >
-                    {expandedMobileCards.has(invoice.id) ? 'Skrýt detaily' : 'Zobrazit detaily'}
+                    {expandedMobileCards.has(invoice.id)
+                      ? 'Skrýt detaily'
+                      : 'Zobrazit detaily'}
                     {expandedMobileCards.has(invoice.id) ? (
                       <ChevronUp className="h-4 w-4" />
                     ) : (
@@ -594,7 +590,10 @@ export function IssuedInvoiceTable({
             <div className="text-sm font-semibold text-gray-700">Souhrn</div>
             <div className="mt-2 space-y-2 text-sm">
               {sortedCurrencies.map((currency) => (
-                <div key={currency} className="flex items-center justify-between">
+                <div
+                  key={currency}
+                  className="flex items-center justify-between"
+                >
                   <span className="text-gray-700">
                     {currencyTotals[currency].count}{' '}
                     {currencyTotals[currency].count === 1
@@ -626,11 +625,6 @@ export function IssuedInvoiceTable({
                       {formatNumberWithSpaces(totalSumCZK)} CZK
                     </span>
                   </div>
-                  {year !== undefined && search !== undefined && (
-                    <div className="pt-1">
-                      <InvoicesDownloadButton year={year} search={search} />
-                    </div>
-                  )}
                 </>
               )}
             </div>

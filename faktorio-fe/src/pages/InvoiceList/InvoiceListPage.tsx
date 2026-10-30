@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { useQueryParamState } from './useQueryParamState'
 import { MarkAsPaidDialog } from './MarkAsPaidDialog'
 import { IssuedInvoiceTable } from '@/components/IssuedInvoiceTable'
+import { InvoicesDownloadButton } from './InvoicesDownloadButton'
 import type { TRPCClientErrorLike } from '@trpc/client'
 import type { UseQueryResult } from '@tanstack/react-query'
 import type { AppRouter } from 'faktorio-api/src/trpcRouter'
@@ -109,6 +110,12 @@ export function InvoiceListPage() {
             })}
           </SelectContent>
         </Select>
+        <InvoicesDownloadButton
+          invoices={invoices}
+          year={selectedYear}
+          search={search}
+          disabled={q.isFetching || q.isError}
+        />
       </div>
       <IssuedInvoiceTable
         invoices={invoices}
@@ -118,7 +125,6 @@ export function InvoiceListPage() {
         onMarkAsUnpaid={handleMarkAsUnpaid}
         showTotals={true}
         year={selectedYear}
-        search={search}
       />
 
       {markAsPaidInvoice && (
