@@ -50,11 +50,13 @@ export function InvoicesDownloadButton({
   invoices,
   year,
   search,
+  contactId,
   disabled = false
 }: {
   invoices: RouterOutputs['invoices']['listInvoices']
   year?: number | null
   search?: string
+  contactId?: string
   disabled?: boolean
 }) {
   const [generating, setGenerating] = useState<DownloadFormat | null>(null)
@@ -69,6 +71,7 @@ export function InvoicesDownloadButton({
       const allInvoices = await utils.invoices.listInvoices.fetch({
         filter: search,
         year,
+        ...(contactId ? { contactId } : {}),
         limit: null
       })
       if (allInvoices.length === 0) {

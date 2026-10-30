@@ -7,8 +7,9 @@ import {
 } from '@/components/ui/select'
 import { trpcClient } from '@/lib/trpcClient'
 
-import { useState } from 'react' // Import useState
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { useQueryParamState } from './useQueryParamState'
 import { MarkAsPaidDialog } from './MarkAsPaidDialog'
 import { IssuedInvoiceTable } from '@/components/IssuedInvoiceTable'
@@ -20,23 +21,36 @@ import type { RouterOutputs } from '@/lib/trpcClient'
 
 export function useFilteredInvoicesQuery(
   search: string = '',
-  year?: number | null // Add year parameter
+  year?: number | null,
+  contactId?: string
 ): UseQueryResult<
   RouterOutputs['invoices']['listInvoices'] | undefined,
   TRPCClientErrorLike<AppRouter>
 > {
   return trpcClient.invoices.listInvoices.useQuery({
     filter: search,
-    limit: 100,
-    year: year // Pass year to the query
+    limit: contactId ? null : 100,
+    year,
+    ...(contactId ? { contactId } : {})
   })
 }
 
 export function InvoiceListPage() {
   const currentYear = new Date().getFullYear()
-  const [selectedYear, setSelectedYear] = useState<number | null>(currentYear)
+  const [contactId, setContactId] = useQueryParamState('contactId')
+  const [year, setYear] = useQueryParamState('year')
+  const defaultYear = contactId ? null : currentYear
+  const selectedYear =
+    year === 'all' ? null : /^\d{4}$/.test(year) ? Number(year) : defaultYear
   const [search, setSearch] = useQueryParamState('search')
-  const q = useFilteredInvoicesQuery(search, selectedYear) // Pass selectedYear
+  const q = useFilteredInvoicesQuery(
+    search,
+    selectedYear,
+    contactId || undefined
+  )
+  const contactQuery = trpcClient.contacts.byId.useQuery(contactId, {
+    enabled: !!contactId
+  })
   // State to manage which invoice's "Mark as Paid" dialog is open
   const [markAsPaidInvoice, setMarkAsPaidInvoice] = useState<{
     id: string
@@ -75,6 +89,17 @@ export function InvoiceListPage() {
 
   return (
     <>
+      {contactId && (
+        <div className="mx-4 mt-4 flex flex-wrap items-center gap-2 text-sm">
+          <span>
+            Faktury pro kontakt:{' '}
+            <strong>{contactQuery.data?.name ?? 'Vybraný kontakt'}</strong>
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => setContactId('')}>
+            Zrušit filtr kontaktu
+          </Button>
+        </div>
+      )}
       <div className="m-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Input
           value={search}
@@ -86,20 +111,14 @@ export function InvoiceListPage() {
         ></Input>
 
         <Select
-          value={selectedYear === null ? 'null' : selectedYear.toString()}
-          onValueChange={(value) => {
-            if (value === 'null') {
-              setSelectedYear(null)
-            } else {
-              setSelectedYear(parseInt(value))
-            }
-          }}
+          value={selectedYear === null ? 'all' : selectedYear.toString()}
+          onValueChange={setYear}
         >
           <SelectTrigger className="w-full sm:w-[140px]">
             <SelectValue placeholder="Rok" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="null">Všechny</SelectItem>
+            <SelectItem value="all">Všechny</SelectItem>
             {[...Array(6)].map((_, i) => {
               const year = currentYear - i
               return (
@@ -114,6 +133,7 @@ export function InvoiceListPage() {
           invoices={invoices}
           year={selectedYear}
           search={search}
+          contactId={contactId || undefined}
           disabled={q.isFetching || q.isError}
         />
       </div>
