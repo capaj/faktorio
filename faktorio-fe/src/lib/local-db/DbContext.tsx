@@ -5,15 +5,11 @@ import React, {
   useEffect,
   ReactNode
 } from 'react'
-import { initSqlDb, saveDatabaseToOPFS } from './initSql'
 import type { Database } from 'sql.js'
 import { createId } from '@paralleldrive/cuid2'
-import { drizzle } from 'drizzle-orm/sql-js'
-import * as schema from 'faktorio-db/schema.ts'
-import { SQLJsDatabase } from 'drizzle-orm/sql-js'
-import { UserSelectType } from 'faktorio-db/schema'
-import { userSelectSchema } from 'faktorio-api/src/zodDbSchemas'
-import z from 'zod/v4'
+import type * as schema from 'faktorio-db/schema.ts'
+import type { SQLJsDatabase } from 'drizzle-orm/sql-js'
+import type { UserSelectType } from 'faktorio-db/schema'
 
 interface DbContextType {
   activeDbName: string | null
@@ -35,10 +31,25 @@ interface DbProviderProps {
   children: ReactNode
 }
 
-const userLocalStorageSchema = userSelectSchema.extend({
-  createdAt: z.string(),
-  updatedAt: z.string()
-})
+// sql.js, drizzle and the schema are only needed for the local database mode, so they
+// are loaded on demand instead of being part of the bundle every visitor downloads
+const loadLocalDbModules = () =>
+  Promise.all([
+    import('./initSql'),
+    import('drizzle-orm/sql-js'),
+    import('faktorio-db/schema.ts')
+  ])
+
+const loadUserLocalStorageSchema = async () => {
+  const [{ userSelectSchema }, { default: z }] = await Promise.all([
+    import('faktorio-api/src/zodDbSchemas'),
+    import('zod/v4')
+  ])
+  return userSelectSchema.extend({
+    createdAt: z.string(),
+    updatedAt: z.string()
+  })
+}
 
 const LOCAL_STORAGE_ACTIVE_DB_KEY = 'faktorio_active_db'
 const LOCAL_STORAGE_USER_KEY = 'faktorio_local_user'
@@ -59,23 +70,25 @@ export function DbProvider({ children }: DbProviderProps) {
     const storedUserJson = localStorage.getItem(LOCAL_STORAGE_USER_KEY)
     console.log('storedUserJson', storedUserJson)
     if (storedUserJson) {
-      try {
-        const user = JSON.parse(storedUserJson)
-        const parsedUser = userLocalStorageSchema.safeParse(user)
-        if (parsedUser.success) {
-          setLocalUserState({
-            ...parsedUser.data,
-            createdAt: new Date(parsedUser.data.createdAt),
-            updatedAt: new Date(parsedUser.data.updatedAt)
-          })
-        } else {
-          console.error('Failed to parse local user data:', parsedUser.error)
+      loadUserLocalStorageSchema()
+        .then((userLocalStorageSchema) => {
+          const user = JSON.parse(storedUserJson)
+          const parsedUser = userLocalStorageSchema.safeParse(user)
+          if (parsedUser.success) {
+            setLocalUserState({
+              ...parsedUser.data,
+              createdAt: new Date(parsedUser.data.createdAt),
+              updatedAt: new Date(parsedUser.data.updatedAt)
+            })
+          } else {
+            console.error('Failed to parse local user data:', parsedUser.error)
+            localStorage.removeItem(LOCAL_STORAGE_USER_KEY)
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to parse local user data:', err)
           localStorage.removeItem(LOCAL_STORAGE_USER_KEY)
-        }
-      } catch (err) {
-        console.error('Failed to parse local user data:', err)
-        localStorage.removeItem(LOCAL_STORAGE_USER_KEY)
-      }
+        })
     }
 
     // Load active database
@@ -97,6 +110,7 @@ export function DbProvider({ children }: DbProviderProps) {
     setError(null)
 
     try {
+      const [{ initSqlDb }, { drizzle }, schema] = await loadLocalDbModules()
       const db = await initSqlDb(dbName)
       if (!db) {
         setError(`Nepodařilo se načíst databázi '${dbName}'.`)
@@ -156,7 +170,9 @@ export function DbProvider({ children }: DbProviderProps) {
 
   const saveDatabase = () => {
     if (activeDb && activeDbName) {
-      saveDatabaseToOPFS(activeDb, activeDbName)
+      import('./initSql').then(({ saveDatabaseToOPFS }) =>
+        saveDatabaseToOPFS(activeDb, activeDbName)
+      )
     }
   }
 

@@ -1,19 +1,63 @@
-import { Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { Route } from 'wouter'
 // Create Document Component
-import { InvoiceDetailPage } from './pages/InvoiceDetail/InvoiceDetailPage'
-import { InvoiceListPage } from './pages/InvoiceList/InvoiceListPage'
-import { NewInvoicePage } from './pages/invoice/NewInvoicePage'
-import { ContactList } from './pages/ContactList/ContactList'
-import { UserInvoicingDetails } from './pages/UserInvoicingDetails'
-import { EditInvoicePage } from './pages/invoice/EditInvoicePage'
-import { ManageLoginDetails } from './pages/ManageLoginDetails'
-import { ReceivedInvoicesPage } from './pages/ReceivedInvoicesPage'
 import { SpinnerContainer } from './components/SpinnerContainer'
 import { useAuth } from './lib/AuthContext'
-import { XMLExportPage } from './pages/XMLExportPage/XMLExportPage'
-import { SettingsPage } from './pages/SettingsPage'
-import { IsdocExportPage } from './pages/InvoiceDetail/IsdocExportPage'
+
+// Pages are code-split so a visitor only downloads the page they open
+const InvoiceDetailPage = lazy(() =>
+  import('./pages/InvoiceDetail/InvoiceDetailPage').then((m) => ({
+    default: m.InvoiceDetailPage
+  }))
+)
+const InvoiceListPage = lazy(() =>
+  import('./pages/InvoiceList/InvoiceListPage').then((m) => ({
+    default: m.InvoiceListPage
+  }))
+)
+const NewInvoicePage = lazy(() =>
+  import('./pages/invoice/NewInvoicePage').then((m) => ({
+    default: m.NewInvoicePage
+  }))
+)
+const ContactList = lazy(() =>
+  import('./pages/ContactList/ContactList').then((m) => ({
+    default: m.ContactList
+  }))
+)
+const UserInvoicingDetails = lazy(() =>
+  import('./pages/UserInvoicingDetails').then((m) => ({
+    default: m.UserInvoicingDetails
+  }))
+)
+const EditInvoicePage = lazy(() =>
+  import('./pages/invoice/EditInvoicePage').then((m) => ({
+    default: m.EditInvoicePage
+  }))
+)
+const ManageLoginDetails = lazy(() =>
+  import('./pages/ManageLoginDetails').then((m) => ({
+    default: m.ManageLoginDetails
+  }))
+)
+const ReceivedInvoicesPage = lazy(() =>
+  import('./pages/ReceivedInvoicesPage').then((m) => ({
+    default: m.ReceivedInvoicesPage
+  }))
+)
+const XMLExportPage = lazy(() =>
+  import('./pages/XMLExportPage/XMLExportPage').then((m) => ({
+    default: m.XMLExportPage
+  }))
+)
+const SettingsPage = lazy(() =>
+  import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage }))
+)
+const IsdocExportPage = lazy(() =>
+  import('./pages/InvoiceDetail/IsdocExportPage').then((m) => ({
+    default: m.IsdocExportPage
+  }))
+)
 
 export const SignedInRoutes = () => {
   const { token } = useAuth()

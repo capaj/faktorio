@@ -548,6 +548,15 @@ importers:
       vitest:
         specifier: ^5.0.2
         version: 5.0.2(@types/node@26.6.3)(vite@8.3.1(@types/node@26.6.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.39.0)(tsx@4.23.15))
+      workbox-core:
+        specifier: ^7.4.1
+        version: 7.4.1
+      workbox-precaching:
+        specifier: ^7.4.1
+        version: 7.4.1
+      workbox-routing:
+        specifier: ^7.4.1
+        version: 7.4.1
       wrangler:
         specifier: ^4.143.0
         version: 4.143.0(@cloudflare/workers-types@5.20260908.1)(@types/node@26.6.3)

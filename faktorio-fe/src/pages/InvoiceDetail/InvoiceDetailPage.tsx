@@ -394,7 +394,7 @@ export const InvoiceDetail = ({
                     navigate(`/invoices/${params.invoiceId}?language=${val}`)
                   }}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px]" aria-label="Jazyk faktury">
                     <SelectValue placeholder="Jazyk" />
                   </SelectTrigger>
                   <SelectContent>
@@ -458,9 +458,9 @@ export const InvoiceDetail = ({
         </div>
 
         <div className="rounded-lg border bg-background p-5 shadow-sm">
-          <h4 className="text-lg font-semibold text-foreground">
+          <h2 className="text-lg font-semibold text-foreground">
             Stažení faktury
-          </h4>
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Uložte si dokument nebo ho sdílejte ve formátu PDF či ISDOC.
           </p>
@@ -530,9 +530,9 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-foreground">
+        <h2 className="text-base font-semibold text-foreground">
           Sdílení faktury
-        </h3>
+        </h2>
         <Button
           size="sm"
           onClick={() => createShare.mutate({ invoiceId })}
@@ -553,7 +553,7 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
                 <div className="flex flex-col gap-2">
                   <div className="flex items-start justify-between gap-2">
                     <a
-                      className="break-all text-blue-600 underline"
+                      className="break-all text-info underline"
                       href={link}
                       target="_blank"
                       rel="noreferrer"

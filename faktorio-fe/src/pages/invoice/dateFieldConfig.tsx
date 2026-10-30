@@ -17,7 +17,7 @@ export const createDateFieldConfig = (label: string) => ({
     <FormItem className="flex flex-col">
       <FormLabel>
         {label}
-        {isRequired && <span className="text-destructive">{`\u00A0*`}</span>}
+        {isRequired && <span className="text-danger">{`\u00A0*`}</span>}
       </FormLabel>
       <FormControl>
         <DatePicker

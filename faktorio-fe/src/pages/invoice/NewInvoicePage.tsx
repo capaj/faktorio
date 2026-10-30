@@ -80,18 +80,18 @@ const LocalizedNumberInput = ({
   onChange,
   ...props
 }: Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange'> & {
-  value: number | undefined
+  value: number | null | undefined
   onChange: (value: number | undefined) => void
 }) => {
   const [localValue, setLocalValue] = useState(() =>
-    value !== undefined ? String(value) : ''
+    value != null ? String(value) : ''
   )
 
   useEffect(() => {
-    if (value !== undefined && parseLocalizedFloat(localValue) !== value) {
+    if (value != null && parseLocalizedFloat(localValue) !== value) {
       setLocalValue(String(value))
     } else if (
-      value === undefined &&
+      value == null &&
       localValue !== '' &&
       parseLocalizedFloat(localValue) !== undefined
     ) {
@@ -443,7 +443,7 @@ export const NewInvoicePage = () => {
 
           {templatesQuery.isLoading ? (
             <div className="flex items-center justify-center py-6">
-              <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+              <Loader2 className="h-5 w-5 animate-spin text-fg-muted" />
             </div>
           ) : templatesQuery.isError ? (
             <div className="space-y-3">
@@ -499,7 +499,7 @@ export const NewInvoicePage = () => {
             <CopyIcon className="mr-2 h-4 w-4" /> Načíst šablonu
           </Button>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-fg-muted">
           <LucideClock className="w-4 h-4" />
           <span>
             {month}:{' '}
@@ -509,7 +509,7 @@ export const NewInvoicePage = () => {
                 form.setValue('items.0.quantity', workingDays)
                 form.setValue('items.0.unit', 'manday')
               }}
-              className="hover:text-blue-600 hover:underline cursor-pointer"
+              className="hover:text-info hover:underline cursor-pointer"
             >
               {workingDays} pracovních dní
             </button>{' '}
@@ -520,7 +520,7 @@ export const NewInvoicePage = () => {
                 form.setValue('items.0.quantity', hours)
                 form.setValue('items.0.unit', 'hodin')
               }}
-              className="hover:text-blue-600 hover:underline cursor-pointer"
+              className="hover:text-info hover:underline cursor-pointer"
             >
               {hours} hodin
             </button>
@@ -609,7 +609,6 @@ export const NewInvoicePage = () => {
                     </div>
                     <ButtonLink
                       type="button"
-                      tabIndex={100}
                       href="/contacts/new?next=/new-invoice"
                     >
                       Nový kontakt
@@ -742,7 +741,7 @@ export const NewInvoicePage = () => {
             onBankAccountChange={handleBankAccountChange}
           />
 
-          <div className="flex flex-col gap-4 p-4 bg-white border rounded-md mt-6">
+          <div className="flex flex-col gap-4 p-4 bg-surface border rounded-md mt-6">
             <h3 className="flex items-center gap-2">Položky</h3>
             {fields.map((item, index) => {
               return (
@@ -760,7 +759,7 @@ export const NewInvoicePage = () => {
             <div className="flex gap-4">
               <Button
                 type="button"
-                className="flex items-center gap-2 bg-green-500 text-white"
+                className="flex items-center gap-2 bg-success-solid text-on-success-solid hover:bg-success-solid/90"
                 onClick={() => {
                   append(
                     getDefaultInvoiceItem({
@@ -770,7 +769,7 @@ export const NewInvoicePage = () => {
                   )
                 }}
               >
-                <LucidePlus className="text-white" />
+                <LucidePlus className="text-on-success-solid" />
                 Další položka
               </Button>
             </div>
@@ -816,6 +815,13 @@ const InvoiceItemForm = ({
   const { setValue, control, watch } = useFormContext()
   const vatRate = watch(`items.${index}.vat_rate`)
   const [showVatWarning, setShowVatWarning] = useState<boolean | null>(null)
+  // Remounting the VAT input drops a rejected 0 and shows the form value again
+  const [vatInputKey, setVatInputKey] = useState(0)
+
+  const cancelZeroVat = () => {
+    setShowVatWarning(null)
+    setVatInputKey((key) => key + 1)
+  }
 
   useEffect(() => {
     if (vatPayer) {
@@ -839,7 +845,7 @@ const InvoiceItemForm = ({
       <div className="sm:flex sm:flex-row gap-4 grow grid grid-cols-2 flex-wrap items-end">
         <div>
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.quantity`}
           >
             Množství
@@ -861,7 +867,7 @@ const InvoiceItemForm = ({
 
         <div>
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.unit`}
           >
             Jednotka
@@ -883,7 +889,7 @@ const InvoiceItemForm = ({
         </div>
         <div className="flex flex-col flex-1">
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.description`}
           >
             Popis položky
@@ -907,7 +913,7 @@ const InvoiceItemForm = ({
       <div className="flex gap-4 items-end">
         <div className="flex-grow sm:flex-grow-0">
           <Label
-            className="text-xs text-gray-500 mb-1 block md:block"
+            className="text-xs text-fg-muted mb-1 block md:block"
             htmlFor={`items.${index}.unit_price`}
           >
             Cena/jedn.
@@ -929,7 +935,7 @@ const InvoiceItemForm = ({
         {vatPayer && (
           <div className="flex-grow sm:flex-grow-0">
             <Label
-              className="text-xs text-gray-500 mb-1 block md:block"
+              className="text-xs text-fg-muted mb-1 block md:block"
               htmlFor={`items.${index}.vat_rate`}
             >
               DPH %
@@ -939,20 +945,23 @@ const InvoiceItemForm = ({
               name={`items.${index}.vat_rate`}
               render={({ field }) => (
                 <LocalizedNumberInput
+                  key={vatInputKey}
                   id={`items.${index}.vat_rate`}
-                  className="w-full sm:w-20"
+                  className="w-full sm:w-20 user-invalid:border-destructive user-invalid:focus-visible:ring-destructive"
                   placeholder="DPH %"
+                  required
                   value={field.value}
                   onChange={(vatRate) => {
                     if (vatRate === undefined) {
-                      field.onChange(undefined)
+                      // null instead of undefined, otherwise react-hook-form falls back to the default rate
+                      field.onChange(null)
                       return
                     }
 
                     if (
                       vatPayer &&
                       vatRate === 0 &&
-                      (field.value ?? 0) > 0 &&
+                      field.value !== 0 &&
                       selectedContactId &&
                       contacts
                         .find((c) => c.id === selectedContactId)
@@ -970,13 +979,17 @@ const InvoiceItemForm = ({
           </div>
         )}
         <div>
-          <button
+          <Button
             type="button"
-            className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded hover:bg-gray-300 flex-shrink-0"
+            variant="outline"
+            size="icon"
+            className="flex-shrink-0"
             onClick={onDelete}
+            aria-label="Odstranit položku"
+            title="Odstranit položku"
           >
-            <LucideTrash2 className="text-gray-600" />
-          </button>
+            <LucideTrash2 aria-hidden="true" />
+          </Button>
         </div>
       </div>
 
@@ -984,37 +997,35 @@ const InvoiceItemForm = ({
         open={!!vatPayer && showVatWarning === true}
         onOpenChange={(open) => {
           if (!open) {
-            setShowVatWarning(null)
+            cancelZeroVat()
           }
         }}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Upozornění</DialogTitle>
-            <DialogDescription>
-              Nulová DPH pro tuzemskou fakturu lze použít pouze pro omezené typy
-              zboží a služeb. Zde je jejich výčet:{' '}
-              <a
-                href="https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline"
-              >
-                https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni
-              </a>
-              <p className="mt-4">
-                V xml exportu kontrolního hlášení bude tato faktura v sekci A.1
-                a budete muset ručně doplnit kód plnění
-              </p>
+            {/* A div, because the description contains a paragraph */}
+            <DialogDescription asChild>
+              <div>
+                Nulová DPH pro tuzemskou fakturu lze použít pouze pro omezené
+                typy zboží a služeb. Zde je jejich výčet:{' '}
+                <a
+                  href="https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-info underline"
+                >
+                  https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni
+                </a>
+                <p className="mt-4">
+                  V xml exportu kontrolního hlášení bude tato faktura v sekci
+                  A.1 a budete muset ručně doplnit kód plnění
+                </p>
+              </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowVatWarning(null)
-              }}
-            >
+            <Button variant="outline" onClick={cancelZeroVat}>
               Zrušit
             </Button>
             <Button onClick={handleConfirmZeroVat}>

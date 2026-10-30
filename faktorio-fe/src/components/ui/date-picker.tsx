@@ -65,7 +65,7 @@ export const DatePicker = forwardRef<
             setCalendarMonth(date)
           }
         }}
-        className={cn(isInvalid && 'border-red-500 focus-visible:ring-red-500')}
+        className={cn(isInvalid && 'border-danger focus-visible:ring-danger')}
         placeholder="YYYY-MM-DD"
       />
       <Popover>
@@ -73,8 +73,9 @@ export const DatePicker = forwardRef<
           <Button
             variant={'outline'}
             className={cn('px-3', !date && 'text-muted-foreground')}
+            aria-label="Vybrat datum v kalendáři"
           >
-            <CalendarIcon className="h-4 w-4" />
+            <CalendarIcon className="h-4 w-4" aria-hidden="true" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" ref={ref}>

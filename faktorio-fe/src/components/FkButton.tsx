@@ -10,7 +10,7 @@ import { Spinner } from './ui/spinner'
 export const FkButton = React.forwardRef<
   HTMLButtonElement,
   ButtonProps & { isLoading?: boolean }
->(({ className, variant, size, asChild = false, ...props }, ref) => {
+>(({ className, variant, size, asChild = false, isLoading, ...props }, ref) => {
   const Comp = asChild ? Slot : 'button'
   return (
     <Comp
@@ -18,19 +18,19 @@ export const FkButton = React.forwardRef<
       ref={ref}
       {...props}
       type={props.type || 'button'}
-      disabled={props.disabled || props.isLoading}
+      disabled={props.disabled || isLoading}
     >
       <div className="relative">
         <div
           className={cn('flex items-center gap-1 whitespace-nowrap', {
-            'text-white text-opacity-0': props.isLoading
+            'text-white text-opacity-0': isLoading
           })}
         >
           {props.children}
         </div>
         <div
           className={`absolute inset-0 z-10 flex items-center justify-center ${
-            props.isLoading ? 'opacity-100' : 'opacity-0'
+            isLoading ? 'opacity-100' : 'opacity-0'
           }`}
         >
           <Spinner />

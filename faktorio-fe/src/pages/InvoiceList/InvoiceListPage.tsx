@@ -114,7 +114,7 @@ export function InvoiceListPage() {
           value={selectedYear === null ? 'all' : selectedYear.toString()}
           onValueChange={setYear}
         >
-          <SelectTrigger className="w-full sm:w-[140px]">
+          <SelectTrigger className="w-full sm:w-[140px]" aria-label="Rok">
             <SelectValue placeholder="Rok" />
           </SelectTrigger>
           <SelectContent>

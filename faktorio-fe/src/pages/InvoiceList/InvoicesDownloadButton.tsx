@@ -13,19 +13,7 @@ import {
   Loader2Icon
 } from 'lucide-react'
 import Papa from 'papaparse'
-import { Document, pdf } from '@react-pdf/renderer'
-import { BlobWriter, ZipWriter } from '@zip.js/zip.js'
-import {
-  CzechInvoicePDF,
-  CzechInvoicePDFPage
-} from '../InvoiceDetail/CzechInvoicePDF'
-import {
-  EnglishInvoicePDF,
-  EnglishInvoicePDFPage
-} from '../InvoiceDetail/EnglishInvoicePDF'
 import { trpcClient, type RouterOutputs } from '@/lib/trpcClient'
-import QRCode from 'qrcode'
-import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
 import { getPrimaryBankAccount } from '@/lib/getPrimaryBankAccount'
 import { snakeCase } from 'lodash-es'
 import { useState, type ReactElement } from 'react'
@@ -90,6 +78,23 @@ export function InvoicesDownloadButton({
         )
         return
       }
+
+      // Load PDF, QR code and archive libraries only when they are needed.
+      const [
+        { Document, pdf },
+        { BlobWriter, ZipWriter },
+        { CzechInvoicePDF, CzechInvoicePDFPage },
+        { EnglishInvoicePDF, EnglishInvoicePDFPage },
+        { default: QRCode },
+        { generateQrPaymentString }
+      ] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('@zip.js/zip.js'),
+        import('../InvoiceDetail/CzechInvoicePDF'),
+        import('../InvoiceDetail/EnglishInvoicePDF'),
+        import('qrcode'),
+        import('@/lib/qrCodeGenerator')
+      ])
 
       const invoicingDetails = await utils.invoicingDetails.fetch()
       const primaryBankAccount = getPrimaryBankAccount(invoicingDetails)

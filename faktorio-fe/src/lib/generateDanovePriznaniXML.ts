@@ -14,37 +14,115 @@ interface GenerateDanovePriznaniParams {
   month?: number
 }
 
-const VAT_RATE_21 = 0.21
+type VatBreakdown = Pick<
+  Invoice,
+  | 'vat_base_21'
+  | 'vat_21'
+  | 'vat_base_12'
+  | 'vat_12'
+  | 'vat_base_15'
+  | 'vat_15'
+  | 'vat_base_10'
+  | 'vat_10'
+>
 
-/**
- * ADIS validates VAT amount against the tax base (rounded to whole CZK in XML).
- * To avoid cumulative floating point drift (or mixed per-invoice rounding),
- * we calculate VAT from the summed base in haléře and then convert back to CZK.
- */
-function calculateVatFromBase(base: number, rate: number): number {
-  const baseInHalers = Math.round(base * 100)
-  const vatInHalers = Math.round(baseInHalers * rate)
-  return vatInHalers / 100
+interface VatTotals {
+  base21: number
+  vat21: number
+  baseReduced: number
+  vatReduced: number
 }
 
-// Per-invoice 21% base in CZK. vat_base_21 is stored in the invoice's original
-// currency, so it must be converted via exchange_rate before summing. When the
-// breakdown is missing (legacy invoice), fall back to native_subtotal (already
-// CZK), which assumes the whole invoice is at 21% — the best available
-// approximation for invoices written before the breakdown columns existed.
-function getCzkBase21Issued(invoice: Invoice): number {
-  if (invoice.vat_base_21 !== null && invoice.vat_base_21 !== undefined) {
-    return invoice.vat_base_21 * (invoice.exchange_rate ?? 1)
+// Keep converted document amounts in integer haléře until each return row is
+// rounded. Negative credit notes use the same rounding as positive invoices.
+function toHalers(amount: number): number {
+  return (
+    Math.sign(amount) * Math.round((Math.abs(amount) + Number.EPSILON) * 100)
+  )
+}
+
+function toWholeCzk(halers: number): number {
+  return Math.sign(halers) * Math.round(Math.abs(halers) / 100)
+}
+
+function getVatTotals(
+  invoice: VatBreakdown,
+  exchangeRate: number,
+  legacyBaseCzk: number,
+  legacyVatCzk: number
+): VatTotals {
+  const hasBreakdown = [
+    invoice.vat_base_21,
+    invoice.vat_21,
+    invoice.vat_base_12,
+    invoice.vat_12,
+    invoice.vat_base_15,
+    invoice.vat_15,
+    invoice.vat_base_10,
+    invoice.vat_10
+  ].some((amount) => amount !== null && amount !== undefined)
+
+  if (!hasBreakdown) {
+    // Pre-breakdown documents retain the existing 21% classification, using
+    // their recorded VAT (total minus base), never VAT recomputed from a rate.
+    // Documents without VAT do not belong in the taxable/deductible rows.
+    return {
+      base21: legacyVatCzk === 0 ? 0 : toHalers(legacyBaseCzk),
+      vat21: toHalers(legacyVatCzk),
+      baseReduced: 0,
+      vatReduced: 0
+    }
   }
-  return invoice.native_subtotal ?? 0
+
+  // Explicit zeroes are authoritative. A reduced-rate-only document must not
+  // fall back to its full subtotal for the 21% row. Historical reduced rates
+  // also belong in row 2/41, for example when reporting a credit note.
+  return {
+    base21: toHalers((invoice.vat_base_21 ?? 0) * exchangeRate),
+    vat21: toHalers((invoice.vat_21 ?? 0) * exchangeRate),
+    baseReduced: toHalers(
+      ((invoice.vat_base_12 ?? 0) +
+        (invoice.vat_base_15 ?? 0) +
+        (invoice.vat_base_10 ?? 0)) *
+        exchangeRate
+    ),
+    vatReduced: toHalers(
+      ((invoice.vat_12 ?? 0) + (invoice.vat_15 ?? 0) + (invoice.vat_10 ?? 0)) *
+        exchangeRate
+    )
+  }
 }
 
-function getCzkBase21Received(invoice: ReceivedInvoice): number {
+function sumVatTotals(documents: VatTotals[]): VatTotals {
+  const totals = documents.reduce(
+    (sum, document) => ({
+      base21: sum.base21 + document.base21,
+      vat21: sum.vat21 + document.vat21,
+      baseReduced: sum.baseReduced + document.baseReduced,
+      vatReduced: sum.vatReduced + document.vatReduced
+    }),
+    { base21: 0, vat21: 0, baseReduced: 0, vatReduced: 0 }
+  )
+
+  return {
+    base21: toWholeCzk(totals.base21),
+    vat21: toWholeCzk(totals.vat21),
+    baseReduced: toWholeCzk(totals.baseReduced),
+    vatReduced: toWholeCzk(totals.vatReduced)
+  }
+}
+
+function getIssuedVatTotals(invoice: Invoice): VatTotals {
   const exchangeRate = invoice.exchange_rate ?? 1
-  if (invoice.vat_base_21 !== null && invoice.vat_base_21 !== undefined) {
-    return invoice.vat_base_21 * exchangeRate
-  }
-  return (invoice.total_without_vat ?? 0) * exchangeRate
+  const baseCzk = invoice.native_subtotal ?? 0
+  const totalCzk = invoice.native_total ?? invoice.total * exchangeRate
+  return getVatTotals(invoice, exchangeRate, baseCzk, totalCzk - baseCzk)
+}
+
+export function hasIssuedVatAmounts(invoice: Invoice): boolean {
+  return Object.values(getIssuedVatTotals(invoice)).some(
+    (amount) => amount !== 0
+  )
 }
 
 export function generateDanovePriznaniXML({
@@ -59,26 +137,35 @@ export function generateDanovePriznaniXML({
 }: GenerateDanovePriznaniParams): string {
   const todayCzech = formatCzechDate(new Date())
 
-  const obrat23 = issuedInvoices.reduce(
-    (sum, inv) => sum + getCzkBase21Issued(inv),
-    0
+  const issued = sumVatTotals(issuedInvoices.map(getIssuedVatTotals))
+  const received = sumVatTotals(
+    receivedInvoices.map((invoice) => {
+      const exchangeRate = invoice.exchange_rate ?? 1
+      const base = invoice.total_without_vat ?? 0
+      return getVatTotals(
+        invoice,
+        exchangeRate,
+        base * exchangeRate,
+        (invoice.total_with_vat - base) * exchangeRate
+      )
+    })
   )
 
-  const dan23 = calculateVatFromBase(obrat23, VAT_RATE_21)
+  const obrat23 = issued.base21
+  const dan23 = issued.vat21
+  const obrat5 = issued.baseReduced
+  const dan5 = issued.vatReduced
+  const pln23 = received.base21
+  const odp_tuz23_nar = received.vat21
+  const pln5 = received.baseReduced
+  const odp_tuz5_nar = received.vatReduced
 
-  const pln23 = receivedInvoices.reduce(
-    (sum, inv) => sum + getCzkBase21Received(inv),
-    0
-  )
-
-  const odp_tuz23_nar = calculateVatFromBase(pln23, VAT_RATE_21)
-  const odp_sum_nar = odp_tuz23_nar // In this simplified case, they are the same
-
-  // Calculate sums for <Veta6>
-  const dan_zocelk = dan23
-  const odp_zocelk = odp_tuz23_nar
-  // Ensure dano_da is not negative, minimum is 0
+  // Summary rows are sums/differences of the rounded rows actually exported.
+  const odp_sum_nar = odp_tuz23_nar + odp_tuz5_nar
+  const dan_zocelk = dan23 + dan5
+  const odp_zocelk = odp_sum_nar
   const dano_da = Math.max(0, dan_zocelk - odp_zocelk)
+  const dano_no = Math.max(0, odp_zocelk - dan_zocelk)
 
   // Construct Final XML
 
@@ -115,6 +202,7 @@ export function generateDanovePriznaniXML({
   />
   <Veta1
     obrat23="${toInt(obrat23)}" dan23="${toInt(dan23)}"
+    obrat5="${toInt(obrat5)}" dan5="${toInt(dan5)}"
   />
   ${
     czkSumEurServices > 0 || czkSumOutsideEuServices > 0
@@ -123,10 +211,11 @@ export function generateDanovePriznaniXML({
   }
   <Veta4
     pln23="${toInt(pln23)}" odp_tuz23_nar="${toInt(odp_tuz23_nar)}"
+    pln5="${toInt(pln5)}" odp_tuz5_nar="${toInt(odp_tuz5_nar)}"
     odp_sum_nar="${toInt(odp_sum_nar)}"
   />
   <Veta6
-    dan_zocelk="${toInt(dan_zocelk)}" odp_zocelk="${toInt(odp_zocelk)}" dano_da="${toInt(dano_da)}"
+    dan_zocelk="${toInt(dan_zocelk)}" odp_zocelk="${toInt(odp_zocelk)}" ${dano_no > 0 ? `dano_no="${toInt(dano_no)}"` : `dano_da="${toInt(dano_da)}"`}
   />
 </DPHDP3>
 </Pisemnost>`
