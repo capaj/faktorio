@@ -1,11 +1,59 @@
 import {
   BankingInfo,
   generateQrPaymentString,
+  getQrPaymentAccountNumber,
   normalizeAccountNumberForQrPayment
 } from './qrCodeGenerator'
 import QRCode from 'qrcode'
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+
+describe('getQrPaymentAccountNumber', () => {
+  it.each(['', ' \t\n ', null, undefined])(
+    'generates a domestic-account QR payment when IBAN is %j',
+    (iban) => {
+      const qrPaymentData = generateQrPaymentString({
+        accountNumber: getQrPaymentAccountNumber({
+          iban,
+          bank_account: '19-2000145399/0800'
+        }),
+        amount: 100,
+        currency: 'CZK'
+      })
+
+      expect(qrPaymentData).toBe(
+        'SPD*1.0*ACC:CZ6508000000192000145399*AM:100.00*CC:CZK'
+      )
+    }
+  )
+
+  it('prefers a nonempty IBAN over the domestic account and removes whitespace', () => {
+    expect(
+      getQrPaymentAccountNumber({
+        iban: ' CZ28 0600 0000 0000 0000 0123 ',
+        bank_account: '19-2000145399/0800'
+      })
+    ).toBe('CZ2806000000000000000123')
+  })
+
+  it.each([
+    {},
+    { iban: null, bank_account: null },
+    { iban: '', bank_account: '' },
+    { iban: ' \t ', bank_account: ' \n ' }
+  ])(
+    'does not generate a QR payment when both account fields are absent (%j)',
+    (account) => {
+      expect(
+        generateQrPaymentString({
+          accountNumber: getQrPaymentAccountNumber(account),
+          amount: 100,
+          currency: 'CZK'
+        })
+      ).toBeNull()
+    }
+  )
+})
 
 describe('generateQrPaymentString', () => {
   it('should generate', () => {

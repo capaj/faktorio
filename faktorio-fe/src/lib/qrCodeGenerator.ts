@@ -6,6 +6,14 @@ export interface BankingInfo {
   variableSymbol?: string // Optional variable symbol for identifying the payment
 }
 
+export const getQrPaymentAccountNumber = ({
+  iban,
+  bank_account
+}: {
+  iban?: string | null
+  bank_account?: string | null
+}): string | null => iban?.replace(/\s/g, '') || bank_account || null
+
 const CZECH_DOMESTIC_ACCOUNT_REGEX = /^(?:(\d{1,6})-)?(\d{1,10})\/(\d{4})$/
 
 const calculateIbanCheckDigits = (bban: string): string => {

@@ -40,7 +40,10 @@ import {
   BookmarkPlus
 } from 'lucide-react'
 import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
-import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
+import {
+  generateQrPaymentString,
+  getQrPaymentAccountNumber
+} from '@/lib/qrCodeGenerator'
 import {
   useQueryClient,
   type UseSuspenseQueryResult
@@ -208,8 +211,7 @@ export const InvoiceDetail = ({
   }, 0)
 
   const generatedQrString = generateQrPaymentString({
-    accountNumber:
-      invoice.iban?.replace(/\s/g, '') ?? invoice.bank_account ?? null,
+    accountNumber: getQrPaymentAccountNumber(invoice),
     amount: invoiceTotal + taxTotal,
     currency: invoice.currency,
     variableSymbol: invoice.number?.replace('-', ''),
@@ -394,7 +396,10 @@ export const InvoiceDetail = ({
                     navigate(`/invoices/${params.invoiceId}?language=${val}`)
                   }}
                 >
-                  <SelectTrigger className="w-[180px]" aria-label="Jazyk faktury">
+                  <SelectTrigger
+                    className="w-[180px]"
+                    aria-label="Jazyk faktury"
+                  >
                     <SelectValue placeholder="Jazyk" />
                   </SelectTrigger>
                   <SelectContent>

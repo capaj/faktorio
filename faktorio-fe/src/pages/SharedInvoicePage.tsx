@@ -8,7 +8,10 @@ import { Download } from 'lucide-react'
 import { snakeCase } from 'lodash-es'
 import { Button } from '@/components/ui/button'
 import { generateIsdocXml } from '@/lib/isdoc/generateIsdocXml'
-import { generateQrPaymentString } from '@/lib/qrCodeGenerator'
+import {
+  generateQrPaymentString,
+  getQrPaymentAccountNumber
+} from '@/lib/qrCodeGenerator'
 import { trpcClient } from '@/lib/trpcClient'
 import { useQRCodeBase64 } from '@/lib/useQRCodeBase64'
 
@@ -44,7 +47,8 @@ export function SharedInvoicePage() {
   }, [])
 
   const invoice = data?.invoice
-  const language = selectedLanguage ?? (invoice?.language === 'en' ? 'en' : 'cs')
+  const language =
+    selectedLanguage ?? (invoice?.language === 'en' ? 'en' : 'cs')
   const PdfComponent = language === 'cs' ? CzechInvoicePDF : EnglishInvoicePDF
   const items = data?.items ?? []
   const invoiceTotal = items.reduce(
@@ -59,8 +63,7 @@ export function SharedInvoicePage() {
   }, 0)
   const qrPayload = invoice
     ? generateQrPaymentString({
-        accountNumber:
-          invoice.iban?.replace(/\s/g, '') ?? invoice.bank_account ?? null,
+        accountNumber: getQrPaymentAccountNumber(invoice),
         amount: invoiceTotal + taxTotal,
         currency: invoice.currency,
         variableSymbol: invoice.number?.replace('-', ''),
