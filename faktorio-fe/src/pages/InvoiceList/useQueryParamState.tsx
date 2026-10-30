@@ -1,28 +1,19 @@
-import { useLocation, useSearch } from 'wouter'
-import queryString from 'query-string'
-import { useEffect, useState } from 'react'
+import { useSearchParams } from 'wouter'
 
 export function useQueryParamState(name: string, defaultValue: string = '') {
-  const [location, navigate] = useLocation()
+  const [params, setParams] = useSearchParams()
+  const value = params.get(name) ?? defaultValue
+  const setValue = (nextValue: string) => {
+    setParams(
+      (current) => {
+        const updated = new URLSearchParams(current)
+        if (nextValue) updated.set(name, nextValue)
+        else updated.delete(name)
+        return updated
+      },
+      { replace: true }
+    )
+  }
 
-  const query = queryString.parse(useSearch())
-  const [search, setSearch] = useState((query[name] as string) ?? defaultValue)
-
-  useEffect(() => {
-    const locationWithoutSearch = location.split('?')[0]
-
-    const updatedQuery = { ...query }
-    if (search) {
-      updatedQuery[name] = search
-    } else {
-      delete updatedQuery[name]
-    }
-
-    const queryStr = queryString.stringify(updatedQuery)
-    const newUrl = locationWithoutSearch + (queryStr ? '?' + queryStr : '')
-    navigate(newUrl, { replace: true })
-
-  }, [search])
-
-  return [search, setSearch] as const
+  return [value, setValue] as const
 }

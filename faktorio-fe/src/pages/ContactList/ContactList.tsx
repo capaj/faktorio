@@ -36,6 +36,7 @@ import {
   UploadIcon,
   HelpCircleIcon,
   DownloadIcon,
+  FileTextIcon,
   ChevronDownIcon
 } from 'lucide-react'
 import { contactCreateFormSchema } from 'faktorio-api/src/routers/contactCreateFormSchema'
@@ -650,6 +651,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
               <TableHead>Email</TableHead>
               <TableHead>IČO</TableHead>
               <TableHead>DIČ</TableHead>
+              <TableHead className="text-right">Faktury</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -671,6 +673,16 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
                 <TableCell>{contact.main_email}</TableCell>
                 <TableCell>{contact.registration_no}</TableCell>
                 <TableCell className="text-right">{contact.vat_no}</TableCell>
+                <TableCell className="text-right">
+                  <Link
+                    href={`/invoices?${new URLSearchParams({ contactId: contact.id })}`}
+                    aria-label={`Faktury pro ${contact.name}`}
+                    className="inline-flex items-center gap-1 whitespace-nowrap text-primary underline-offset-4 hover:underline"
+                  >
+                    <FileTextIcon className="h-4 w-4" />
+                    Zobrazit faktury
+                  </Link>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

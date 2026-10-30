@@ -10,16 +10,13 @@ import {
 } from '@react-pdf/renderer'
 
 import { formatMoneyEnglish } from '../../lib/formatMoney'
-import {
-  InsertInvoiceItemType,
-  SelectInvoiceType
-} from 'faktorio-api/src/zodDbSchemas'
 
 import { reactMainRender } from '@/main'
 import {
   Flex,
   FlexRow,
   ItemDescText,
+  type InvoicePDFPageProps,
   pdfStyles,
   SectionHeading,
   TextLabel,
@@ -69,17 +66,19 @@ Font.register({
   ]
 })
 
-export const EnglishInvoicePDF = ({
+export const EnglishInvoicePDF = (props: InvoicePDFPageProps) => (
+  <Document>
+    <EnglishInvoicePDFPage {...props} />
+  </Document>
+)
+
+export const EnglishInvoicePDFPage = ({
   invoiceData,
   qrCodeBase64,
   vatPayer,
-  logoUrl
-}: {
-  invoiceData: SelectInvoiceType & { items: InsertInvoiceItemType[] }
-  qrCodeBase64?: string
-  vatPayer?: boolean
-  logoUrl?: string | null
-}) => {
+  logoUrl,
+  singlePage = false
+}: InvoicePDFPageProps) => {
   const inferredInvoiceVatRate =
     invoiceData.items.find((i) => i.vat_rate != null)?.vat_rate ?? 0
   const invoiceVatrate = vatPayer ? inferredInvoiceVatRate : 0
@@ -107,332 +106,413 @@ export const EnglishInvoicePDF = ({
   )
 
   return (
-    <Document key={new Date().toISOString()}>
-      <Page size="A4" style={pdfStyles.page}>
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
-          <Flex
-            style={{
-              minHeight: 200,
-              width: '100%'
-            }}
-          >
-            <Flex
-              style={{
-                flexDirection: 'row',
-                marginTop: 50,
-                fontSize: 22
-              }}
-            >
-              <View
-                style={{
-                  width: '50%'
-                }}
-              >
-                <Flex
-                  style={{
-                    flexDirection: 'column',
-                    marginLeft: 20
-                  }}
-                >
-                  <Text>Invoice {invoiceData.number}</Text>
-
-                  <Text
-                    style={{
-                      marginTop: 10,
-                      fontSize: 11
-                    }}
-                  >
-                    Tax Document
-                  </Text>
-                </Flex>
-              </View>
-              <Flex
-                style={{
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  width: '50%'
-                }}
-              >
-                {logoUrl && (
-                  <View
-                    style={{
-                      marginRight: 20,
-                      marginBottom: 10
-                    }}
-                  >
-                    <InvoiceLogo logoUrl={logoUrl} />
-                  </View>
-                )}
-              </Flex>
-            </Flex>
-          </Flex>
-        </View>
+    <Page
+      size={singlePage ? { width: 595.28 } : 'A4'}
+      wrap={!singlePage}
+      style={
+        singlePage ? [pdfStyles.page, pdfStyles.singlePage] : pdfStyles.page
+      }
+    >
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}
+      >
         <Flex
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginLeft: 2
+            minHeight: 200,
+            width: '100%'
           }}
         >
           <Flex
             style={{
               flexDirection: 'row',
-              marginLeft: 20
+              marginTop: 50,
+              fontSize: 22
             }}
           >
-            <Flex
+            <View
               style={{
-                width: '57%',
-                flexDirection: 'column',
-                fontSize: 11
+                width: '50%'
               }}
             >
-              <SectionHeading>Supplier</SectionHeading>
-              <View style={pdfStyles.section}>
-                <View style={{ maxWidth: '95%' }}>
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 500
-                    }}
-                  >
-                    {invoiceData.your_name}
-                  </Text>
-                </View>
-                <Text>{invoiceData.your_street}</Text>
-                <Text>
-                  {invoiceData.your_zip} {invoiceData.your_city}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 8,
-                    marginTop: 8
-                  }}
-                >
-                  Fyzická osoba zapsaná v živnostenském rejstříku.
-                </Text>
-              </View>
-
               <Flex
                 style={{
-                  marginTop: 10,
-                  paddingRight: 40
+                  flexDirection: 'column',
+                  marginLeft: 20
                 }}
               >
-                <Flex
-                  style={{
-                    flexDirection: 'row',
-                    fontSize: 10
-                  }}
-                >
-                  <TextLabel style={{ width: 56 }}>Reg. No.</TextLabel>
-                  <Text>{invoiceData.your_registration_no}</Text>
-                </Flex>
-                <Flex
-                  style={{
-                    flexDirection: 'row',
-                    fontSize: 10
-                  }}
-                >
-                  <TextLabel style={{ width: 56 }}>VAT No.</TextLabel>
-                  <Text>{invoiceData.your_vat_no}</Text>
-                </Flex>
-              </Flex>
-              <View
-                style={{
-                  ...pdfStyles.section,
-                  paddingRight: 40
-                }}
-              >
-                <FlexRow>
-                  <TextLabel>Bank Account</TextLabel>
-                  <Text>{invoiceData.bank_account ?? '-'}</Text>
-                </FlexRow>
-                <FlexRow>
-                  <TextLabel>IBAN</TextLabel>
-                  <Text>{invoiceData.iban}</Text>
-                </FlexRow>
-                <FlexRow>
-                  <TextLabel>SWIFT/BIC</TextLabel>
-                  <Text>{invoiceData.swift_bic}</Text>
-                </FlexRow>
-                <FlexRow>
-                  <TextLabel>Variable Symbol</TextLabel>
-                  <Text>{invoiceData.number.replace('-', '')}</Text>
-                </FlexRow>
-                <FlexRow>
-                  <TextLabel>Payment Method</TextLabel>
-                  <Text>Wire transfer</Text>
-                </FlexRow>
-              </View>
-            </Flex>
+                <Text>Invoice {invoiceData.number}</Text>
 
+                <Text
+                  style={{
+                    marginTop: 10,
+                    fontSize: 11
+                  }}
+                >
+                  Tax Document
+                </Text>
+              </Flex>
+            </View>
             <Flex
               style={{
-                marginRight: 22,
-                width: '43%'
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                width: '50%'
               }}
             >
-              <SectionHeading>Recipient</SectionHeading>
-
-              <View style={pdfStyles.section}>
+              {logoUrl && (
+                <View
+                  style={{
+                    marginRight: 20,
+                    marginBottom: 10
+                  }}
+                >
+                  <InvoiceLogo logoUrl={logoUrl} />
+                </View>
+              )}
+            </Flex>
+          </Flex>
+        </Flex>
+      </View>
+      <Flex
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginLeft: 2
+        }}
+      >
+        <Flex
+          style={{
+            flexDirection: 'row',
+            marginLeft: 20
+          }}
+        >
+          <Flex
+            style={{
+              width: '57%',
+              flexDirection: 'column',
+              fontSize: 11
+            }}
+          >
+            <SectionHeading>Supplier</SectionHeading>
+            <View style={pdfStyles.section}>
+              <View style={{ maxWidth: '95%' }}>
                 <Text
                   style={{
                     fontSize: 13,
                     fontWeight: 500
                   }}
                 >
-                  {invoiceData.client_name}
+                  {invoiceData.your_name}
                 </Text>
-                <Text>{invoiceData.client_street}</Text>
-                <Text>
-                  {invoiceData.client_zip} {invoiceData.client_city}
-                </Text>
-                <Flex
-                  style={{
-                    marginTop: 10
-                  }}
-                >
-                  <FlexRow>
-                    <TextLabel>Reg. No. </TextLabel>
-                    <Text>{invoiceData.client_registration_no}</Text>
-                  </FlexRow>
-                  <FlexRow>
-                    <TextLabel>VAT No. </TextLabel>
-                    <Text>{invoiceData.client_vat_no}</Text>
-                  </FlexRow>
-                </Flex>
-                <Flex
-                  style={{
-                    marginTop: 10
-                  }}
-                >
-                  <FlexRow>
-                    <TextLabel>Issue Date </TextLabel>
-                    <Text>{invoiceData.issued_on}</Text>{' '}
-                  </FlexRow>
-                  <FlexRow>
-                    <TextLabel>Due Date </TextLabel>
-                    <Text>{invoiceData.due_on}</Text>{' '}
-                  </FlexRow>
-                  <FlexRow>
-                    <TextLabel>Taxable fulfillment date </TextLabel>
-                    <Text>{invoiceData.taxable_fulfillment_due} </Text>
-                  </FlexRow>
-                </Flex>
               </View>
+              <Text>{invoiceData.your_street}</Text>
+              <Text>
+                {invoiceData.your_zip} {invoiceData.your_city}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 8,
+                  marginTop: 8
+                }}
+              >
+                Fyzická osoba zapsaná v živnostenském rejstříku.
+              </Text>
+            </View>
+
+            <Flex
+              style={{
+                marginTop: 10,
+                paddingRight: 40
+              }}
+            >
+              <Flex
+                style={{
+                  flexDirection: 'row',
+                  fontSize: 10
+                }}
+              >
+                <TextLabel style={{ width: 56 }}>Reg. No.</TextLabel>
+                <Text>{invoiceData.your_registration_no}</Text>
+              </Flex>
+              <Flex
+                style={{
+                  flexDirection: 'row',
+                  fontSize: 10
+                }}
+              >
+                <TextLabel style={{ width: 56 }}>VAT No.</TextLabel>
+                <Text>{invoiceData.your_vat_no}</Text>
+              </Flex>
             </Flex>
+            <View
+              style={{
+                ...pdfStyles.section,
+                paddingRight: 40
+              }}
+            >
+              <FlexRow>
+                <TextLabel>Bank Account</TextLabel>
+                <Text>{invoiceData.bank_account ?? '-'}</Text>
+              </FlexRow>
+              <FlexRow>
+                <TextLabel>IBAN</TextLabel>
+                <Text>{invoiceData.iban}</Text>
+              </FlexRow>
+              <FlexRow>
+                <TextLabel>SWIFT/BIC</TextLabel>
+                <Text>{invoiceData.swift_bic}</Text>
+              </FlexRow>
+              <FlexRow>
+                <TextLabel>Variable Symbol</TextLabel>
+                <Text>{invoiceData.number.replace('-', '')}</Text>
+              </FlexRow>
+              <FlexRow>
+                <TextLabel>Payment Method</TextLabel>
+                <Text>Wire transfer</Text>
+              </FlexRow>
+            </View>
           </Flex>
+
+          <Flex
+            style={{
+              marginRight: 22,
+              width: '43%'
+            }}
+          >
+            <SectionHeading>Recipient</SectionHeading>
+
+            <View style={pdfStyles.section}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500
+                }}
+              >
+                {invoiceData.client_name}
+              </Text>
+              <Text>{invoiceData.client_street}</Text>
+              <Text>
+                {invoiceData.client_zip} {invoiceData.client_city}
+              </Text>
+              <Flex
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <FlexRow>
+                  <TextLabel>Reg. No. </TextLabel>
+                  <Text>{invoiceData.client_registration_no}</Text>
+                </FlexRow>
+                <FlexRow>
+                  <TextLabel>VAT No. </TextLabel>
+                  <Text>{invoiceData.client_vat_no}</Text>
+                </FlexRow>
+              </Flex>
+              <Flex
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <FlexRow>
+                  <TextLabel>Issue Date </TextLabel>
+                  <Text>{invoiceData.issued_on}</Text>{' '}
+                </FlexRow>
+                <FlexRow>
+                  <TextLabel>Due Date </TextLabel>
+                  <Text>{invoiceData.due_on}</Text>{' '}
+                </FlexRow>
+                <FlexRow>
+                  <TextLabel>Taxable fulfillment date </TextLabel>
+                  <Text>{invoiceData.taxable_fulfillment_due} </Text>
+                </FlexRow>
+              </Flex>
+            </View>
+          </Flex>
+        </Flex>
+      </Flex>
+      <Flex
+        style={{
+          flexDirection: 'row',
+          fontSize: 10,
+          marginTop: 20,
+          marginRight: 22,
+          justifyContent: 'flex-end'
+        }}
+      >
+        <Flex
+          style={{
+            width: '49%',
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+          }}
+        >
+          {vatPayer && <ThirdWidthColumnRight>VAT</ThirdWidthColumnRight>}
+          <ThirdWidthColumnRight>Unit Price</ThirdWidthColumnRight>
+          <ThirdWidthColumnRight>
+            Total {vatPayer && 'Excl. VAT'}
+          </ThirdWidthColumnRight>
+        </Flex>
+      </Flex>
+
+      <View
+        style={{
+          marginTop: 10,
+          marginRight: 22,
+          paddingTop: 7,
+          paddingBottom: 0,
+          marginLeft: 20,
+          fontSize: 10,
+          borderBottom: '1px solid #444',
+          borderTop: '1px solid #444'
+        }}
+      >
+        {invoiceData.items.map((item, index) => {
+          const unitPrice = item.unit_price ?? 0
+          const quantity = item.quantity ?? 0
+          const vatRate = invoiceVatrate
+          const hourPluralized = quantity === 1 ? 'hour' : 'hours'
+          const unit =
+            item.unit === 'hodina' || item.unit === 'hodin'
+              ? hourPluralized
+              : item.unit
+          return (
+            <Flex
+              key={index}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: 7
+              }}
+            >
+              <Flex
+                style={{
+                  width: '50%',
+                  flexDirection: 'row',
+                  alignItems: 'baseline',
+                  justifyContent: 'flex-start'
+                }}
+              >
+                <ItemDescText
+                  style={{
+                    width: '5%'
+                  }}
+                >
+                  {item.quantity}
+                </ItemDescText>
+                <ItemDescText
+                  style={{
+                    width: '14%',
+                    fontSize: 9
+                  }}
+                >
+                  {unit}
+                </ItemDescText>
+                <ItemDescText>{item.description}</ItemDescText>
+              </Flex>
+              <Flex
+                style={{
+                  width: '50%',
+                  flexDirection: 'row'
+                }}
+              >
+                <ThirdWidthColumnRight>
+                  {vatPayer ? `${vatRate}%` : ''}
+                </ThirdWidthColumnRight>
+                <ThirdWidthColumnRight>
+                  {formatMoneyEnglish(unitPrice, invoiceData.currency)}
+                </ThirdWidthColumnRight>
+                <ThirdWidthColumnRight>
+                  {formatMoneyEnglish(
+                    unitPrice * quantity,
+                    invoiceData.currency
+                  )}
+                </ThirdWidthColumnRight>
+              </Flex>
+            </Flex>
+          )
+        })}
+      </View>
+
+      <Flex
+        style={{
+          marginTop: 30,
+          marginRight: 22,
+          flexDirection: 'row'
+        }}
+      >
+        <Flex
+          style={{
+            width: '60%',
+            flexDirection: 'column',
+            paddingLeft: 20
+          }}
+        >
+          {qrCodeBase64 && (
+            <View>
+              <Text
+                style={{
+                  fontSize: 13,
+                  marginBottom: 8
+                }}
+              >
+                QR Payment:
+              </Text>
+
+              <Image
+                style={{
+                  width: 100,
+                  height: 100
+                }}
+                source={qrCodeBase64}
+              ></Image>
+            </View>
+          )}
         </Flex>
         <Flex
           style={{
-            flexDirection: 'row',
-            fontSize: 10,
-            marginTop: 20,
-            marginRight: 22,
-            justifyContent: 'flex-end'
+            flexDirection: 'column',
+            width: '40%'
           }}
         >
           <Flex
             style={{
-              width: '49%',
-              flexDirection: 'row',
-              justifyContent: 'space-between'
+              borderBottom: '1px solid #444'
             }}
           >
-            {vatPayer && <ThirdWidthColumnRight>VAT</ThirdWidthColumnRight>}
-            <ThirdWidthColumnRight>Unit Price</ThirdWidthColumnRight>
-            <ThirdWidthColumnRight>
-              Total {vatPayer && 'Excl. VAT'}
-            </ThirdWidthColumnRight>
+            <FlexRow>
+              <TextLabel>Total {vatPayer && 'without VAT'}</TextLabel>
+              <Text>
+                {formatMoneyEnglish(invoiceTotal, invoiceData.currency)}
+              </Text>
+            </FlexRow>
+            {vatPayer &&
+              Object.entries(taxPaidByRate).map(([rate, tax]) => {
+                return (
+                  <FlexRow key={rate}>
+                    <TextLabel>VAT {Number(rate)}%</TextLabel>
+                    <Text>{formatMoneyEnglish(tax, invoiceData.currency)}</Text>
+                  </FlexRow>
+                )
+              })}
           </Flex>
+
+          <Text
+            style={{
+              fontSize: 24,
+              marginTop: 6,
+              textAlign: 'right',
+              fontWeight: 500
+            }}
+          >
+            {formatMoneyEnglish(invoiceTotal + taxTotal, invoiceData.currency)}
+          </Text>
         </Flex>
-
-        <View
-          style={{
-            marginTop: 10,
-            marginRight: 22,
-            paddingTop: 7,
-            paddingBottom: 0,
-            marginLeft: 20,
-            fontSize: 10,
-            borderBottom: '1px solid #444',
-            borderTop: '1px solid #444'
-          }}
-        >
-          {invoiceData.items.map((item, index) => {
-            const unitPrice = item.unit_price ?? 0
-            const quantity = item.quantity ?? 0
-            const vatRate = invoiceVatrate
-            const hourPluralized = quantity === 1 ? 'hour' : 'hours'
-            const unit =
-              item.unit === 'hodina' || item.unit === 'hodin'
-                ? hourPluralized
-                : item.unit
-            return (
-              <Flex
-                key={index}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  marginBottom: 7
-                }}
-              >
-                <Flex
-                  style={{
-                    width: '50%',
-                    flexDirection: 'row',
-                    alignItems: 'baseline',
-                    justifyContent: 'flex-start'
-                  }}
-                >
-                  <ItemDescText
-                    style={{
-                      width: '5%'
-                    }}
-                  >
-                    {item.quantity}
-                  </ItemDescText>
-                  <ItemDescText
-                    style={{
-                      width: '14%',
-                      fontSize: 9
-                    }}
-                  >
-                    {unit}
-                  </ItemDescText>
-                  <ItemDescText>{item.description}</ItemDescText>
-                </Flex>
-                <Flex
-                  style={{
-                    width: '50%',
-                    flexDirection: 'row'
-                  }}
-                >
-                  <ThirdWidthColumnRight>
-                    {vatPayer ? `${vatRate}%` : ''}
-                  </ThirdWidthColumnRight>
-                  <ThirdWidthColumnRight>
-                    {formatMoneyEnglish(unitPrice, invoiceData.currency)}
-                  </ThirdWidthColumnRight>
-                  <ThirdWidthColumnRight>
-                    {formatMoneyEnglish(
-                      unitPrice * quantity,
-                      invoiceData.currency
-                    )}
-                  </ThirdWidthColumnRight>
-                </Flex>
-              </Flex>
-            )
-          })}
-        </View>
-
+      </Flex>
+      {invoiceData.exchange_rate !== 1 && (
         <Flex
           style={{
             marginTop: 30,
@@ -442,32 +522,9 @@ export const EnglishInvoicePDF = ({
         >
           <Flex
             style={{
-              width: '60%',
-              flexDirection: 'column',
-              paddingLeft: 20
+              width: '60%'
             }}
-          >
-            {qrCodeBase64 && (
-              <View>
-                <Text
-                  style={{
-                    fontSize: 13,
-                    marginBottom: 8
-                  }}
-                >
-                  QR Payment:
-                </Text>
-
-                <Image
-                  style={{
-                    width: 100,
-                    height: 100
-                  }}
-                  source={qrCodeBase64}
-                ></Image>
-              </View>
-            )}
-          </Flex>
+          ></Flex>
           <Flex
             style={{
               flexDirection: 'column',
@@ -479,138 +536,79 @@ export const EnglishInvoicePDF = ({
                 borderBottom: '1px solid #444'
               }}
             >
+              <Text style={{ fontSize: 12, color: 'gray' }}>
+                At the exchange rate{' '}
+                <Text style={{ fontWeight: 500, color: 'black' }}>
+                  {invoiceData.exchange_rate} CZK / 1 {invoiceData.currency}
+                </Text>
+              </Text>
               <FlexRow>
-                <TextLabel>Total {vatPayer && 'without VAT'}</TextLabel>
-                <Text>
-                  {formatMoneyEnglish(invoiceTotal, invoiceData.currency)}
+                <TextLabel style={{ color: 'gray' }}>
+                  Total without VAT
+                </TextLabel>
+                <Text style={{ color: 'gray' }}>
+                  {formatMoneyEnglish(
+                    invoiceTotal * invoiceData.exchange_rate,
+                    'CZK'
+                  )}
                 </Text>
               </FlexRow>
-              {vatPayer &&
-                Object.entries(taxPaidByRate).map(([rate, tax]) => {
-                  return (
-                    <FlexRow key={rate}>
-                      <TextLabel>VAT {Number(rate)}%</TextLabel>
-                      <Text>
-                        {formatMoneyEnglish(tax, invoiceData.currency)}
+              {Object.entries(taxPaidByRate).map(([rate, tax]) => {
+                return (
+                  <Fragment key={rate}>
+                    <FlexRow>
+                      <TextLabel style={{ color: 'gray' }}>
+                        VAT {Number(rate)}% in CZK
+                      </TextLabel>
+                      <Text
+                        style={{
+                          color: 'gray'
+                        }}
+                      >
+                        {formatMoneyEnglish(
+                          tax * invoiceData.exchange_rate,
+                          'CZK'
+                        )}
                       </Text>
                     </FlexRow>
-                  )
-                })}
+                  </Fragment>
+                )
+              })}
             </Flex>
 
             <Text
               style={{
-                fontSize: 24,
+                fontSize: 16,
+                color: 'gray',
                 marginTop: 6,
                 textAlign: 'right',
                 fontWeight: 500
               }}
             >
               {formatMoneyEnglish(
-                invoiceTotal + taxTotal,
-                invoiceData.currency
+                (invoiceTotal + taxTotal) * invoiceData.exchange_rate,
+                'CZK'
               )}
             </Text>
           </Flex>
         </Flex>
-        {invoiceData.exchange_rate !== 1 && (
-          <Flex
-            style={{
-              marginTop: 30,
-              marginRight: 22,
-              flexDirection: 'row'
-            }}
-          >
-            <Flex
-              style={{
-                width: '60%'
-              }}
-            ></Flex>
-            <Flex
-              style={{
-                flexDirection: 'column',
-                width: '40%'
-              }}
-            >
-              <Flex
-                style={{
-                  borderBottom: '1px solid #444'
-                }}
-              >
-                <Text style={{ fontSize: 12, color: 'gray' }}>
-                  At the exchange rate{' '}
-                  <Text style={{ fontWeight: 500, color: 'black' }}>
-                    {invoiceData.exchange_rate} CZK / 1 {invoiceData.currency}
-                  </Text>
-                </Text>
-                <FlexRow>
-                  <TextLabel style={{ color: 'gray' }}>
-                    Total without VAT
-                  </TextLabel>
-                  <Text style={{ color: 'gray' }}>
-                    {formatMoneyEnglish(
-                      invoiceTotal * invoiceData.exchange_rate,
-                      'CZK'
-                    )}
-                  </Text>
-                </FlexRow>
-                {Object.entries(taxPaidByRate).map(([rate, tax]) => {
-                  return (
-                    <Fragment key={rate}>
-                      <FlexRow>
-                        <TextLabel style={{ color: 'gray' }}>
-                          VAT {Number(rate)}% in CZK
-                        </TextLabel>
-                        <Text
-                          style={{
-                            color: 'gray'
-                          }}
-                        >
-                          {formatMoneyEnglish(
-                            tax * invoiceData.exchange_rate,
-                            'CZK'
-                          )}
-                        </Text>
-                      </FlexRow>
-                    </Fragment>
-                  )
-                })}
-              </Flex>
-
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: 'gray',
-                  marginTop: 6,
-                  textAlign: 'right',
-                  fontWeight: 500
-                }}
-              >
-                {formatMoneyEnglish(
-                  (invoiceTotal + taxTotal) * invoiceData.exchange_rate,
-                  'CZK'
-                )}
-              </Text>
-            </Flex>
-          </Flex>
-        )}
-        <Text style={{ marginLeft: 22, marginTop: 10, fontSize: 10 }}>
-          {invoiceData.footer_note}
+      )}
+      <Text style={{ marginLeft: 22, marginTop: 10, fontSize: 10 }}>
+        {invoiceData.footer_note}
+      </Text>
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 30,
+          left: 20,
+          fontSize: 8
+        }}
+      >
+        <Text>
+          Invoice issued on <Link href="faktorio.cz">faktorio.cz</Link>
         </Text>
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 30,
-            left: 20,
-            fontSize: 8
-          }}
-        >
-          <Text>
-            Invoice issued on <Link href="faktorio.cz">faktorio.cz</Link>
-          </Text>
-        </View>
-      </Page>
-    </Document>
+      </View>
+    </Page>
   )
 }
 

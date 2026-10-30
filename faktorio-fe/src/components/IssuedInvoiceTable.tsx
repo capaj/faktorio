@@ -27,8 +27,7 @@ import {
   ChevronUp
 } from 'lucide-react'
 import { Link } from 'wouter'
-import { formatNumberWithSpaces } from '@/pages/formatNumberWithSpaces' // Adjust path if needed
-import { InvoicesDownloadButton } from '@/pages/InvoiceList/InvoicesDownloadButton' // Adjust path if needed
+import { formatMoney } from '@/lib/formatMoney'
 import { IsdocDownloadButton } from '@/components/IsdocDownloadButton'
 
 // Define the shape of an invoice - adjust based on your actual data structure
@@ -91,7 +90,6 @@ interface InvoiceTableProps {
   onMarkAsUnpaid?: (id: string) => Promise<void>
   showTotals?: boolean
   year?: number | null
-  search?: string
   // Add any other props needed, e.g., specific mutation status if needed inside the table
 }
 
@@ -102,8 +100,7 @@ export function IssuedInvoiceTable({
   onMarkAsPaid,
   onMarkAsUnpaid,
   showTotals = true, // Default to showing totals
-  year,
-  search
+  year
 }: InvoiceTableProps) {
   // Determine if we should show full year in dates
   const showFullYear = year === null || year === undefined
@@ -118,9 +115,7 @@ export function IssuedInvoiceTable({
 
   const renderPaymentBadge = (invoice: Invoice) => {
     const isOverdue =
-      invoice.due_on &&
-      !invoice.paid_on &&
-      new Date(invoice.due_on) < today
+      invoice.due_on && !invoice.paid_on && new Date(invoice.due_on) < today
 
     const baseClass = 'px-2 py-1 rounded-full text-xs font-medium'
 
@@ -160,10 +155,7 @@ export function IssuedInvoiceTable({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="cursor-pointer">
         <DropdownMenuItem>
-          <Link
-            href={`/invoices/${invoice.id}/edit`}
-            className="flex w-full"
-          >
+          <Link href={`/invoices/${invoice.id}/edit`} className="flex w-full">
             <Pencil size={16} strokeWidth="1.5" />
             <span className="ml-2">Editovat</span>
           </Link>
@@ -295,7 +287,7 @@ export function IssuedInvoiceTable({
   }
 
   const currencyTotals = invoices.reduce<CurrencyTotals>((acc, invoice) => {
-    const currency = invoice.currency || 'N/A' // Handle potential null/undefined currency
+    const currency = invoice.currency
     if (!acc[currency]) {
       acc[currency] = { total: 0, subtotal: 0, count: 0 }
     }
@@ -374,17 +366,22 @@ export function IssuedInvoiceTable({
                   <TableCell>{formatCzechDate(invoice.sent_at)}</TableCell>
                   <TableCell>{renderPaymentBadge(invoice)}</TableCell>
                   <TableCell>
-                    {invoice.subtotal} {invoice.currency}
+                    {formatMoney(invoice.subtotal, invoice.currency)}
                     {invoice.currency !== 'CZK' &&
-                      invoice.exchange_rate &&
-                      invoice.subtotal && (
+                      invoice.exchange_rate != null &&
+                      invoice.subtotal != null && (
                         <div className="text-xs text-fg-muted">
-                          ({invoice.exchange_rate * invoice.subtotal} CZK)
+                          (
+                          {formatMoney(
+                            invoice.exchange_rate * invoice.subtotal,
+                            'CZK'
+                          )}
+                          )
                         </div>
                       )}
                   </TableCell>
                   <TableCell>
-                    {invoice.total} {invoice.currency}
+                    {formatMoney(invoice.total, invoice.currency)}
                   </TableCell>
 
                   <TableCell className="text-right">
@@ -412,7 +409,10 @@ export function IssuedInvoiceTable({
               <>
                 {/* Dynamically render rows for each currency */}
                 {sortedCurrencies.map((currency) => (
-                  <TableRow key={currency} className="bg-surface-muted font-medium">
+                  <TableRow
+                    key={currency}
+                    className="bg-surface-muted font-medium"
+                  >
                     <TableCell colSpan={5}>
                       Celkem {currencyTotals[currency].count}{' '}
                       {currencyTotals[currency].count === 1
@@ -426,12 +426,10 @@ export function IssuedInvoiceTable({
                     {/* Empty cell for alignment */}
                     <TableCell></TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {formatNumberWithSpaces(currencyTotals[currency].subtotal)}{' '}
-                      {currency}
+                      {formatMoney(currencyTotals[currency].subtotal, currency)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
-                      {currency}
+                      {formatMoney(currencyTotals[currency].total, currency)}
                     </TableCell>
                     {/* Empty action cell */}
                     <TableCell className="text-right"></TableCell>
@@ -454,7 +452,7 @@ export function IssuedInvoiceTable({
                     <TableCell colSpan={3} className="text-right font-light">
                       Celkem částka DPH:{' '}
                       <span className="font-bold text-warning-fg">
-                        {formatNumberWithSpaces(totalVAT)} CZK
+                        {formatMoney(totalVAT, 'CZK')}
                       </span>
                     </TableCell>
 
@@ -462,27 +460,23 @@ export function IssuedInvoiceTable({
                       colSpan={1}
                       className="text-left whitespace-nowrap"
                     >
-                      {formatNumberWithSpaces(
+                      {formatMoney(
                         invoices.reduce(
                           (acc, inv) => acc + inv.native_subtotal,
                           0
-                        )
-                      )}{' '}
-                      CZK
+                        ),
+                        'CZK'
+                      )}
                     </TableCell>
                     {/* Display the total sum in CZK */}
                     <TableCell
                       colSpan={1}
                       className="text-left whitespace-nowrap"
                     >
-                      {formatNumberWithSpaces(totalSumCZK)} CZK
+                      {formatMoney(totalSumCZK, 'CZK')}
                     </TableCell>
 
-                    <TableCell className="text-right">
-                      {year !== undefined && search !== undefined && (
-                        <InvoicesDownloadButton year={year} search={search} />
-                      )}
-                    </TableCell>
+                    <TableCell />
                   </TableRow>
                 )}
               </>
@@ -527,9 +521,7 @@ export function IssuedInvoiceTable({
                     <div className="text-right">
                       <div className="text-xs text-fg-muted">s DPH</div>
                       <div className="text-base font-bold text-fg-strong">
-                        {invoice.total
-                          ? `${invoice.total} ${invoice.currency}`
-                          : '—'}
+                        {formatMoney(invoice.total, invoice.currency)}
                       </div>
                     </div>
                     {renderActionMenu(invoice)}
@@ -546,7 +538,9 @@ export function IssuedInvoiceTable({
                     className="flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-200"
                     onClick={() => toggleExpanded(invoice.id)}
                   >
-                    {expandedMobileCards.has(invoice.id) ? 'Skrýt detaily' : 'Zobrazit detaily'}
+                    {expandedMobileCards.has(invoice.id)
+                      ? 'Skrýt detaily'
+                      : 'Zobrazit detaily'}
                     {expandedMobileCards.has(invoice.id) ? (
                       <ChevronUp className="h-4 w-4" />
                     ) : (
@@ -579,15 +573,11 @@ export function IssuedInvoiceTable({
                     )}
                     <div className="text-fg-muted">bez DPH</div>
                     <div className="text-fg-strong">
-                      {invoice.subtotal
-                        ? `${invoice.subtotal} ${invoice.currency}`
-                        : '—'}
+                      {formatMoney(invoice.subtotal, invoice.currency)}
                     </div>
                     <div className="text-fg-muted">s DPH</div>
                     <div className="font-semibold text-fg-strong">
-                      {invoice.total
-                        ? `${invoice.total} ${invoice.currency}`
-                        : '—'}
+                      {formatMoney(invoice.total, invoice.currency)}
                     </div>
                   </div>
                 )}
@@ -596,10 +586,15 @@ export function IssuedInvoiceTable({
 
         {showTotals && !isLoading && invoices.length > 0 && (
           <div className="mt-2 rounded-xl border border-line bg-surface p-4 shadow-sm">
-            <div className="text-sm font-semibold text-fg-secondary">Souhrn</div>
+            <div className="text-sm font-semibold text-fg-secondary">
+              Souhrn
+            </div>
             <div className="mt-2 space-y-2 text-sm">
               {sortedCurrencies.map((currency) => (
-                <div key={currency} className="flex items-center justify-between">
+                <div
+                  key={currency}
+                  className="flex items-center justify-between"
+                >
                   <span className="text-fg-secondary">
                     {currencyTotals[currency].count}{' '}
                     {currencyTotals[currency].count === 1
@@ -611,8 +606,7 @@ export function IssuedInvoiceTable({
                     v {currency}
                   </span>
                   <span className="font-semibold text-fg-strong">
-                    {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
-                    {currency}
+                    {formatMoney(currencyTotals[currency].total, currency)}
                   </span>
                 </div>
               ))}
@@ -622,20 +616,15 @@ export function IssuedInvoiceTable({
                   <div className="flex items-center justify-between border-t border-dashed border-line pt-2">
                     <span className="text-fg-secondary">Celkem částka DPH</span>
                     <span className="font-semibold text-warning-fg">
-                      {formatNumberWithSpaces(totalVAT)} CZK
+                      {formatMoney(totalVAT, 'CZK')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-fg-secondary">
                     <span>Celkem v CZK</span>
                     <span className="font-semibold text-fg-strong">
-                      {formatNumberWithSpaces(totalSumCZK)} CZK
+                      {formatMoney(totalSumCZK, 'CZK')}
                     </span>
                   </div>
-                  {year !== undefined && search !== undefined && (
-                    <div className="pt-1">
-                      <InvoicesDownloadButton year={year} search={search} />
-                    </div>
-                  )}
                 </>
               )}
             </div>

@@ -200,6 +200,7 @@ export const Header = () => {
                     Vystavit ze šablony
                   </ButtonLink>
                   <ButtonLink
+                    variant="ghost"
                     className={mobileMenuButtonClass}
                     href="/invoices"
                   >
@@ -272,7 +273,8 @@ export const Header = () => {
               </ButtonLink>
               <ButtonLink
                 href="/new-invoice?fromTemplate=true"
-                className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors"
+                variant="ghost"
+                className="flex items-center gap-2 text-primary hover:bg-surface-strong aria-[current=page]:bg-surface-muted rounded-md px-2 py-1 transition-colors"
               >
                 <Copy className="h-4 w-4" />
                 Vystavit ze šablony

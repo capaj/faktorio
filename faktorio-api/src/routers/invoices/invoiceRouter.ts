@@ -350,6 +350,7 @@ export const invoiceRouter = trpcContext.router({
         limit: z.number().nullable().default(30),
         offset: z.number().nullish().default(0),
         filter: z.string().nullish(),
+        contactId: z.string().min(1).nullish(),
         currency: z.string().min(3).max(3).nullish(),
         from: stringDateSchema.nullish(), // YYYY-MM-DD
         to: stringDateSchema.nullish(),
@@ -364,6 +365,10 @@ export const invoiceRouter = trpcContext.router({
     )
     .query(async ({ ctx, input }) => {
       const conditions: SQL[] = [eq(invoicesTb.user_id, ctx.user.id)]
+
+      if (input.contactId) {
+        conditions.push(eq(invoicesTb.client_contact_id, input.contactId))
+      }
 
       if (input.filter) {
         conditions.push(
