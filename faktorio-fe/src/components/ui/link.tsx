@@ -24,15 +24,17 @@ export function ButtonLink({
   type?: 'button' | 'submit' | 'reset'
 }) {
   const [isActive] = useRoute(props.href)
+  const variant = props.variant ?? 'link'
   // One focusable element: the link itself, styled as a button (a <button> inside <a> was two tab stops)
   return (
     <Button
       asChild
-      variant={props.variant ?? 'link'}
+      variant={variant}
       size={props.size}
       className={cn(
         props.className,
-        isActive ? 'underline' : '',
+        // Only text links are underlined; links that look like buttons never are
+        isActive && variant === 'link' ? 'underline' : '',
         'cursor-pointer'
       )}
     >

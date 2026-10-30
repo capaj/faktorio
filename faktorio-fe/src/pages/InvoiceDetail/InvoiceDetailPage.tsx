@@ -298,9 +298,9 @@ export const InvoiceDetail = ({
         </div>
 
         <div className="rounded-lg border bg-background p-5 shadow-sm">
-          <h4 className="text-lg font-semibold text-foreground">
+          <h2 className="text-lg font-semibold text-foreground">
             Stažení faktury
-          </h4>
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Uložte si dokument nebo ho sdílejte ve formátu PDF či ISDOC.
           </p>
@@ -370,9 +370,9 @@ function ShareControls({ invoiceId }: { invoiceId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-foreground">
+        <h2 className="text-base font-semibold text-foreground">
           Sdílení faktury
-        </h3>
+        </h2>
         <Button
           size="sm"
           onClick={() => createShare.mutate({ invoiceId })}

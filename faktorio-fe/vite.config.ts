@@ -1,4 +1,4 @@
-import { defineConfig, Plugin } from 'vite'
+import { createServer, defineConfig, Plugin } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import react from '@vitejs/plugin-react-swc'
@@ -6,10 +6,6 @@ import path from 'path'
 import fs from 'fs'
 import matter from 'gray-matter'
 import { marked } from 'marked'
-// @ts-ignore
-import { getGitHash } from '../scripts/getGitHash'
-
-const gitHash = getGitHash()
 
 interface BlogPost {
   slug: string
@@ -17,6 +13,126 @@ interface BlogPost {
   date: string
   content: string
   excerpt: string
+}
+
+const IMAGES_DIR = path.join(process.cwd(), 'public/images')
+
+// Reads width and height from a PNG header (bytes 16-23 of the IHDR chunk)
+function pngSize(file: string) {
+  const header = Buffer.alloc(24)
+  const fd = fs.openSync(file, 'r')
+  fs.readSync(fd, header, 0, 24, 0)
+  fs.closeSync(fd)
+  return { width: header.readUInt32BE(16), height: header.readUInt32BE(20) }
+}
+
+// Blog images: serve the WebP in public/images/blog when there is one, and add
+// width/height (no layout shift) and lazy loading
+function enhanceBlogImages(html: string) {
+  return html.replace(
+    /<img src="(?:\.\.\/)*images\/([^"]+)\.png" alt="([^"]*)">/g,
+    (tag, name: string, alt: string) => {
+      const png = path.join(IMAGES_DIR, `${name}.png`)
+      if (!fs.existsSync(png)) return tag
+      const { width, height } = pngSize(png)
+      const webp = path.join(IMAGES_DIR, 'blog', `${name}.webp`)
+      const src = fs.existsSync(webp)
+        ? `/images/blog/${name}.webp`
+        : `/images/${name}.png`
+      return `<img src="${src}" alt="${alt}" width="${width}" height="${height}" loading="lazy" decoding="async">`
+    }
+  )
+}
+
+// Renders the signed-out landing page into index.html, so the first paint does not wait
+// for the JavaScript bundle (FCP/LCP) and crawlers get real content. index.html is also the
+// SPA fallback for every other route; an inline script in index.html drops the markup there.
+function prerenderLandingPage(): Plugin {
+  return {
+    name: 'prerender-landing-page',
+    apply: 'build',
+    enforce: 'post',
+    async generateBundle(_options, bundle) {
+      const page = bundle['index.html']
+      if (!page || page.type !== 'asset') return
+
+      const server = await createServer({
+        configFile: false,
+        root: __dirname,
+        mode: 'production',
+        logLevel: 'error',
+        resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+        server: { middlewareMode: true, hmr: false, ws: false },
+        appType: 'custom'
+      })
+      try {
+        const { render } = await server.ssrLoadModule(
+          '/src/entry-prerender.tsx'
+        )
+        const html = String(page.source)
+        if (!html.includes('<div id="root"></div>')) {
+          throw new Error(
+            'prerender: <div id="root"></div> not found in index.html'
+          )
+        }
+        const preloads = [
+          ...html.matchAll(
+            /<link rel="modulepreload" crossorigin href="([^"]+)">/g
+          )
+        ].map((match) => match[1])
+
+        page.source = html
+          .replace(
+            '<div id="root"></div>',
+            `<div id="root">${render('/')}</div>`
+          )
+          // Load the app only after the prerendered page has painted its main content (LCP),
+          // so the bundle never competes with it; links and content work without it. Without
+          // prerendered content (other routes, signed-in visitors) it loads immediately. The
+          // modulepreload links move into the loader so they follow the same timing.
+          .replace(
+            /\s*<link rel="modulepreload" crossorigin href="[^"]+">/g,
+            ''
+          )
+          .replace(
+            /<script type="module" crossorigin src="(\/assets\/[^"]+\.js)"><\/script>/,
+            (_tag, src: string) => `<script type="module">
+      const preloads = ${JSON.stringify(preloads)}
+      const start = () => {
+        for (const href of preloads) {
+          const link = document.createElement('link')
+          link.rel = 'modulepreload'
+          link.crossOrigin = ''
+          link.href = href
+          document.head.append(link)
+        }
+        import('${src}')
+      }
+      if (document.getElementById('root').childElementCount && 'PerformanceObserver' in window) {
+        let started = false
+        const once = () => started || ((started = true), start())
+        new PerformanceObserver(once).observe({ type: 'largest-contentful-paint', buffered: true })
+        setTimeout(once, 3000)
+      } else {
+        start()
+      }
+    </script>`
+          )
+          // Inline the stylesheet: one render-blocking request less before the first paint
+          .replace(
+            /<link rel="stylesheet"[^>]*href="\/(assets\/[^"]+\.css)"[^>]*>/,
+            (tag, file: string) => {
+              const css = bundle[file]
+              return css?.type === 'asset'
+                ? `<style>${css.source}</style>`
+                : tag
+            }
+          )
+      } finally {
+        await server.close()
+      }
+    }
+  }
 }
 
 function blogPlugin(): Plugin {
@@ -39,7 +155,7 @@ function blogPlugin(): Plugin {
       const { data, content } = matter(fileContent)
       const slug = file.replace('.md', '')
 
-      const htmlContent = marked.parse(content) as string
+      const htmlContent = enhanceBlogImages(marked.parse(content) as string)
       const firstParagraph =
         content
           .split('\n')
@@ -175,11 +291,15 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
+        // Generated by scripts/generate-social-images.mts
         icons: [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
           {
-            src: '/faktura.png',
-            sizes: '192x192',
-            type: 'image/png'
+            src: '/icons/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       }
@@ -189,22 +309,22 @@ export default defineConfig({
       apply: 'build',
       transformIndexHtml: {
         order: 'pre',
-        handler: () => [
-          {
-            tag: 'script',
-            attrs: { id: 'faktorio-app-bootstrap' },
-            children: fs.readFileSync(
+        // Right after <meta charset>: the charset must come first in <head>, and the
+        // bootstrap still runs before any application bundle
+        handler: (html) =>
+          html.replace(
+            '<meta charset="UTF-8" />',
+            `<meta charset="UTF-8" />\n    <script id="faktorio-app-bootstrap">${fs.readFileSync(
               path.resolve(__dirname, 'src/lib/appBootstrap.js'),
               'utf8'
-            ),
-            injectTo: 'head-prepend'
-          }
-        ]
+            )}</script>`
+          )
       }
     },
     react(),
     tailwindcss(),
-    blogPlugin()
+    blogPlugin(),
+    prerenderLandingPage()
   ],
   server: {
     cors: true,
@@ -218,35 +338,6 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            // Split large database/SQL libraries
-            if (id.includes('sql.js') || id.includes('drizzle')) {
-              return `db_${gitHash}`
-            }
-
-            // Split React and React-related libraries
-            if (
-              id.includes('react') ||
-              id.includes('react-dom') ||
-              id.includes('react-router')
-            ) {
-              return `react_${gitHash}`
-            }
-
-            // Split PDF and document libraries
-            if (
-              id.includes('pdf') ||
-              id.includes('jspdf') ||
-              id.includes('html2canvas')
-            ) {
-              return `pdf_${gitHash}`
-            }
-
-            // Everything else goes to general vendor
-            return `vendor_${gitHash}`
-          }
-        },
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.') || []
           const ext = info.at(-1)

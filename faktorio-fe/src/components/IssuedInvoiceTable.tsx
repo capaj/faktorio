@@ -423,7 +423,8 @@ export function IssuedInvoiceTable({
                           : 'faktur'}{' '}
                       v {currency}
                     </TableCell>
-                    <TableCell></TableCell> {/* Empty cell for alignment */}
+                    {/* Empty cell for alignment */}
+                    <TableCell></TableCell>
                     <TableCell className="whitespace-nowrap">
                       {formatNumberWithSpaces(currencyTotals[currency].subtotal)}{' '}
                       {currency}
@@ -432,8 +433,8 @@ export function IssuedInvoiceTable({
                       {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
                       {currency}
                     </TableCell>
-                    <TableCell className="text-right"></TableCell>{' '}
                     {/* Empty action cell */}
+                    <TableCell className="text-right"></TableCell>
                   </TableRow>
                 ))}
 

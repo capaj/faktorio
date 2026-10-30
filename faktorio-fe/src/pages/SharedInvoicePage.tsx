@@ -118,7 +118,8 @@ export function SharedInvoicePage() {
           Sdílená faktura {invoice.number}
         </h1>
         <select
-          className="border rounded px-2 py-1"
+          aria-label="Jazyk faktury"
+          className="border rounded px-2 py-1 bg-background"
           value={language}
           onChange={(e) => setLanguage(e.target.value as 'cs' | 'en')}
         >
@@ -132,9 +133,9 @@ export function SharedInvoicePage() {
       </div>
 
       <div className="rounded-lg border bg-background p-5 shadow-sm">
-        <h4 className="text-lg font-semibold text-foreground">
+        <h2 className="text-lg font-semibold text-foreground">
           Stažení faktury
-        </h4>
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Stáhněte si fakturu ve formátu PDF nebo ISDOC.
         </p>

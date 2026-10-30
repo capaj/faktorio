@@ -1,4 +1,3 @@
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useState } from 'react'
 import { Link } from 'wouter'
 
@@ -22,20 +21,33 @@ export function BlogIndex({ posts }: BlogIndexProps) {
     return order * (new Date(b.date).getTime() - new Date(a.date).getTime())
   })
 
-  const handleSortChange = (value: string) => {
-    setSortAscending(value === 'newest')
-  }
+  // A sort switch, not tabs: two toggle buttons styled like the tab list
+  const sortOptions = [
+    { label: 'Od nejstaršího', ascending: false },
+    { label: 'Od nejnovějšího', ascending: true }
+  ]
 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-12">
         <h1 className="text-4xl font-bold">Blog</h1>
-        <Tabs defaultValue="newest" onValueChange={handleSortChange}>
-          <TabsList>
-            <TabsTrigger value="oldest">Od nejstaršího</TabsTrigger>
-            <TabsTrigger value="newest">Od nejnovějšího</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div
+          role="group"
+          aria-label="Řazení článků"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
+        >
+          {sortOptions.map(({ label, ascending }) => (
+            <button
+              key={label}
+              type="button"
+              aria-pressed={sortAscending === ascending}
+              onClick={() => setSortAscending(ascending)}
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-pressed:bg-background aria-pressed:text-foreground aria-pressed:shadow-sm"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="space-y-12">
         {sortedPosts.map((post) => (

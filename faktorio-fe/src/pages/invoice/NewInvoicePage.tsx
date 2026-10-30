@@ -453,7 +453,6 @@ export const NewInvoicePage = () => {
                     </div>
                     <ButtonLink
                       type="button"
-                      tabIndex={100}
                       href="/contacts/new?next=/new-invoice"
                     >
                       Nový kontakt
@@ -853,21 +852,24 @@ const InvoiceItemForm = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Upozornění</DialogTitle>
-            <DialogDescription>
-              Nulová DPH pro tuzemskou fakturu lze použít pouze pro omezené typy
-              zboží a služeb. Zde je jejich výčet:{' '}
-              <a
-                href="https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-info underline"
-              >
-                https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni
-              </a>
-              <p className="mt-4">
-                V xml exportu kontrolního hlášení bude tato faktura v sekci A.1
-                a budete muset ručně doplnit kód plnění
-              </p>
+            {/* A div, because the description contains a paragraph */}
+            <DialogDescription asChild>
+              <div>
+                Nulová DPH pro tuzemskou fakturu lze použít pouze pro omezené
+                typy zboží a služeb. Zde je jejich výčet:{' '}
+                <a
+                  href="https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-info underline"
+                >
+                  https://financnisprava.gov.cz/cs/financni-sprava/media-a-verejnost/tiskove-zpravy-gfr/tiskove-zpravy-2017/od-cervence-dochazi-k-rozsireni-rezimu-reverse-charge-na-dalsi-plneni
+                </a>
+                <p className="mt-4">
+                  V xml exportu kontrolního hlášení bude tato faktura v sekci
+                  A.1 a budete muset ručně doplnit kód plnění
+                </p>
+              </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

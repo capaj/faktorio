@@ -72,7 +72,7 @@ self.addEventListener('push', function (event) {
 
   const options = {
     body: data.body,
-    icon: data.icon || '/faktura.png',
+    icon: data.icon || '/icons/icon-192.png',
     badge: data.badge || '/faktura.png',
     data: data.data || {},
     actions: data.actions || [],

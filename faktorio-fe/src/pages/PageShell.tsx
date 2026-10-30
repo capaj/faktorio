@@ -53,7 +53,10 @@ export function Footer() {
       </div>
     <div className="container mx-auto p-4">
         <div className="text-center text-sm text-fg-subtle">
-          © {new Date().getFullYear()} Faktorio
+          ©{' '}
+          {/* Prerendered at build time, so the year can differ from the browser's */}
+          <span suppressHydrationWarning>{new Date().getFullYear()}</span>{' '}
+          Faktorio
         </div>
       </div>
     </footer>
