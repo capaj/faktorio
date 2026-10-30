@@ -54,6 +54,8 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { useForm, UseFormReturn } from 'react-hook-form'
 import { ContactForm } from './ContactForm'
+import { ContactFavicon } from '@/components/ContactFavicon'
+import { parseContactWebsite } from '@/lib/contactWebsite'
 
 // Define base schema for reuse
 const baseContactSchema = z.object({
@@ -67,6 +69,13 @@ const baseContactSchema = z.object({
   country: z.string().optional(),
   main_email: z.string().email().nullish(),
   phone_number: z.string().nullish(),
+  web: z
+    .string()
+    .trim()
+    .refine((value) => !value || parseContactWebsite(value) !== null, {
+      message: 'Zadejte platnou webovou adresu'
+    })
+    .nullish(),
   language: z.string().optional()
 })
 
@@ -128,6 +137,7 @@ export const ContactList = () => {
         country: z.string().optional().default('Česká Republika'),
         main_email: z.string().email().nullish(),
         phone_number: z.string().nullish(),
+        web: baseContactSchema.shape.web,
         language: z.string().optional()
       }),
     [contactsQuery.data, contactId]
@@ -142,6 +152,7 @@ export const ContactList = () => {
     country: 'Česká Republika',
     main_email: null,
     phone_number: null,
+    web: '',
     registration_no: '',
     vat_no: '',
     language: 'cs'
@@ -213,6 +224,7 @@ export const ContactList = () => {
           country: 'Česká Republika',
           main_email: null,
           phone_number: null,
+          web: '',
           registration_no: '',
           vat_no: '',
           language: 'cs'
@@ -421,7 +433,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
 
   // Handle form submission for creating a new contact
   const handleCreateSubmit = async (values: ContactFormSchema) => {
-    await create.mutateAsync(values)
+    await create.mutateAsync({ ...values, web: values.web ?? undefined })
     const refreshPromise = contactsQuery.refetch()
     setNewDialogOpen(false)
 
@@ -473,6 +485,7 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
       country: '',
       main_email: null,
       phone_number: null,
+      web: '',
       registration_no: '',
       vat_no: '',
       language: 'cs'
@@ -646,7 +659,9 @@ Company Ltd,123 Main St,,Prague,10000,CZ,12345678,CZ12345678,1234567890/0100,CZ1
                   <Link
                     onClick={(e) => handleContactClick(e, contact.id)}
                     href={`/contacts/${contact.id}`}
+                    className="inline-flex items-center gap-2"
                   >
+                    <ContactFavicon website={contact.web} />
                     {contact.name}
                   </Link>
                 </TableCell>

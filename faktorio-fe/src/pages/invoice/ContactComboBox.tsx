@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/popover'
 import { trpcClient } from '@/lib/trpcClient'
 import { useEffect } from 'react'
+import { ContactFavicon } from '@/components/ContactFavicon'
 
 export function ContactComboBox(props: {
   onChange?: (value: string) => void
@@ -89,8 +90,13 @@ export function ContactComboBox(props: {
             data-testid="contact-combobox"
             aria-label="Odběratel"
           >
-            <span className="overflow-hidden text-ellipsis">
-              {selectedContact ? selectedContact.name : 'Vyberte kontakt...'}
+            <span className="flex min-w-0 items-center gap-2">
+              {selectedContact && (
+                <ContactFavicon website={selectedContact.web} />
+              )}
+              <span className="truncate">
+                {selectedContact ? selectedContact.name : 'Vyberte kontakt...'}
+              </span>
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -117,6 +123,7 @@ export function ContactComboBox(props: {
                           value === contact.id ? 'opacity-100' : 'opacity-0'
                         )}
                       />
+                      <ContactFavicon website={contact.web} />
                       {contact.name}
                     </CommandItem>
                   )
