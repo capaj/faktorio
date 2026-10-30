@@ -27,7 +27,7 @@ import {
   ChevronUp
 } from 'lucide-react'
 import { Link } from 'wouter'
-import { formatNumberWithSpaces } from '@/pages/formatNumberWithSpaces' // Adjust path if needed
+import { formatMoney } from '@/lib/formatMoney'
 import { IsdocDownloadButton } from '@/components/IsdocDownloadButton'
 
 // Define the shape of an invoice - adjust based on your actual data structure
@@ -287,7 +287,7 @@ export function IssuedInvoiceTable({
   }
 
   const currencyTotals = invoices.reduce<CurrencyTotals>((acc, invoice) => {
-    const currency = invoice.currency || 'N/A' // Handle potential null/undefined currency
+    const currency = invoice.currency
     if (!acc[currency]) {
       acc[currency] = { total: 0, subtotal: 0, count: 0 }
     }
@@ -366,17 +366,22 @@ export function IssuedInvoiceTable({
                   <TableCell>{formatCzechDate(invoice.sent_at)}</TableCell>
                   <TableCell>{renderPaymentBadge(invoice)}</TableCell>
                   <TableCell>
-                    {invoice.subtotal} {invoice.currency}
+                    {formatMoney(invoice.subtotal, invoice.currency)}
                     {invoice.currency !== 'CZK' &&
-                      invoice.exchange_rate &&
-                      invoice.subtotal && (
+                      invoice.exchange_rate != null &&
+                      invoice.subtotal != null && (
                         <div className="text-xs text-gray-500">
-                          ({invoice.exchange_rate * invoice.subtotal} CZK)
+                          (
+                          {formatMoney(
+                            invoice.exchange_rate * invoice.subtotal,
+                            'CZK'
+                          )}
+                          )
                         </div>
                       )}
                   </TableCell>
                   <TableCell>
-                    {invoice.total} {invoice.currency}
+                    {formatMoney(invoice.total, invoice.currency)}
                   </TableCell>
 
                   <TableCell className="text-right">
@@ -417,14 +422,10 @@ export function IssuedInvoiceTable({
                     </TableCell>
                     <TableCell></TableCell> {/* Empty cell for alignment */}
                     <TableCell className="whitespace-nowrap">
-                      {formatNumberWithSpaces(
-                        currencyTotals[currency].subtotal
-                      )}{' '}
-                      {currency}
+                      {formatMoney(currencyTotals[currency].subtotal, currency)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
-                      {currency}
+                      {formatMoney(currencyTotals[currency].total, currency)}
                     </TableCell>
                     <TableCell className="text-right"></TableCell>{' '}
                     {/* Empty action cell */}
@@ -447,7 +448,7 @@ export function IssuedInvoiceTable({
                     <TableCell colSpan={3} className="text-right font-light">
                       Celkem částka DPH:{' '}
                       <span className="font-bold text-yellow-800">
-                        {formatNumberWithSpaces(totalVAT)} CZK
+                        {formatMoney(totalVAT, 'CZK')}
                       </span>
                     </TableCell>
 
@@ -455,20 +456,20 @@ export function IssuedInvoiceTable({
                       colSpan={1}
                       className="text-left whitespace-nowrap"
                     >
-                      {formatNumberWithSpaces(
+                      {formatMoney(
                         invoices.reduce(
                           (acc, inv) => acc + inv.native_subtotal,
                           0
-                        )
-                      )}{' '}
-                      CZK
+                        ),
+                        'CZK'
+                      )}
                     </TableCell>
                     {/* Display the total sum in CZK */}
                     <TableCell
                       colSpan={1}
                       className="text-left whitespace-nowrap"
                     >
-                      {formatNumberWithSpaces(totalSumCZK)} CZK
+                      {formatMoney(totalSumCZK, 'CZK')}
                     </TableCell>
 
                     <TableCell />
@@ -516,9 +517,7 @@ export function IssuedInvoiceTable({
                     <div className="text-right">
                       <div className="text-xs text-gray-500">s DPH</div>
                       <div className="text-base font-bold text-gray-900">
-                        {invoice.total
-                          ? `${invoice.total} ${invoice.currency}`
-                          : '—'}
+                        {formatMoney(invoice.total, invoice.currency)}
                       </div>
                     </div>
                     {renderActionMenu(invoice)}
@@ -570,15 +569,11 @@ export function IssuedInvoiceTable({
                     )}
                     <div className="text-gray-500">bez DPH</div>
                     <div className="text-gray-900">
-                      {invoice.subtotal
-                        ? `${invoice.subtotal} ${invoice.currency}`
-                        : '—'}
+                      {formatMoney(invoice.subtotal, invoice.currency)}
                     </div>
                     <div className="text-gray-500">s DPH</div>
                     <div className="font-semibold text-gray-900">
-                      {invoice.total
-                        ? `${invoice.total} ${invoice.currency}`
-                        : '—'}
+                      {formatMoney(invoice.total, invoice.currency)}
                     </div>
                   </div>
                 )}
@@ -605,8 +600,7 @@ export function IssuedInvoiceTable({
                     v {currency}
                   </span>
                   <span className="font-semibold text-gray-900">
-                    {formatNumberWithSpaces(currencyTotals[currency].total)}{' '}
-                    {currency}
+                    {formatMoney(currencyTotals[currency].total, currency)}
                   </span>
                 </div>
               ))}
@@ -616,13 +610,13 @@ export function IssuedInvoiceTable({
                   <div className="flex items-center justify-between border-t border-dashed border-gray-200 pt-2">
                     <span className="text-gray-700">Celkem částka DPH</span>
                     <span className="font-semibold text-yellow-800">
-                      {formatNumberWithSpaces(totalVAT)} CZK
+                      {formatMoney(totalVAT, 'CZK')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-gray-700">
                     <span>Celkem v CZK</span>
                     <span className="font-semibold text-gray-900">
-                      {formatNumberWithSpaces(totalSumCZK)} CZK
+                      {formatMoney(totalSumCZK, 'CZK')}
                     </span>
                   </div>
                 </>
