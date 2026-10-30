@@ -33,6 +33,6 @@ export function getInvoiceCreateSchema(nextInvoiceNumber: string) {
     exchange_rate: z.number().nullable().default(1),
     bank_account: z.string().nullish(),
     iban: z.string().nullish(),
-    swift_bic: z.string().nullish().default('')
+    swift_bic: z.string().nullish()
   })
 }

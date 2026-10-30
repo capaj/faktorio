@@ -41,7 +41,7 @@ export function InvoicesDownloadButton({
         { CzechInvoicePDF },
         { EnglishInvoicePDF },
         { default: QRCode },
-        { generateQrPaymentString }
+        { generateQrPaymentString, getQrPaymentAccountNumber }
       ] = await Promise.all([
         import('@react-pdf/renderer'),
         import('@zip.js/zip.js'),
@@ -78,10 +78,7 @@ export function InvoicesDownloadButton({
         )
 
         const generatedQrString = generateQrPaymentString({
-          accountNumber:
-            invoiceWithItems.iban?.replace(/\s/g, '') ??
-            invoiceWithItems.bank_account ??
-            null,
+          accountNumber: getQrPaymentAccountNumber(invoiceWithItems),
           amount: invoiceTotal + taxTotal,
           currency: invoiceWithItems.currency,
           variableSymbol: invoiceWithItems.number.replace('-', ''),

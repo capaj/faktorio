@@ -138,6 +138,45 @@ describe('SharedInvoicePage QR payment preview', () => {
     expect(pdfElement.props.qrCodeBase64).toMatch(/^data:image\/png;base64,/)
   })
 
+  it.each(['', ' \t\n ', null, undefined])(
+    'uses the domestic account for preview and download when IBAN is %j',
+    (iban) => {
+      reactMocks.useState.mockReset()
+      reactMocks.useState
+        .mockReturnValueOnce([false, vi.fn()])
+        .mockReturnValueOnce([null, vi.fn()])
+        .mockReturnValueOnce([
+          {
+            ...sharedInvoice,
+            invoice: {
+              ...sharedInvoice.invoice,
+              iban,
+              bank_account: '19-2000145399/0800'
+            }
+          },
+          vi.fn()
+        ])
+        .mockReturnValueOnce([null, vi.fn()])
+
+      const page = SharedInvoicePage()
+      const preview = findElementByType(page, InvoicePdfPreview)
+      const download = findElementByType(page, PDFDownloadLink)
+
+      expect(qrCodeMocks.useQRCodeBase64).toHaveBeenCalledWith(
+        'SPD*1.0*ACC:CZ6508000000192000145399*AM:1000.00*CC:CZK*MSG:Faktura 2026-001*X-VS:2026001'
+      )
+      for (const document of [
+        preview?.props.document,
+        download?.props.document
+      ]) {
+        expect(
+          (document as ReactElement<{ qrCodeBase64: string }>).props
+            .qrCodeBase64
+        ).toMatch(/^data:image\/png;base64,/)
+      }
+    }
+  )
+
   it.each([
     ['en', null, EnglishInvoicePDF, 'en'],
     ['cs', null, CzechInvoicePDF, 'cs'],
@@ -165,7 +204,9 @@ describe('SharedInvoicePage QR payment preview', () => {
 
       expect((preview?.props.document as ReactElement).type).toBe(expectedPdf)
       expect((download?.props.document as ReactElement).type).toBe(expectedPdf)
-      expect(findElementByType(page, 'select')?.props.value).toBe(expectedLanguage)
+      expect(findElementByType(page, 'select')?.props.value).toBe(
+        expectedLanguage
+      )
     }
   )
 })
