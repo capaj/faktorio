@@ -49,6 +49,7 @@ import { getMonthWorkingDays } from '@/lib/czechWorkingDays'
 import { RouterOutputs } from '@/lib/trpcClient'
 import { toast } from 'sonner'
 import { interpolateTemplatePlaceholders } from '@/lib/interpolateTemplatePlaceholders'
+import { SpinnerContainer } from '@/components/SpinnerContainer'
 
 const getDefaultInvoiceItem = ({
   isVatPayer,
@@ -127,7 +128,7 @@ export const NewInvoicePage = () => {
     trpcClient.invoices.lastInvoiceThisYear.useSuspenseQuery()
   const invoiceToDuplicateQuery = trpcClient.invoices.getById.useQuery(
     { id: duplicateFromInvoiceId ?? '' },
-    { enabled: !!duplicateFromInvoiceId }
+    { enabled: !!duplicateFromInvoiceId, throwOnError: true }
   )
   const invoiceToDuplicate = invoiceToDuplicateQuery.data
   const [contacts] = trpcClient.contacts.all.useSuspenseQuery()
@@ -291,6 +292,22 @@ export const NewInvoicePage = () => {
     }
   }, [bankAccounts, primaryBankAccount.id, selectedBankAccountId])
 
+  useEffect(() => {
+    if (!invoiceToDuplicate) {
+      return
+    }
+
+    const matchingAccount = bankAccounts.find(
+      (account) =>
+        account.id &&
+        (account.bank_account ?? '') ===
+          (invoiceToDuplicate.bank_account ?? '') &&
+        (account.iban ?? '') === (invoiceToDuplicate.iban ?? '') &&
+        (account.swift_bic ?? '') === (invoiceToDuplicate.swift_bic ?? '')
+    )
+    setSelectedBankAccountId(matchingAccount?.id ?? 'custom')
+  }, [bankAccounts, invoiceToDuplicate])
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'items'
@@ -383,6 +400,10 @@ export const NewInvoicePage = () => {
         100,
     0
   )
+
+  if (duplicateFromInvoiceId && !invoiceToDuplicate) {
+    return <SpinnerContainer loading={true} />
+  }
 
   if (!invoicingDetails?.registration_no) {
     return (
@@ -586,6 +607,7 @@ export const NewInvoicePage = () => {
                       <FormControl>
                         <ContactComboBox
                           value={field.value ?? ''}
+                          autoSelect={!duplicateFromInvoiceId}
                           onChange={(contactId) => {
                             field.onChange(contactId)
                             const selectedContact = contacts.find(

@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures'
 import type { Page } from '@playwright/test'
 
-const url = 'http://localhost:5173'
+const url = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173'
 const sourceInvoice = {
   id: 'template-source',
   number: '2025-099',
