@@ -301,9 +301,18 @@ export const invoiceRouter = trpcContext.router({
             your_country: user.country,
             your_registration_no: user.registration_no ?? '',
             your_vat_no: user.vat_no ?? '',
-            bank_account: defaultAccount?.bank_account ?? null,
-            iban: defaultAccount?.iban ?? user.iban,
-            swift_bic: defaultAccount?.swift_bic ?? user.swift_bic,
+            bank_account:
+              input.invoice.bank_account !== undefined
+                ? input.invoice.bank_account
+                : (defaultAccount?.bank_account ?? null),
+            iban:
+              input.invoice.iban !== undefined
+                ? input.invoice.iban
+                : (defaultAccount?.iban ?? user.iban),
+            swift_bic:
+              input.invoice.swift_bic !== undefined
+                ? input.invoice.swift_bic
+                : (defaultAccount?.swift_bic ?? user.swift_bic),
 
             // client
             client_name: client.name,

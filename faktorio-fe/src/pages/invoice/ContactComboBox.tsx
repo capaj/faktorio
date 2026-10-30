@@ -24,6 +24,7 @@ export function ContactComboBox(props: {
   value: string | undefined
   onBlur?: () => void
   disabled?: boolean
+  autoSelect?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
   const [lastInvoice] = trpcClient.invoices.lastInvoice.useSuspenseQuery()
@@ -31,8 +32,13 @@ export function ContactComboBox(props: {
   const contactsQuery = trpcClient.contacts.all.useQuery()
   const contacts = contactsQuery.data ?? []
   const { value } = props
+  const autoSelect = props.autoSelect ?? true
 
   useEffect(() => {
+    if (!autoSelect) {
+      return
+    }
+
     const defaultContactValue = contacts.length === 1 ? contacts[0].id : ''
     if (!value) {
       const lastUsedContactId = lastInvoice?.client_contact_id
@@ -57,7 +63,7 @@ export function ContactComboBox(props: {
         props.onChange?.(someDefaultContactId)
       }
     }
-  }, [contactsQuery.data])
+  }, [contactsQuery.data, autoSelect])
 
   // Find the selected contact by ID
   const selectedContact = contacts.find((contact) => contact.id === value)
