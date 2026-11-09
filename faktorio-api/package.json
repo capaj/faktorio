@@ -17,7 +17,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261109.1",
     "@types/debug": "^4.1.13",
-    "@types/web-push": "^3.6.4",
+    "@types/node": "^26.6.6",
     "drizzle-kit": "^0.31.11",
     "faktorio-db": "workspace:*",
     "tsx": "^4.23.15",
@@ -42,7 +42,6 @@
     "drizzle-orm": "^0.45.4",
     "drizzle-zod": "0.8.3",
     "faktorio-shared": "workspace:*",
-    "web-push": "^4.0.0",
     "zod": "^4.6.7"
   }
 }

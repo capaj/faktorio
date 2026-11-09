@@ -55,19 +55,13 @@ self.skipWaiting()
 clientsClaim()
 
 self.addEventListener('push', function (event) {
-  console.log('Push event received:', event)
-
-  if (!event.data) {
-    console.log('No data in push event')
-    return
-  }
+  if (!event.data) return
 
   let data
   try {
     data = event.data.json()
-  } catch (error) {
-    console.error('Error parsing push data:', error)
-    return
+  } catch {
+    data = { title: 'Faktorio', body: event.data.text() }
   }
 
   const options = {
@@ -76,48 +70,45 @@ self.addEventListener('push', function (event) {
     badge: data.badge || '/faktura.png',
     data: data.data || {},
     actions: data.actions || [],
-    tag: data.data?.type || 'default',
-    requireInteraction: true,
+    tag: data.tag || data.data?.type || 'default',
+    renotify: true,
     vibrate: [200, 100, 200]
   }
 
-  event.waitUntil(self.registration.showNotification(data.title, options))
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Faktorio', options)
+  )
 })
 
 self.addEventListener('notificationclick', function (event) {
-  console.log('Notification clicked:', event)
-
   event.notification.close()
 
-  const data = event.notification.data
-  let url = '/'
+  const targetUrl = new URL(
+    event.notification.data?.url || '/',
+    self.location.origin
+  ).href
 
-  if (data && data.url) {
-    url = data.url
-  }
+  event.waitUntil(
+    (async () => {
+      const clientList = await clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true
+      })
 
-  if (event.action === 'view' || !event.action) {
-    event.waitUntil(
-      clients
-        .matchAll({ type: 'window', includeUncontrolled: true })
-        .then(function (clientList) {
-          // Check if there's already a window/tab open with the target URL
-          for (let i = 0; i < clientList.length; i++) {
-            const client = clientList[i]
-            if (client.url.includes(url) && 'focus' in client) {
-              return client.focus()
-            }
-          }
+      const existing =
+        clientList.find((client) => client.url === targetUrl) ||
+        clientList.find(
+          (client) => new URL(client.url).origin === self.location.origin
+        )
 
-          // If no existing window/tab, open a new one
-          if (clients.openWindow) {
-            return clients.openWindow(url)
-          }
-        })
-    )
-  }
-})
+      if (existing) {
+        if (existing.url !== targetUrl && 'navigate' in existing) {
+          await existing.navigate(targetUrl).catch(() => {})
+        }
+        return existing.focus()
+      }
 
-self.addEventListener('notificationclose', function (event) {
-  console.log('Notification closed:', event)
+      return clients.openWindow(targetUrl)
+    })()
+  )
 })

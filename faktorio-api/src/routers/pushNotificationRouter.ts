@@ -4,6 +4,8 @@ import { trpcContext } from '../trpcContext'
 import { pushSubscriptionTb, invoicesTb } from 'faktorio-db/schema'
 import { eq, and, lte, isNull } from 'drizzle-orm'
 import { djs } from 'faktorio-shared/src/djs'
+import { TRPCError } from '@trpc/server'
+import { WebPushService } from '../lib/webPushService'
 
 const pushSubscriptionSchema = z.object({
   endpoint: z.string().url(),
@@ -28,6 +30,8 @@ export const pushNotificationRouter = trpcContext.router({
         .onConflictDoUpdate({
           target: pushSubscriptionTb.endpoint,
           set: {
+            // the same browser may be re-subscribed by a different user
+            user_id: ctx.user.id,
             p256dh: input.keys.p256dh,
             auth: input.keys.auth,
             updated_at: new Date().toISOString()
@@ -51,6 +55,40 @@ export const pushNotificationRouter = trpcContext.router({
 
       return { success: true }
     }),
+
+  sendTestNotification: protectedProc.mutation(async ({ ctx }) => {
+    const service = new WebPushService(ctx.db, {
+      publicKey: ctx.env.VAPID_PUBLIC_KEY,
+      privateKey: ctx.env.VAPID_PRIVATE_KEY,
+      subject: ctx.env.VAPID_SUBJECT
+    })
+
+    const result = await service.sendNotificationToUser(
+      ctx.user.id,
+      {
+        title: 'Faktorio',
+        body: 'Testovací notifikace funguje 🎉',
+        tag: 'test',
+        data: { type: 'test', url: '/settings' }
+      },
+      { ttl: 60, urgency: 'high' }
+    )
+
+    if (result.total === 0) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Nemáte žádné aktivní odběry notifikací'
+      })
+    }
+    if (result.sent === 0) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Notifikaci se nepodařilo odeslat'
+      })
+    }
+
+    return result
+  }),
 
   getUserSubscriptions: protectedProc.query(async ({ ctx }) => {
     const subscriptions = await ctx.db

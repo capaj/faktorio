@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { ZodError } from 'zod/v4'
 import { envSchema } from '../src/envSchema'
 

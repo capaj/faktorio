@@ -1,5 +1,5 @@
-import { eq, and, lte, isNull } from 'drizzle-orm'
-import { invoicesTb, userT } from 'faktorio-db/schema'
+import { eq, and, lte, isNull, inArray } from 'drizzle-orm'
+import { invoicesTb, pushSubscriptionTb, userT } from 'faktorio-db/schema'
 import { WebPushService } from './webPushService'
 import { djs } from 'faktorio-shared/src/djs'
 
@@ -19,10 +19,12 @@ export async function checkAndNotifyDueInvoices(
     subject: env.VAPID_SUBJECT
   })
 
-  const today = djs().format('YYYY-MM-DD')
-  const tomorrow = djs().add(1, 'day').format('YYYY-MM-DD')
+  const now = djs().tz('Europe/Prague')
+  const today = now.format('YYYY-MM-DD')
+  const tomorrow = now.add(1, 'day').format('YYYY-MM-DD')
 
-  // Get all users with due invoices (due today or tomorrow)
+  // Unpaid invoices that are overdue or due today/tomorrow, only for users
+  // who have at least one push subscription
   const dueInvoicesWithUsers = await db
     .select({
       userId: invoicesTb.user_id,
@@ -41,7 +43,13 @@ export async function checkAndNotifyDueInvoices(
       and(
         lte(invoicesTb.due_on, tomorrow),
         isNull(invoicesTb.paid_on),
-        isNull(invoicesTb.cancelled_at)
+        isNull(invoicesTb.cancelled_at),
+        inArray(
+          invoicesTb.user_id,
+          db
+            .selectDistinct({ userId: pushSubscriptionTb.user_id })
+            .from(pushSubscriptionTb)
+        )
       )
     )
 
@@ -103,44 +111,14 @@ export async function checkAndNotifyDueInvoices(
     const { user, invoices } = userData
 
     try {
-      const dueToday = invoices.filter((inv) => inv.dueOn === today)
-      const dueTomorrow = invoices.filter((inv) => inv.dueOn === tomorrow)
-
-      let title = ''
-      let body = ''
-
-      if (dueToday.length > 0 && dueTomorrow.length > 0) {
-        title = `${dueToday.length + dueTomorrow.length} faktury jsou splatné`
-        body = `${dueToday.length} dnes, ${dueTomorrow.length} zítra`
-      } else if (dueToday.length > 0) {
-        title =
-          dueToday.length === 1
-            ? 'Faktura je splatná dnes'
-            : `${dueToday.length} faktury jsou splatné dnes`
-        body =
-          dueToday.length === 1
-            ? `Faktura ${dueToday[0].number} pro ${dueToday[0].clientName}`
-            : dueToday
-                .map((inv) => `${inv.number} (${inv.clientName})`)
-                .join(', ')
-      } else if (dueTomorrow.length > 0) {
-        title =
-          dueTomorrow.length === 1
-            ? 'Faktura je splatná zítra'
-            : `${dueTomorrow.length} faktury jsou splatné zítra`
-        body =
-          dueTomorrow.length === 1
-            ? `Faktura ${dueTomorrow[0].number} pro ${dueTomorrow[0].clientName}`
-            : dueTomorrow
-                .map((inv) => `${inv.number} (${inv.clientName})`)
-                .join(', ')
-      }
+      const { title, body } = buildDueInvoicesMessage(invoices, today, tomorrow)
 
       await webPushService.sendNotificationToUser(userId, {
         title,
         body,
         icon: '/icons/icon-192.png',
         badge: '/faktura.png',
+        tag: 'due_invoices',
         data: {
           type: 'due_invoices',
           invoices: invoices.map((inv) => ({
@@ -166,4 +144,57 @@ export async function checkAndNotifyDueInvoices(
   }
 
   console.log('Scheduled notification check completed')
+}
+
+type DueInvoice = { number: string; clientName: string; dueOn: string }
+
+function czechInvoiceCount(count: number) {
+  if (count === 1) return '1 faktura'
+  if (count >= 2 && count <= 4) return `${count} faktury`
+  return `${count} faktur`
+}
+
+function describeInvoices(invoices: DueInvoice[]) {
+  if (invoices.length === 1) {
+    return `${invoices[0].number} (${invoices[0].clientName})`
+  }
+  const listed = invoices
+    .slice(0, 3)
+    .map((inv) => inv.number)
+    .join(', ')
+  return invoices.length > 3 ? `${listed} a další` : listed
+}
+
+export function buildDueInvoicesMessage(
+  invoices: DueInvoice[],
+  today: string,
+  tomorrow: string
+): { title: string; body: string } {
+  const overdue = invoices.filter((inv) => inv.dueOn < today)
+  const dueToday = invoices.filter((inv) => inv.dueOn === today)
+  const dueTomorrow = invoices.filter((inv) => inv.dueOn === tomorrow)
+
+  const groups = [
+    { items: overdue, label: 'po splatnosti' },
+    { items: dueToday, label: 'splatné dnes' },
+    { items: dueTomorrow, label: 'splatné zítra' }
+  ].filter((group) => group.items.length > 0)
+
+  if (groups.length === 1) {
+    const [{ items, label }] = groups
+    const verb = items.length >= 2 && items.length <= 4 ? 'jsou' : 'je'
+    const subject =
+      items.length === 1 ? 'Faktura' : czechInvoiceCount(items.length)
+    return {
+      title: `${subject} ${verb} ${label}`,
+      body: describeInvoices(items)
+    }
+  }
+
+  return {
+    title: `Nezaplacené faktury: ${invoices.length}`,
+    body: groups
+      .map(({ items, label }) => `${items.length} ${label}`)
+      .join(', ')
+  }
 }
