@@ -1,14 +1,20 @@
-import webpush from 'web-push'
 import { pushSubscriptionTb } from 'faktorio-db/schema'
 import { eq } from 'drizzle-orm'
 import { LibSQLDatabase } from 'drizzle-orm/libsql'
 import * as schema from 'faktorio-db/schema'
+import {
+  sendPushNotification,
+  WebPushError,
+  type SendPushOptions,
+  type VapidDetails
+} from './webPush'
 
-interface NotificationPayload {
+export interface NotificationPayload {
   title: string
   body: string
   icon?: string
   badge?: string
+  tag?: string
   data?: Record<string, any>
   actions?: Array<{
     action: string
@@ -17,87 +23,94 @@ interface NotificationPayload {
   }>
 }
 
-interface PushSubscription {
-  id: string
-  user_id: string
-  endpoint: string
-  p256dh: string
-  auth: string
+type PushSubscriptionRow = typeof pushSubscriptionTb.$inferSelect
+
+export interface SendResult {
+  total: number
+  sent: number
+  removed: number
+  failed: number
 }
 
 export class WebPushService {
   constructor(
     private db: LibSQLDatabase<typeof schema>,
-    private vapidKeys: {
-      publicKey: string
-      privateKey: string
-      subject: string
-    }
-  ) {
-    webpush.setVapidDetails(
-      vapidKeys.subject,
-      vapidKeys.publicKey,
-      vapidKeys.privateKey
-    )
-  }
+    private vapidKeys: VapidDetails
+  ) {}
 
-  async sendNotificationToUser(userId: string, payload: NotificationPayload) {
+  async sendNotificationToUser(
+    userId: string,
+    payload: NotificationPayload,
+    options?: SendPushOptions
+  ): Promise<SendResult> {
     const subscriptions = await this.db
       .select()
       .from(pushSubscriptionTb)
       .where(eq(pushSubscriptionTb.user_id, userId))
 
+    const result: SendResult = {
+      total: subscriptions.length,
+      sent: 0,
+      removed: 0,
+      failed: 0
+    }
+
     if (subscriptions.length === 0) {
       console.log(`No push subscriptions found for user ${userId}`)
-      return
+      return result
     }
 
     const results = await Promise.allSettled(
       subscriptions.map((subscription) =>
-        this.sendNotificationToSubscription(subscription, payload)
+        this.sendNotificationToSubscription(subscription, payload, options)
       )
     )
 
-    const failedSubscriptions = results
-      .map((result, index) => ({ result, subscription: subscriptions[index] }))
-      .filter(({ result }) => result.status === 'rejected')
+    for (const [index, settled] of results.entries()) {
+      const subscription = subscriptions[index]
+      if (settled.status === 'fulfilled') {
+        result.sent++
+        continue
+      }
 
-    // Clean up failed subscriptions
-    for (const { subscription } of failedSubscriptions) {
-      console.log(`Removing failed subscription: ${subscription.endpoint}`)
-      await this.db
-        .delete(pushSubscriptionTb)
-        .where(eq(pushSubscriptionTb.id, subscription.id))
-    }
-
-    const successCount = results.filter(
-      (result) => result.status === 'fulfilled'
-    ).length
-
-    console.log(
-      `Sent notification to ${successCount}/${subscriptions.length} subscriptions for user ${userId}`
-    )
-  }
-
-  private async sendNotificationToSubscription(
-    subscription: PushSubscription,
-    payload: NotificationPayload
-  ) {
-    const pushSubscription = {
-      endpoint: subscription.endpoint,
-      keys: {
-        p256dh: subscription.p256dh,
-        auth: subscription.auth
+      const error = settled.reason
+      // Only drop subscriptions the push service reports as gone. Other errors
+      // (rate limits, outages, bad VAPID config) must not unsubscribe users.
+      if (error instanceof WebPushError && error.isGone) {
+        console.log(`Removing expired subscription: ${subscription.endpoint}`)
+        await this.db
+          .delete(pushSubscriptionTb)
+          .where(eq(pushSubscriptionTb.id, subscription.id))
+        result.removed++
+      } else {
+        console.error(
+          `Failed to send push notification to ${subscription.endpoint}:`,
+          error
+        )
+        result.failed++
       }
     }
 
-    return webpush.sendNotification(pushSubscription, JSON.stringify(payload), {
-      TTL: 24 * 60 * 60, // 24 hours
-      urgency: 'normal'
-    })
+    console.log(
+      `Sent notification to ${result.sent}/${result.total} subscriptions for user ${userId}`
+    )
+    return result
   }
 
-  static generateVapidKeys() {
-    return webpush.generateVAPIDKeys()
+  private async sendNotificationToSubscription(
+    subscription: PushSubscriptionRow,
+    payload: NotificationPayload,
+    options?: SendPushOptions
+  ) {
+    return sendPushNotification(
+      {
+        endpoint: subscription.endpoint,
+        p256dh: subscription.p256dh,
+        auth: subscription.auth
+      },
+      JSON.stringify(payload),
+      this.vapidKeys,
+      { ttl: 24 * 60 * 60, urgency: 'normal', ...options }
+    )
   }
 }

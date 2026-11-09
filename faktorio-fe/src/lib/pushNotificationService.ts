@@ -6,16 +6,7 @@ import { authHeaders } from './AuthContext'
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
 const VITE_API_URL = import.meta.env.VITE_API_URL
 
-console.log(
-  'VAPID_PUBLIC_KEY loaded:',
-  VAPID_PUBLIC_KEY ? 'Yes (length: ' + VAPID_PUBLIC_KEY.length + ')' : 'No'
-)
-console.log(
-  'VAPID_PUBLIC_KEY preview:',
-  VAPID_PUBLIC_KEY ? VAPID_PUBLIC_KEY.substring(0, 20) + '...' : 'Not set'
-)
-
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
 
@@ -28,6 +19,19 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray
 }
 
+function sameBytes(a: ArrayBuffer | null | undefined, b: Uint8Array) {
+  if (!a || a.byteLength !== b.length) return false
+  const view = new Uint8Array(a)
+  return view.every((byte, i) => byte === b[i])
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))
+  ])
+}
+
 export class PushNotificationService {
   private registration: ServiceWorkerRegistration | undefined
   trpcClient: ReturnType<typeof createTRPCClient<AppRouter>>
@@ -38,43 +42,42 @@ export class PushNotificationService {
         httpBatchLink({
           transformer: SuperJSON,
           url: VITE_API_URL,
-
-          // You can pass any HTTP headers you wish here
           headers: authHeaders
         })
       ]
     })
   }
+
+  isSupported() {
+    return (
+      Boolean(VAPID_PUBLIC_KEY) &&
+      'serviceWorker' in navigator &&
+      'PushManager' in window &&
+      'Notification' in window
+    )
+  }
+
   async initialize(): Promise<boolean> {
     if (!VAPID_PUBLIC_KEY) {
-      console.error('VAPID_PUBLIC_KEY is not set')
+      console.error('VITE_VAPID_PUBLIC_KEY is not set')
       return false
     }
-
-    if (!('serviceWorker' in navigator)) {
-      console.log('Service Worker not supported')
-      return false
-    }
-
-    if (!('PushManager' in window)) {
-      console.log('Push messaging not supported')
-      return false
-    }
+    if (!this.isSupported()) return false
+    if (this.registration) return true
 
     try {
-      // Wait for service worker to be ready (VitePWA handles registration)
-      await navigator.serviceWorker.ready
-      console.log('Service Worker ready')
-
-      // Get the registration from VitePWA
-      this.registration = await navigator.serviceWorker.getRegistration()
-      if (this.registration) {
-        console.log('Found service worker registration:', this.registration)
-        return true
+      // The service worker is registered by appBootstrap.js. `ready` never
+      // resolves when registration failed, so do not wait forever.
+      const registration = await withTimeout(
+        navigator.serviceWorker.ready,
+        10_000
+      )
+      if (!registration) {
+        console.error('Service Worker did not become ready')
+        return false
       }
-
-      console.error('No service worker registration found')
-      return false
+      this.registration = registration
+      return true
     } catch (error) {
       console.error('Service Worker initialization failed:', error)
       return false
@@ -94,160 +97,105 @@ export class PushNotificationService {
       throw new Error('Notification permission denied')
     }
 
-    const permission = await Notification.requestPermission()
-    console.log('Notification permission result:', permission)
-    return permission
+    return Notification.requestPermission()
+  }
+
+  private async saveSubscription(subscription: PushSubscription) {
+    // toJSON() returns the keys base64url encoded, as the push protocol expects
+    const json = subscription.toJSON()
+    if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
+      throw new Error('Push subscription is missing keys')
+    }
+    await this.trpcClient.webPushNotifications.subscribe.mutate({
+      endpoint: json.endpoint,
+      keys: { p256dh: json.keys.p256dh, auth: json.keys.auth }
+    })
+  }
+
+  /** Returns the current browser subscription, discarding it if it was created with a different VAPID key */
+  private async getValidSubscription(): Promise<PushSubscription | null> {
+    if (!this.registration) return null
+    const subscription = await this.registration.pushManager.getSubscription()
+    if (!subscription) return null
+
+    const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    if (
+      subscription.options.applicationServerKey &&
+      !sameBytes(
+        subscription.options.applicationServerKey,
+        applicationServerKey
+      )
+    ) {
+      // VAPID keys were rotated; the old subscription can no longer be used
+      await this.trpcClient.webPushNotifications.unsubscribe
+        .mutate({ endpoint: subscription.endpoint })
+        .catch(() => {})
+      await subscription.unsubscribe()
+      return null
+    }
+    return subscription
   }
 
   async subscribe(): Promise<boolean> {
-    try {
-      if (!VAPID_PUBLIC_KEY) {
-        throw new Error('VAPID public key is not configured')
-      }
-
-      const permission = await this.requestPermission()
-      if (permission !== 'granted') {
-        throw new Error('Notification permission not granted')
-      }
-
-      if (!this.registration) {
-        await this.initialize()
-      }
-
-      if (!this.registration) {
-        throw new Error('Service Worker not registered')
-      }
-
-      // Check if there's an existing subscription
-      const existingSubscription =
-        await this.registration.pushManager.getSubscription()
-      if (existingSubscription) {
-        console.log('Found existing subscription, unsubscribing first...')
-        await existingSubscription.unsubscribe()
-      }
-
-      console.log('Converting VAPID key to Uint8Array...')
-      const applicationServerKey = urlBase64ToUint8Array(
-        VAPID_PUBLIC_KEY
-      ) as BufferSource
-      console.log(
-        'VAPID key converted, length:',
-        String(applicationServerKey).length
-      )
-
-      console.log('Subscribing to push manager...')
-      console.log(
-        'Push manager supported:',
-        'subscribe' in this.registration.pushManager
-      )
-
-      const subscription = await this.registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey
-      })
-
-      console.log('Push subscription successful, sending to server...')
-
-      // Send subscription to server
-      await this.trpcClient.webPushNotifications.subscribe.mutate({
-        endpoint: subscription.endpoint,
-        keys: {
-          p256dh: btoa(
-            String.fromCharCode(
-              ...new Uint8Array(
-                subscription.getKey('p256dh') || new ArrayBuffer(0)
-              )
-            )
-          ),
-          auth: btoa(
-            String.fromCharCode(
-              ...new Uint8Array(
-                subscription.getKey('auth') || new ArrayBuffer(0)
-              )
-            )
-          )
-        }
-      })
-
-      console.log('Push subscription sent to server successfully')
-      return true
-    } catch (error) {
-      console.error('Push subscription failed:', error)
-
-      // Log additional details for debugging
-      if (error instanceof Error) {
-        console.error('Error name:', error.name)
-        console.error('Error message:', error.message)
-        console.error('Error stack:', error.stack)
-      }
-
-      throw error
+    if (!VAPID_PUBLIC_KEY) {
+      throw new Error('VAPID public key is not configured')
     }
+
+    const permission = await this.requestPermission()
+    if (permission !== 'granted') {
+      throw new Error('Notification permission not granted')
+    }
+
+    if (!(await this.initialize()) || !this.registration) {
+      throw new Error('Service Worker not registered')
+    }
+
+    const subscription =
+      (await this.getValidSubscription()) ??
+      (await this.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      }))
+
+    await this.saveSubscription(subscription)
+    return true
   }
 
   async unsubscribe(): Promise<boolean> {
-    try {
-      if (!this.registration) {
-        return true // Already unsubscribed
-      }
+    if (!(await this.initialize()) || !this.registration) return true
 
-      const subscription = await this.registration.pushManager.getSubscription()
-      if (!subscription) {
-        return true // No subscription to unsubscribe from
-      }
+    const subscription = await this.registration.pushManager.getSubscription()
+    if (!subscription) return true
 
-      // Unsubscribe from server first
-      await this.trpcClient.webPushNotifications.unsubscribe.mutate({
-        endpoint: subscription.endpoint
-      })
-
-      // Then unsubscribe locally
-      const result = await subscription.unsubscribe()
-      console.log('Push unsubscription successful:', result)
-      return result
-    } catch (error) {
-      console.error('Push unsubscription failed:', error)
-      throw error
-    }
+    await this.trpcClient.webPushNotifications.unsubscribe.mutate({
+      endpoint: subscription.endpoint
+    })
+    return subscription.unsubscribe()
   }
 
+  /**
+   * Whether this browser is subscribed. An existing subscription is re-sent to
+   * the server so it is stored for the signed-in user even if the server
+   * dropped it or another user subscribed on this browser before.
+   */
   async isSubscribed(): Promise<boolean> {
     try {
-      // Ensure service worker is initialized first
-      if (!this.registration) {
-        const initialized = await this.initialize()
-        if (!initialized || !this.registration) {
-          return false
-        }
-      }
+      if (!(await this.initialize())) return false
+      if (Notification.permission !== 'granted') return false
 
-      const subscription = await this.registration.pushManager.getSubscription()
-      const hasSubscription = subscription !== null
+      const subscription = await this.getValidSubscription()
+      if (!subscription) return false
 
-      if (hasSubscription) {
-        console.log('Found active push subscription:', subscription.endpoint)
-      } else {
-        console.log('No active push subscription found')
-      }
-
-      return hasSubscription
+      await this.saveSubscription(subscription)
+      return true
     } catch (error) {
       console.error('Error checking subscription status:', error)
       return false
     }
   }
 
-  async getSubscription(): Promise<PushSubscription | null> {
-    try {
-      if (!this.registration) {
-        return null
-      }
-
-      return await this.registration.pushManager.getSubscription()
-    } catch (error) {
-      console.error('Error getting subscription:', error)
-      return null
-    }
+  async sendTestNotification() {
+    return this.trpcClient.webPushNotifications.sendTestNotification.mutate()
   }
 }
 
