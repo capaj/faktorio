@@ -90,7 +90,7 @@ Set the API Worker's `PUBLIC_APP_URL` to the frontend origin used in email links
 
 Environment configuration:
 
-- API Worker (`faktorio-api`): `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `JWT_SECRET`, `OPENROUTER_API_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`; `SEND_EMAIL` is a Worker binding configured in `wrangler.toml`, not an environment secret
+- API Worker (`faktorio-api`): `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `JWT_SECRET`, `OPENROUTER_API_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (`VAPID_SUBJECT` is a plain var in `wrangler.toml`); `SEND_EMAIL` is a Worker binding configured in `wrangler.toml`, not an environment secret
 - Public API Worker (`faktorio-public-api`): `TURSO_DATABASE_URL` and optionally `TURSO_AUTH_TOKEN` for Turso access
 - Frontend (`faktorio-fe`): `VITE_API_URL` (points to `faktorio-api` `/trpc`), `VITE_PUBLIC_API_URL` (points to `faktorio-public-api`), `VITE_GOOGLE_CLIENT_ID`, `VITE_VAPID_PUBLIC_KEY`
 

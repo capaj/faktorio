@@ -30,6 +30,8 @@ allowed_sender_addresses = ["no-reply@faktorio.cz"]
 [vars]
 PUBLIC_APP_URL = "https://faktorio.cz"
 INVOICE_LOGO_PUBLIC_BASE_URL = "https://uploads.faktorio.cz"
+# Contact for push services, sent in every VAPID token (not a secret)
+VAPID_SUBJECT = "mailto:admin@faktorio.cz"
 
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
