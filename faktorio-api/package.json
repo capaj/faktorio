@@ -15,34 +15,34 @@
     "bump": "npm-check-updates -u"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260929.1",
+    "@cloudflare/workers-types": "^5.20261109.1",
     "@types/debug": "^4.1.13",
     "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.31.11",
     "faktorio-db": "workspace:*",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.2",
-    "wrangler": "^4.143.0"
+    "vitest": "^5.1.0",
+    "wrangler": "^4.159.0"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
     "@openrouter/ai-sdk-provider": "^3.1.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pinojs/json-colorizer": "^4.0.0",
-    "@tanstack/react-query": "^5.104.0",
-    "@trpc/client": "^11.19.0",
-    "@trpc/react-query": "^11.19.0",
-    "@trpc/server": "^11.19.0",
+    "@tanstack/react-query": "^5.107.1",
+    "@trpc/client": "^11.26.0",
+    "@trpc/react-query": "^11.26.0",
+    "@trpc/server": "^11.26.0",
     "@tsndr/cloudflare-worker-jwt": "3.2.3",
-    "ai": "^7.0.122",
+    "ai": "^7.0.166",
     "currency-codes": "^2.2.0",
     "debug": "^4.4.3",
-    "dotenv": "^18.0.4",
-    "drizzle-orm": "^0.45.3",
+    "dotenv": "^18.0.10",
+    "drizzle-orm": "^0.45.4",
     "drizzle-zod": "0.8.3",
     "faktorio-shared": "workspace:*",
-    "web-push": "^3.6.7",
-    "zod": "^4.6.5"
+    "web-push": "^4.0.0",
+    "zod": "^4.6.7"
   }
 }
