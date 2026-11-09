@@ -267,6 +267,9 @@ importers:
       '@types/debug':
         specifier: ^4.1.13
         version: 4.1.13
+      '@types/node':
+        specifier: ^26.6.6
+        version: 26.6.6
       drizzle-kit:
         specifier: ^0.31.11
         version: 0.31.11

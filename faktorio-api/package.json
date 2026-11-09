@@ -17,6 +17,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261109.1",
     "@types/debug": "^4.1.13",
+    "@types/node": "^26.6.6",
     "drizzle-kit": "^0.31.11",
     "faktorio-db": "workspace:*",
     "tsx": "^4.23.15",
