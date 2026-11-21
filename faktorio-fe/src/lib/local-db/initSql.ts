@@ -5,6 +5,7 @@ const LOCAL_DB_LIST_KEY = 'faktorio_local_db_files'
 
 async function getSqlJs() {
   return initSqlJs({
+    useOldExtensionFunctions: true,
     locateFile: (file) => `https://sql.js.org/dist/${file}`
   })
 }
